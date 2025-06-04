@@ -1,6 +1,11 @@
 <?php
 
 declare(strict_types=1);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', 'php://stderr');
+error_reporting(E_ALL);
 
 use DI\ContainerBuilder;
 use Slim\Exception\HttpException;
@@ -72,8 +77,10 @@ $errorMiddleware->setDefaultErrorHandler(function (
 $app->add(App\Middleware\AddJsonResponseHeader::class);
 
 // Rotas de auth
+$app->post('/auth/sign-in', App\Controllers\AuthController::class . ':signIn');
+$app->post('/auth/verify-account', App\Controllers\AuthController::class . ':verifyEmail');
 $app->post('/auth/login', App\Controllers\AuthController::class . ':login');
-$app->post('/auth/logout', App\Controllers\AuthController::class . ':logout');
+$app->post('/auth/logout', App\Controllers\AuthController::class . ':logout')->add(App\Middleware\ValidateToken::class);
 
 // Implementa middlware que valida token de autenticação
 

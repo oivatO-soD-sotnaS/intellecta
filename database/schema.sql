@@ -22,6 +22,16 @@ CREATE TABLE `users` (
   FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
 
+CREATE TABLE verification_codes (
+  `verification_code_id` CHAR(36) PRIMARY KEY,
+  `code` VARCHAR(6),
+  `is_pending` BOOL NOT NULL DEFAULT true,
+  `expires_at` DATETIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `user_id` CHAR(36),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+);
+
 -- Tabela de instituição
 CREATE TABLE `institutions` (
   `institution_id` CHAR(36) PRIMARY KEY,

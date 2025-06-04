@@ -1,0 +1,69 @@
+<?php
+
+declare(strict_types= 1);
+
+namespace App\Dao;
+
+use App\Database;
+use App\Models\VerificationCode;
+use PDO;
+
+class VerificationCodeDao {
+  public function __construct(private Database $database) {}
+
+  public function create(VerificationCode $verificationCode): ?VerificationCode {
+    $sql = 'INSERT INTO verification_codes (verification_code_id, code, expires_at, user_id)
+            VALUES (:verification_code_id, :code, :expires_at, :user_id)';
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $success = $stmt->execute([
+      ':verification_code_id' => $verificationCode->getVerificationCodeId(),
+      ':code' => $verificationCode->getCode(),
+      ':expires_at' => $verificationCode->getExpiresAt(),
+      ':user_id' => $verificationCode->getUserId()
+    ]);
+
+    return $success ? $verificationCode : null;
+  }
+
+  public function getLatestVerificationCode(string $user_id, string $code): ?VerificationCode {
+    $sql = 'SELECT * FROM verification_codes
+            WHERE user_id LIKE :user_id
+              AND code LIKE :code
+              AND is_pending LIKE true
+              AND expires_at > NOW()
+            ORDER BY created_at DESC
+            LIMIT 1';
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(param: ':user_id', value: $user_id, type: PDO::PARAM_STR);
+    $stmt->bindValue(param: ':code', value: $code, type: PDO::PARAM_STR);
+    
+    $stmt->execute();
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $data ? new VerificationCode($data) : null;
+  }
+
+  public function update(VerificationCode $verificationCode): ?VerificationCode {
+    $sql = 'UPDATE verification_codes SET
+              code = :code,
+              is_pending = :is_pending,
+              expires_at = :expires_at
+            WHERE verification_code_id = :verification_code_id';
+    
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $success = $stmt->execute([
+      ':code' => $verificationCode->getCode(),
+      ':is_pending' => $verificationCode->isPending() ? 1 : 0,
+      ':expires_at' => $verificationCode->getExpiresAt(),
+      ':verification_code_id' => $verificationCode->getVerificationCodeId()
+    ]);
+
+    return $success ? $verificationCode : null;
+  }
+}

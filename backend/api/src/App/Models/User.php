@@ -16,7 +16,7 @@ class User implements \JsonSerializable {
         $this->full_name = $data['full_name'] ?? '';
         $this->email = $data['email'] ?? '';
         $this->password_hash = $data['password_hash'] ?? '';
-        $this->email_verified = $data['email_verified'] ?? false;
+        $this->email_verified = isset($data['email_verified']) ? (bool) $data['email_verified'] : false;
         $this->created_at = $data['created_at'] ?? date('Y-m-d H:i:s');
         $this->changed_at = $data['changed_at'] ?? date('Y-m-d H:i:s');
         $this->profile_picture_id = $data['profile_picture_id'] ?? null;
@@ -47,4 +47,45 @@ class User implements \JsonSerializable {
     public function getCreatedAt(): string { return $this->created_at; }
     public function getChangedAt(): string { return $this->changed_at; }
     public function getProfilePictureId(): ?string { return $this->profile_picture_id; }
+
+    // Setters
+    public function setUserId(string $user_id): self {
+        $this->user_id = $user_id;
+        return $this;
+    }
+
+    public function setFullName(string $full_name): self {
+        $this->full_name = $full_name;
+        return $this;
+    }
+
+    public function setEmail(string $email): self {
+        $this->email = $email;
+        return $this;
+    }
+
+    public function setPasswordHash(string $password_hash): self {
+        $this->password_hash = $password_hash;
+        return $this;
+    }
+
+    public function setEmailVerified(bool $email_verified): self {
+        $this->email_verified = $email_verified;
+        return $this;
+    }
+
+    public function setCreatedAt(string $created_at): self {
+        $this->created_at = $created_at;
+        return $this;
+    }
+
+    public function setChangedAt(string $changed_at): self {
+        $this->changed_at = $changed_at;
+        return $this;
+    }
+
+    public function setProfilePictureId(?string $profile_picture_id): self {
+        $this->profile_picture_id = $profile_picture_id;
+        return $this;
+    }
 }
