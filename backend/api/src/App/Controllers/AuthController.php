@@ -30,7 +30,7 @@ class AuthController {
     private EmailService $emailService,
   ){}
 
-  public function signIn(Request $request, Response $response) {
+  public function signUp(Request $request, Response $response) {
     $body = $request->getParsedBody();
     if(
       !isset($body['full_name']) || 

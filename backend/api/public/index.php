@@ -77,7 +77,7 @@ $errorMiddleware->setDefaultErrorHandler(function (
 $app->add(App\Middleware\AddJsonResponseHeader::class);
 
 // Rotas de auth
-$app->post('/auth/sign-in', App\Controllers\AuthController::class . ':signIn');
+$app->post('/auth/sign-up', App\Controllers\AuthController::class . ':signUp');
 $app->post('/auth/verify-account', App\Controllers\AuthController::class . ':verifyEmail');
 $app->post('/auth/login', App\Controllers\AuthController::class . ':login');
 $app->post('/auth/logout', App\Controllers\AuthController::class . ':logout')->add(App\Middleware\ValidateToken::class);
@@ -105,7 +105,7 @@ $app->post('/auth/logout', App\Controllers\AuthController::class . ':logout')->a
 // Rotas de arquivo
 $app->get('/files', App\Controllers\FilesController::class . ':getAll')->add(App\Middleware\ValidateToken::class);
 $app->post('/files', App\Controllers\FilesController::class . ':create');
-$app->get('/files/{id}', App\Controllers\FilesController::class . ':getById');
+$app->get('/files/{id}', callable: App\Controllers\FilesController::class . ':getById');
 
 // -> Inicializa Aplicação REST <-
 $app->run();
