@@ -1,13 +1,53 @@
-# /etc/hosts
-O arquivo de variáveis de ambiente possui as URLs da API do backend e do servidor de arquivos, também no backend. No entanto, como o container do backend é local, precisamos, de forma manual, instruir o computador de como resolver o domínio. Execute o comando abaixo:
-```shell
-echo "127.0.0.1 api.intellecta files.intellecta" | sudo tee -a /etc/hosts
+# Next.js & HeroUI Template
+
+This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
+
+[Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
+
+## Technologies Used
+
+- [Next.js 14](https://nextjs.org/docs/getting-started)
+- [HeroUI v2](https://heroui.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Tailwind Variants](https://tailwind-variants.org)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [next-themes](https://github.com/pacocoursey/next-themes)
+
+## How to Use
+
+### Use the template with create-next-app
+
+To create a new project based on this template using `create-next-app`, run the following command:
+
+```bash
+npx create-next-app -e https://github.com/heroui-inc/next-app-template
 ```
 
-# Instalando novas dependências
-Para instalar novos pacotes no projeto, execute o comando abaixo:
+### Install dependencies
+
+You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
+
 ```bash
-sudo docker compose exec frontend_container npm install algum-pacote
+npm install
 ```
-Isso é necessário pois o bind volume do frontend não inclui a pasta node_modules. Dessa forma, caso se instale uma nova dependência localmente, ela também precisa ser instalada dentro do container.
-> Não fazer isso irá quebrar o funcionamento do container, uma vez que ele não possui as novas depências do projeto.
+
+### Run the development server
+
+```bash
+npm run dev
+```
+
+### Setup pnpm (optional)
+
+If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+
+```bash
+public-hoist-pattern[]=*@heroui/*
+```
+
+After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+
+## License
+
+Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
