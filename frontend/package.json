@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@heroui/button": "2.2.20",
+    "@heroui/card": "^2.2.20",
+    "@heroui/checkbox": "^2.3.20",
     "@heroui/code": "2.2.15",
+    "@heroui/form": "^2.1.20",
     "@heroui/input": "2.4.20",
     "@heroui/kbd": "2.2.16",
     "@heroui/link": "2.2.17",

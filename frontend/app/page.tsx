@@ -1,8 +1,7 @@
-/* eslint-disable prettier/prettier */
 import { redirect } from "next/navigation"
 
 const Page = () => {
-  redirect("/login")
+  redirect("/sign-in")
 }
 
 export default Page

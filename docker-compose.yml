@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   frontend:
     build:
@@ -5,44 +7,50 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_container
     ports:
-      - 3000:3000
+      - "3000:3000"
     volumes:
-      - ./frontend:/app # Bind mount para o diretório do frontend
-      - /app/node_modules # Volume anônimo para priorizar o node_modules do container
+      - ./frontend:/app       # Bind mount para o diretório do frontend
+      - /app/node_modules     # Volume anônimo para priorizar o node_modules do container
     networks:
       - intellecta-network
+
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend_container
     ports:
-      - 8080:80
+      - "8080:80"
     volumes:
-      - ./backend/files:/var/www/files.intellecta # Bind mount para o diretório do servidor arquivos
-      - ./backend/api:/var/www/api.intellecta # Bind mount para o diretório do servidor API
+      - ./backend/files:/var/www/files.intellecta  # Bind mount para o servidor de arquivos
+      - ./backend/api:/var/www/api.intellecta      # Bind mount para o servidor API
     networks:
-      - intellecta-network
+      intellecta-network:
+        aliases:
+          - api.intellecta
+          - files.intellecta
+
   database:
     image: mysql:9.3.0
     container_name: database_container
     volumes:
-      - ./volumes/mysql_data:/var/lib/mysql # volume que persiste os dados da base de dados
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql # script que inicializa a base de dados
-      - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql # script que insere mock data
+      - ./volumes/mysql_data:/var/lib/mysql       # Persiste dados da base
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql  # inicializa esquema
+      - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql      # insere mock data
     environment:
       MYSQL_ROOT_PASSWORD: SegredoInsano
       MYSQL_DATABASE: intellecta
       MYSQL_USER: www_root
       MYSQL_PASSWORD: foraelecriadoParahabitaruminstantequefosseNasvizinhascasdoteucoracao
     ports:
-      - 3306:3306
+      - "3306:3306"
     networks:
       - intellecta-network
-# Define a rede interna para os containers se comunicarem
+
 networks:
   intellecta-network:
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.255.0/24
+  
