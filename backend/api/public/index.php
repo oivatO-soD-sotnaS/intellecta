@@ -79,12 +79,17 @@ $app->add(App\Middleware\AddJsonResponseHeader::class);
 // Rotas de auth
 $app->post('/auth/sign-up', App\Controllers\AuthController::class . ':signUp');
 $app->post('/auth/verify-account', App\Controllers\AuthController::class . ':verifyEmail');
-$app->post('/auth/login', App\Controllers\AuthController::class . ':login');
-$app->post('/auth/logout', App\Controllers\AuthController::class . ':logout')->add(App\Middleware\ValidateToken::class);
-
-// Implementa middlware que valida token de autenticação
-
+$app->post('/auth/sign-in', App\Controllers\AuthController::class . ':signIn');
+$app->post('/auth/sign-out', App\Controllers\AuthController::class . ':signOut')
+    ->add(App\Middleware\ValidateToken::class);
 // Rotas de usuário
+$app->get('/users/{id}', App\Controllers\UserController::class . ':getById')
+    ->add(App\Middleware\ValidateToken::class);
+$app->patch('/users/{id}', App\Controllers\UserController::class . ':patchById')
+    ->add(App\Middleware\ValidateToken::class);
+$app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteById')
+->add(App\Middleware\ValidateToken::class);
+    // Rotas de evento do usuário
 
 // Rotas de instituição
 

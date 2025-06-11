@@ -6,7 +6,6 @@ namespace App\Controllers;
 
 use App\Models\User;
 use App\Models\VerificationCode;
-use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpUnauthorizedException;
@@ -16,6 +15,7 @@ use App\Dao\UserDao;
 use App\Dao\VerificationCodeDao;
 use App\Services\EmailService;
 use App\Services\JwtService;
+use App\Services\ValidationService;
 use Exception;
 use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
@@ -28,47 +28,55 @@ class AuthController {
     private VerificationCodeDao $verificationCodeDao,
     private JwtService $jwtService,
     private EmailService $emailService,
+    private ValidationService $validationService
   ){}
 
   public function signUp(Request $request, Response $response) {
     $body = $request->getParsedBody();
+    
     if(
-      !isset($body['full_name']) || 
-      !isset($body['email'])     || 
-      !isset($body['password'])
+      empty($body['full_name']) || 
+      empty($body['email'])     || 
+      empty($body['password'])
       ){
-        throw new HttpBadRequestException($request, 'Full name, E-mail and password are required');
+        throw new HttpException(
+          $request, 
+          'Full name, E-mail and password are required',
+          422
+        );
     }
-    $fullName = $body['full_name'];
-    $email = $body['email'];
-    $password_hash = password_hash($body['password'], PASSWORD_BCRYPT);
-    
-    if(! $fullName){
-      throw new HttpBadRequestException($request,'Full name is required');
-    }
-    if (! $email) {
-      throw new HttpBadRequestException($request, message: 'E-mail is required');
-    }
-    if (! $password_hash) {
-      throw new HttpBadRequestException($request, message: 'Password is required');
-    }
+
+    $fullName = trim($body['full_name']);
+    $email = trim($body['email']);
+    $password = trim($body['password']);
     
     
+    // Verifica as regras de negócio
+    if(!$this->validationService->isValidUsername($fullName)){
+      throw new HttpException($request, 'Full name must be between 5 and 64 characters', 422);
+    }
+    if(!$this->validationService->isValidEmail($email)){
+      throw new HttpException($request, 'Invalid e-mail format', 422);
+    }
+    if(!$this->validationService->isValidPassword($password)){
+      throw new HttpException($request, 'Password must be between 8 and 64 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 422);
+    }
+
     try{
       // Verifica se já existe alguma conta pendente com o mesmo e-mail
       // Se houver atualiza os dados cadastrais do cliente, se não, cria a conta
       $user = $this->userDao->getByEmail($email);
-      if(! $user){
+      if(empty($user)){
         $user = $this->userDao->create(new User([
           "user_id" => Uuid::uuid4()->toString(),
           "full_name" => $fullName,
           "email" => $email,
-          "password_hash" => $password_hash,
+          "password_hash" => password_hash($password, PASSWORD_BCRYPT),
         ]));
       }else if (! $user->isEmailVerified()){
         $user = $user->setFullName($fullName);
         $user->setEmail($email);
-        $user->setPasswordHash($password_hash);
+        $user->setPasswordHash(password_hash($password, PASSWORD_BCRYPT));
         $this->userDao->update($user);
       }else {
         throw new HttpException($request, 'E-mail already registered', 409);
@@ -94,7 +102,7 @@ class AuthController {
       ]));
 
       $response->getBody()->write(json_encode([
-        "message"=> 'User account created, verify your e-mail to continue the sign-in proccess'
+        "message"=> 'User account created. Verify your e-mail to continue the sign-up proccess'
       ]));
 
       return $response->withStatus(201);
@@ -122,20 +130,20 @@ class AuthController {
     $body = $request->getParsedBody();
 
     if(
-      !isset($body['email']) ||
-      !isset($body['verification_code'])
+      empty($body['email']) ||
+      empty($body['verification_code'])
     ){
-      throw new HttpBadRequestException($request, 'E-mail and verification code are required');
+      throw new HttpException($request, 'E-mail and verification code are required', 422);
     }
 
-    $email = $body['email'];
-    $code = $body['verification_code'];
-
-    if(! $email) throw new HttpBadRequestException($request,'E-mail is required');
-    if(! $code) throw new HttpBadRequestException($request,'Verification code is required');
+    $email = trim($body['email']);
+    $code = trim($body['verification_code']);
 
     $user = $this->userDao->getByEmail($email);
-    if(! $user) throw new HttpNotFoundException($request,'User not found');
+    if(empty($user)){
+      throw new HttpNotFoundException($request,'User not found');
+    } 
+
     if($user->isEmailVerified()) throw new HttpException(
       $request,
       'User account already verified. No additional actions required.',
@@ -144,8 +152,8 @@ class AuthController {
     
     try{
       $verificationCode = $this->verificationCodeDao->getLatestVerificationCode($user->getUserId(), $code);
-      if(! $verificationCode) {
-        throw new HttpBadRequestException($request,'Verification code expired or invalid');
+      if(empty($verificationCode)) {
+        throw new HttpException($request,'Verification code expired or invalid', 422);
       }
       // Atualiza código de verificação para inválido
       $verificationCode->setIsPending(false);
@@ -175,33 +183,29 @@ class AuthController {
     }   
   }
 
-  public function login(Request $request, Response $response): Response {
+  public function signIn(Request $request, Response $response): Response {
     $body = $request->getParsedBody();
     
-    if (!isset($body['email']) || !isset($body['password'])) {
-      throw new HttpBadRequestException($request, 'Email and password are required');
+    if (
+      empty($body['email']) || 
+      empty($body['password'])
+    ) {
+      throw new HttpException($request, 'Email and password are required', 422);
     }
     
-    $email = $body['email'];
-    $password = $body['password'];
-
-    if (! $email) {
-      throw new HttpBadRequestException($request, message: 'E-mail is required');
-    }
-    if (! $password) {
-      throw new HttpBadRequestException($request, message: 'Password is required');
-    }
+    $email = trim($body['email']);
+    $password = trim($body['password']);
 
     $user = $this->userDao->getByEmail($email);
-    
-    if (! $user) {
-      throw new HttpNotFoundException($request, message:'User not found');
+
+    if (empty($user)) {
+      throw new HttpNotFoundException($request, message:'Usuário não encontrado');
     }else if (! $user->isEmailVerified()) {
-      throw new HttpNotFoundException($request, message:'User not found');
+      throw new HttpNotFoundException($request, message:'E-mail not verified');
     }
 
-    if ($user->getPasswordHash() !== $password){
-      throw new HttpUnauthorizedException($request, message:'Password doesnt match');
+    if (!password_verify($password, $user->getPasswordHash())) {
+      throw new HttpUnauthorizedException($request, message:'Username or Password incorrect');
     }
 
     $jwt = $this->jwtService->generateToken(
@@ -216,7 +220,7 @@ class AuthController {
     return $response;
   }
 
-  public function logout(Request $request, Response $response): Response {
+  public function signOut(Request $request, Response $response): Response {
     $authHeader = $request->getHeaderLine("Authorization");
     
     if (empty($authHeader)) {
@@ -236,7 +240,7 @@ class AuthController {
     try {
       $decoded = $this->jwtService->validateToken($token);
       
-      if (!$decoded) {
+      if (empty($decoded)) {
         throw new HttpUnauthorizedException($request, 'Invalid token');
       }
       
@@ -250,7 +254,7 @@ class AuthController {
       ]));
 
       return $response;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
       throw new HttpUnauthorizedException($request, 'Token validation failed: ' . $e->getMessage());
     }
   }

@@ -11,25 +11,12 @@ use PDO;
 class UserDao {
   public function __construct(private Database $database) {}
 
-  public function getAll(): array {
-    $pdo = $this->database->getConnection();
-    $stmt = $pdo->query('SELECT * FROM users');
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $users = [];
-    foreach ($results as $data) {
-        $users[] = new User($data);
-    }
-
-    return $users;
-  }
-
   public function getById(string $id): ?User {
     $sql = 'SELECT * FROM users WHERE user_id = :id';
     
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':id', $id, PDO::PARAM_STR); // Changed to PARAM_STR for UUID
+    $stmt->bindValue(':id', $id, PDO::PARAM_STR);
     $stmt->execute();
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
