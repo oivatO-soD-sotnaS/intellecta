@@ -214,7 +214,8 @@ class AuthController {
     );
 
     $response->getBody()->write(json_encode([
-        'token' => $jwt
+        'token' => $jwt,
+        'user' => $user
     ]));
     
     return $response;

@@ -93,7 +93,9 @@ $app->patch('/users/{id}', App\Controllers\UserController::class . ':patchById')
 $app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteById')
     ->add(App\Middleware\ValidateToken::class);
 // Rotas de evento do usuário
-$app->post('/users/{id}/events', App\Controllers\UserEventController::class . ':create')
+$app->get('/users/{id}/events', App\Controllers\UserEventController::class . ':getUserEvents')
+    ->add(App\Middleware\ValidateToken::class);
+$app->post('/users/{id}/events', App\Controllers\UserEventController::class . ':createUserEvent')
     ->add(App\Middleware\ValidateToken::class);
 // Rotas de instituição
 
