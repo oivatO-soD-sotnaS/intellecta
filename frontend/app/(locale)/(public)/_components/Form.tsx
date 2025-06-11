@@ -78,7 +78,7 @@ export const SignInForm: React.FC = () => {
     setErrors({})
     setIsLoading(true)
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch("/api/sign-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -94,7 +94,7 @@ export const SignInForm: React.FC = () => {
         setErrors({ api: msg })
       } else {
         localStorage.setItem("token", payload.token)
-        router.push("/") // pagina após login
+        router.push("/home") // pagina após login
       }
     } catch {
       setErrors({ api: "Falha na conexão. Tente novamente." })
@@ -113,36 +113,37 @@ export const SignInForm: React.FC = () => {
             <div className="text-sm text-red-600">{errors.api}</div>
           )}
 
-          <InputField
-            isRequired
-            errorMessage={errors.email}
-            isInvalid={!!errors.email}
-            label="Email"
-            name="email"
-            placeholder="Digite seu email"
-            type="email"
-            value={email}
-            onChange={setEmail}
-          />
+          <div className="flex flex-col gap-7 w-full">
+            <InputField
+              isRequired
+              errorMessage={errors.email}
+              isInvalid={!!errors.email}
+              label="Email"
+              name="email"
+              placeholder="Digite seu email"
+              type="email"
+              value={email}
+              onChange={setEmail}
+            />
+            <PasswordInput
+              isRequired
+              errorMessage={
+                hasPwErr ? (
+                  <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
+                    {errors.password!.map((msg, i) => (
+                      <li key={i}>{msg}</li>
+                    ))}
+                  </ul>
+                ) : undefined
+              }
+              isInvalid={hasPwErr}
+              name="password"
+              value={password}
+              onChange={setPassword}
+            />
+          </div>
 
-          <PasswordInput
-            isRequired
-            errorMessage={
-              hasPwErr ? (
-                <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                  {errors.password!.map((msg, i) => (
-                    <li key={i}>{msg}</li>
-                  ))}
-                </ul>
-              ) : undefined
-            }
-            isInvalid={hasPwErr}
-            name="password"
-            value={password}
-            onChange={setPassword}
-          />
-
-          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm w-full">
             <RecaptchaCheckbox isSelected={isHuman} onChange={setIsHuman} />
           </div>
           {errors.terms && (
