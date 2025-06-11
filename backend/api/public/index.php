@@ -76,21 +76,25 @@ $errorMiddleware->setDefaultErrorHandler(function (
 // Add JSON response header middleware
 $app->add(App\Middleware\AddJsonResponseHeader::class);
 
+// ********ROTAS NÃO AUTENTICADAS***********
 // Rotas de auth
 $app->post('/auth/sign-up', App\Controllers\AuthController::class . ':signUp');
 $app->post('/auth/verify-account', App\Controllers\AuthController::class . ':verifyEmail');
 $app->post('/auth/sign-in', App\Controllers\AuthController::class . ':signIn');
 $app->post('/auth/sign-out', App\Controllers\AuthController::class . ':signOut')
     ->add(App\Middleware\ValidateToken::class);
+
+// ********ROTAS AUTENTICADAS***********
 // Rotas de usuário
 $app->get('/users/{id}', App\Controllers\UserController::class . ':getById')
     ->add(App\Middleware\ValidateToken::class);
 $app->patch('/users/{id}', App\Controllers\UserController::class . ':patchById')
     ->add(App\Middleware\ValidateToken::class);
 $app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteById')
-->add(App\Middleware\ValidateToken::class);
-    // Rotas de evento do usuário
-
+    ->add(App\Middleware\ValidateToken::class);
+// Rotas de evento do usuário
+$app->post('/users/{id}/events', App\Controllers\UserEventController::class . ':create')
+    ->add(App\Middleware\ValidateToken::class);
 // Rotas de instituição
 
 // Rotas de turma
@@ -108,9 +112,6 @@ $app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteById
 // Rotas de Notificação 
 
 // Rotas de arquivo
-$app->get('/files', App\Controllers\FilesController::class . ':getAll')->add(App\Middleware\ValidateToken::class);
-$app->post('/files', App\Controllers\FilesController::class . ':create');
-$app->get('/files/{id}', callable: App\Controllers\FilesController::class . ':getById');
 
 // -> Inicializa Aplicação REST <-
 $app->run();

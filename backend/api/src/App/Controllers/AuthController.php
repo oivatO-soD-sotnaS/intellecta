@@ -205,7 +205,7 @@ class AuthController {
     }
 
     if (!password_verify($password, $user->getPasswordHash())) {
-      throw new HttpUnauthorizedException($request, message:'Username or Password incorrect');
+      throw new HttpUnauthorizedException($request, message:'E-mail or Password incorrect');
     }
 
     $jwt = $this->jwtService->generateToken(

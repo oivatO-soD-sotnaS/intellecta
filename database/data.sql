@@ -4,10 +4,12 @@ INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `size`, `uploade
 ('33333333-3333-3333-3333-333333333333', 'https://example.com/files/3', 'presentation.pptx', 'application/vnd.ms-powerpoint', 2048000, '2023-01-03 12:00:00');
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_verified`, `created_at`, `changed_at`, `profile_picture_id`) VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'John Doe', 'john@example.com', '$2y$10$ceo4rxf09sjiLYJr3fzYq.jl8I.6Xoddv08WwK3pPmgQJOluQLhWS', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', '11111111-1111-1111-1111-111111111111'),
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jane Smith', 'jane@example.com', '$2y$10$dMfEyM/M9Wu8DmWv9lxMiuYCaAACHsnOLdZH8Ozwfo0lfEMRyMolm', TRUE, '2023-01-02 11:00:00', '2023-01-02 11:00:00', NULL),
-('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Bob Johnson', 'bob@example.com', '$2y$10$07XFod1Y/r7.otZbZpsdiOTnASbXEsB9xKjudGA/IKSOcmcT7EZSK', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
-
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'John Doe', 'john@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', '11111111-1111-1111-1111-111111111111'),
+-- Senha: Password1!
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Jane Smith', 'jane@example.com', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, '2023-01-02 11:00:00', '2023-01-02 11:00:00', NULL),
+-- Senha: Password2!
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
+-- Senha: Password3!
 INSERT INTO `institutions` (`institution_id`, `name`, `email`, `phone_number`, `description`, `thumbnail_id`, `banner_id`, `owner_id`) VALUES
 ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Harvard University', 'contact@harvard.edu', '+15551234567', 'Ivy League university', NULL, NULL, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
 ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'MIT', 'info@mit.edu', '+15552345678', 'Technology institute', NULL, NULL, 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
