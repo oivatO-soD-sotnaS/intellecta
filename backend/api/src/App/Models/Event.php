@@ -1,11 +1,13 @@
 <?php
 namespace App\Models;
 
+use App\Enums\EventType;
+
 class Event implements \JsonSerializable {
     private $event_id;
     private $title;
     private $description;
-    private $type;
+    private EventType $type;
     private $event_date;
     private $created_at;
     private $changed_at;
@@ -14,7 +16,7 @@ class Event implements \JsonSerializable {
         $this->event_id = $data['event_id'] ?? '';
         $this->title = $data['title'] ?? '';
         $this->description = $data['description'] ?? null;
-        $this->type = $data['type'] ?? 'other';
+        $this->type = EventType::tryFrom($data['type'] ?? 'other') ?? EventType::Other;
         $this->event_date = $data['event_date'] ?? '';
         $this->created_at = $data['created_at'] ?? date('Y-m-d H:i:s');
         $this->changed_at = $data['changed_at'] ?? date('Y-m-d H:i:s');
@@ -40,12 +42,20 @@ class Event implements \JsonSerializable {
     public function getEventId(): string { return $this->event_id; }
     public function getTitle(): string { return $this->title; }
     public function getDescription(): ?string { return $this->description; }
-    public function getType(): string { return $this->type; }
+    public function getType(): string { return $this->type->value; }
     public function getEventDate(): string { return $this->event_date; }
     public function getCreatedAt(): string { return $this->created_at; }
     public function getChangedAt(): string { return $this->changed_at; }
 
-    public function isUpcoming(): bool {
-        return strtotime($this->event_date) > time();
+    // Setters
+    public function setEventId(string $event_id): void { $this->event_id = $event_id; }
+    public function setTitle(string $title): void { $this->title = $title; }
+    public function setDescription(?string $description): void { $this->description = $description; }
+    public function setType(EventType $type): void {
+        $this->type = EventType::tryFrom($data['type'] ?? 'other') ?? EventType::Other; 
     }
+    public function setEventDate(string $event_date): void { $this->event_date = $event_date; }
+    public function setCreatedAt(string $created_at): void { $this->created_at = $created_at; }
+    public function setChangedAt(string $changed_at): void { $this->changed_at = $changed_at; }
+    
 }

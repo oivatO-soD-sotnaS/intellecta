@@ -14,46 +14,27 @@ class UserEventDao {
     private Database $database
   ) {}
 
-  public function getUserEventById(string $userId, string $eventId): ?Event {
-    $sql = 'SELECT 
-              e.event_id,
-              e.title,
-              e.description,
-              e.type,
-              e.event_date,
-              e.created_at,
-              e.changed_at
-            FROM user_events ue
-            JOIN events e ON ue.event_id = e.event_id
-            WHERE ue.user_id = :user_id AND ue.event_id = :event_id';
+  public function getUserEventById(string $userEventId): ?UserEvent {
+    $sql = 'SELECT * FROM user_events 
+            WHERE user_event_id = :user_event_id';
     
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
-    $stmt->bindValue(':event_id', $eventId, PDO::PARAM_STR);
+    $stmt->bindValue(':user_event_id', $userEventId, PDO::PARAM_STR);
 
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($data) {
-        return new Event($data); 
+      return new UserEvent($data); 
     }
 
     return null;
   }
 
   public function getAllUserEventsById(string $userId): ?array {
-    $sql = 'SELECT 
-              e.event_id,
-              e.title,
-              e.description,
-              e.type,
-              e.event_date,
-              e.created_at,
-              e.changed_at
-            FROM user_events ue
-            JOIN events e ON ue.event_id = e.event_id
-            WHERE ue.user_id = :user_id';
+    $sql = 'SELECT * FROM user_events
+            WHERE user_id = :user_id';
     
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
@@ -65,9 +46,28 @@ class UserEventDao {
     $userEvents = [];
     
     foreach ($data as $row) {
-        $userEvents[] = new Event($row); 
+        $userEvents[] = new UserEvent($row); 
     }
 
     return $userEvents;
   } 
+
+  public function createUserEvent(UserEvent $userEvent): ?UserEvent {
+    $sql = 'INSERT INTO user_events (user_event_id, user_id, event_id) 
+            VALUES (:user_event_id, :user_id, :event_id)';
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    
+    $stmt->bindValue(':user_event_id', $userEvent->getUserEventId(), PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $userEvent->getUserId(), PDO::PARAM_STR);
+    $stmt->bindValue(':event_id', $userEvent->getEventId(), PDO::PARAM_STR);
+
+    $success = $stmt->execute();
+    if ($success) {
+      return $userEvent;
+    }
+
+    return null;
+  }
 }

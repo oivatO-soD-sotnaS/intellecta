@@ -179,7 +179,7 @@ CREATE TABLE `events` (
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT,
   `type` ENUM(
-    'class', 'exam', 'quiz', 'assignment', 'lecture', 'workshop',
+    'exam', 'quiz', 'assignment', 'lecture', 'workshop',
     'seminar', 'presentation', 'deadline',
     'holiday', 'announcement', 'cultural', 'sports', 'other'
   ) DEFAULT 'other', -- Tipos de evento, mais detalhes podem ser encontados em ./README.md
@@ -190,7 +190,7 @@ CREATE TABLE `events` (
 
 -- Eventos globais da instituição
 CREATE TABLE `institutional_events` (
-  `institutional_events_id` CHAR(36) PRIMARY KEY,
+  `institutional_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `institution_id` CHAR(36) NOT NULL,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE, 
@@ -199,7 +199,7 @@ CREATE TABLE `institutional_events` (
 
 -- Eventos específicos de disciplina
 CREATE TABLE `subject_events` (
-  `subject_events_id` CHAR(36) PRIMARY KEY,
+  `subject_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `subject_id` CHAR(36) NOT NULL,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
@@ -208,7 +208,7 @@ CREATE TABLE `subject_events` (
 
 -- Eventos específicos de usuário
 CREATE TABLE `user_events` (
-  `user_events_id` CHAR(36) PRIMARY KEY,
+  `user_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `user_id` CHAR(36) NOT NULL,
   FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
