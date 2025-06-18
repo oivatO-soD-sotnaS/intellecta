@@ -7,10 +7,10 @@ import { Card, CardBody } from "@heroui/card"
 import { Form } from "@heroui/form"
 import Link from "next/link"
 
-import { InputField } from "./InputField"
-import { PasswordInput } from "./PasswordInput"
-import { RecaptchaCheckbox } from "./RecaptchaCheckbox"
-import { PrimaryButton } from "./PrimaryButton"
+import { InputField } from "../InputField"
+import { PasswordInput } from "../PasswordInput"
+import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
+import { PrimaryButton } from "../PrimaryButton"
 
 export const SignInForm: React.FC = () => {
   const router = useRouter()

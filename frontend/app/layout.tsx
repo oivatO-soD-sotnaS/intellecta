@@ -40,7 +40,7 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "min-h-screen text-foreground bg-background font-sans antialiased",
+          "h-screen text-foreground bg-background font-sans antialiased",
           fontSans.variable
         )}
       >
@@ -51,7 +51,7 @@ export default function RootLayout({
               <ThemeSwitch />
             </div>
 
-            <main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
+            <main className="container mx-auto max-w-7xl px-6 sm:px-6 flex-grow">
               {children}
             </main>
           </div>

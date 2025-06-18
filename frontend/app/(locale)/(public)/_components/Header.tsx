@@ -2,13 +2,13 @@ import React from "react"
 
 import { Logo } from "./Logo"
 
-interface SignInHeaderProps {
+interface HeaderProps {
   title?: string
   subtitle?: string
   description?: string
 }
 
-export const SignInHeader: React.FC<SignInHeaderProps> = ({
+export const Header: React.FC<HeaderProps> = ({
   title = "Entrar no Intellecta",
   subtitle = "Sua plataforma educacional integrada",
   description = "Comece a aprender e colaborar agora",
