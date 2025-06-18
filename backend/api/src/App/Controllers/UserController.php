@@ -21,7 +21,7 @@ class UserController {
     private ValidationService $validationService
   ) {}
  
-  public function getById(Request $request, Response $response, string $id): Response {
+  public function getUser(Request $request, Response $response, string $id): Response {
     $user = $this->userDao->getById($id);
     
     if(empty($user)) {
@@ -38,21 +38,29 @@ class UserController {
     return $response;
   }
 
-  public function patchByID(Request $request, Response $response, string $id): Response {
+  public function updateUser(Request $request, Response $response, string $id): Response {
     $body = $request->getParsedBody();
 
-    $fullName = isset($body['full_name']) ? trim($body['full_name']) : null;
-    $password = isset($body['password']) ? trim($body['password']) : null;
-    $profilePictureUrl = isset($body['profile_picture_url']) ? trim($body['profile_picture_url']) : null;
+    $fullName = $body['full_name'] ?? null;
+    $password = $body['password'] ?? null;
+    $profilePictureUrl = $body['profile_picture_url'] ?? null;
+
+    if(
+      empty($fullName) && 
+      empty($password) && 
+      empty($profilePictureUrl)
+    ){
+      throw new HttpException($request, "'full_name', 'password' or 'profile_picture_url' are required", 422);
+    }
 
     // Validações condicionais
-    if (!is_null($fullName) && !$this->validationService->isValidUsername($fullName)) {
+    if (!empty($fullName) && !$this->validationService->isValidUsername($fullName)) {
       throw new HttpException($request, 'Full name must be between 5 and 64 characters', 422);
     }
-    if (!is_null($profilePictureUrl) && !$this->validationService->isValidURL($profilePictureUrl)) {
+    if (!empty($profilePictureUrl) && !$this->validationService->isValidURL($profilePictureUrl)) {
       throw new HttpException($request, 'Invalid profile picture URL', 422);
     }
-    if (!is_null($password) && !$this->validationService->isValidPassword($password)) {
+    if (!empty($password) && !$this->validationService->isValidPassword($password)) {
       throw new HttpException($request, 'Password must be between 8 and 64 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 422);
     }
 
@@ -60,31 +68,31 @@ class UserController {
       $user = $this->userDao->getById($id);
 
       if (empty($user)) {
-          throw new HttpNotFoundException($request, 'Object not found');
+        throw new HttpNotFoundException($request, 'Object not found');
       }
 
       $token = $request->getAttribute('token');
 
       if ($token['sub'] !== $user->getUserId()) {
-          throw new HttpUnauthorizedException($request, 'User not authorized');
+        throw new HttpUnauthorizedException($request, 'User not authorized');
       }
 
       // Atualiza somente os campos fornecidos
-      if (!is_null($fullName)) {
-          $user->setFullName($fullName);
+      if (!empty($fullName)) {
+        $user->setFullName($fullName);
       }
-      if (!is_null($password)) {
-          $user->setPasswordHash(password_hash($password, PASSWORD_DEFAULT));
+      if (!empty($password)) {
+        $user->setPasswordHash(password_hash($password, PASSWORD_DEFAULT));
       }
-      if (!is_null($profilePictureUrl)) {
-          $user->setProfilePictureId($profilePictureUrl);
+      if (!empty($profilePictureUrl)) {
+        $user->setProfilePictureId($profilePictureUrl);
       }
 
       $user = $this->userDao->update($user);
 
       $response->getBody()->write(json_encode([
-          'user' => $user,
-          'message' => 'User updated successfully'
+        'user' => $user,
+        'message' => 'User updated successfully'
       ]));
 
       return $response;
@@ -97,7 +105,7 @@ class UserController {
     }
   }
 
-  public function deleteById(Request $request, Response $response, string $id): Response {
+  public function deleteUser(Request $request, Response $response, string $id): Response {
     $user = $this->userDao->getById($id);
     
     if(empty($user)) {

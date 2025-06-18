@@ -41,7 +41,7 @@ class AuthController {
       ){
         throw new HttpException(
           $request, 
-          'Full name, E-mail and password are required',
+          "'full_name, 'email' and 'password' are required",
           422
         );
     }
@@ -133,13 +133,14 @@ class AuthController {
       empty($body['email']) ||
       empty($body['verification_code'])
     ){
-      throw new HttpException($request, 'E-mail and verification code are required', 422);
+      throw new HttpException($request, "'email' and 'verification_code' are required", 422);
     }
 
     $email = trim($body['email']);
     $code = trim($body['verification_code']);
 
     $user = $this->userDao->getByEmail($email);
+    
     if(empty($user)){
       throw new HttpNotFoundException($request,'User not found');
     } 
@@ -190,7 +191,7 @@ class AuthController {
       empty($body['email']) || 
       empty($body['password'])
     ) {
-      throw new HttpException($request, 'Email and password are required', 422);
+      throw new HttpException($request, "'email' and 'password' are required", 422);
     }
     
     $email = trim($body['email']);
@@ -214,7 +215,8 @@ class AuthController {
     );
 
     $response->getBody()->write(json_encode([
-        'token' => $jwt
+        'token' => $jwt,
+        'user' => $user
     ]));
     
     return $response;

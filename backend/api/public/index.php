@@ -85,15 +85,23 @@ $app->post('/auth/sign-out', App\Controllers\AuthController::class . ':signOut')
     ->add(App\Middleware\ValidateToken::class);
 
 // ********ROTAS AUTENTICADAS***********
-// Rotas de usuário
-$app->get('/users/{id}', App\Controllers\UserController::class . ':getById')
-    ->add(App\Middleware\ValidateToken::class);
-$app->patch('/users/{id}', App\Controllers\UserController::class . ':patchById')
-    ->add(App\Middleware\ValidateToken::class);
-$app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteById')
-    ->add(App\Middleware\ValidateToken::class);
 // Rotas de evento do usuário
-$app->post('/users/{id}/events', App\Controllers\UserEventController::class . ':create')
+$app->get('/users/events', App\Controllers\UserEventController::class . ':getUserEvents')
+    ->add(App\Middleware\ValidateToken::class);
+$app->post('/users/events', App\Controllers\UserEventController::class . ':createUserEvent')
+    ->add(App\Middleware\ValidateToken::class);
+$app->patch('/users/events/{id}', App\Controllers\UserEventController::class . ':updateUserEvent')
+    ->add(App\Middleware\ValidateToken::class);
+$app->delete('/users/events/{id}', App\Controllers\UserEventController::class . ':deleteUserEvent')
+    ->add(App\Middleware\ValidateToken::class);
+$app->get('/users/events/{id}', App\Controllers\UserEventController::class . ':getUserEvent')
+    ->add(App\Middleware\ValidateToken::class);
+// Rotas de usuário
+$app->get('/users/{id}', App\Controllers\UserController::class . ':getUser')
+    ->add(App\Middleware\ValidateToken::class);
+$app->patch('/users/{id}', App\Controllers\UserController::class . ':updateUser')
+    ->add(App\Middleware\ValidateToken::class);
+$app->delete('/users/{id}', App\Controllers\UserController::class . ':deleteUser')
     ->add(App\Middleware\ValidateToken::class);
 // Rotas de instituição
 

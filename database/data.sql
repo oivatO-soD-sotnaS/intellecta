@@ -70,17 +70,17 @@ INSERT INTO `events` (`event_id`, `title`, `description`, `type`, `event_date`, 
 ('22222222-2222-2222-2222-222222222224', 'Guest Lecture', 'Industry expert on AI', 'lecture', '2023-04-10 14:00:00', '2023-01-02 11:00:00', '2023-01-02 11:00:00'),
 ('33333333-3333-3333-3333-333333333335', 'Spring Break', 'No classes this week', 'holiday', '2023-03-13 00:00:00', '2023-01-03 12:00:00', '2023-01-03 12:00:00');
 
-INSERT INTO `institutional_events` (`institutional_events_id`, `event_id`, `institution_id`) VALUES
+INSERT INTO `institutional_events` (`institutional_event_id`, `event_id`, `institution_id`) VALUES
 ('44444444-4444-4444-4444-444444444446', '11111111-1111-1111-1111-111111111113', 'dddddddd-dddd-dddd-dddd-dddddddddddd'),
 ('55555555-5555-5555-5555-555555555557', '22222222-2222-2222-2222-222222222224', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'),
 ('66666666-6666-6666-6666-666666666668', '33333333-3333-3333-3333-333333333335', 'ffffffff-ffff-ffff-ffff-ffffffffffff');
 
-INSERT INTO `subject_events` (`subject_events_id`, `event_id`, `subject_id`) VALUES
+INSERT INTO `subject_events` (`subject_event_id`, `event_id`, `subject_id`) VALUES
 ('77777777-7777-7777-7777-777777777779', '11111111-1111-1111-1111-111111111113', 'ssssssss-ssss-ssss-ssss-ssssssssssss'),
 ('88888888-8888-8888-8888-888888888880', '22222222-2222-2222-2222-222222222224', 'tttttttt-tttt-tttt-tttt-tttttttttttt'),
 ('99999999-9999-9999-9999-999999999990', '33333333-3333-3333-3333-333333333335', 'uuuuuuuu-uuuu-uuuu-uuuu-uuuuuuuuuuuu');
 
-INSERT INTO `user_events` (`user_events_id`, `event_id`, `user_id`) VALUES
+INSERT INTO `user_events` (`user_event_id`, `event_id`, `user_id`) VALUES
 ('00000000-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111113', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
 ('00000000-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222224', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
 ('00000000-0000-0000-0000-000000000004', '33333333-3333-3333-3333-333333333335', 'cccccccc-cccc-cccc-cccc-cccccccccccc');

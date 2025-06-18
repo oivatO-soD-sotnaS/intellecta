@@ -6,13 +6,17 @@ namespace App\Services;
 
 class ValidationService {
 
-  public function isValidUsername(string $username): bool {
+  public function isValidUsername(?string $username): bool {
+    if (is_null($username)) return false;
+
     if(strlen($username) < 5 || strlen($username) > 64){
       return false;
     }
     return true;
   }
-  public function isValidPassword($password): bool {
+  public function isValidPassword(?string $password): bool {
+    if (is_null($password)) return false;
+    
     if(strlen($password) < 8 || strlen($password) > 64){
       return false;
     }
@@ -29,7 +33,9 @@ class ValidationService {
     return true;
   }
 
-  public function isValidEmail(string $email): bool {
+  public function isValidEmail(?string $email): bool {
+    if (is_null($email)) return false;
+
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
       return false;
     }
@@ -41,7 +47,9 @@ class ValidationService {
     return true;
   }
 
-  public function isValidURL(string $url): bool {
+  public function isValidURL(?string $url): bool {
+    if (is_null($url)) return false;
+    
     return filter_var($url, FILTER_VALIDATE_URL) !== false;
   }
 }
