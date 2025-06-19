@@ -10,6 +10,8 @@ use App\Dao\UserEventDao;
 use App\Models\Event;
 use App\Models\UserEvent;
 use App\Services\EmailService;
+use App\Services\LogService;
+use Exception;
 use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
@@ -30,40 +32,51 @@ class UserEventController {
     public function getUserEvents(Request $request,Response $response) {
       $token = $request->getAttribute("token");
 
-      $user = $this->userDao->getById($token["sub"]);
-      
-      if(empty($user)) {
-        throw new HttpUnauthorizedException($request, 'User not found');
+      try{
+        $user = $this->userDao->getById($token["sub"]);
+        
+        if(empty($user)) {
+          LogService::error("/users/events", "Unable to find user by id: ".$token['sub']);
+          throw new HttpUnauthorizedException($request, 'User not found');
+        }
+  
+        $userEvents = $this->userEventDao->getAllUserEventsById($user->getUserId());
+  
+        if(empty($userEvents)) {
+          LogService::warn("/users/events", "No user events found for the following user: ".$user->getEmail());
+          throw new HttpNotFoundException($request, 'No events found for this user');
+        }
+  
+        $data = [];
+        foreach ($userEvents as $event) {
+          $row = [
+            "user_event_id" => $event->getUserEventId(),
+            "user_id" => $event->getUserId(),
+            "event" => $this->eventDao->getEventById($event->getEventId())
+          ];
+          $data[] = $row;
+        }
+  
+        $response->getBody()->write(json_encode($data));
+  
+        LogService::info("/users/events", "User events fetched from $user");
+        return $response;
+      }catch(Exception $e){
+        switch(true) {
+          case $e instanceof PDOException:
+            LogService::error("/users/events", "Unable to get user events due to database error: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, "Unable to get user events due to a database error");
+          case $e instanceof HttpException:
+            throw $e;
+          default:
+            LogService::error("/users/events", 'An unexpected error occurred: ' . $e->getMessage());
+            throw new HttpInternalServerErrorException($request, "An unexpected error occured. See logs for more detail");
+        }
       }
-
-      $userEvents = $this->userEventDao->getAllUserEventsById($user->getUserId());
-
-      if(empty($userEvents)) {
-        throw new HttpNotFoundException($request, 'No events found for this user');
-      }
-
-      $data = [];
-      foreach ($userEvents as $event) {
-        $row = [
-          "user_event_id" => $event->getUserEventId(),
-          "user_id" => $event->getUserId(),
-          "event" => $this->eventDao->getEventById($event->getEventId())
-        ];
-        $data[] = $row;
-      }
-
-      $response->getBody()->write(json_encode($data));
-      return $response;
     }
 
     public function createUserEvent(Request $request, Response $response) {
       $token = $request->getAttribute("token");
-
-      $user = $this->userDao->getById($token["sub"]);
-
-      if(!$user) {
-        throw new HttpNotFoundException($request, 'User not found');
-      }
 
       $body = $request->getParsedBody();
       $title = $body['title'] ?? null;
@@ -77,9 +90,18 @@ class UserEventController {
         empty($eventDate) || 
         empty($eventType)
       ) {
+        LogService::error("/users/events", "Unprocessable entity, missing POST parameters: 'title', 'description', 'event_date' and 'event_type'");
         throw new HttpException($request, "'title', 'description', 'event_date' and 'event_type' are required", 422);
       }
+      
       try{
+        $user = $this->userDao->getById($token["sub"]);
+  
+        if(!$user) {
+          LogService::error("/users/events", "Unable to find user by id: ".$token["sub"]);
+          throw new HttpNotFoundException($request, 'User not found');
+        }
+
         $event = $this->eventDao->createEvent(
         new Event([
           'event_id' => Uuid::uuid4()->toString(),
@@ -91,6 +113,7 @@ class UserEventController {
         );
 
         if(empty($event)) {
+          LogService::error("/users/events", "Could not create event for: $user");
           throw new HttpException($request, 'Failed to create event', 500);
         }
 
@@ -102,6 +125,7 @@ class UserEventController {
         );
 
         if(empty($userEvent)) {
+          LogService::error("/users/events", "Could not create user event for: $user");
           $this->eventDao->deleteEventById($event->getEventId());
           throw new HttpException($request,  'Failed to create user event', 500);
         }
@@ -115,13 +139,18 @@ class UserEventController {
           ]
         ]));
 
+        LogService::info("/users/events", "User event created for $user. User event: $userEvent");
         return $response->withStatus(201);
-      }catch (\Exception $e) {
+      }catch (Exception $e) {
         switch($e) {
           case $e instanceof PDOException:
+            LogService::error("/users/events", "Could not create event due to database error: $e->");
             throw new HttpException($request, 'Database error: ' . $e->getMessage(), 500);
+          case $e instanceof HttpException:
+            throw $e;
           default:
-            throw new HttpInternalServerErrorException($request, 'An unexpected error occurred: ' . $e->getMessage());
+            LogService::error("/users/events", 'An unexpected error occurred: ' . $e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'An unexpected error occurred. See logs for more detail');
         }
       }
     }
@@ -140,6 +169,7 @@ class UserEventController {
         empty($eventDate) &&
         empty($eventType)
       ) {
+        LogService::error("/users/events/$id", "Unprocessable entity, missing PATCH parameters: 'title', 'description, 'event_data' and 'event_type'");
         throw new HttpException($request, "'title', 'description', 'event_date' or 'event_type' are required", 422);
       }
       try{
@@ -147,17 +177,20 @@ class UserEventController {
         
         
         if(empty($userEvent)) {
+          LogService::error("/users/events/$id", "Could not find user event with the following ID: $id");
           throw new HttpNotFoundException($request, 'User event not found');
         }
   
         $token = $request->getAttribute("token");
   
         if($userEvent->getUserId() !== $token["sub"]) {
+          LogService::error("/users/events/$id", "User event update denied, user does not own the event");
           throw new HttpUnauthorizedException($request, 'You do not have permission to update this event');
         }
         $event = $this->eventDao->getEventById($userEvent->getEventId());
         
         if(empty($event)) {
+          LogService::error("/users/events/$id", "Could not find event with the following ID: ".$userEvent->getEventId());
           throw new HttpNotFoundException($request, 'Event not found');
         }
 
@@ -176,6 +209,7 @@ class UserEventController {
         $event = $this->eventDao->updateEvent($event);
         
         if(empty($event)) {
+          LogService::error("/users/events/$id", "Could not update the event");
           throw new HttpInternalServerErrorException($request, 'Failed to update event');
         }
         
@@ -188,63 +222,100 @@ class UserEventController {
           ]
         ]));
 
+        LogService::info("/users/events/$id", "Update the following user event successfully: $userEvent");
         return $response;
-      }catch (\Exception $e) {
+      }catch (Exception $e) {
         switch($e) {
           case $e instanceof PDOException:
+            LogService::error("/users/events/$id", "Could not update user event to database error: ".$e->getMessage());
             throw new HttpInternalServerErrorException($request, 'Database error: ' . $e->getMessage());
           case $e instanceof HttpException:
             throw $e; // Re-throw HttpExceptions to maintain status code
           default:
-            throw new HttpInternalServerErrorException($request, 'An unexpected error occurred: ' . $e->getMessage());
+            LogService::error("/users/events/$id", "An unexpected error occured: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'An unexpected error occurred. See the logs for more details');
         }
       }
     }
 
     public function deleteUserEvent(Request $request, Response $response, string $id) {
-      $userEvent = $this->userEventDao->getUserEventById($id);
+      try{
+        $userEvent = $this->userEventDao->getUserEventById($id);
+        
+        if(empty($userEvent)) {
+          LogService::error("/users/events/$id", "User event  with the following ID was not found: $id");
+          throw new HttpNotFoundException($request, 'User event not found');
+        }
+        $token = $request->getAttribute("token");
+        if($userEvent->getUserId() !== $token["sub"]) {
+          LogService::error("/users/events/$id", "User event does not belong to user with ID: ".$token["sub"]);
+          throw new HttpUnauthorizedException($request, 'You do not have permission to delete this event');
+        }
+        $event = $this->eventDao->getEventById($userEvent->getEventId());
+        if(empty($event)) {
+          LogService::error("/users/events/$id", "Event  with the following ID was not found: ".$userEvent->getEventId());
+          throw new HttpNotFoundException($request, 'Event not found');
+        }
+        $deleted = $this->eventDao->deleteEventById($event->getEventId());
+        if(!$deleted) {
+          LogService::error("/users/events/$id", "Could not delete event with the following ID: ".$event->getEventId());
+          throw new HttpInternalServerErrorException($request, 'Failed to delete event');
+        }
+  
+        $response->getBody()->write(json_encode([
+          "Message" => "User event deleted successfully",
+        ]));
+  
+        return $response;
+      }catch (Exception $e) {
+        switch(true) {
+          case $e instanceof PDOException:
+            LogService::error("/users/events/$id", "Could not delete the user event due to database error: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'Could not delete the user event due to a database error');
+          case $e instanceof HttpException:
+            throw $e;
+          default:
+            LogService::error("/users/events/$id", "An unexpected error occured: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'An unexpected error occured. See the logs for more detail');
+        }
+      }
       
-      if(empty($userEvent)) {
-        throw new HttpNotFoundException($request, 'User event not found');
-      }
-      $token = $request->getAttribute("token");
-      if($userEvent->getUserId() !== $token["sub"]) {
-        throw new HttpUnauthorizedException($request, 'You do not have permission to delete this event');
-      }
-      $event = $this->eventDao->getEventById($userEvent->getEventId());
-      if(empty($event)) {
-        throw new HttpNotFoundException($request, 'Event not found');
-      }
-      $deleted = $this->eventDao->deleteEventById($event->getEventId());
-      if(!$deleted) {
-        throw new HttpInternalServerErrorException($request, 'Failed to delete event');
-      }
-
-      $response->getBody()->write(json_encode([
-        "Message" => "User event deleted successfully",
-      ]));
-
-      return $response;
     }
 
     public function getUserEvent(Request $request, Response $response, string $id) {
-      $userEvent = $this->userEventDao->getUserEventById($id);
-      if(empty($userEvent)) {
-        throw new HttpNotFoundException($request, 'User event not found');
+      try{
+        $userEvent = $this->userEventDao->getUserEventById($id);
+        if(empty($userEvent)) {
+          LogService::error("/users/events/$id", "User event  with the following ID was not found: $id");
+          throw new HttpNotFoundException($request, 'User event not found');
+        }
+        $token = $request->getAttribute("token");
+        if($userEvent->getUserId() !== $token["sub"]) {
+          LogService::error("/users/events/$id", "User event does not belong to user with ID: ".$token["sub"]);
+          throw new HttpUnauthorizedException($request, 'You do not have permission to view this event');
+        }
+        $event = $this->eventDao->getEventById($userEvent->getEventId());
+        if(empty($event)) {
+          LogService::error("/users/events/$id", "Event  with the following ID was not found: ".$userEvent->getEventId());
+          throw new HttpNotFoundException($request, 'Event not found');
+        }
+        $response->getBody()->write(json_encode([
+          'user_event_id' => $userEvent->getUserEventId(),
+          'user_id' => $userEvent->getUserId(),
+          'event' => $event
+        ]));
+        return $response->withStatus(200);
+      }catch (Exception $e){
+        switch(true) {
+          case $e instanceof PDOException:
+            LogService::error("/users/events/$id", "Could not get the user event due to database error: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'Could not get user event due to a database error');
+          case $e instanceof HttpException:
+            throw $e;
+          default:
+            LogService::error("/users/events/$id", "Could not delete the user event due to database error: ".$e->getMessage());
+            throw new HttpInternalServerErrorException($request, 'An unexpected error occured. See the logs for more details');
+        }
       }
-      $token = $request->getAttribute("token");
-      if($userEvent->getUserId() !== $token["sub"]) {
-        throw new HttpUnauthorizedException($request, 'You do not have permission to view this event');
-      }
-      $event = $this->eventDao->getEventById($userEvent->getEventId());
-      if(empty($event)) {
-        throw new HttpNotFoundException($request, 'Event not found');
-      }
-      $response->getBody()->write(json_encode([
-        'user_event_id' => $userEvent->getUserEventId(),
-        'user_id' => $userEvent->getUserId(),
-        'event' => $event
-      ]));
-      return $response->withStatus(200);
     }
 }

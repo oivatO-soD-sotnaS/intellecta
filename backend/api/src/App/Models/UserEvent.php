@@ -24,6 +24,10 @@ class UserEvent implements \JsonSerializable {
         return $this->toArray();
     }
 
+    public function __toString()
+    {
+        return "User event ID: ".$this->user_event_id.", Event ID: ".$this->event_id.", User ID: ".$this->user_id;
+    }
     // Getters
     public function getUserEventId(): string { return $this->user_event_id; }
     public function getEventId(): string { return $this->event_id; }

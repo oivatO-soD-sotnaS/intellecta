@@ -28,19 +28,15 @@ class EmailService {
   }
 
   public function sendMail(string $to, string $toName, string $subject, string $body, string $altBody = ''){
-    try {
-      $this->mailer->clearAddresses();
-      $this->mailer->addAddress($to, $toName);
-      $this->mailer->isHTML(true);
-      $this->mailer->Subject = $subject;
-      $this->mailer->Body    = $body;
-      $this->mailer->AltBody = $altBody ?: strip_tags($body);
+    $this->mailer->clearAddresses();
+    $this->mailer->addAddress($to, $toName);
+    $this->mailer->isHTML(true);
+    $this->mailer->Subject = $subject;
+    $this->mailer->Body    = $body;
+    $this->mailer->AltBody = $altBody ?: strip_tags($body);
 
-      $this->mailer->send();
-      return "E-mail enviado com sucesso";
-    } catch (Exception $e) {
-      return $this->mailer->ErrorInfo;
-    }
+    $this->mailer->send();
+    return "E-mail enviado com sucesso";
   }
   public function getVerificationEmailTemplate(string $userName, string $code): string
   {

@@ -38,6 +38,9 @@ class User implements \JsonSerializable {
         return $this->toArray();
     }
 
+    public function __tostring(): string {
+        return "Username: ".$this->getFullName().", E-mail: ".$this->getEmail().", Created at: ".$this->getCreatedAt();
+    }
     // Getters
     public function getUserId(): string { return $this->user_id; }
     public function getFullName(): string { return $this->full_name; }

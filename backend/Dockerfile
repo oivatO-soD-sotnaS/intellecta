@@ -1,4 +1,4 @@
-FROM omegapeixe/tcc-intellecta:backend-1.1
+FROM omegapeixe/tcc-intellecta:backend-1.3
 
 WORKDIR /var/www/api.intellecta
 
@@ -6,8 +6,11 @@ WORKDIR /var/www/api.intellecta
 RUN apt-get update && apt-get install -y libzip-dev unzip \
     && docker-php-ext-install pdo pdo_mysql
 
-# habilita o mod_rewrite do apache
+# Habilita o mod_rewrite do apache
 RUN a2enmod rewrite
+
+# Copia o php.ini customizado para o local correto
+COPY ./php.ini /usr/local/etc/php/php.ini
 
 # Copia os arquivos do fileserver
 COPY ./files /var/www/files.intellecta
