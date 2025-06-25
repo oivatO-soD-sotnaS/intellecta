@@ -1,4 +1,4 @@
-// app/layouts/PublicLayout.tsx
+// app/(public)/layouts/PublicLayout.tsx
 import "@/styles/globals.css"
 import { ReactNode } from "react"
 

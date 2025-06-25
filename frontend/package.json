@@ -9,6 +9,8 @@
     "lint": "eslint --fix"
   },
   "dependencies": {
+    "@heroui/avatar": "^2.2.18",
+    "@heroui/badge": "^2.2.14",
     "@heroui/button": "2.2.20",
     "@heroui/card": "^2.2.20",
     "@heroui/checkbox": "^2.3.20",
@@ -20,9 +22,10 @@
     "@heroui/link": "2.2.17",
     "@heroui/listbox": "2.3.19",
     "@heroui/navbar": "2.2.18",
+    "@heroui/popover": "^2.3.22",
     "@heroui/snippet": "2.2.21",
     "@heroui/switch": "2.2.18",
-    "@heroui/system": "2.4.16",
+    "@heroui/system": "2.4.18",
     "@heroui/theme": "2.4.16",
     "@heroui/toast": "^2.0.11",
     "@react-aria/ssr": "3.9.8",
@@ -30,6 +33,7 @@
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "10.7.16",
+    "lucide-react": "^0.523.0",
     "next": "15.3.1",
     "next-themes": "0.4.6",
     "react": "18.3.1",
@@ -63,5 +67,8 @@
     "tailwind-variants": "0.3.0",
     "tailwindcss": "3.4.16",
     "typescript": "5.6.3"
+  },
+  "overrides": {
+    "@heroui/system": "2.4.18"
   }
 }

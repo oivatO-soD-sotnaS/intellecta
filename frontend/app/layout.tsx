@@ -40,21 +40,16 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable
+          "min-h-screen flex flex-col bg-background text-foreground antialiased"
+          /* suas fontes… */
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-col h-screen">
-            {/* Theme Switch - Posicionado no canto superior direito */}
-            <div className="absolute top-4 right-4 z-50">
-              <ThemeSwitch />
-            </div>
+          {/* Theme Switch flutuante */}
+          <ThemeSwitch className="absolute top-4 right-4 z-50" />
 
-            <main className="container mx-auto max-w-7xl px-6 sm:px-6 flex-grow">
-              {children}
-            </main>
-          </div>
+          {/* Aqui injetamos só as rotas */}
+          {children}
         </Providers>
       </body>
     </html>
