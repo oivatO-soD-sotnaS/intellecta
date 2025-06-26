@@ -12,6 +12,11 @@ class EventDao {
     private Database $database
   ) {}
 
+  /**
+   * Summary of getEventById
+   * @param string $eventId
+   * @return Event|null
+   */
   public function getEventById(string $eventId): ?Event {
     $sql = 'SELECT * FROM events WHERE event_id = :event_id';
     
@@ -28,6 +33,11 @@ class EventDao {
     return null;
   }
 
+  /**
+   * Summary of createEvent
+   * @param \App\Models\Event $event
+   * @return Event|null
+   */
   public function createEvent(Event $event): ?Event {
     $sql = 'INSERT INTO events (event_id, title, description, type, event_date, created_at, changed_at) 
             VALUES (:event_id, :title, :description, :type, :event_date, :created_at, :changed_at)';
@@ -51,6 +61,11 @@ class EventDao {
     return null;
   }
 
+  /**
+   * Summary of deleteEventById
+   * @param string $eventId
+   * @return bool
+   */
   public function deleteEventById(string $eventId): bool {
     $sql = 'DELETE FROM events WHERE event_id = :event_id';
 
@@ -61,6 +76,11 @@ class EventDao {
     return $stmt->execute();
   }
 
+  /**
+   * Summary of updateEvent
+   * @param \App\Models\Event $event
+   * @return Event|null
+   */
   public function updateEvent(Event $event): ?Event {
     $sql = 'UPDATE events 
             SET title = :title, description = :description, type = :type, event_date = :event_date, changed_at = :changed_at 

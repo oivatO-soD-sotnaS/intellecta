@@ -9,6 +9,12 @@ use App\Database;
 class JwtBlacklistDao {
   public function __construct(private Database $database) {}
 
+  /**
+   * Summary of addToken
+   * @param string $token
+   * @param \DateTimeInterface $expiresAt
+   * @return void
+   */
   public function addToken(string $token, \DateTimeInterface $expiresAt): void
   {
     $pdo = $this->database->getConnection();
@@ -40,19 +46,28 @@ class JwtBlacklistDao {
     ]);
   }
 
+  /**
+   * Summary of isTokenBlacklisted
+   * @param string $token
+   * @return bool
+   */
   public function isTokenBlacklisted(string $token): bool
   {
+    $sql = "SELECT 1 FROM jwt_blacklists 
+              WHERE token_hash = :token_hash 
+              AND expires_at > :currentTime
+            LIMIT 1";
+
     $pdo = $this->database->getConnection();
     $tokenHash = hash('sha256', $token);
 
-    $stmt = $pdo->prepare("
-      SELECT 1 FROM jwt_blacklists 
-      WHERE token_hash = :token_hash 
-      AND expires_at > NOW()
-      LIMIT 1
-    ");
+    $stmt = $pdo->prepare($sql);
 
-    $stmt->execute([':token_hash' => $tokenHash]);
+    $stmt->execute([
+      ':token_hash' => $tokenHash,
+      ':currentTime' => date('Y-m-d H:i:s')
+    ]);
+    
     return (bool) $stmt->fetchColumn();
   }
 }

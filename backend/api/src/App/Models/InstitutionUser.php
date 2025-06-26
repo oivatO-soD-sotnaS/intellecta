@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Enums\InstitutionUserType;
+
 class InstitutionUser implements \JsonSerializable {
     private $institution_users_id;
     private $role;
@@ -10,7 +12,7 @@ class InstitutionUser implements \JsonSerializable {
 
     public function __construct(array $data = []) {
         $this->institution_users_id = $data['institution_users_id'] ?? '';
-        $this->role = $data['role'] ?? 'student';
+        $this->role = InstitutionUserType::tryFrom($data["role"] ?? 'student') ?? InstitutionUserType::Student;
         $this->joined_at = $data['joined_at'] ?? date('Y-m-d H:i:s');
         $this->institution_id = $data['institution_id'] ?? '';
         $this->user_id = $data['user_id'] ?? '';
@@ -32,7 +34,7 @@ class InstitutionUser implements \JsonSerializable {
 
     // Getters
     public function getInstitutionUsersId(): string { return $this->institution_users_id; }
-    public function getRole(): string { return $this->role; }
+    public function getRole(): string { return $this->role->value; }
     public function getJoinedAt(): string { return $this->joined_at; }
     public function getInstitutionId(): string { return $this->institution_id; }
     public function getUserId(): string { return $this->user_id; }

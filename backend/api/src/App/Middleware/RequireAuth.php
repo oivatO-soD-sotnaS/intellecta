@@ -6,12 +6,17 @@ namespace App\Middleware;
 
 use App\Dao\UserDao;
 use App\Services\JwtService;
+use App\Services\LogService;
+use Exception;
+use PDOException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler; 
+use Slim\Exception\HttpException;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpUnauthorizedException;
 
-class ValidateToken{
+class RequireAuth{
   public function __construct(
     private JwtService $jwtService,
     private UserDao $userDao
@@ -22,7 +27,7 @@ class ValidateToken{
     $authHeader = $request->getHeaderLine("Authorization");
     
     if (empty($authHeader)) {
-        throw new HttpUnauthorizedException($request, 'Authorization header is required');
+      throw new HttpUnauthorizedException($request, 'Authorization header is required');
     }
 
     if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
@@ -49,10 +54,15 @@ class ValidateToken{
       
       $request = $request->withAttribute('token', $decoded);
         
-    } catch (\Exception $e) {
-      throw new HttpUnauthorizedException($request, 'Token validation failed: ' . $e->getMessage());
+      return $handler->handle($request);
+    }catch (PDOException $e) {
+      LogService::error('RequireAuth middlware', 'Token validation failed due to a database error: '.$e->getMessage());
+      throw new HttpInternalServerErrorException($request, 'Token validation failed due to a database error. See logs for more details');
+    }catch (HttpException $e) {
+      throw $e;
+    }catch (Exception $e) {
+      LogService::error('RequireAuth middlware', 'Token validation failed due to a unknown error: '.$e->getMessage());
+      throw new HttpInternalServerErrorException($request, 'Token validation failed due to a unknown error. See logs for more details');          
     }
-
-    return $handler->handle($request);
   }
 }

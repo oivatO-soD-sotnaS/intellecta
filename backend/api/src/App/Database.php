@@ -5,14 +5,15 @@ declare(strict_types= 1);
 namespace App;
 
 use PDO;
+use SensitiveParameter;
 
 class Database
 {
   public function __construct(
-    private string $host,
-    private string $name,
-    private string $user,
-    private string $password,
+    #[SensitiveParameter] private string $host,
+    #[SensitiveParameter] private string $name,
+    #[SensitiveParameter] private string $user,
+    #[SensitiveParameter] private string $password,
   ){}
 
   public function getConnection(): PDO {

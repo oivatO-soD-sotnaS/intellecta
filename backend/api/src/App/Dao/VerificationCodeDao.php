@@ -11,6 +11,11 @@ use PDO;
 class VerificationCodeDao {
   public function __construct(private Database $database) {}
 
+  /**
+   * Summary of create
+   * @param \App\Models\VerificationCode $verificationCode
+   * @return VerificationCode|null
+   */
   public function create(VerificationCode $verificationCode): ?VerificationCode {
     $sql = 'INSERT INTO verification_codes (verification_code_id, code, expires_at, user_id)
             VALUES (:verification_code_id, :code, :expires_at, :user_id)';
@@ -27,19 +32,25 @@ class VerificationCodeDao {
 
     return $success ? $verificationCode : null;
   }
-
+  /**
+   * Summary of getLatestVerificationCode
+   * @param string $user_id
+   * @param string $code
+   * @return VerificationCode|null
+   */
   public function getLatestVerificationCode(string $user_id, string $code): ?VerificationCode {
     $sql = 'SELECT * FROM verification_codes
             WHERE user_id LIKE :user_id
               AND code LIKE :code
               AND is_pending LIKE true
-              AND expires_at > NOW()
+              AND expires_at > :currentTime
             ORDER BY created_at DESC
             LIMIT 1';
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(param: ':user_id', value: $user_id, type: PDO::PARAM_STR);
     $stmt->bindValue(param: ':code', value: $code, type: PDO::PARAM_STR);
+    $stmt->bindValue(param: ':currentTime', value: date('Y-m-d H:i:s'), type: PDO::PARAM_STR);
     
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -47,6 +58,11 @@ class VerificationCodeDao {
     return $data ? new VerificationCode($data) : null;
   }
 
+  /**
+   * Summary of update
+   * @param \App\Models\VerificationCode $verificationCode
+   * @return VerificationCode|null
+   */
   public function update(VerificationCode $verificationCode): ?VerificationCode {
     $sql = 'UPDATE verification_codes SET
               code = :code,

@@ -40,7 +40,7 @@ class AuthController {
       empty($body['email'])     || 
       empty($body['password'])
       ){
-        LogService::error("/auth/sign-up", "Unprocessable entity, missing POST parameters: 'full_name', 'email' and 'password'");
+        LogService::http422('/auth/sign-up', "missing POST parameters: 'full_name', 'email' and 'password'");
         throw new HttpException(
           $request, 
           "'full_name, 'email' and 'password' are required",
@@ -55,15 +55,15 @@ class AuthController {
     
     // Verifica as regras de negócio
     if(!$this->validationService->isValidUsername($fullName)){
-      LogService::error("/auth/sign-up", "Unprocessable entity, invalid username: $fullName");
+      LogService::http422("/auth/sign-up", "invalid username: $fullName");
       throw new HttpException($request, 'Full name must be between 5 and 64 characters', 422);
     }
     if(!$this->validationService->isValidEmail($email)){
-      LogService::error("/auth/sign-up", "Unprocessable entity, invalid e-mail: $email");
+      LogService::http422("/auth/sign-up", "invalid e-mail: $email");
       throw new HttpException($request, 'Invalid e-mail format', 422);
     }
     if(!$this->validationService->isValidPassword($password)){
-      LogService::error("/auth/sign-up", "Unprocessable entity, invalid password: $password");
+      LogService::http422("/auth/sign-up", "invalid password: $password");
       throw new HttpException($request, 'Password must be between 8 and 64 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 422);
     }
 
@@ -104,7 +104,7 @@ class AuthController {
       $this->verificationCodeDao->create(new VerificationCode([
         'verification_code_id' => Uuid::uuid4()->toString(),
         'code' => $code,
-        'expires_at' => date('Y-m-d H:i:s', strtotime('+10 minutes')),
+        'expires_at' => date('Y-m-d H:i:s', strtotime('+5 minutes')),
         'user_id' => $user->getUserId()
       ]));
       
@@ -114,23 +114,21 @@ class AuthController {
       
       LogService::info("/auth/sign-up", "Verification code sent to: ".$user->getEmail());
       return $response->withStatus(201);
-    }catch (Exception $e){
-      switch (true) {
-        case $e instanceof PDOException && $e->getCode() === 23000:
-          LogService::error("/auth/sign-up", "Could not create user due to database error: ".$e->getMessage());
-          throw new HttpException(
-            $request,
-            'E-mail already registered',
-            409
-          );
-          case $e instanceof PDOException:
-            LogService::error("/auth/sign-up", "Could not create user due to database error: ".$e->getMessage());
-          throw new HttpInternalServerErrorException($request, "Could not sign-up the user due to database errors");
-        case $e instanceof HttpException:
-          throw $e;
-        default:
-          throw new HttpInternalServerErrorException($request, $e->getMessage());
+    }catch(PDOException $e) {
+      LogService::http500("/auth/sign-up", $e->getMessage());
+      if($e->getCode() === 23000) {
+        throw new HttpException(
+          $request,
+          'E-mail already registered',
+          409
+        );
       }
+      throw new HttpInternalServerErrorException($request, "Could not sign-up the user due to a database error. See logs for more detail");
+    }catch (HttpException $e) {
+      throw $e;
+    }catch (Exception $e){
+      LogService::http500("/auth/sign-up", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, $e->getMessage());
     }
   }
 
@@ -141,7 +139,7 @@ class AuthController {
       empty($body['email']) ||
       empty($body['verification_code'])
     ){
-      LogService::error("/auth/verify-code", "Unprocessable entity, missing POST parameters: 'email' and 'verification_code'");
+      LogService::http422("/auth/verify-code", "missing POST parameters: 'email' and 'verification_code'");
       throw new HttpException($request, "'email' and 'verification_code' are required", 422);
     }
 
@@ -153,12 +151,12 @@ class AuthController {
       $user = $this->userDao->getByEmail($email);
       
       if(empty($user)){
-        LogService::error("/auth/verify-code", "Code verification failed: e-mail does not correspond to any user");
+        LogService::http404("/auth/verify-code", "e-mail: $email does not correspond to any user");
         throw new HttpNotFoundException($request,'User not found');
       } 
   
       if($user->isEmailVerified()){
-        LogService::error("/auth/verify-code", "Code verification failed: user account already registred and verified");
+        LogService::http409("/auth/verify-code", "user account already registred and verified");
         throw new HttpException(
           $request,
           'User account already verified. No additional actions required.',
@@ -167,7 +165,7 @@ class AuthController {
       } 
       $verificationCode = $this->verificationCodeDao->getLatestVerificationCode($user->getUserId(), $code);
       if(empty($verificationCode)) {
-        LogService::error("/auth/verify-code", "No verification code found for: $user");
+        LogService::http422("/auth/verify-code", "No verification code found for: $user");
         throw new HttpException($request,'Verification code expired or invalid', 422);
       }
       // Atualiza código de verificação para inválido
@@ -190,16 +188,14 @@ class AuthController {
 
       LogService::info("/auth/verify-code", "User account verified: $user");
       return $response;
-    } catch(Exception $e){
-      switch(true){
-        case $e instanceof PDOException:
-          LogService::error("/auth/verify-code", "Could not verify user account due to database error: ".$e->getMessage());
-          throw new HttpInternalServerErrorException($request, 'Could not verify the user due to a database error.');
-        case $e instanceof HttpException:
-          throw $e;
-        default:
-          throw new HttpInternalServerErrorException($request, $e->getMessage());
-      }
+    }catch (PDOException $e) {
+      LogService::http500("/auth/verify-code", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, 'Could not verify the user due to a database error. See logs for more detail');
+    }catch (HttpException $e) {
+      throw $e;
+    }catch(Exception $e){
+      LogService::http500("/auth/verify-code", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, $e->getMessage());
     }   
   }
 
@@ -210,34 +206,36 @@ class AuthController {
       empty($body['email']) || 
       empty($body['password'])
     ) {
-      LogService::error("/auth/sign-in", "Unprocessable entity, missing POST parameters: 'email' and 'password'");
+      LogService::http422("/auth/sign-in", "missing POST parameters: 'email' and 'password'");
       throw new HttpException($request, "'email' and 'password' are required", 422);
     }
-    
+
     $email = trim($body['email']);
     $password = trim($body['password']);
 
-    try{
+    try {
       $user = $this->userDao->getByEmail($email);
-  
+
       if (empty($user)) {
-        LogService::error("/auth/sign-in", "No user found with email: $email");
-        throw new HttpNotFoundException($request, message:'Usuário não encontrado');
-      }else if (! $user->isEmailVerified()) {
-        LogService::error("/auth/sign-in", "User not verified, sign-in denied: $user");
-        throw new HttpNotFoundException($request, message:'E-mail not verified');
+        LogService::http404("/auth/sign-in", "No user found with email: $email");
+        throw new HttpNotFoundException($request, 'Usuário não encontrado');
       }
-  
+
+      if (! $user->isEmailVerified()) {
+        LogService::http403("/auth/sign-in", "User not verified, sign-in denied: $user");
+        throw new HttpException($request, 'E-mail not verified', 403);
+      }
+
       if (!password_verify($password, $user->getPasswordHash())) {
-        LogService::error("/auth/sign-in", "Password incorrect, sign-in denied for: $user");
-        throw new HttpUnauthorizedException($request, message:'E-mail or Password incorrect');
+        LogService::http401("/auth/sign-in", "Password incorrect for: $user");
+        throw new HttpUnauthorizedException($request, 'E-mail or Password incorrect');
       }
-  
+
       $jwt = $this->jwtService->generateToken(
         userId: $user->getUserId(),
         email: $user->getEmail(),
       );
-  
+
       $response->getBody()->write(json_encode([
           'token' => $jwt,
           'user' => $user
@@ -245,30 +243,26 @@ class AuthController {
       
       LogService::info("/auth/sign-in", "User signed-in: $user");
       return $response;
-    }catch (Exception $e){
-      switch(true){
-        case $e instanceof PDOException:
-          LogService::error("/auth/sign-in", "Could not sign-in user due to database error:".$e->getMessage());
-          throw new HttpInternalServerErrorException($request, "Could not sign-in user due to database error.");
-        case $e instanceof HttpException:
-          throw $e;
-        default:
-          throw new HttpException($request, $e->getMessage());
-      }
+    } catch (PDOException $e) {
+      LogService::http500("/auth/sign-in", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, "Could not sign-in user due to database error.");
+    } catch (HttpException $e) {
+      throw $e;
+    } catch (Exception $e) {
+      LogService::http500("/auth/sign-in", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, $e->getMessage());
     }
   }
 
+
   public function signOut(Request $request, Response $response): Response {
     $authHeader = $request->getHeaderLine("Authorization");
-
-    // No token validation necessary due to the route being protected by the token validation middlware. Token is guaranteed to be valid.
     preg_match('/Bearer\s(\S+)/', $authHeader, $matches);
-    
     $token = $matches[1];
 
     try {
-      if (! $this->jwtService->blacklistJwt($token)){
-        LogService::error("/auth/sign-out", "Could not blacklist token: $token");
+      if (! $this->jwtService->blacklistJwt($token)) {
+        LogService::http500("/auth/sign-out", "Could not blacklist token: $token");
         throw new HttpInternalServerErrorException($request, 'There was an error in the sign-out process.');
       }
       
@@ -279,8 +273,14 @@ class AuthController {
 
       LogService::info("/auth/sign-out", "Blacklisted token: $token");
       return $response;
+    } catch (PDOException $e) {
+      LogService::http500("/auth/sign-out", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, 'Database error during sign-out');
+    } catch (HttpException $e) {
+      throw $e;
     } catch (Exception $e) {
-      throw new HttpUnauthorizedException($request, 'Token validation failed: ' . $e->getMessage());
+      LogService::http500("/auth/sign-out", $e->getMessage());
+      throw new HttpInternalServerErrorException($request, $e->getMessage());
     }
   }
 }

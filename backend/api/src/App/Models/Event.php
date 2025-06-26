@@ -51,8 +51,8 @@ class Event implements \JsonSerializable {
     public function setEventId(string $event_id): void { $this->event_id = $event_id; }
     public function setTitle(string $title): void { $this->title = $title; }
     public function setDescription(?string $description): void { $this->description = $description; }
-    public function setType(EventType $type): void {
-        $this->type = EventType::tryFrom($data['type'] ?? 'other') ?? EventType::Other; 
+    public function setType(?string $type): void {
+        $this->type = EventType::tryFrom($type ?? 'other') ?? EventType::Other;
     }
     public function setEventDate(string $event_date): void { $this->event_date = $event_date; }
     public function setCreatedAt(string $created_at): void { $this->created_at = $created_at; }

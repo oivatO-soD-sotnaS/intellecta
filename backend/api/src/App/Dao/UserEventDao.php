@@ -14,6 +14,11 @@ class UserEventDao {
     private Database $database
   ) {}
 
+  /**
+   * Summary of getUserEventById
+   * @param string $userEventId
+   * @return UserEvent|null
+   */
   public function getUserEventById(string $userEventId): ?UserEvent {
     $sql = 'SELECT * FROM user_events 
             WHERE user_event_id = :user_event_id';
@@ -32,7 +37,12 @@ class UserEventDao {
     return null;
   }
 
-  public function getAllUserEventsById(string $userId): ?array {
+  /**
+   * Summary of getAllInstitutionalEventsById
+   * @param string $userId
+   * @return UserEvent[]
+   */
+  public function getAllInstitutionalEventsById(string $userId): ?array {
     $sql = 'SELECT * FROM user_events
             WHERE user_id = :user_id';
     
@@ -52,7 +62,12 @@ class UserEventDao {
     return $userEvents;
   } 
 
-  public function createUserEvent(UserEvent $userEvent): ?UserEvent {
+  /**
+   * Summary of createInstitutionalEvent
+   * @param \App\Models\UserEvent $userEvent
+   * @return UserEvent|null
+   */
+  public function createInstitutionalEvent(UserEvent $userEvent): ?UserEvent {
     $sql = 'INSERT INTO user_events (user_event_id, user_id, event_id) 
             VALUES (:user_event_id, :user_id, :event_id)';
 
