@@ -93,7 +93,6 @@ export const SignInForm: React.FC = () => {
 
         setErrors({ api: msg })
       } else {
-        localStorage.setItem("token", payload.token)
         router.push("/home") // pagina após login
       }
     } catch {

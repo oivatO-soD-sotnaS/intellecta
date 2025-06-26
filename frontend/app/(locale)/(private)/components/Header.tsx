@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ className, ...htmlProps }) => {
           <Popover>
             <PopoverTrigger asChild>
               <Button className="flex items-center space-x-2" variant="flat">
-                <Avatar alt="Ana Silva" size="sm" src="/avatar.jpg" />
+                <Avatar alt="Ana Silva" size="sm" src="#" />
                 <span className="text-sm text-gray-700 dark:text-gray-200">
                   Ana Silva
                 </span>
@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({ className, ...htmlProps }) => {
             </PopoverTrigger>
             <PopoverContent className="w-56">
               <div className="flex items-center gap-2 mb-3">
-                <Avatar alt="Ana Silva" size="md" src="/avatar.jpg" />
+                <Avatar alt="Ana Silva" size="md" src="#" />
                 <div>
                   <p className="font-medium">Ana Silva</p>
                   <p className="text-xs text-gray-500">ana.silva@email.com</p>

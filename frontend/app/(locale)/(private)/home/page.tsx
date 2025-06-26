@@ -1,14 +1,20 @@
+/* eslint-disable jsx-a11y/aria-role */
 /* eslint-disable react/jsx-sort-props */
+"use client"
 
+import { useUser } from "../hooks/useUser"
+
+import { Activity, RecentActivities } from "./components/RecentActivities"
 import { DashboardBanner } from "./components/DashboardBanner"
 import { InstitutionsSection } from "./components/Institution/InstitutionsSection"
 import { ProfileCard } from "./components/ProfileCard"
-import { Activity, RecentActivities } from "./components/RecentActivities"
 import { UpcomingEvents } from "./components/UpcomingEvents"
 
 export default function HomePage() {
-  // Exemplo estático; substitua pelos dados da API
-  const data = [
+  const { user, loading, error } = useUser()
+
+  // dados estáticos temporários
+  const institutionsData = [
     {
       id: "1",
       role: "Admin",
@@ -41,14 +47,14 @@ export default function HomePage() {
     },
   ]
 
-  // aqui você carrega dados via fetch
-  const profile = {
-    name: "Ana Silva",
-    role: "Professora e Administradora",
-    institutionsCount: 3,
-    disciplinesCount: 29,
-  }
+  // enquanto carrega…
+  if (loading) return <div>Carregando…</div>
+  if (error || !user) return <div>Erro ao carregar perfil.</div>
 
+  // extrai primeiro nome do usuário
+  const firstName = user.full_name.split(" ")[0]
+
+  // histórico de atividades e eventos (ainda estático)
   const activities = [
     {
       id: "1",
@@ -103,19 +109,29 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto px-6 py-8 space-y-8">
-      {/* banner: ocupa todas as colunas */}
-      <DashboardBanner name={profile.name.split(" ")[0]} date={new Date()} />
+      {/* Banner ocupa 100% das colunas */}
+      <DashboardBanner name={firstName} date={new Date()} />
 
-      {/* grid principal: 1 coluna em mobile, 3 em lg+ */}
+      {/* Grid principal: 1 coluna no mobile, 3 no lg+ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* esquerda / conteúdo principal */}
+        {/* Conteúdo principal (2 colunas em lg) */}
         <div className="lg:col-span-2 space-y-8">
-          <InstitutionsSection institutions={data} />
+          <InstitutionsSection institutions={institutionsData} />
         </div>
 
-        {/* direita / sidebar */}
+        {/* Sidebar */}
         <aside className="space-y-6">
-          <ProfileCard {...profile} />
+          <ProfileCard
+            name={user.full_name}
+            role="Seu cargo aqui"
+            institutionsCount={institutionsData.length}
+            disciplinesCount={0}
+            avatarUrl={
+              user.profile_picture_id
+                ? `/api/files/${user.profile_picture_id}`
+                : undefined
+            }
+          />
           <RecentActivities activities={activities} />
           <UpcomingEvents events={events} />
         </aside>
