@@ -176,21 +176,24 @@ class UserController {
     /**
      * @var UploadedFileInterface|null
      */
-    $avatar = $uploadedFiles['avatar'] ?? null;
+    $profilePicture = $uploadedFiles['profile-picture'] ?? null;
 
-    if (!$avatar || $avatar->getError() !== UPLOAD_ERR_OK) {
-      throw new HttpException($request, "Invalid upload", 422);
+    if (!$profilePicture || $profilePicture->getError() !== UPLOAD_ERR_OK) {
+      LogService::http422('/users/upload-profile-picture', "Missing 'profile-picture' file");
+      throw new HttpException($request, "Invalid upload, Missing 'profile-picture' file", 422);
     }
 
     $maxSize = 1024 * 500; // 500KB
-    if ($avatar->getSize() > $maxSize) {
+    if ($profilePicture->getSize() > $maxSize) {
+      LogService::http413('/users/upload-profile-picture', 'Image exceds maximum size of 500kbs');
       throw new HttpException($request, "File exceeds 500KB limit", 413);
     }
-    if ($avatar->getSize() === 0) {
+    if ($profilePicture->getSize() === 0) {
+      LogService::http422('/users/upload-profile-picture', 'Image cannot be empty');
       throw new HttpException($request, "Empty file not allowed", 422);
     }
 
-    $tempFile = $avatar->getStream()->getMetadata('uri');
+    $tempFile = $profilePicture->getStream()->getMetadata('uri');
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mimeType = finfo_file($finfo, $tempFile);
@@ -198,10 +201,11 @@ class UserController {
 
     $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!in_array($mimeType, $allowedMimes, true)) {
+      LogService::http422('/users/upload-profile-picture', "Invalid mime type: $mimeType");
       throw new HttpException($request, "Only JPEG, PNG, GIF, and WebP are allowed", 422);
     }
 
-    $filename = $avatar->getClientFilename();
+    $filename = $profilePicture->getClientFilename();
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     $mimeToExt = [
       'image/jpeg' => ['jpeg', 'jpg'],
@@ -210,6 +214,7 @@ class UserController {
       'image/webp' => ['webp'],
     ];
     if (!in_array($ext, $mimeToExt[$mimeType] ?? [])) {
+      LogService::http422('/users/upload-profile-picture', "File extension does not match its content");
       throw new HttpException($request, "File extension does not match its content", 422);
     }
 
@@ -218,14 +223,14 @@ class UserController {
     $safeFilename = pathinfo($safeFilename, PATHINFO_FILENAME);
 
     try {
-      $fileUrl = $this->uploadService->avatar($ext, $avatar->getStream()->getContents());
+      $fileUrl = $this->uploadService->avatar($ext, $profilePicture->getStream()->getContents());
       
       $file = $this->fileDao->createFile(new File([
         "file_id" => Uuid::uuid4()->toString(),
         "url" => $fileUrl,
         "filename" => $safeFilename,
         "mime_type" => $mimeType,
-        "size" => $avatar->getSize(),
+        "size" => $profilePicture->getSize(),
         "uploaded_at" => date('Y-m-d H:i:s')
       ]));
       
