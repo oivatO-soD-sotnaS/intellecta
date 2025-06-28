@@ -4,10 +4,15 @@ WORKDIR /var/www/api.intellecta
 
 # Instala o driver pdo_mysql e outras dependências
 RUN apt-get update && apt-get install -y libzip-dev unzip \
-    && docker-php-ext-install pdo pdo_mysql
+&& docker-php-ext-install pdo pdo_mysql
 
 # Habilita o mod_rewrite do apache
 RUN a2enmod rewrite
+
+# Seta permissões de escrita no diretório de arquivos para o a back-end
+RUN mkdir -p /var/www/files.intellecta && \
+  chown -R www-data:www-data /var/www/files.intellecta && \
+  chmod -R 775 /var/www/files.intellecta
 
 # Copia o php.ini customizado para o local correto
 COPY ./php.ini /usr/local/etc/php/php.ini
