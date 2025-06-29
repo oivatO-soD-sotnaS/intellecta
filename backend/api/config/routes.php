@@ -2,6 +2,7 @@
 
 use App\Controllers\AuthController;
 use App\Controllers\InstitutionalEventController;
+use App\Controllers\InstitutionsController;
 use App\Controllers\UserController;
 use App\Controllers\UserEventController;
 use App\Middleware\RequireAuth;
@@ -64,8 +65,12 @@ return function (App $app) {
         ->add(RequireAuth::class);
 
     // Rotas de instituição
-    // $app->get('/institutions', )q
-
+    $app->get('/institutions/summary', InstitutionsController::class . ':getInstitutionsSummary')
+        ->add(RequireAuth::class);
+    $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/summary', InstitutionsController::class . ':getInstitutionSummaryById')
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    
     // Rotas de turma
 
 

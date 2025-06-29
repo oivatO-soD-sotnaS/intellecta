@@ -40,7 +40,7 @@ class UserEventController {
                 throw new HttpUnauthorizedException($request, 'User not found');
             }
 
-            $userEvents = $this->userEventDao->getAllInstitutionalEventsById($user->getUserId());
+            $userEvents = $this->userEventDao->getAllUserEventsById($user->getUserId());
             if (empty($userEvents)) {
                 LogService::http404("/users/events", "No events found for user: ".$user->getEmail());
                 throw new HttpNotFoundException($request, 'No events found for this user');
@@ -97,7 +97,7 @@ class UserEventController {
                 'type' => $eventType
             ]));
 
-            $userEvent = $this->userEventDao->createInstitutionalEvent(new UserEvent([
+            $userEvent = $this->userEventDao->createUserEvent(new UserEvent([
                 'user_event_id' => Uuid::uuid4()->toString(),
                 'user_id' => $user->getUserId(),
                 'event_id' => $event->getEventId()
