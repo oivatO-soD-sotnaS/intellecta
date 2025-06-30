@@ -1,6 +1,6 @@
 USE `intellecta`;
 
-CREATE OR REPLACE TABLE `files` (
+CREATE TABLE `files` (
   `file_id` CHAR(36) PRIMARY KEY,
   `url` TEXT NOT NULL,
   `filename` VARCHAR(255) NOT NULL,
@@ -10,7 +10,7 @@ CREATE OR REPLACE TABLE `files` (
 );
 
 -- Tabela de usuário
-CREATE OR REPLACE TABLE `users` (
+CREATE TABLE `users` (
   `user_id` CHAR(36) PRIMARY KEY,
   `full_name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) UNIQUE NOT NULL,
@@ -22,7 +22,7 @@ CREATE OR REPLACE TABLE `users` (
   FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
 
-CREATE OR REPLACE TABLE verification_codes (
+CREATE TABLE verification_codes (
   `verification_code_id` CHAR(36) PRIMARY KEY,
   `code` VARCHAR(6),
   `is_pending` BOOL NOT NULL DEFAULT true,
@@ -33,7 +33,7 @@ CREATE OR REPLACE TABLE verification_codes (
 );
 
 -- Tabela de instituição
-CREATE OR REPLACE TABLE `institutions` (
+CREATE TABLE `institutions` (
   `institution_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
@@ -48,7 +48,7 @@ CREATE OR REPLACE TABLE `institutions` (
 );
 
 -- Tabela de relação MxN entre users e institutions
-CREATE OR REPLACE TABLE `institution_users` (
+CREATE TABLE `institution_users` (
   `institution_users_id` CHAR(36) PRIMARY KEY,
   `role` ENUM('student', 'teacher', 'admin') NOT NULL DEFAULT 'student',
   `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -60,7 +60,7 @@ CREATE OR REPLACE TABLE `institution_users` (
 );
 
 -- Tabela que armazena os convites de participação de uma instituição
-CREATE OR REPLACE TABLE `invitations` (
+CREATE TABLE `invitations` (
   `invitation_id` CHAR(36) NOT NULL PRIMARY KEY,
   `email` VARCHAR(255) NOT NULL,
   `role` ENUM('student', 'teacher', 'admin') NOT NULL DEFAULT 'student',
@@ -75,7 +75,7 @@ CREATE OR REPLACE TABLE `invitations` (
 );
 
 -- Tabela de turma
-CREATE OR REPLACE TABLE `classes` (
+CREATE TABLE `classes` (
   `class_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `description` VARCHAR(255) NOT NULL,
@@ -88,7 +88,7 @@ CREATE OR REPLACE TABLE `classes` (
 );
 
 -- Tabela de relação entre usuário e turma
-CREATE OR REPLACE TABLE `class_users` (
+CREATE TABLE `class_users` (
   `class_users_id` CHAR(36) PRIMARY KEY,
   `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `class_id` CHAR(36) NOT NULL,
@@ -98,7 +98,7 @@ CREATE OR REPLACE TABLE `class_users` (
 );
 
 -- Tabela de Disciplina
-CREATE OR REPLACE TABLE `subjects` (
+CREATE TABLE `subjects` (
   `subject_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `description` TEXT,
@@ -113,7 +113,7 @@ CREATE OR REPLACE TABLE `subjects` (
 );
 
 -- Tabela de relação entre turma e disciplina
-CREATE OR REPLACE TABLE `subject_classes` (
+CREATE TABLE `subject_classes` (
   `subject_classes_id` CHAR(36) PRIMARY KEY,
   `class_id` CHAR(36) NOT NULL,
   `subject_id` CHAR(36) NOT NULL,
@@ -123,7 +123,7 @@ CREATE OR REPLACE TABLE `subject_classes` (
 );
 
 -- Tabela de material da disciplina
-CREATE OR REPLACE TABLE `materials` (
+CREATE TABLE `materials` (
   `material_id` CHAR(36) PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -135,7 +135,7 @@ CREATE OR REPLACE TABLE `materials` (
 );
 
 -- Tabela de atividade avaliativa
-CREATE OR REPLACE TABLE `assignments` (
+CREATE TABLE `assignments` (
   `assignment_id` CHAR(36) PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT NOT NULL,
@@ -147,7 +147,7 @@ CREATE OR REPLACE TABLE `assignments` (
 );
 
 -- Tabela de entrega de atividade avaliativa
-CREATE OR REPLACE TABLE `submissions` (
+CREATE TABLE `submissions` (
   `submission_id` CHAR(36) PRIMARY KEY,
   `submitted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `grade` DECIMAL,
@@ -162,7 +162,7 @@ CREATE OR REPLACE TABLE `submissions` (
 );
 
 -- Tabela de mensgens do fórum de disciplina
-CREATE OR REPLACE TABLE `forum_messages` (
+CREATE TABLE `forum_messages` (
   `forum_messages_id` CHAR(36) PRIMARY KEY,
   `content` TEXT NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -174,7 +174,7 @@ CREATE OR REPLACE TABLE `forum_messages` (
 );
 
 -- Tabela 'pai' dos eventos. As outras 'herdam' dessa via padrão de composição.
-CREATE OR REPLACE TABLE `events` (
+CREATE TABLE `events` (
   `event_id` CHAR(36) PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT,
@@ -189,7 +189,7 @@ CREATE OR REPLACE TABLE `events` (
 );
 
 -- Eventos globais da instituição
-CREATE OR REPLACE TABLE `institutional_events` (
+CREATE TABLE `institutional_events` (
   `institutional_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `institution_id` CHAR(36) NOT NULL,
@@ -198,7 +198,7 @@ CREATE OR REPLACE TABLE `institutional_events` (
 );
 
 -- Eventos específicos de disciplina
-CREATE OR REPLACE TABLE `subject_events` (
+CREATE TABLE `subject_events` (
   `subject_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `subject_id` CHAR(36) NOT NULL,
@@ -207,7 +207,7 @@ CREATE OR REPLACE TABLE `subject_events` (
 );
 
 -- Eventos específicos de usuário
-CREATE OR REPLACE TABLE `user_events` (
+CREATE TABLE `user_events` (
   `user_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `user_id` CHAR(36) NOT NULL,
@@ -216,7 +216,7 @@ CREATE OR REPLACE TABLE `user_events` (
 );
 
 -- Tabela de notificações
-CREATE OR REPLACE TABLE `notifications` (
+CREATE TABLE `notifications` (
   `notification_id` CHAR(36) PRIMARY KEY,
   `user_id` CHAR(36) NOT NULL,
   `event_id` CHAR(36) NOT NULL,
@@ -227,27 +227,36 @@ CREATE OR REPLACE TABLE `notifications` (
 );
 
 -- Tabela de tokens JWT invalidados
-CREATE OR REPLACE TABLE `jwt_blacklists` (
+CREATE TABLE `jwt_blacklists` (
   `jwt_blacklists_id` CHAR(36) NOT NULL PRIMARY KEY,
   `token_hash` TEXT,
   `expires_at` DATETIME NOT NULL
 );
 
-CREATE OR REPLACE VIEW `institution_summary` AS
+CREATE VIEW `institution_summary` AS
 SELECT
   i.institution_id,
   i.name,
   i.email,
-  i.phone_number,subject_events
+  i.phone_number,
+  i.banner_id,
+  i.description,
   iu.user_id,
   iu.role,
   COUNT(DISTINCT iu2.user_id) AS active_user_count,
   COUNT(DISTINCT e.event_id) AS upcoming_event_count
 FROM institutions i
+
+-- Join to get role of each user in the institution
 JOIN institution_users iu ON iu.institution_id = i.institution_id
-LEFT JOIN institution_users iu2 ON iu2.institution_id = i.institution_id AND iu2.
+
+-- Count active users in the same institution
+LEFT JOIN institution_users iu2 ON iu2.institution_id = i.institution_id
+
+-- Left join to institutional_events with upcoming events
 LEFT JOIN institutional_events ie ON ie.institution_id = i.institution_id
 LEFT JOIN events e ON e.event_id = ie.event_id 
                    AND e.event_date >= CURRENT_TIMESTAMP 
                    AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
+
 GROUP BY i.institution_id, i.name, i.email, i.phone_number, iu.user_id, iu.role;
