@@ -12,6 +12,8 @@ class InstitutionSummary implements \JsonSerializable {
   private string $userId;
   private string $description;
   private string $bannerId;
+  private string $thumbnailId;
+
   private InstitutionUserType $role;
   private int $activeUserCount;
   private int $upcomingEventCount;
@@ -24,6 +26,7 @@ class InstitutionSummary implements \JsonSerializable {
     $this->userId = $data['user_id'] ?? "";
     $this->description = $data['description'] ?? "";
     $this->bannerId = $data['banner_id'] ?? "";
+    $this->thumbnailId = $data['thumbnail_id'] ?? "";
     $this->role = InstitutionUserType::tryFrom($data["role"] ?? 'student') ?? InstitutionUserType::Student;
     $this->activeUserCount = isset($data['active_user_count']) ? (int)$data['active_user_count'] : 0;
     $this->upcomingEventCount = isset($data['upcoming_event_count']) ? (int)$data['upcoming_event_count'] : 0;
@@ -38,6 +41,7 @@ class InstitutionSummary implements \JsonSerializable {
       'user_id' => $this->userId,
       'description' => $this->description,
       'banner_id' => $this->bannerId,
+      'thumbnail_id' => $this->thumbnailId,
       'role' => $this->role->value,
       'active_user_count' => $this->activeUserCount,
       'upcoming_event_count' => $this->upcomingEventCount,
@@ -92,20 +96,30 @@ class InstitutionSummary implements \JsonSerializable {
     return $this->description;
   }
 
-  public function getBannerId(): string {
-    return $this->bannerId;
-  }
-  public function getRole(): InstitutionUserType {
-    return $this->role;
-  }
-
   public function setDescription(string $description): void {
     $this->description = $description;
+  }
+
+  public function getBannerId(): string {
+    return $this->bannerId;
   }
 
   public function setBannerId(string $bannerId): void {
     $this->bannerId = $bannerId;
   }
+
+  public function getThumbnailId(): string {
+    return $this->thumbnailId;
+  }
+
+  public function setThumbnailId(string $thumbnailId): void {
+    $this->thumbnailId = $thumbnailId;
+  }
+
+  public function getRole(): InstitutionUserType {
+    return $this->role;
+  }
+
   public function setRole(InstitutionUserType $role): void {
     $this->role = $role;
   }

@@ -240,6 +240,7 @@ SELECT
   i.email,
   i.phone_number,
   i.banner_id,
+  i.thumbnail_id,
   i.description,
   iu.user_id,
   iu.role,
