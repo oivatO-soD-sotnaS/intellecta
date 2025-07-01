@@ -46,10 +46,4 @@ class ValidationService {
 
     return true;
   }
-
-  public function isValidURL(?string $url): bool {
-    if (is_null($url)) return false;
-    
-    return filter_var($url, FILTER_VALIDATE_URL) !== false;
-  }
 }

@@ -50,4 +50,18 @@ class InstitutionsController {
       throw new HttpInternalServerErrorException($request, 'Could not get institutions summaries due to a database error. See logs for more details');
     }
   }
+
+  public function createInstitution(Request $request, Response $response): Response {
+    $body = $request->getParsedBody();
+
+    $name = $body["name"] ?? null;
+    $email = $body["email"] ?? null;
+    $phoneNumber = $body["phone_number"] ?? null;
+    $description = $body["description"] ?? null;
+    $thumbnailUrl = $body["thumbnail_id"] ?? null;
+    $bannerId = $body["banner_id"] ?? null;
+
+
+    return $response;
+  }
 }

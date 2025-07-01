@@ -66,11 +66,11 @@ class UserController {
 
     $fullName = $body['full_name'] ?? null;
     $password = $body['password'] ?? null;
-    $profilePictureUrl = $body['profile_picture_url'] ?? null;
+    $profilePictureId = $body['profile_picture_id'] ?? null;
 
-    if (empty($fullName) && empty($password) && empty($profilePictureUrl)) {
+    if (empty($fullName) && empty($password) && empty($profilePictureId)) {
       LogService::http422("/users/$user_id", "Missing fields to update");
-      throw new HttpException($request, "'full_name', 'password' or 'profile_picture_url' are required", 422);
+      throw new HttpException($request, "'full_name', 'password' or 'profile_picture_id' are required", 422);
     }
 
     if (!empty($fullName) && !$this->validationService->isValidUsername($fullName)) {
@@ -83,9 +83,9 @@ class UserController {
       throw new HttpException($request, 'Password must be between 8 and 64 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 422);
     }
 
-    if (!empty($profilePictureUrl) && !$this->validationService->isValidURL($profilePictureUrl)) {
-      LogService::http422("/users/$user_id", "Invalid profile picture URL");
-      throw new HttpException($request, 'Invalid profile picture URL', 422);
+    if (!empty($profilePictureId)) {
+      LogService::http422("/users/$user_id", "Invalid profile picture file id");
+      throw new HttpException($request, 'Invalid profile picture file id', 422);
     }
 
     try {
@@ -111,8 +111,8 @@ class UserController {
         $user->setPasswordHash(password_hash($password, PASSWORD_DEFAULT));
       }
 
-      if (!empty($profilePictureUrl)) {
-        $user->setProfilePictureId($profilePictureUrl);
+      if (!empty($profilePictureId)) {
+        $user->setProfilePictureId($profilePictureId);
       }
 
       $user = $this->userDao->update($user);

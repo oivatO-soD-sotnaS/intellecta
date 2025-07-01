@@ -70,7 +70,8 @@ return function (App $app) {
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/summary', InstitutionsController::class . ':getInstitutionSummaryById')
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
-    
+    $app->post('/institutions', InstitutionsController::class . ":createInstitution")
+        ->add(RequireAuth::class);
     // Rotas de turma
 
 
