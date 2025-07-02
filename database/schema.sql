@@ -232,3 +232,32 @@ CREATE TABLE `jwt_blacklists` (
   `token_hash` TEXT,
   `expires_at` DATETIME NOT NULL
 );
+
+CREATE VIEW `institution_summary` AS
+SELECT
+  i.institution_id,
+  i.name,
+  i.email,
+  i.phone_number,
+  i.banner_id,
+  i.thumbnail_id,
+  i.description,
+  iu.user_id,
+  iu.role,
+  COUNT(DISTINCT iu2.user_id) AS active_user_count,
+  COUNT(DISTINCT e.event_id) AS upcoming_event_count
+FROM institutions i
+
+-- Join to get role of each user in the institution
+JOIN institution_users iu ON iu.institution_id = i.institution_id
+
+-- Count active users in the same institution
+LEFT JOIN institution_users iu2 ON iu2.institution_id = i.institution_id
+
+-- Left join to institutional_events with upcoming events
+LEFT JOIN institutional_events ie ON ie.institution_id = i.institution_id
+LEFT JOIN events e ON e.event_id = ie.event_id 
+                   AND e.event_date >= CURRENT_TIMESTAMP 
+                   AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
+
+GROUP BY i.institution_id, i.name, i.email, i.phone_number, iu.user_id, iu.role;

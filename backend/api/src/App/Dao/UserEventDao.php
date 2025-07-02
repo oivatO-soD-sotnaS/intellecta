@@ -42,7 +42,7 @@ class UserEventDao {
    * @param string $userId
    * @return UserEvent[]
    */
-  public function getAllInstitutionalEventsById(string $userId): ?array {
+  public function getAllUserEventsById(string $userId): ?array {
     $sql = 'SELECT * FROM user_events
             WHERE user_id = :user_id';
     
@@ -67,7 +67,7 @@ class UserEventDao {
    * @param \App\Models\UserEvent $userEvent
    * @return UserEvent|null
    */
-  public function createInstitutionalEvent(UserEvent $userEvent): ?UserEvent {
+  public function createUserEvent(UserEvent $userEvent): ?UserEvent {
     $sql = 'INSERT INTO user_events (user_event_id, user_id, event_id) 
             VALUES (:user_event_id, :user_id, :event_id)';
 
