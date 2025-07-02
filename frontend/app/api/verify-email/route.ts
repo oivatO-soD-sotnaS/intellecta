@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // app/api/verify-email/route.ts
 import { NextResponse } from "next/server"
 
@@ -17,17 +18,8 @@ export async function POST(request: Request) {
     const res = NextResponse.json(data, { status: apiRes.status })
 
     if (apiRes.ok) {
-
       res.cookies.set("token", data.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
-      })
-
-      res.cookies.set("user_id", data.user.user_id, {
-        httpOnly: false, 
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",

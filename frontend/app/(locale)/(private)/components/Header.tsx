@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ className, ...htmlProps }) => {
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link className="flex items-center space-x-2" href="/">
+        <Link className="flex items-center space-x-2" href="/home">
           <span className="text-xl font-semibold text-gray-900 dark:text-white">
             Intellecta
           </span>

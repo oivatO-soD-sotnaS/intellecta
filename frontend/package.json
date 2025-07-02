@@ -30,6 +30,7 @@
     "@heroui/toast": "^2.0.11",
     "@react-aria/ssr": "3.9.8",
     "@react-aria/visually-hidden": "3.8.23",
+    "@tanstack/react-query": "^5.81.5",
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "10.7.16",
@@ -67,8 +68,5 @@
     "tailwind-variants": "0.3.0",
     "tailwindcss": "3.4.16",
     "typescript": "5.6.3"
-  },
-  "overrides": {
-    "@heroui/system": "2.4.18"
   }
 }

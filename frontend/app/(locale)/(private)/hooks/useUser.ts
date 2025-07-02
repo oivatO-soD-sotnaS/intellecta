@@ -1,49 +1,35 @@
 // hooks/useUser.ts
 "use client"
-import { useState, useEffect } from "react"
 
-interface User {
+import { useQuery } from "@tanstack/react-query"
+
+export interface User {
   user_id: string
   full_name: string
   email: string
   profile_picture_id?: string
 }
 
-function getCookie(name: string): string | null {
-  const m = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"))
+async function fetchMe(): Promise<User> {
+  const res = await fetch("/api/me", {
+    credentials: "include", // send HttpOnly token cookie
+    headers: { "Content-Type": "application/json" },
+  })
 
-  console.log("log do m ->", m)
+  if (!res.ok) {
+    const err = await res.json()
 
-  return m ? decodeURIComponent(m[2]) : null
+    throw new Error(err.error || err.message || "Falha ao carregar usuário")
+  }
+
+  return res.json()
 }
 
 export function useUser() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const id = getCookie("user_id")
-
-    if (!id) {
-      setError("Usuário não autenticado")
-      setLoading(false)
-
-      return
-    }
-
-    fetch(`/api/users/${id}`, {
-      credentials: "include", // para mandar o token HttpOnly junto
-    })
-      .then(async (res) => {
-        const payload = await res.json()
-
-        if (!res.ok) throw new Error(payload.error || payload.message)
-        setUser(payload)
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
-
-  return { user, loading, error }
+  return useQuery<User, Error>({
+    queryKey: ["user"],
+    queryFn: fetchMe,
+    staleTime: 1000 * 60 * 5, // cache for 5 minutes
+    retry: false, // don’t retry by default
+  })
 }

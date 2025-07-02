@@ -26,24 +26,6 @@ export async function POST(request: Request) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 dias
       })
-
-      // 2) extrai o sub (user_id) do payload do JWT
-      try {
-        const [, payload] = data.token.split(".")
-        const decoded = JSON.parse(Buffer.from(payload, "base64").toString())
-        const userId = decoded.sub as string
-
-        // 3) cookie não-HttpOnly com o user_id
-        res.cookies.set("user_id", userId, {
-          httpOnly: false,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7, // 7 dias
-        })
-      } catch (e) {
-        console.warn("Não foi possível extrair user_id do token:", e)
-      }
     }
 
     return res

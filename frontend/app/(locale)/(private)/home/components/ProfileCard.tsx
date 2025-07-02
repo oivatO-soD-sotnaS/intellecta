@@ -10,7 +10,7 @@ import { User } from "lucide-react"
 
 interface ProfileCardProps {
   name: string
-  role: string
+  role?: string
   institutionsCount?: number
   disciplinesCount?: number
   avatarUrl?: string
