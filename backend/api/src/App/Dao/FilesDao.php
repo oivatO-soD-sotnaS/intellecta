@@ -12,7 +12,7 @@ class FilesDao {
     private Database $database
   ) {}
 
-  public function createFile (File $file): ?File {
+  public function createFile (File $file): File {
     $sql = "INSERT INTO files (file_id, url, filename, mime_type, size, uploaded_at)
             VALUE (:file_id, :url, :filename, :mime_type, :size, :uploaded_at)";
 
@@ -26,11 +26,7 @@ class FilesDao {
     $stmt->bindValue(':size', $file->getSize(), PDO::PARAM_STR);
     $stmt->bindValue(':uploaded_at', $file->getUploadedAt(), PDO::PARAM_STR);
 
-    $success = $stmt->execute();
-    if($success) {
-      return $file;
-    }
-
-    return null;
+    $stmt->execute();
+    return $file;
   }
 }

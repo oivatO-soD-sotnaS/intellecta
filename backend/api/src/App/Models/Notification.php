@@ -16,7 +16,7 @@ class Notification implements \JsonSerializable {
         $this->created_at = $data['created_at'] ?? date('Y-m-d H:i:s');
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'notification_id' => $this->notification_id,
             'user_id' => $this->user_id,

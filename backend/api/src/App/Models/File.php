@@ -18,7 +18,7 @@ class File implements \JsonSerializable {
         $this->uploaded_at = $data['uploaded_at'] ?? date('Y-m-d H:i:s');
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'file_id' => $this->file_id,
             'url' => $this->url,

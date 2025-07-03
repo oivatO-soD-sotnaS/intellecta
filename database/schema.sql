@@ -37,7 +37,6 @@ CREATE TABLE `institutions` (
   `institution_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
-  `phone_number` VARCHAR(255),
   `description` TEXT,
   `thumbnail_id` CHAR(36),
   `banner_id` CHAR(36),
@@ -238,7 +237,6 @@ SELECT
   i.institution_id,
   i.name,
   i.email,
-  i.phone_number,
   i.banner_id,
   i.thumbnail_id,
   i.description,
@@ -260,4 +258,4 @@ LEFT JOIN events e ON e.event_id = ie.event_id
                    AND e.event_date >= CURRENT_TIMESTAMP 
                    AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
 
-GROUP BY i.institution_id, i.name, i.email, i.phone_number, iu.user_id, iu.role;
+GROUP BY i.institution_id, i.name, i.email, iu.user_id, iu.role;

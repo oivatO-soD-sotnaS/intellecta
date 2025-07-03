@@ -22,7 +22,7 @@ class Submission implements \JsonSerializable {
         $this->file_id = $data['file_id'] ?? null;
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'submission_id' => $this->submission_id,
             'submitted_at' => $this->submitted_at,

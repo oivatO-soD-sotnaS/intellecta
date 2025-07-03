@@ -18,7 +18,7 @@ class ForumMessage implements \JsonSerializable {
         $this->subject_id = $data['subject_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'forum_messages_id' => $this->forum_messages_id,
             'content' => $this->content,

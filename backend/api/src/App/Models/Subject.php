@@ -20,7 +20,7 @@ class Subject implements \JsonSerializable {
         $this->professor_id = $data['professor_id'] ?? null;
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'subject_id' => $this->subject_id,
             'name' => $this->name,

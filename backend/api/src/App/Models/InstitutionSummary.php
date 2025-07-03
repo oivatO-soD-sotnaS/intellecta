@@ -8,7 +8,6 @@ class InstitutionSummary implements \JsonSerializable {
   private string $institution_id;
   private string $name;
   private string $email;
-  private string $phoneNumber;
   private string $userId;
   private string $description;
   private string $bannerId;
@@ -22,7 +21,6 @@ class InstitutionSummary implements \JsonSerializable {
     $this->institution_id = $data['institution_id'] ?? "";
     $this->name = $data['name'] ?? "";
     $this->email = $data['email'] ?? "";
-    $this->phoneNumber = $data['phone_number'] ?? "";
     $this->userId = $data['user_id'] ?? "";
     $this->description = $data['description'] ?? "";
     $this->bannerId = $data['banner_id'] ?? "";
@@ -32,12 +30,11 @@ class InstitutionSummary implements \JsonSerializable {
     $this->upcomingEventCount = isset($data['upcoming_event_count']) ? (int)$data['upcoming_event_count'] : 0;
   }
 
-  public function toArray(): array {
+  private function toArray(): array {
     return [
       'institution_id' => $this->institution_id,
       'name' => $this->name,
       'email' => $this->email,
-      'phone_number' => $this->phoneNumber,
       'user_id' => $this->userId,
       'description' => $this->description,
       'banner_id' => $this->bannerId,
@@ -74,14 +71,6 @@ class InstitutionSummary implements \JsonSerializable {
 
   public function setEmail(string $email): void {
     $this->email = $email;
-  }
-
-  public function getPhoneNumber(): string {
-    return $this->phoneNumber;
-  }
-
-  public function setPhoneNumber(string $phoneNumber): void {
-    $this->phoneNumber = $phoneNumber;
   }
 
   public function getUserId(): string {

@@ -16,7 +16,7 @@ class VerificationCodeDao {
    * @param \App\Models\VerificationCode $verificationCode
    * @return VerificationCode|null
    */
-  public function create(VerificationCode $verificationCode): ?VerificationCode {
+  public function create(VerificationCode $verificationCode): VerificationCode {
     $sql = 'INSERT INTO verification_codes (verification_code_id, code, expires_at, user_id)
             VALUES (:verification_code_id, :code, :expires_at, :user_id)';
 
@@ -30,7 +30,7 @@ class VerificationCodeDao {
       ':user_id' => $verificationCode->getUserId()
     ]);
 
-    return $success ? $verificationCode : null;
+    return $verificationCode;
   }
   /**
    * Summary of getLatestVerificationCode
@@ -38,7 +38,7 @@ class VerificationCodeDao {
    * @param string $code
    * @return VerificationCode|null
    */
-  public function getLatestVerificationCode(string $user_id, string $code): ?VerificationCode {
+  public function getLatestVerificationCode(string $user_id, string $code): VerificationCode {
     $sql = 'SELECT * FROM verification_codes
             WHERE user_id LIKE :user_id
               AND code LIKE :code
@@ -55,7 +55,7 @@ class VerificationCodeDao {
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return $data ? new VerificationCode($data) : null;
+    return new VerificationCode($data);
   }
 
   /**
@@ -63,7 +63,7 @@ class VerificationCodeDao {
    * @param \App\Models\VerificationCode $verificationCode
    * @return VerificationCode|null
    */
-  public function update(VerificationCode $verificationCode): ?VerificationCode {
+  public function update(VerificationCode $verificationCode): VerificationCode {
     $sql = 'UPDATE verification_codes SET
               code = :code,
               is_pending = :is_pending,
@@ -73,13 +73,12 @@ class VerificationCodeDao {
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
 
-    $success = $stmt->execute([
-      ':code' => $verificationCode->getCode(),
-      ':is_pending' => $verificationCode->isPending() ? 1 : 0,
-      ':expires_at' => $verificationCode->getExpiresAt(),
-      ':verification_code_id' => $verificationCode->getVerificationCodeId()
-    ]);
+    $stmt->bindValue(':code', $verificationCode->getCode(), PDO::PARAM_STR);
+    $stmt->bindValue(':is_pending', $verificationCode->isPending() ? 1 : 0, PDO::PARAM_INT);
+    $stmt->bindValue(':expires_at', $verificationCode->getExpiresAt(), PDO::PARAM_STR);
+    $stmt->bindValue(':verification_code_id', $verificationCode->getVerificationCodeId(), PDO::PARAM_STR);
+    $stmt->execute();
 
-    return $success ? $verificationCode : null;
+    return $verificationCode;
   }
 }

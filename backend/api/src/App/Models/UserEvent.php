@@ -12,7 +12,7 @@ class UserEvent implements \JsonSerializable {
         $this->user_id = $data['user_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'user_event_id' => $this->user_event_id,
             'event_id' => $this->event_id,

@@ -10,10 +10,10 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_ve
 -- Senha: Password2!
 ('bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
 -- Senha: Password3!
-INSERT INTO `institutions` (`institution_id`, `name`, `email`, `phone_number`, `description`, `thumbnail_id`, `banner_id`, `owner_id`) VALUES
-('2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'Harvard University', 'contact@harvard.edu', '+15551234567', 'Ivy League university', NULL, NULL, 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
-('c7579a48-cddb-43f3-af78-d0f26edb327c', 'MIT', 'info@mit.edu', '+15552345678', 'Technology institute', NULL, NULL, '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
-('f6989a00-0032-4068-a2d0-efd8b1085aad', 'Stanford University', 'admin@stanford.edu', '+15553456789', 'Private research university', NULL, NULL, 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
+INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `thumbnail_id`, `banner_id`, `owner_id`) VALUES
+('2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'Harvard University', 'contact@harvard.edu', 'Ivy League university', NULL, NULL, 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
+('c7579a48-cddb-43f3-af78-d0f26edb327c', 'MIT', 'info@mit.edu', 'Technology institute', NULL, NULL, '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
+('f6989a00-0032-4068-a2d0-efd8b1085aad', 'Stanford University', 'admin@stanford.edu', 'Private research university', NULL, NULL, 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
 
 INSERT INTO `institution_users` (`institution_users_id`, `role`, `joined_at`, `institution_id`, `user_id`) VALUES
 ('f256ae5c-694f-4766-bd3b-3614c0d511c1', 'admin', '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),

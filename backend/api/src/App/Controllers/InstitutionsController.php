@@ -4,8 +4,13 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\InstitutionDao;
+use App\Models\Institution;
 use App\Services\LogService;
+use Exception;
 use PDOException;
+use Ramsey\Uuid\Nonstandard\Uuid;
+use Slim\Exception\HttpException;
+use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
@@ -52,16 +57,49 @@ class InstitutionsController {
   }
 
   public function createInstitution(Request $request, Response $response): Response {
-    $body = $request->getParsedBody();
+    try {
+      $body = $request->getParsedBody();
+  
+      $name = $body["name"] ?? null;
+      $description = $body["description"] ?? null;
+      $thumbnailId = $body["thumbnail_id"] ?? null;
+      $bannerId = $body["banner_id"] ?? null;
+  
+      // Check for empty required fields
+      if (empty($name) || empty($description)) {
+        LogService::http422('/institutions', "Missing POST parameters: 'name' or 'description'");
+        throw new HttpException($request, "POST parameters: 'name' and 'description' are required", 422);
+      }
+      $token = $request->getAttribute('token');
+  
+      $userOwnedInstitutions = $this->institutionDao->getOwnedInstitutions($token['sub']);
+      
+      if(count($userOwnedInstitutions) >= 3) {
+        LogService::http403('/institutions', "User {$token['sub']} has reached the maximum number of owned institutions (3). Could not create institution.");
+        throw new HttpForbiddenException($request, "User has reached the maximum number of owned institutions (3). Could not create institution.");
+      }
 
-    $name = $body["name"] ?? null;
-    $email = $body["email"] ?? null;
-    $phoneNumber = $body["phone_number"] ?? null;
-    $description = $body["description"] ?? null;
-    $thumbnailUrl = $body["thumbnail_id"] ?? null;
-    $bannerId = $body["banner_id"] ?? null;
+      $institution = $this->institutionDao->createInstitution(new Institution([
+        "institution_id" => Uuid::uuid4()->toString(),
+        "owner_id" => $token['sub'],
+        "name" => $name,
+        "email" => $token["email"],
+        "description" => $description,
+        "thumbnail_id" => $thumbnailId,
+        "banner_id" => $bannerId,
+      ]));
 
-
-    return $response;
+      LogService::info('/institutions', "Create institution {$institution->getInstitutionId()} for user {$token['sub']}");
+      $response->getBody()->write(json_encode($institution));
+      return $response;
+    } catch (PDOException $e) {
+      LogService::http500('/institutions', "Could not create the institution due to an database error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not create the institution due to an database error. See logs for more detail');
+    } catch (HttpException $e) {
+      throw $e;
+    } catch (Exception $e) {
+      LogService::http500('/institutions', "Could not create the institution due to a unknown error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not create the institution due to a unknown error. See logs for more detail');
+    }
   }
 }

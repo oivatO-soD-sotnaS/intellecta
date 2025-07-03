@@ -18,7 +18,7 @@ class VerificationCode implements \JsonSerializable {
     $this->user_id = $data['user_id'] ?? '';
   }
 
-  public function toArray(): array {
+  private function toArray(): array {
     return [
       'verification_code_id' => $this->verification_code_id,
       'code' => $this->code,

@@ -24,7 +24,7 @@ class Invitation implements \JsonSerializable {
         $this->invited_by = $data['invited_by'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'invitation_id' => $this->invitation_id,
             'email' => $this->email,

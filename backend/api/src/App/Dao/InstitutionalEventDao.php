@@ -57,7 +57,7 @@ class InstitutionalEventDao {
     $userEvents = [];
     
     foreach ($data as $row) {
-        $userEvents[] = new InstitutionalEvent($row); 
+      $userEvents[] = new InstitutionalEvent($row); 
     }
 
     return $userEvents;
@@ -79,8 +79,7 @@ class InstitutionalEventDao {
     $stmt->bindValue(':institution_id', $institutionalEvent->getInstitutionId(), PDO::PARAM_STR);
     $stmt->bindValue(':event_id', $institutionalEvent->getEventId(), PDO::PARAM_STR);
 
-    $success = $stmt->execute();
-    if ($success) {
+    if ($stmt->execute()) {
       return $institutionalEvent;
     }
 

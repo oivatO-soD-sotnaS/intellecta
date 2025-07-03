@@ -22,7 +22,7 @@ class User implements \JsonSerializable {
         $this->profile_picture_id = $data['profile_picture_id'] ?? null;
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'user_id' => $this->user_id,
             'full_name' => $this->full_name,

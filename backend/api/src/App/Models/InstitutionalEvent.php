@@ -12,7 +12,7 @@ class InstitutionalEvent implements \JsonSerializable {
         $this->institution_id = $data['institution_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'institutional_event_id' => $this->institutional_event_id,
             'event_id' => $this->event_id,
