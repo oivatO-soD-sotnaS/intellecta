@@ -7,12 +7,16 @@ namespace App\Controllers;
 use App\Dao\EventDao;
 use App\Dao\UserDao;
 use App\Dao\UserEventDao;
-use App\Enums\EventType;
 use App\Models\Event;
 use App\Models\UserEvent;
 use App\Services\EmailService;
 use App\Services\LogService;
+use App\Dto\UserEventDto;
+use App\Vo\EventDateVo;
+use App\Vo\EventDescriptionVo;
+use App\Vo\EventTitleVo;
 use Exception;
+use InvalidArgumentException;
 use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
@@ -46,15 +50,11 @@ class UserEventController {
                 throw new HttpNotFoundException($request, 'No events found for this user');
             }
 
-            $data = array_map(function ($event) {
-                return [
-                    "user_event_id" => $event->getUserEventId(),
-                    "user_id" => $event->getUserId(),
-                    "event" => $this->eventDao->getEventById($event->getEventId())
-                ];
+            $userEventsDto = array_map(function (UserEvent $userEvent) {
+                return new UserEventDto($userEvent, $this->eventDao->getEventById($userEvent->getEventId()));
             }, $userEvents);
 
-            $response->getBody()->write(json_encode($data));
+            $response->getBody()->write(json_encode($userEventsDto));
             LogService::info("/users/events", "User events fetched for: $user");
             return $response;
         } catch (PDOException $e) {
@@ -83,6 +83,15 @@ class UserEventController {
         }
 
         try {
+            $title = new EventTitleVo($title);
+            $description = new EventDescriptionVo($description);
+            $eventDate = new EventDateVo($eventDate);
+        } catch (InvalidArgumentException $e) {
+            LogService::http422("/users/events", $e->getMessage());
+            throw new HttpException($request, $e->getMessage(), 422);
+        }
+
+        try {
             $user = $this->userDao->getById($token["sub"]);
             if (!$user) {
                 LogService::http404("/users/events", "User not found: " . $token["sub"]);
@@ -91,9 +100,9 @@ class UserEventController {
 
             $event = $this->eventDao->createEvent(new Event([
                 'event_id' => Uuid::uuid4()->toString(),
-                'title' => $title,
-                'description' => $description,
-                'event_date' => $eventDate,
+                'title' => $title->getValue(),
+                'description' => $description->getValue(),
+                'event_date' => $eventDate->toString(),
                 'type' => $eventType
             ]));
 
@@ -103,13 +112,11 @@ class UserEventController {
                 'event_id' => $event->getEventId()
             ]));
 
+            $userEventDto = new UserEventDto($userEvent, $event);
+
             $response->getBody()->write(json_encode([
                 "Message" => "User event created successfully",
-                "user_event" => [
-                    'user_event_id' => $userEvent->getUserEventId(),
-                    'user_id' => $userEvent->getUserId(),
-                    'event' => $event
-                ]
+                "user_event" => $userEventDto
             ]));
 
             LogService::info("/users/events", "User event created: $userEvent");
@@ -139,6 +146,15 @@ class UserEventController {
         }
 
         try {
+            if(!empty($title)) $title = new EventTitleVo($title);
+            if(!empty($description)) $description = new EventDescriptionVo($description);
+            if(!empty($eventDate)) $eventDate = new EventDateVo($eventDate);
+        } catch (InvalidArgumentException $e) {
+            LogService::http422("/users/events", $e->getMessage());
+            throw new HttpException($request, $e->getMessage(), 422);
+        }
+
+        try {
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
                 LogService::http404("/users/events/$event_id", "User event not found");
@@ -157,20 +173,24 @@ class UserEventController {
                 throw new HttpNotFoundException($request, 'Event not found');
             }
 
-            $event->setTitle($title ?? $event->getTitle());
-            $event->setDescription($description ?? $event->getDescription());
-            $event->setEventDate($eventDate ?? $event->getEventDate());
+            if(!empty($title)) {
+                $event->setTitle($title->getValue());
+            }
+            if(!empty($description)) {
+                $event->setDescription($description->getValue());
+            }
+            if(!empty($eventDate)) {
+                $event->setEventDate($eventDate->toString());
+            }
+
             $event->setType($eventType ?? $event->getType());
 
             $this->eventDao->updateEvent($event);
 
+            $userEventDto = new userEventDto($userEvent, $event);
             $response->getBody()->write(json_encode([
                 "Message" => "User event updated successfully",
-                "user_event" => [
-                    'user_event_id' => $userEvent->getUserEventId(),
-                    'user_id' => $userEvent->getUserId(),
-                    'event' => $event
-                ]
+                "user_event" => $userEventDto
             ]));
 
             LogService::info("/users/events/$event_id", "User event updated: $userEvent");
@@ -241,11 +261,8 @@ class UserEventController {
                 throw new HttpNotFoundException($request, 'Event not found');
             }
 
-            $response->getBody()->write(json_encode([
-                'user_event_id' => $userEvent->getUserEventId(),
-                'user_id' => $userEvent->getUserId(),
-                'event' => $event
-            ]));
+            $userEventDto = new UserEventDto($userEvent, $event);
+            $response->getBody()->write(json_encode($userEventDto));
 
             return $response;
         } catch (PDOException $e) {

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Dao;
 
 use App\Database;
-use App\Models\Event;
 use App\Models\InstitutionalEvent;
-use App\Models\UserEvent;
 use PDO;
 
 class InstitutionalEventDao {

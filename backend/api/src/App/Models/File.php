@@ -40,4 +40,11 @@ class File implements \JsonSerializable {
     public function getMimeType(): ?string { return $this->mime_type; }
     public function getSize(): ?int { return $this->size; }
     public function getUploadedAt(): string { return $this->uploaded_at; }
+    // Setters
+    public function setFileId(string $file_id): void { $this->file_id = $file_id; }
+    public function setUrl(string $url): void { $this->url = $url; }
+    public function setFilename(string $filename): void { $this->filename = $filename; }
+    public function setMimeType(?string $mime_type): void { $this->mime_type = $mime_type; }
+    public function setSize(?int $size): void { $this->size = $size; }
+    public function setUploadedAt(string $uploaded_at): void { $this->uploaded_at = $uploaded_at; }
 }

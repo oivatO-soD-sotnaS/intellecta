@@ -16,7 +16,7 @@ class UserDao {
    * @param string $id
    * @return User|null
    */
-  public function getById(string $id): User {
+  public function getById(string $id): ?User {
     $sql = 'SELECT * FROM users WHERE user_id = :id';
     
     $pdo = $this->database->getConnection();
@@ -26,7 +26,7 @@ class UserDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    return new User($data);
+    return $data ?  new User($data) : null;
   }
 
   /**
@@ -34,7 +34,7 @@ class UserDao {
    * @param string $email
    * @return User|null
    */
-  public function getByEmail(string $email): User {
+  public function getByEmail(string $email): ?User {
     $sql = 'SELECT * FROM users WHERE email = :email';
     
     $pdo = $this->database->getConnection();
@@ -44,7 +44,7 @@ class UserDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    return new User($data);
+    return $data ? new User($data) : null;
   }
 
   /**
@@ -52,7 +52,7 @@ class UserDao {
    * @param \App\Models\User $user
    * @return User|null
    */
-  public function create(User $user): User {
+  public function create(User $user): ?User {
     $sql = 'INSERT INTO users (user_id, full_name, email, password_hash, profile_picture_id) 
             VALUES (:user_id, :full_name, :email, :password_hash, :profile_picture_id)';
 
@@ -64,9 +64,9 @@ class UserDao {
     $stmt->bindValue(':email', $user->getEmail(), PDO::PARAM_STR);
     $stmt->bindValue(':password_hash', $user->getPasswordHash(), PDO::PARAM_STR);
     $stmt->bindValue(':profile_picture_id', $user->getProfilePictureId(), PDO::PARAM_STR);
-    $stmt->execute();
+    $success = $stmt->execute();
 
-    return $user;
+    return $success ? $user : null;
   }
 
   /**
@@ -74,7 +74,7 @@ class UserDao {
    * @param \App\Models\User $user
    * @return User|null
    */
-  public function update(User $user): User {
+  public function update(User $user): ?User {
     $sql = 'UPDATE users SET 
               full_name = :full_name,
               email = :email,
@@ -92,9 +92,9 @@ class UserDao {
     $stmt->bindValue(':password_hash', $user->getPasswordHash(), PDO::PARAM_STR);
     $stmt->bindValue(':email_verified', $user->isEmailVerified() ? 1 : 0, PDO::PARAM_INT);
     $stmt->bindValue(':profile_picture_id', $user->getProfilePictureId(), PDO::PARAM_STR);
-    $stmt->execute();
+    $success = $stmt->execute();
 
-    return $user;
+    return $success ? $user : null;
   }
 
   /**

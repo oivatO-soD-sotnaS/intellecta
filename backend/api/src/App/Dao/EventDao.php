@@ -17,7 +17,7 @@ class EventDao {
    * @param string $eventId
    * @return Event|null
    */
-  public function getEventById(string $eventId): Event {
+  public function getEventById(string $eventId): ?Event {
     $sql = 'SELECT * FROM events WHERE event_id = :event_id';
     
     $pdo = $this->database->getConnection();
@@ -27,7 +27,7 @@ class EventDao {
     $stmt->execute();
     $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-    return new Event($data);
+    return $data ? new Event($data) : null;
   }
 
   /**
@@ -35,7 +35,7 @@ class EventDao {
    * @param \App\Models\Event $event
    * @return Event|null
    */
-  public function createEvent(Event $event): Event {
+  public function createEvent(Event $event): ?Event {
     $sql = 'INSERT INTO events (event_id, title, description, type, event_date, created_at, changed_at) 
             VALUES (:event_id, :title, :description, :type, :event_date, :created_at, :changed_at)';
 
@@ -50,8 +50,8 @@ class EventDao {
     $stmt->bindValue(':created_at', $event->getCreatedAt(), \PDO::PARAM_STR);
     $stmt->bindValue(':changed_at', $event->getChangedAt(), \PDO::PARAM_STR);
 
-    $stmt->execute();
-    return $event;
+    $success = $stmt->execute();
+    return $success ? $event : null;
   }
 
   /**
@@ -89,8 +89,8 @@ class EventDao {
     $stmt->bindValue(':event_date', $event->getEventDate(), \PDO::PARAM_STR);
     $stmt->bindValue(':changed_at', date('Y-m-d H:i:s'), \PDO::PARAM_STR);
     
-    $stmt->execute();
+    $success = $stmt->execute();
     
-    return $event;
+    return $success ? $event : null;
   }
 }

@@ -4,8 +4,6 @@ declare(strict_types= 1);
 namespace App\Middleware;
 
 use App\Dao\InstitutionUserDao;
-use App\Dao\UserDao;
-use App\Models\InstitutionUser;
 use App\Services\JwtService;
 use App\Services\LogService;
 use Exception;
@@ -17,7 +15,6 @@ use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
-use Slim\Exception\HttpUnauthorizedException;
 use Slim\Routing\RouteContext;
 
 class RequireInstitutionMembership{

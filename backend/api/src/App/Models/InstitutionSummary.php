@@ -10,8 +10,8 @@ class InstitutionSummary implements \JsonSerializable {
   private string $email;
   private string $userId;
   private string $description;
-  private string $bannerId;
-  private string $thumbnailId;
+  private ?string $bannerId;
+  private ?string $profilePictureId;
 
   private InstitutionUserType $role;
   private int $activeUserCount;
@@ -23,8 +23,8 @@ class InstitutionSummary implements \JsonSerializable {
     $this->email = $data['email'] ?? "";
     $this->userId = $data['user_id'] ?? "";
     $this->description = $data['description'] ?? "";
-    $this->bannerId = $data['banner_id'] ?? "";
-    $this->thumbnailId = $data['thumbnail_id'] ?? "";
+    $this->bannerId = $data['banner_id'] ?? null;
+    $this->profilePictureId = $data['profile_picture_id'] ?? null;
     $this->role = InstitutionUserType::tryFrom($data["role"] ?? 'student') ?? InstitutionUserType::Student;
     $this->activeUserCount = isset($data['active_user_count']) ? (int)$data['active_user_count'] : 0;
     $this->upcomingEventCount = isset($data['upcoming_event_count']) ? (int)$data['upcoming_event_count'] : 0;
@@ -38,7 +38,7 @@ class InstitutionSummary implements \JsonSerializable {
       'user_id' => $this->userId,
       'description' => $this->description,
       'banner_id' => $this->bannerId,
-      'thumbnail_id' => $this->thumbnailId,
+      'profile_picture_id' => $this->profilePictureId,
       'role' => $this->role->value,
       'active_user_count' => $this->activeUserCount,
       'upcoming_event_count' => $this->upcomingEventCount,
@@ -89,20 +89,20 @@ class InstitutionSummary implements \JsonSerializable {
     $this->description = $description;
   }
 
-  public function getBannerId(): string {
+  public function getBannerId(): ?string {
     return $this->bannerId;
   }
 
-  public function setBannerId(string $bannerId): void {
+  public function setBannerId(?string $bannerId): void {
     $this->bannerId = $bannerId;
   }
 
-  public function getThumbnailId(): string {
-    return $this->thumbnailId;
+  public function getThumbnailId(): ?string {
+    return $this->profilePictureId;
   }
 
-  public function setThumbnailId(string $thumbnailId): void {
-    $this->thumbnailId = $thumbnailId;
+  public function setThumbnailId(?string $profilePictureId): void {
+    $this->profilePictureId = $profilePictureId;
   }
 
   public function getRole(): InstitutionUserType {

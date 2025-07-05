@@ -8,13 +8,17 @@ use App\Dao\EventDao;
 use App\Dao\InstitutionalEventDao;
 use App\Dao\InstitutionDao;
 use App\Dao\UserDao;
-use App\Enums\EventType;
+use App\Dto\InstitutionalEventDto;
 use App\Models\Event;
 use App\Models\InstitutionalEvent;
 use App\Models\InstitutionUser;
 use App\Services\EmailService;
 use App\Services\LogService;
+use App\Vo\EventDateVo;
+use App\Vo\EventDescriptionVo;
+use App\Vo\EventTitleVo;
 use Exception;
+use InvalidArgumentException;
 use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
@@ -42,18 +46,14 @@ class InstitutionalEventController {
         throw new HttpNotFoundException($request, "Institution does not have any events");
       }
 
-      $data = array_map(function ($event) {
-        return [
-          "institutional_event_id" => $event->getInstitutionalEventId(),
-          "user_id" => $event->getEventId(),
-          "event" => $this->eventDao->getEventById($event->getEventId())
-        ];
+      $data = array_map(function ($institutionalEvent) {
+        $event = $this->eventDao->getEventById($institutionalEvent->getEventId());
+        return new InstitutionalEventDto($institutionalEvent, $event);
       }, $institutionalEvents);
 
       $response->getBody()->write(json_encode($data));
       LogService::info("/institutions/$institution_id/events", "Institutional events successfully fetched for $institution_id");
       return $response;
-
     } catch (PDOException $e) {
       LogService::http500("/institutions/$institution_id/events", $e->getMessage());
       throw new HttpInternalServerErrorException($request, 'Could not fetch institutional events due to a database error. See logs for more detail');
@@ -89,6 +89,15 @@ class InstitutionalEventController {
     }
 
     try {
+      $title = new EventTitleVo($title);
+      $description = new EventDescriptionVo($description);
+      $eventDate = new EventDateVo($eventDate);
+    } catch (InvalidArgumentException $e) {
+      LogService::http422("/institutions/$institution_id/events", $e->getMessage());
+      throw new HttpException($request, $e->getMessage(), 422);
+    }
+
+    try {
       $institution = $this->institutionDao->getInstitutionById($institution_id);
       if (!$institution) {
         LogService::http404("/institutions/$institution_id/events", "Institution not found: " . $institution_id);
@@ -97,9 +106,9 @@ class InstitutionalEventController {
 
       $event = $this->eventDao->createEvent(new Event([
         'event_id' => Uuid::uuid4()->toString(),
-        'title' => $title,
-        'description' => $description,
-        'event_date' => $eventDate,
+        'title' => $title->getValue(),
+        'description' => $description->getValue(),
+        'event_date' => $eventDate->toString(),
         'type' => $eventType
       ]));
 
@@ -110,13 +119,11 @@ class InstitutionalEventController {
       ]
       ));
 
+      $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
+      
       $response->getBody()->write(json_encode([
         "Message" => "Institutional event created successfully",
-        "institutional_event" => [
-          'institutional_event_id' => $institutionalEvent->getInstitutionalEventId(),
-          'user_id' => $institutionalEvent->getInstitutionId(),
-          'event' => $event
-        ]
+        "institutional_event" => $institutionalEventDto
       ]));
 
       return $response;
@@ -155,6 +162,15 @@ class InstitutionalEventController {
     }
 
     try {
+      if(!empty($title)) $title = new EventTitleVo($title);
+      if(!empty($description)) $description = new EventDescriptionVo($description);
+      if(!empty($eventDate)) $eventDate = new EventDateVo($eventDate);
+    } catch (InvalidArgumentException $e) {
+      LogService::http422("/institutions/$institution_id/events", $e->getMessage());
+      throw new HttpException($request, $e->getMessage(), 422);
+    }
+
+    try {
       $institutionalEvent = $this->institutionalEventDao->getInstitutionalEventById($event_id);
       if (empty($institutionalEvent)) {
         LogService::http404("/institutions/$institution_id/events/$event_id", "Institutional event not found");
@@ -172,20 +188,25 @@ class InstitutionalEventController {
         throw new HttpNotFoundException($request, 'Event not found');
       }
       
-      $event->setTitle($title ?? $event->getTitle());
-      $event->setDescription($description ?? $event->getDescription());
-      $event->setEventDate($eventDate ?? $event->getEventDate());
+      if(!empty($title)) {
+        $event->setTitle($title->getValue());
+      }
+      if(!empty($description)) {
+        $event->setDescription($description->getValue());
+      }
+      if(!empty($eventDate)) {
+        $event->setEventDate($eventDate->toString());
+      }
+
       $event->setType($eventType ?? $event->getType());
 
       $event = $this->eventDao->updateEvent($event);
 
+      $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
+      
       $response->getBody()->write(json_encode([
         "Message" => "User event updated successfully",
-        "user_event" => [
-          'institutional_event_id' => $institutionalEvent->getInstitutionalEventId(),
-          'institution_id' => $institutionalEvent->getInstitutionId(),
-          'event' => $event
-        ]
+        "user_event" => $institutionalEventDto
       ]));
       
       LogService::info("/institutions/$institution_id/events/$event_id", "Institutional event updated: $institutionalEvent");
@@ -263,11 +284,8 @@ class InstitutionalEventController {
         throw new HttpNotFoundException($request, 'Event not found');
       }
 
-      $response->getBody()->write(json_encode([
-        'user_event_id' => $institutionalEvent->getInstitutionalEventId(),
-        'institution_id' => $institutionalEvent->getInstitutionId(),
-        'event' => $event
-      ]));
+      $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
+      $response->getBody()->write(json_encode($institutionalEventDto));
 
       return $response;
     } catch (PDOException $e) {

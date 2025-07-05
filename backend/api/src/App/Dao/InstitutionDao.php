@@ -19,7 +19,7 @@ class InstitutionDao {
    * @param string $id
    * @return Institution|null
    */
-  public function getInstitutionById(string $id): Institution {
+  public function getInstitutionById(string $id): ?Institution {
     $sql = "SELECT * FROM institutions
             WHERE institution_id LIKE :institution_id";
 
@@ -30,7 +30,7 @@ class InstitutionDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return new Institution($data);
+    return $data ? new Institution($data) : null;
   }
 
   /**
@@ -57,7 +57,13 @@ class InstitutionDao {
     return $institutionSummaries;
   }
 
-  public function getInstitutionSummaryById(string $userId, string $institutionId): InstitutionSummary {
+  /**
+   * Summary of getInstitutionSummaryById
+   * @param string $userId
+   * @param string $institutionId
+   * @return InstitutionSummary|null
+   */
+  public function getInstitutionSummaryById(string $userId, string $institutionId): ?InstitutionSummary {
     $sql = 'SELECT * FROM institution_summary 
             WHERE user_id LIKE :user_id
             AND institution_id LIKE :institution_id';
@@ -70,27 +76,32 @@ class InstitutionDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return new InstitutionSummary($data);
+    return $data ? new InstitutionSummary($data) : null;
   }
 
-  public function createInstitution(Institution $institution): Institution {
-    $sql = "INSERT INTO institutions (institution_id, owner_id, name, email, description, thumbnail_id, banner_id)
-            VALUES (:institution_id, :owner_id, :name, :email, :description, :thumbnail_id, :banner_id)";
+  /**
+   * Summary of createInstitution
+   * @param \App\Models\Institution $institution
+   * @return Institution|null
+   */
+  public function createInstitution(Institution $institution): ?Institution {
+    $sql = "INSERT INTO institutions (institution_id, user_id, name, email, description, profile_picture_id, banner_id)
+            VALUES (:institution_id, :user_id, :name, :email, :description, :profile_picture_id, :banner_id)";
 
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
 
     $stmt->bindValue(':institution_id', $institution->getInstitutionId(), PDO::PARAM_STR);
-    $stmt->bindValue(':owner_id', $institution->getOwnerId(), PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $institution->getOwnerId(), PDO::PARAM_STR);
     $stmt->bindValue(':name', $institution->getName(), PDO::PARAM_STR);
     $stmt->bindValue(':email', $institution->getEmail(), PDO::PARAM_STR);
     $stmt->bindValue(':description', $institution->getDescription(), PDO::PARAM_STR);
-    $stmt->bindValue(':thumbnail_id', $institution->getThumbnailId(), PDO::PARAM_STR);
+    $stmt->bindValue(':profile_picture_id', $institution->getThumbnailId(), PDO::PARAM_STR);
     $stmt->bindValue(':banner_id', $institution->getBannerId(), PDO::PARAM_STR);
 
-    $stmt->execute();
+    $success = $stmt->execute();
 
-    return $institution;
+    return $success ? $institution : null;
   }
   
   /**
@@ -100,13 +111,48 @@ class InstitutionDao {
    */
   public function getOwnedInstitutions(string $user_id): array {
     $sql = "SELECT * FROM institutions
-            WHERE owner_id LIKE :owner_id";
+            WHERE user_id LIKE :user_id";
 
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
 
-    $stmt->bindValue(':owner_id', $user_id, PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
 
+    $stmt->execute();
+
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $institutions = [];
+
+    foreach($data as $row) {
+      $institutions[] = new Institution($row);
+    }
+
+    return $institutions;
+  }
+
+  /**
+   * Summary of getInstitutionsByUserId
+   * @param string $userId
+   * @return Institution[]
+   */
+  public function getInstitutionsByUserId(string $userId): array {
+    $sql = "SELECT DISTINCT
+              i.institution_id,
+              i.name,
+              i.email,
+              i.description
+            FROM 
+              institutions i
+            JOIN 
+              institution_users iu ON i.institution_id = iu.institution_id
+            WHERE 
+              iu.user_id = :user_id";
+              
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
     $stmt->execute();
 
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);

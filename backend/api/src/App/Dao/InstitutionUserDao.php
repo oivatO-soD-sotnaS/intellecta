@@ -19,7 +19,7 @@ class InstitutionUserDao {
    * @param string $user_id
    * @return InstitutionUser|null
    */
-  public function getInstitutionUserByIds(string $institution_id, string $user_id): InstitutionUser {
+  public function getInstitutionUserByIds(string $institution_id, string $user_id): ?InstitutionUser {
     $sql = "SELECT * FROM institution_users
             WHERE user_id = :user_id
             AND institution_id = :institution_id";
@@ -32,6 +32,6 @@ class InstitutionUserDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return new InstitutionUser($data);
+    return $data ? new InstitutionUser($data) : null;
   }
 }

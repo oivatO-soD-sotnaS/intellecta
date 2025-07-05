@@ -19,7 +19,7 @@ class UserEventDao {
    * @param string $userEventId
    * @return UserEvent|null
    */
-  public function getUserEventById(string $userEventId): UserEvent {
+  public function getUserEventById(string $userEventId): ?UserEvent {
     $sql = 'SELECT * FROM user_events 
             WHERE user_event_id = :user_event_id';
     
@@ -30,7 +30,7 @@ class UserEventDao {
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return new UserEvent($data); 
+    return $data ? new UserEvent($data) : null; 
   }
 
   /**
@@ -63,7 +63,7 @@ class UserEventDao {
    * @param \App\Models\UserEvent $userEvent
    * @return UserEvent|null
    */
-  public function createUserEvent(UserEvent $userEvent): UserEvent {
+  public function createUserEvent(UserEvent $userEvent): ?UserEvent {
     $sql = 'INSERT INTO user_events (user_event_id, user_id, event_id) 
             VALUES (:user_event_id, :user_id, :event_id)';
 
@@ -74,7 +74,7 @@ class UserEventDao {
     $stmt->bindValue(':user_id', $userEvent->getUserId(), PDO::PARAM_STR);
     $stmt->bindValue(':event_id', $userEvent->getEventId(), PDO::PARAM_STR);
 
-    $stmt->execute();
-    return $userEvent;
+    $success = $stmt->execute();
+    return $success ? $userEvent : null;
   }
 }

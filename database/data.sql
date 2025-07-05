@@ -10,7 +10,7 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_ve
 -- Senha: Password2!
 ('bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
 -- Senha: Password3!
-INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `thumbnail_id`, `banner_id`, `owner_id`) VALUES
+INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `profile_picture_id`, `banner_id`, `user_id`) VALUES
 ('2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'Harvard University', 'contact@harvard.edu', 'Ivy League university', NULL, NULL, 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('c7579a48-cddb-43f3-af78-d0f26edb327c', 'MIT', 'info@mit.edu', 'Technology institute', NULL, NULL, '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('f6989a00-0032-4068-a2d0-efd8b1085aad', 'Stanford University', 'admin@stanford.edu', 'Private research university', NULL, NULL, 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
@@ -25,7 +25,7 @@ INSERT INTO `invitations` (`invitation_id`, `email`, `role`, `token`, `expires_a
 ('99ee192f-fa77-4925-8307-9c3c69115e44', 'newuser2@example.com', 'student', 'token2abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv', '2023-02-02 11:00:00', '2023-01-15 11:00:00', '2023-01-02 11:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('8e3ac162-1095-4915-99c5-79c2f87abe56', 'newuser3@example.com', 'admin', 'token3abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv', '2023-02-03 12:00:00', NULL, '2023-01-03 12:00:00', 'f6989a00-0032-4068-a2d0-efd8b1085aad', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6');
 
-INSERT INTO `classes` (`class_id`, `name`, `description`, `thumbnail_id`, `banner_id`, `institution_id`) VALUES
+INSERT INTO `classes` (`class_id`, `name`, `description`, `profile_picture_id`, `banner_id`, `institution_id`) VALUES
 ('7bae5f09-48fd-47d6-958d-26809f97a2e0', 'Computer Science 101', 'Intro to Computer Science', NULL, NULL, '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
 ('3827894f-2c54-412a-aa2c-f178511d0553', 'Mathematics 201', 'Advanced Calculus', NULL, NULL, 'c7579a48-cddb-43f3-af78-d0f26edb327c'),
 ('3d95fee9-b1c7-417b-a8ac-7f1ce1dfcaed', 'Physics 301', 'Quantum Mechanics', NULL, NULL, 'f6989a00-0032-4068-a2d0-efd8b1085aad');
@@ -35,7 +35,7 @@ INSERT INTO `class_users` (`class_users_id`, `joined_at`, `class_id`, `user_id`)
 ('5e58f6f7-4a0c-4673-a3a4-a326ac69628a', '2023-01-02 11:00:00', '7bae5f09-48fd-47d6-958d-26809f97a2e0', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('9bce115a-a1ef-4ceb-9e9c-68b327c1b77b', '2023-01-03 12:00:00', '3827894f-2c54-412a-aa2c-f178511d0553', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
 
-INSERT INTO `subjects` (`subject_id`, `name`, `description`, `thumbnail_id`, `banner_id`, `institution_id`, `professor_id`) VALUES
+INSERT INTO `subjects` (`subject_id`, `name`, `description`, `profile_picture_id`, `banner_id`, `institution_id`, `professor_id`) VALUES
 ('5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', 'Programming Fundamentals', 'Learn basic programming concepts', NULL, NULL, '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('df4b74b3-4bff-460e-aa77-14bb84435b33', 'Linear Algebra', 'Matrix operations and vector spaces', NULL, NULL, 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('8b046b6f-1fa2-462c-84ba-1c7b88450c87', 'Thermodynamics', 'Study of heat and energy transfer', NULL, NULL, 'f6989a00-0032-4068-a2d0-efd8b1085aad', '65fe5128-3fbd-424c-86e9-6d8e42ef9286');
