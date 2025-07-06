@@ -1,9 +1,8 @@
 /* eslint-disable react/jsx-sort-props */
-// components/ui/InputField.tsx
 import React, { useMemo } from "react"
 import { Input } from "@heroui/input"
 
-interface InputFieldProps {
+export interface InputFieldProps {
   name?: string
   label: string
   placeholder: string
@@ -32,7 +31,7 @@ export const InputField: React.FC<InputFieldProps> = ({
   endContent,
   className = "",
 }) => {
-  // Só para tipo email: valida com regex
+  // Validação simples para e-mail
   const emailRegex = useMemo(
     () => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
     []
@@ -55,7 +54,15 @@ export const InputField: React.FC<InputFieldProps> = ({
           "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 " +
           "bg-transparent focus:outline-none",
       }}
-      endContent={endContent}
+      name={name}
+      label={label}
+      labelPlacement="outside"
+      placeholder={placeholder}
+      type={type}
+      value={value}
+      onValueChange={onChange}
+      isRequired={isRequired}
+      isInvalid={isInvalid || emailInvalid}
       errorMessage={
         isInvalid
           ? errorMessage
@@ -63,18 +70,8 @@ export const InputField: React.FC<InputFieldProps> = ({
             ? "Por favor, insira um email válido."
             : undefined
       }
-      label={label + (isRequired ? "" : "")}
-      labelPlacement="outside"
-      name={name}
-      placeholder={placeholder}
       startContent={startContent}
-      type={type}
-      onValueChange={onChange}
-      isRequired={isRequired}
-      // combina a prop com validação de e-mail:
-      isInvalid={isInvalid || emailInvalid}
-      value={value}
-      // mostra a mensagem custom ou a de e-mail
+      endContent={endContent}
       variant="bordered"
     />
   )
