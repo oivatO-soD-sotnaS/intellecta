@@ -3,7 +3,7 @@ USE `intellecta`;
 CREATE TABLE `files` (
   `file_id` CHAR(36) PRIMARY KEY,
   `url` TEXT NOT NULL,
-  `filename` VARCHAR(255) NOT NULL,
+  `filename` VARCHAR(128) NOT NULL,
   `mime_type` VARCHAR(100),
   `size` INT UNSIGNED, -- Tamanho em bytes
   `uploaded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -12,9 +12,9 @@ CREATE TABLE `files` (
 -- Tabela de usuário
 CREATE TABLE `users` (
   `user_id` CHAR(36) PRIMARY KEY,
-  `full_name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(255) UNIQUE NOT NULL,
-  `password_hash` VARCHAR(255) NOT NULL,
+  `full_name` VARCHAR(64) NOT NULL,
+  `email` VARCHAR(64) UNIQUE NOT NULL,
+  `password_hash` VARCHAR(512) NOT NULL,
   `email_verified` BOOL NOT NULL DEFAULT false, -- 'true' significa que o usuário verificou o e-mail que utilizou ao criar a conta e 'false' o contrário.
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `changed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -37,13 +37,12 @@ CREATE TABLE `institutions` (
   `institution_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
-  `phone_number` VARCHAR(255),
   `description` TEXT,
-  `thumbnail_id` CHAR(36),
+  `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
-  `owner_id` CHAR(36) NOT NULL, -- ID do usuário que criou a instituição
-  FOREIGN KEY (`owner_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`thumbnail_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
+  `user_id` CHAR(36) NOT NULL, -- ID do usuário que criou a instituição
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
+  FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`banner_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
 
@@ -79,11 +78,11 @@ CREATE TABLE `classes` (
   `class_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `description` VARCHAR(255) NOT NULL,
-  `thumbnail_id` CHAR(36),
+  `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
   `institution_id` CHAR(36) NOT NULL, -- ID da instituição à qual a turma pertence
   FOREIGN KEY (`institution_id`) REFERENCES `institutions`(`institution_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`thumbnail_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`banner_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
 
@@ -102,13 +101,13 @@ CREATE TABLE `subjects` (
   `subject_id` CHAR(36) PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `description` TEXT,
-  `thumbnail_id` CHAR(36),
+  `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
   `institution_id` CHAR(36) NOT NULL, -- ID da instituição à qual a disciplina pertence
   `professor_id` CHAR(36), -- ID do usuário que criou a disciplina -- Professor da disciplina.
   FOREIGN KEY (`institution_id`) REFERENCES `institutions`(`institution_id`) ON DELETE CASCADE,
   FOREIGN KEY (`professor_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL,
-  FOREIGN KEY (`thumbnail_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`banner_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
 
@@ -176,7 +175,7 @@ CREATE TABLE `forum_messages` (
 -- Tabela 'pai' dos eventos. As outras 'herdam' dessa via padrão de composição.
 CREATE TABLE `events` (
   `event_id` CHAR(36) PRIMARY KEY,
-  `title` VARCHAR(255) NOT NULL,
+  `title` VARCHAR(64) NOT NULL,
   `description` TEXT,
   `type` ENUM(
     'exam', 'quiz', 'assignment', 'lecture', 'workshop',
@@ -238,9 +237,8 @@ SELECT
   i.institution_id,
   i.name,
   i.email,
-  i.phone_number,
   i.banner_id,
-  i.thumbnail_id,
+  i.profile_picture_id,
   i.description,
   iu.user_id,
   iu.role,
@@ -260,4 +258,4 @@ LEFT JOIN events e ON e.event_id = ie.event_id
                    AND e.event_date >= CURRENT_TIMESTAMP 
                    AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
 
-GROUP BY i.institution_id, i.name, i.email, i.phone_number, iu.user_id, iu.role;
+GROUP BY i.institution_id, i.name, i.email, iu.user_id, iu.role;
