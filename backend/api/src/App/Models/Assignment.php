@@ -18,7 +18,7 @@ class Assignment implements \JsonSerializable {
         $this->attachment_id = $data['attachment_id'] ?? null;
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'assignment_id' => $this->assignment_id,
             'title' => $this->title,

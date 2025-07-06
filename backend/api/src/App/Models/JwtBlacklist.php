@@ -12,7 +12,7 @@ class JwtBlacklist implements \JsonSerializable {
         $this->expires_at = $data['expires_at'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'jwt_blacklists_id' => $this->jwt_blacklists_id,
             'token_hash' => $this->token_hash,

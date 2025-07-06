@@ -44,7 +44,7 @@ class RequireAuth{
       $decoded = $this->jwtService->validateToken($token);
       
       if (!$decoded) {
-          throw new HttpUnauthorizedException($request, 'Invalid token signature');
+        throw new HttpUnauthorizedException($request, 'Invalid token signature');
       }
 
       $user = $this->userDao->getById($decoded["sub"]);

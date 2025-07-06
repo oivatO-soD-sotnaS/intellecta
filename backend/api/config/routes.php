@@ -65,6 +65,11 @@ return function (App $app) {
         ->add(RequireAuth::class);
 
     // Rotas de instituição
+    $app->get('/institutions', InstitutionsController::class . ":getInstitutions")
+        ->add(RequireAuth::class);
+    $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":getInstitutionById")
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
     $app->get('/institutions/summary', InstitutionsController::class . ':getInstitutionsSummary')
         ->add(RequireAuth::class);
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/summary', InstitutionsController::class . ':getInstitutionSummaryById')

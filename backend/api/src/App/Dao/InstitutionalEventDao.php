@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace App\Dao;
 
 use App\Database;
-use App\Models\Event;
 use App\Models\InstitutionalEvent;
-use App\Models\UserEvent;
 use PDO;
 
 class InstitutionalEventDao {
@@ -57,7 +55,7 @@ class InstitutionalEventDao {
     $userEvents = [];
     
     foreach ($data as $row) {
-        $userEvents[] = new InstitutionalEvent($row); 
+      $userEvents[] = new InstitutionalEvent($row); 
     }
 
     return $userEvents;
@@ -79,8 +77,7 @@ class InstitutionalEventDao {
     $stmt->bindValue(':institution_id', $institutionalEvent->getInstitutionId(), PDO::PARAM_STR);
     $stmt->bindValue(':event_id', $institutionalEvent->getEventId(), PDO::PARAM_STR);
 
-    $success = $stmt->execute();
-    if ($success) {
+    if ($stmt->execute()) {
       return $institutionalEvent;
     }
 

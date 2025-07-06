@@ -27,10 +27,21 @@ class FilesDao {
     $stmt->bindValue(':uploaded_at', $file->getUploadedAt(), PDO::PARAM_STR);
 
     $success = $stmt->execute();
-    if($success) {
-      return $file;
-    }
+    return $success ? $file : null;
+  }
 
-    return null;
+  public function getFileById(string $fileId): ?File {
+    $sql = "SELECT * FROM files
+            WHERE file_id LIKE :file_id";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':file_id', $fileId, PDO::PARAM_STR);
+    $stmt->execute();
+
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    return $data ? new File($data) : null;
   }
 }

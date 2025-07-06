@@ -5,7 +5,7 @@ class Subject implements \JsonSerializable {
     private $subject_id;
     private $name;
     private $description;
-    private $thumbnail_id;
+    private $profile_picture_id;
     private $banner_id;
     private $institution_id;
     private $professor_id;
@@ -14,18 +14,18 @@ class Subject implements \JsonSerializable {
         $this->subject_id = $data['subject_id'] ?? '';
         $this->name = $data['name'] ?? '';
         $this->description = $data['description'] ?? null;
-        $this->thumbnail_id = $data['thumbnail_id'] ?? null;
+        $this->profile_picture_id = $data['profile_picture_id'] ?? null;
         $this->banner_id = $data['banner_id'] ?? null;
         $this->institution_id = $data['institution_id'] ?? '';
         $this->professor_id = $data['professor_id'] ?? null;
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'subject_id' => $this->subject_id,
             'name' => $this->name,
             'description' => $this->description,
-            'thumbnail_id' => $this->thumbnail_id,
+            'profile_picture_id' => $this->profile_picture_id,
             'banner_id' => $this->banner_id,
             'institution_id' => $this->institution_id,
             'professor_id' => $this->professor_id
@@ -40,7 +40,7 @@ class Subject implements \JsonSerializable {
     public function getSubjectId(): string { return $this->subject_id; }
     public function getName(): string { return $this->name; }
     public function getDescription(): ?string { return $this->description; }
-    public function getThumbnailId(): ?string { return $this->thumbnail_id; }
+    public function getThumbnailId(): ?string { return $this->profile_picture_id; }
     public function getBannerId(): ?string { return $this->banner_id; }
     public function getInstitutionId(): string { return $this->institution_id; }
     public function getProfessorId(): ?string { return $this->professor_id; }

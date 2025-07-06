@@ -4,8 +4,11 @@ declare(strict_types= 1);
 
 namespace App\Controllers;
 
+use App\Dao\FilesDao;
+use App\Dto\UserDto;
 use App\Models\User;
 use App\Models\VerificationCode;
+use App\Vo\PasswordVo;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpUnauthorizedException;
@@ -16,8 +19,10 @@ use App\Dao\VerificationCodeDao;
 use App\Services\EmailService;
 use App\Services\JwtService;
 use App\Services\LogService;
-use App\Services\ValidationService;
+use App\Vo\EmailAddressVo;
+use App\Vo\UsernameVo;
 use Exception;
+use InvalidArgumentException;
 use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpNotFoundException;
@@ -27,106 +32,93 @@ class AuthController {
   public function __construct(
     private UserDao $userDao,
     private VerificationCodeDao $verificationCodeDao,
+    private FilesDao $filesDao,
     private JwtService $jwtService,
     private EmailService $emailService,
-    private ValidationService $validationService
   ){}
 
   public function signUp(Request $request, Response $response) {
     $body = $request->getParsedBody();
-    
-    if(
-      empty($body['full_name']) || 
-      empty($body['email'])     || 
+
+    if (
+      empty($body['full_name']) ||
+      empty($body['email']) ||
       empty($body['password'])
-      ){
-        LogService::http422('/auth/sign-up', "missing POST parameters: 'full_name', 'email' and 'password'");
-        throw new HttpException(
-          $request, 
-          "'full_name, 'email' and 'password' are required",
-          422
-        );
+    ) {
+      LogService::http422('/auth/sign-up', "missing POST parameters: 'full_name', 'email' and 'password'");
+      throw new HttpException($request,"'full_name', 'email' and 'password' are required",422);
     }
 
-    $fullName = trim($body['full_name']);
-    $email = trim($body['email']);
-    $password = trim($body['password']);
-    
-    
-    // Verifica as regras de negócio
-    if(!$this->validationService->isValidUsername($fullName)){
-      LogService::http422("/auth/sign-up", "invalid username: $fullName");
-      throw new HttpException($request, 'Full name must be between 5 and 64 characters', 422);
-    }
-    if(!$this->validationService->isValidEmail($email)){
-      LogService::http422("/auth/sign-up", "invalid e-mail: $email");
-      throw new HttpException($request, 'Invalid e-mail format', 422);
-    }
-    if(!$this->validationService->isValidPassword($password)){
-      LogService::http422("/auth/sign-up", "invalid password: $password");
-      throw new HttpException($request, 'Password must be between 8 and 64 characters, and must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 422);
+    try {
+      $fullName = new UsernameVo($body['full_name']);
+      $email = new EmailAddressVo($body['email']);
+      $password = new PasswordVo($body['password']);
+    } catch (InvalidArgumentException $e) {
+      LogService::http422('/auth/sign-up', $e->getMessage());
+      throw new HttpException($request, $e->getMessage(), 422);
     }
 
-    try{
-      // Verifica se já existe alguma conta pendente com o mesmo e-mail
-      // Se houver atualiza os dados cadastrais do cliente, se não, cria a conta
-      $user = $this->userDao->getByEmail($email);
-      if(empty($user)){
+    try {
+      // Check if user exists by email (using VO value)
+      $user = $this->userDao->getByEmail($email->getValue());
+
+      if (empty($user)) {
         $user = $this->userDao->create(new User([
           "user_id" => Uuid::uuid4()->toString(),
-          "full_name" => $fullName,
-          "email" => $email,
-          "password_hash" => password_hash($password, PASSWORD_BCRYPT),
+          "full_name" => $fullName->getValue(),
+          "email" => $email->getValue(),
+          "password_hash" => password_hash($password->getValue(), PASSWORD_BCRYPT),
         ]));
         LogService::info("/auth/sign-up", "Unverified user CREATED: $user");
-      }else if (! $user->isEmailVerified()){
-        $user = $user->setFullName($fullName);
-        $user->setEmail($email);
-        $user->setPasswordHash(password_hash($password, PASSWORD_BCRYPT));
+      } else if (!$user->isEmailVerified()) {
+        $user = $user->setFullName($fullName->getValue());
+        $user->setEmail($email->getValue());
+        $user->setPasswordHash(password_hash($password->getValue(), PASSWORD_BCRYPT));
         $this->userDao->update($user);
         LogService::info("/auth/sign-up", "Unverified user UPDATED: $user");
-      }else {
+      } else {
         throw new HttpException($request, 'E-mail already registered', 409);
       }
 
-      // Cria código de uso único
-      $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-  
+      // Create a unique verification code
+      $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+      // Send verification email
       $this->emailService->sendMail(
-        to: $email,
-        toName: $fullName,
+        to: $email->getValue(),
+        toName: $fullName->getValue(),
         subject: "$code - Seu código de sign-in da Intellecta",
-        body: $this->emailService->getVerificationEmailTemplate(userName: $fullName, code: $code), 
+        body: $this->emailService->getVerificationEmailTemplate(
+          userName: $fullName->getValue(),
+          code: $code
+        ),
         altBody: "$code - Seu código de sign-in da Intellecta"
       );
 
-      // Insere código de verificação na base de dados
+      // Insert verification code into DB
       $this->verificationCodeDao->create(new VerificationCode([
         'verification_code_id' => Uuid::uuid4()->toString(),
         'code' => $code,
         'expires_at' => date('Y-m-d H:i:s', strtotime('+5 minutes')),
-        'user_id' => $user->getUserId()
+        'user_id' => $user->getUserId(),
       ]));
-      
+
       $response->getBody()->write(json_encode([
-        "message"=> 'User account created. Verify your e-mail to continue the sign-up proccess'
+        "message" => 'User account created. Verify your e-mail to continue the sign-up process',
       ]));
-      
-      LogService::info("/auth/sign-up", "Verification code sent to: ".$user->getEmail());
+
+      LogService::info("/auth/sign-up", "Verification code sent to: " . $user->getEmail());
       return $response->withStatus(201);
-    }catch(PDOException $e) {
+
+    } catch (PDOException $e) {
       LogService::http500("/auth/sign-up", $e->getMessage());
-      if($e->getCode() === 23000) {
-        throw new HttpException(
-          $request,
-          'E-mail already registered',
-          409
-        );
+      if ($e->getCode() === 23000) {
+        throw new HttpException($request,'E-mail already registered',409);
       }
-      throw new HttpInternalServerErrorException($request, "Could not sign-up the user due to a database error. See logs for more detail");
-    }catch (HttpException $e) {
+      throw new HttpInternalServerErrorException($request,"Could not sign-up the user due to a database error. See logs for more detail");
+    } catch (HttpException $e) {
       throw $e;
-    }catch (Exception $e){
+    } catch (Exception $e) {
       LogService::http500("/auth/sign-up", $e->getMessage());
       throw new HttpInternalServerErrorException($request, $e->getMessage());
     }
@@ -180,10 +172,12 @@ class AuthController {
         email: $user->getEmail(),
       );
 
+      $userDto = new UserDto($user, null);
+
       $response->getBody()->write(json_encode([
-        'message' => "Conta de usuário verificada com sucesso!",
+        'message' => "User account successfully verified!",
         'token' => $jwt,
-        'user' => $user
+        'user' => $userDto
       ]));
 
       LogService::info("/auth/verify-code", "User account verified: $user");
@@ -230,6 +224,13 @@ class AuthController {
         LogService::http401("/auth/sign-in", "Password incorrect for: $user");
         throw new HttpUnauthorizedException($request, 'E-mail or Password incorrect');
       }
+      $profilePicture = null;
+      
+      if(!empty($user->getProfilePictureId())) {
+        $profilePicture = $this->filesDao->getFileById($user->getProfilePictureId());
+      }
+
+      $userDto = new UserDto($user, $profilePicture);
 
       $jwt = $this->jwtService->generateToken(
         userId: $user->getUserId(),
@@ -238,7 +239,7 @@ class AuthController {
 
       $response->getBody()->write(json_encode([
           'token' => $jwt,
-          'user' => $user
+          'user' => $userDto
       ]));
       
       LogService::info("/auth/sign-in", "User signed-in: $user");
@@ -253,7 +254,6 @@ class AuthController {
       throw new HttpInternalServerErrorException($request, $e->getMessage());
     }
   }
-
 
   public function signOut(Request $request, Response $response): Response {
     $authHeader = $request->getHeaderLine("Authorization");

@@ -26,7 +26,7 @@ class UserDao {
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    return $data ? new User($data) : null;
+    return $data ?  new User($data) : null;
   }
 
   /**
@@ -59,13 +59,12 @@ class UserDao {
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
 
-    $success = $stmt->execute([
-      ':user_id' => $user->getUserId(),
-      ':full_name' => $user->getFullName(),
-      ':email' => $user->getEmail(),
-      ':password_hash' => $user->getPasswordHash(),
-      ':profile_picture_id' => $user->getProfilePictureId()
-    ]);
+    $stmt->bindValue(':user_id', $user->getUserId(), PDO::PARAM_STR);
+    $stmt->bindValue(':full_name', $user->getFullName(), PDO::PARAM_STR);
+    $stmt->bindValue(':email', $user->getEmail(), PDO::PARAM_STR);
+    $stmt->bindValue(':password_hash', $user->getPasswordHash(), PDO::PARAM_STR);
+    $stmt->bindValue(':profile_picture_id', $user->getProfilePictureId(), PDO::PARAM_STR);
+    $success = $stmt->execute();
 
     return $success ? $user : null;
   }
@@ -87,14 +86,13 @@ class UserDao {
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
     
-    $success = $stmt->execute([
-        ':user_id' => $user->getUserId(),
-        ':full_name' => $user->getFullName(),
-        ':email' => $user->getEmail(),
-        ':password_hash' => $user->getPasswordHash(),
-        ':email_verified' => $user->isEmailVerified() ? 1 : 0,
-        ':profile_picture_id' => $user->getProfilePictureId()
-    ]);
+    $stmt->bindValue(':user_id', $user->getUserId(), PDO::PARAM_STR);
+    $stmt->bindValue(':full_name', $user->getFullName(), PDO::PARAM_STR);
+    $stmt->bindValue(':email', $user->getEmail(), PDO::PARAM_STR);
+    $stmt->bindValue(':password_hash', $user->getPasswordHash(), PDO::PARAM_STR);
+    $stmt->bindValue(':email_verified', $user->isEmailVerified() ? 1 : 0, PDO::PARAM_INT);
+    $stmt->bindValue(':profile_picture_id', $user->getProfilePictureId(), PDO::PARAM_STR);
+    $success = $stmt->execute();
 
     return $success ? $user : null;
   }

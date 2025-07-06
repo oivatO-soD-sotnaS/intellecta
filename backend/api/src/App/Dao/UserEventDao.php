@@ -30,11 +30,7 @@ class UserEventDao {
     $stmt->execute();
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($data) {
-      return new UserEvent($data); 
-    }
-
-    return null;
+    return $data ? new UserEvent($data) : null; 
   }
 
   /**
@@ -42,7 +38,7 @@ class UserEventDao {
    * @param string $userId
    * @return UserEvent[]
    */
-  public function getAllUserEventsById(string $userId): ?array {
+  public function getAllUserEventsById(string $userId): array {
     $sql = 'SELECT * FROM user_events
             WHERE user_id = :user_id';
     
@@ -56,7 +52,7 @@ class UserEventDao {
     $userEvents = [];
     
     foreach ($data as $row) {
-        $userEvents[] = new UserEvent($row); 
+      $userEvents[] = new UserEvent($row); 
     }
 
     return $userEvents;
@@ -79,10 +75,6 @@ class UserEventDao {
     $stmt->bindValue(':event_id', $userEvent->getEventId(), PDO::PARAM_STR);
 
     $success = $stmt->execute();
-    if ($success) {
-      return $userEvent;
-    }
-
-    return null;
+    return $success ? $userEvent : null;
   }
 }

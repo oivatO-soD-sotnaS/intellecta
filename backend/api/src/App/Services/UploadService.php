@@ -50,11 +50,29 @@ class UploadService {
     chmod($targetPath, 0644);
   }
 
-  public function avatar(string $ext, string $content): string {
+  public function userProfilePicture(string $ext, string $content): string {
     $fileName = bin2hex(random_bytes(32));
-    $path = "users/avatar/{$fileName}.{$ext}";
+    $path = "users/profile-pictures/{$fileName}.{$ext}";
 
     $this->upload($path, $content);
     return "http://files.intellecta:8080/{$path}";
   }
+
+  public function institutionProfilePicture(string $ext, string $content): string {
+    $fileName = bin2hex(random_bytes(32));
+    $path = "institutions/profile-pictures/{$fileName}.{$ext}";
+
+    $this->upload($path, $content);
+    return "http://files.intellecta:8080/{$path}";
+  }
+
+  public function institutionBanner(string $ext, string $content): string {
+    $fileName = bin2hex(random_bytes(32));
+    $path = "institutions/banners/{$fileName}.{$ext}";
+
+    $this->upload($path, $content);
+    return "http://files.intellecta:8080/{$path}";
+  }
+
+  
 }

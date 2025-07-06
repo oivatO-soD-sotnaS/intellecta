@@ -18,7 +18,7 @@ class Material implements \JsonSerializable {
         $this->file_id = $data['file_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'material_id' => $this->material_id,
             'title' => $this->title,

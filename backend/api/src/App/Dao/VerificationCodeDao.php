@@ -73,12 +73,11 @@ class VerificationCodeDao {
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
 
-    $success = $stmt->execute([
-      ':code' => $verificationCode->getCode(),
-      ':is_pending' => $verificationCode->isPending() ? 1 : 0,
-      ':expires_at' => $verificationCode->getExpiresAt(),
-      ':verification_code_id' => $verificationCode->getVerificationCodeId()
-    ]);
+    $stmt->bindValue(':code', $verificationCode->getCode(), PDO::PARAM_STR);
+    $stmt->bindValue(':is_pending', $verificationCode->isPending() ? 1 : 0, PDO::PARAM_INT);
+    $stmt->bindValue(':expires_at', $verificationCode->getExpiresAt(), PDO::PARAM_STR);
+    $stmt->bindValue(':verification_code_id', $verificationCode->getVerificationCodeId(), PDO::PARAM_STR);
+    $success = $stmt->execute();
 
     return $success ? $verificationCode : null;
   }

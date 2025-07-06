@@ -22,7 +22,7 @@ class Event implements \JsonSerializable {
         $this->changed_at = $data['changed_at'] ?? date('Y-m-d H:i:s');
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'event_id' => $this->event_id,
             'title' => $this->title,

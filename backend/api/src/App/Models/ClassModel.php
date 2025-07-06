@@ -14,7 +14,7 @@ class ClassModel implements \JsonSerializable {
         $this->user_id = $data['user_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'class_users_id' => $this->class_users_id,
             'joined_at' => $this->joined_at,

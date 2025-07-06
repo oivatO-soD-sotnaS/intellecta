@@ -12,7 +12,7 @@ class SubjectClass implements \JsonSerializable {
         $this->subject_id = $data['subject_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'subject_classes_id' => $this->subject_classes_id,
             'class_id' => $this->class_id,

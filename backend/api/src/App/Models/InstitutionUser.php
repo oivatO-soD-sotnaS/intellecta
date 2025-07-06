@@ -18,7 +18,7 @@ class InstitutionUser implements \JsonSerializable {
         $this->user_id = $data['user_id'] ?? '';
     }
 
-    public function toArray(): array {
+    private function toArray(): array {
         return [
             'institution_users_id' => $this->institution_users_id,
             'role' => $this->role,
