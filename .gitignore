@@ -33,6 +33,7 @@ phpunit.xml
 docker-compose.override.yml
 volumes/
 
+backend/files/*
 # Node modules
 node_modules/
 dist/

@@ -77,7 +77,6 @@ return function (App $app) {
         ->add(RequireAuth::class);
     $app->post('/institutions', InstitutionsController::class . ":createInstitution")
         ->add(RequireAuth::class);
-    
     // Rotas de turma
 
 
