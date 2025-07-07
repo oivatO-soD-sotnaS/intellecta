@@ -32,9 +32,9 @@ services:
     ports:
       - "8081:8080"
     volumes:
-      - ./backend/api/public/openapi.json:/tmp/openapi.json:ro
+      - ./backend/api/public/swagger.json:/tmp/swagger.json:ro
     environment:
-      SWAGGER_JSON: /tmp/openapi.json
+      SWAGGER_JSON: /tmp/swagger.json
     networks:
       - intellecta-network
   database:
