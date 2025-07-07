@@ -7,11 +7,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app       # Bind mount para o diretório do frontend
-      - /app/node_modules     # Volume anônimo para priorizar o node_modules do container
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - intellecta-network
-
   backend:
     build:
       context: ./backend
@@ -20,21 +19,31 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./backend/files:/var/www/files.intellecta  # Bind mount para o servidor de arquivos
-      - ./backend/api:/var/www/api.intellecta      # Bind mount para o servidor API
+      - ./backend/files:/var/www/files.intellecta
+      - ./backend/api:/var/www/api.intellecta
     networks:
       intellecta-network:
         aliases:
           - api.intellecta
           - files.intellecta
-
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_container
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./backend/api/public/openapi.json:/tmp/openapi.json:ro
+    environment:
+      SWAGGER_JSON: /tmp/openapi.json
+    networks:
+      - intellecta-network
   database:
     image: mysql:9.3.0
     container_name: database_container
     volumes:
-      - ./volumes/mysql_data:/var/lib/mysql       # Persiste dados da base
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql  # inicializa esquema
-      - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql      # insere mock data
+      - ./volumes/mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql
     environment:
       MYSQL_ROOT_PASSWORD: SegredoInsano
       MYSQL_DATABASE: intellecta
@@ -44,11 +53,9 @@ services:
       - "3306:3306"
     networks:
       - intellecta-network
-
 networks:
   intellecta-network:
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.255.0/24
-  
