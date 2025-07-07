@@ -1,11 +1,10 @@
 /* eslint-disable import/order */
-// components/ui/PasswordInput.tsx
 import React, { useState } from "react"
 import { Input } from "@heroui/input"
 import { EyeSlashFilledIcon } from "./Icons/EyeSlashFilledIcon"
 import { EyeFilledIcon } from "./Icons/EyeFilledIcon"
 
-export const PasswordInput: React.FC<{
+export interface PasswordInputProps {
   name?: string
   label?: string
   placeholder?: string
@@ -14,7 +13,10 @@ export const PasswordInput: React.FC<{
   onChange?: (v: string) => void
   isInvalid?: boolean
   errorMessage?: React.ReactNode
-}> = ({
+  className?: string
+}
+
+export const PasswordInput: React.FC<PasswordInputProps> = ({
   name,
   label = "Senha",
   placeholder = "Digite sua senha",
@@ -23,12 +25,13 @@ export const PasswordInput: React.FC<{
   onChange = () => {},
   isInvalid = false,
   errorMessage,
+  className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(false)
 
   return (
     <Input
-      className="w-full"
+      className={`w-full ${className}`}
       classNames={{
         label: "text-base font-medium text-gray-700 dark:text-gray-200 pb-3",
         inputWrapper:
@@ -38,7 +41,8 @@ export const PasswordInput: React.FC<{
           "focus-within:border-indigo-500 dark:focus-within:border-indigo-400 " +
           "transition-colors",
         input:
-          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 bg-transparent focus:outline-none",
+          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 " +
+          "bg-transparent focus:outline-none",
       }}
       endContent={
         <button
@@ -57,7 +61,7 @@ export const PasswordInput: React.FC<{
       errorMessage={errorMessage}
       isInvalid={isInvalid}
       isRequired={isRequired}
-      label={label + (isRequired ? "" : "")}
+      label={label}
       labelPlacement="outside"
       name={name}
       placeholder={placeholder}

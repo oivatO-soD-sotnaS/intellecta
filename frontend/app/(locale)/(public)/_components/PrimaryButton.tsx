@@ -1,8 +1,7 @@
-// components/ui/PrimaryButton.tsx
 import React from "react"
 import { Button } from "@heroui/button"
 
-interface PrimaryButtonProps {
+export interface PrimaryButtonProps {
   children: React.ReactNode
   type?: "button" | "submit" | "reset"
   isLoading?: boolean
@@ -11,6 +10,8 @@ interface PrimaryButtonProps {
   className?: string
   size?: "sm" | "md" | "lg"
   fullWidth?: boolean
+  onMouseEnter?: React.MouseEventHandler<HTMLButtonElement>
+  onMouseLeave?: React.MouseEventHandler<HTMLButtonElement>
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
@@ -22,11 +23,13 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   className = "",
   size = "lg",
   fullWidth = true,
+  onMouseEnter,
+  onMouseLeave,
 }) => {
   return (
     <Button
       className={`
-        bg-gradient-to-r from-blue-600 to-purple-600 
+        bg-gradient-to-r from-blue-600 to-purple-600
         text-white font-semibold
         hover:from-blue-700 hover:to-purple-700
         transition-all duration-200
@@ -39,6 +42,8 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       size={size}
       type={type}
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {children}
     </Button>
