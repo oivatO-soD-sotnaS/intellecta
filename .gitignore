@@ -41,3 +41,5 @@ build/
 package-lock.json
 package-lock*
 .next/
+
+swagger.json

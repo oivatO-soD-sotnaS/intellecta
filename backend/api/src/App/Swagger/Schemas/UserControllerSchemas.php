@@ -36,11 +36,5 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: "uploaded_at", type: "string", format: "date-time")
     ]
 )]
-#[OA\Schema(
-    schema: "ErrorResponse",
-    properties: [
-        new OA\Property(property: "error", type: "string"),
-        new OA\Property(property: "code", type: "integer")
-    ]
-)]
+
 class UserControllerSchemas {}

@@ -17,6 +17,7 @@ use App\Services\UploadService;
 use App\Vo\InstitutionDescriptionVo;
 use App\Vo\InstitutionNameVo;
 use App\Vo\ProfilePictureVo;
+use App\Vo\UuidV4Vo;
 use Exception;
 use InvalidArgumentException;
 use PDOException;
@@ -82,8 +83,8 @@ class InstitutionsController {
         if(!empty($summary->getBannerId())) {
           $banner = $this->filesDao->getFileById($summary->getBannerId());
         }
-        if(!empty($summary->getThumbnailId())) {
-          $profilePicture = $this->filesDao->getFileById($summary->getThumbnailId());
+        if(!empty($summary->getProfilePictureId())) {
+          $profilePicture = $this->filesDao->getFileById($summary->getProfilePictureId());
         }
 
         $summaryDto = new InstitutionSummaryDto($summary, $banner, $profilePicture);
@@ -144,8 +145,8 @@ class InstitutionsController {
       if(!empty($summary->getBannerId())) {
         $banner = $this->filesDao->getFileById($summary->getBannerId());
       }
-      if(!empty($summary->getThumbnailId())) {
-        $profilePicture = $this->filesDao->getFileById($summary->getThumbnailId());
+      if(!empty($summary->getProfilePictureId())) {
+        $profilePicture = $this->filesDao->getFileById($summary->getProfilePictureId());
       }
 
       $summaryDto = new InstitutionSummaryDto($summary, $banner, $profilePicture);
@@ -199,8 +200,8 @@ class InstitutionsController {
         if(!empty($institution->getBannerId())) {
           $banner = $this->filesDao->getFileById($institution->getBannerId());
         }
-        if(!empty($institution->getThumbnailId())) {
-          $profilePicture = $this->filesDao->getFileById($institution->getThumbnailId());          
+        if(!empty($institution->getProfilePictureId())) {
+          $profilePicture = $this->filesDao->getFileById($institution->getProfilePictureId());          
         }
 
         return new InstitutionDto($institution, $banner, $profilePicture);
@@ -259,8 +260,8 @@ class InstitutionsController {
       if(!empty($institution->getBannerId())) {
         $banner = $this->filesDao->getFileById($institution->getBannerId());
       }
-      if(!empty($institution->getThumbnailId())) {
-        $profilePicture = $this->filesDao->getFileById($institution->getThumbnailId());          
+      if(!empty($institution->getProfilePictureId())) {
+        $profilePicture = $this->filesDao->getFileById($institution->getProfilePictureId());          
       }
       $institutionDto = new InstitutionDto($institution, $banner, $profilePicture);
 
@@ -432,6 +433,236 @@ class InstitutionsController {
     } catch (Exception $e) {
       LogService::http500('/institutions', "Could not create the institution due to a unknown error: {$e->getMessage()}");
       throw new HttpInternalServerErrorException($request, 'Could not create the institution due to a unknown error. See logs for more detail');
+    }
+  }
+
+  #[OA\Patch(
+    path: "/institutions/{institution_id}",
+    tags: ["Instituições"],
+    summary: "Atualizar instituição",
+    description: "Atualiza os dados de uma instituição. Apenas administradores podem atualizar.",
+    operationId: "updateInstitution",
+    security: [["bearerAuth" => []]],
+    parameters: [
+      new OA\Parameter(
+        name: "institution_id",
+        in: "path",
+        required: true,
+        description: "ID da instituição",
+        schema: new OA\Schema(type: "string", format: "uuid")
+      )
+    ],
+    requestBody: new OA\RequestBody(
+      required: true,
+      description: "Dados da instituição e arquivos de imagem (ao menos um campo deve ser enviado)",
+      content: new OA\MediaType(
+        mediaType: "multipart/form-data",
+        schema: new OA\Schema(
+          properties: [
+            new OA\Property(property: "name", type: "string", minLength: 3, maxLength: 255),
+            new OA\Property(property: "description", type: "string"),
+            new OA\Property(
+              property: "profile-picture",
+              type: "string",
+              format: "binary",
+              description: "Imagem de perfil da instituição"
+            ),
+            new OA\Property(
+              property: "banner",
+              type: "string",
+              format: "binary",
+              description: "Banner da instituição"
+            )
+          ]
+        )
+      )
+    ),
+    responses: [
+      new OA\Response(
+        response: 200,
+        description: "Instituição atualizada com sucesso",
+        content: new OA\JsonContent(ref: "#/components/schemas/InstitutionResponse")
+      ),
+      new OA\Response(
+        response: 403,
+        description: "Usuário não é administrador da instituição",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      ),
+      new OA\Response(
+        response: 404,
+        description: "Instituição não encontrada",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      ),
+      new OA\Response(
+        response: 422,
+        description: "Dados inválidos ou ausentes",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      ),
+      new OA\Response(
+        response: 500,
+        description: "Erro interno do servidor",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      )
+    ]
+  )]
+  public function updateInstitution(Request $request, Response $response, string $institution_id): Response {
+    /**
+     * @var InstitutionUser $membership
+    */
+    $membership = $request->getAttribute('membership');
+    
+    if($membership->getRole() !== "admin") {
+      LogService::http403("/institutions/$institution_id", "User {$membership->getUserId()} is not admin");
+      throw new HttpForbiddenException($request, 'User must be admin of the institution');
+    }
+
+    $body = $request->getParsedBody();
+  
+    $name = $body["name"] ?? null;
+    $description = $body["description"] ?? null;
+    $profilePictureId = $body["profile_picture_id"] ?? null;
+    $bannerId = $body["banner_id"] ?? null;
+
+    // Check for empty required fields
+    if (empty($name) && empty($description) && empty($profilePictureId) && empty($bannerId)) {
+      LogService::http422("/institutions/{$institution_id}", "Missing POST parameters: 'name' or 'description' and missing uploaded files 'profile_picture' or 'banner'");
+      throw new HttpException($request, "POST parameters: 'name', 'description', 'profile_picture' or 'banner' are required", 422);
+    }
+
+    try {
+      if(!empty($name)) $name = new InstitutionNameVo($name);
+      if(!empty($description)) $description = new InstitutionDescriptionVo($description);
+      if(!empty($profilePictureId)) $profilePictureId = new UuidV4Vo($profilePictureId);
+      if(!empty($bannerId)) $bannerId = new UuidV4Vo($bannerId);
+    } catch (InvalidArgumentException $e) {
+      LogService::http422("/institutions/{$institution_id}", $e->getMessage());
+      throw new HttpException($request, $e->getMessage(), 422);
+    }
+
+    try{
+      $institution = $this->institutionDao->getInstitutionById($institution_id);
+      
+      if(empty($institution)) {
+        throw new HttpInternalServerErrorException($request, "Could not update institution, institution $institution_id not found");
+      }
+
+      if(!empty($profilePictureId)) {
+        $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
+        if(empty($profilePicture)) {
+          LogService::http404("/institutions/{$institution_id}", "Profile picture with ID {$profilePictureId->getValue()} not found");
+          throw new HttpNotFoundException($request, "Profile picture with ID {$profilePictureId->getValue()} not found");
+        }
+        if($profilePicture->getFileType()->value !== 'image') {
+          LogService::http422("/institutions/{$institution_id}", "File (Profile picture) with ID {$profilePictureId->getValue()} is not an image");
+          throw new HttpException($request, "File (Profile picture) with ID {$profilePictureId->getValue()} is not an image", 422);
+        }
+        $institution->setProfilePictureId($profilePictureId->getValue());
+      }
+
+      if(!empty($bannerId)) {
+        $banner = $this->filesDao->getFileById($bannerId->getValue());
+        if(empty($banner)) {
+          LogService::http404("/institutions/{$institution_id}", "Banner with ID {$bannerId->getValue()} not found");
+          throw new HttpNotFoundException($request, "Banner with ID {$bannerId->getValue()} not found");
+        }
+        if($banner->getFileType()->value !== 'image') {
+          LogService::http422("/institutions/{$institution_id}", "File (Banner) with ID {$bannerId->getValue()} is not an image");
+          throw new HttpException($request, "File (Banner) with ID {$bannerId->getValue()} is not an image", 422);
+        }
+        $institution->setBannerId($bannerId->getValue());
+      }
+
+      if(!empty($name)) $institution->setName($name->getValue());
+      if(!empty($description)) $institution->setDescription($description->getValue());
+      
+      $institution = $this->institutionDao->updateInstitution($institution);
+
+      $institutionDto = new InstitutionDto($institution, $banner ?? null, $profilePicture ?? null);
+
+      $response->getBody()->write(json_encode($institutionDto));
+      LogService::info("/institutions/{$institution_id}", "Institution {$institution->getInstitutionId()} updated by user {$membership->getUserId()}");
+      return $response;
+    }catch(PDOException $e) {
+      LogService::http500("/institutions/{$institution_id}", "Could not update institution due to a database error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not update institution due to a database error. See logs for more details');
+    }catch(HttpException $e) {
+      throw $e;
+    }catch(Exception $e) {
+      LogService::http500("/institutions/{$institution_id}", "Could not update institution due to a unknown error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not update institution due to a unknown error. See logs for more details');
+    }
+  }
+
+  #[OA\Delete(
+    path: "/institutions/{institution_id}",
+    tags: ["Instituições"],
+    summary: "Excluir instituição",
+    description: "Exclui uma instituição. Apenas administradores podem excluir.",
+    operationId: "deleteInstitution",
+    security: [["bearerAuth" => []]],
+    parameters: [
+      new OA\Parameter(
+        name: "institution_id",
+        in: "path",
+        required: true,
+        description: "ID da instituição",
+        schema: new OA\Schema(type: "string", format: "uuid")
+      )
+    ],
+    responses: [
+      new OA\Response(
+        response: 204,
+        description: "Instituição excluída com sucesso"
+      ),
+      new OA\Response(
+        response: 403,
+        description: "Usuário não é administrador da instituição",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      ),
+      new OA\Response(
+        response: 404,
+        description: "Instituição não encontrada",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      ),
+      new OA\Response(
+        response: 500,
+        description: "Erro interno do servidor",
+        content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+      )
+    ]
+  )]
+  public function deleteInstitution(Request $request, Response $response, string $institution_id): Response
+  {
+    /**
+     * @var InstitutionUser $membership
+     */
+    $membership = $request->getAttribute('membership');
+
+    if ($membership->getRole() !== "admin") {
+      LogService::http403("/institutions/$institution_id", "User {$membership->getUserId()} is not admin");
+      throw new HttpForbiddenException($request, 'User must be admin of the institution');
+    }
+
+    try {
+      $institution = $this->institutionDao->getInstitutionById($institution_id);
+
+      if (empty($institution)) {
+        LogService::http404("/institutions/$institution_id", "Institution $institution_id not found");
+        throw new HttpNotFoundException($request, "Institution $institution_id not found");
+      }
+
+      $this->institutionDao->deleteInstitution($institution_id);
+
+      LogService::info("/institutions/$institution_id", "Institution $institution_id deleted by user {$membership->getUserId()}");
+      return $response->withStatus(204);
+    } catch (PDOException $e) {
+      LogService::http500("/institutions/$institution_id", "Could not delete institution due to a database error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not delete institution due to a database error. See logs for more details');
+    } catch (HttpException $e) {
+      throw $e;
+    } catch (Exception $e) {
+      LogService::http500("/institutions/$institution_id", "Could not delete institution due to a unknown error: {$e->getMessage()}");
+      throw new HttpInternalServerErrorException($request, 'Could not delete institution due to a unknown error. See logs for more details');
     }
   }
 }

@@ -40,7 +40,7 @@ class Subject implements \JsonSerializable {
     public function getSubjectId(): string { return $this->subject_id; }
     public function getName(): string { return $this->name; }
     public function getDescription(): ?string { return $this->description; }
-    public function getThumbnailId(): ?string { return $this->profile_picture_id; }
+    public function getProfilePictureId(): ?string { return $this->profile_picture_id; }
     public function getBannerId(): ?string { return $this->banner_id; }
     public function getInstitutionId(): string { return $this->institution_id; }
     public function getProfessorId(): ?string { return $this->professor_id; }

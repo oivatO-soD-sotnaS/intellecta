@@ -97,11 +97,11 @@ class InstitutionSummary implements \JsonSerializable {
     $this->bannerId = $bannerId;
   }
 
-  public function getThumbnailId(): ?string {
+  public function getProfilePictureId(): ?string {
     return $this->profilePictureId;
   }
 
-  public function setThumbnailId(?string $profilePictureId): void {
+  public function setProfilePictureId(?string $profilePictureId): void {
     $this->profilePictureId = $profilePictureId;
   }
 

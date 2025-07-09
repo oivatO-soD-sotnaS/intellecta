@@ -35,23 +35,6 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: "password", type: "string", format: "password", example: "SenhaSegura123!")
     ]
 )]
-#[OA\Schema(
-    schema: "UserResponse",
-    properties: [
-        new OA\Property(property: "user_id", type: "string", format: "uuid"),
-        new OA\Property(property: "full_name", type: "string"),
-        new OA\Property(property: "email", type: "string", format: "email"),
-        new OA\Property(
-            property: "profile_picture", 
-            type: "object", 
-            nullable: true,
-            properties: [
-                new OA\Property(property: "file_id", type: "string", format: "uuid"),
-                new OA\Property(property: "url", type: "string", format: "uri")
-            ]
-        )
-    ]
-)]
 
 #[OA\Schema(
     schema: "AuthResponse",
@@ -73,13 +56,6 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: "status", type: "string", example: "success"),
         new OA\Property(property: "message", type: "string", example: "Token blacklisted with success")
-    ]
-)]
-#[OA\Schema(
-    schema: "ErrorResponse",
-    properties: [
-        new OA\Property(property: "error", type: "string", description: "Mensagem de erro"),
-        new OA\Property(property: "code", type: "integer", description: "Código de status HTTP")
     ]
 )]
 class AuthControllerSchemas {}
