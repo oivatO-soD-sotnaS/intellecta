@@ -8,7 +8,7 @@ import clsx from "clsx"
 import { Providers } from "./providers"
 
 import { siteConfig } from "@/config/site"
-import { fontSans } from "@/config/fonts"
+import { fontMono, fontSans } from "@/config/fonts"
 import { Navbar } from "@/components/navbar"
 import { ThemeSwitch } from "@/components/theme-switch"
 
@@ -40,15 +40,12 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "min-h-screen flex flex-col bg-background text-foreground antialiased"
-          /* suas fontes… */
+          "min-h-screen flex flex-col bg-background text-foreground antialiased font-sans",
+          fontSans.variable
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          {/* Theme Switch flutuante */}
           <ThemeSwitch className="absolute top-4 right-4 z-50" />
-
-          {/* Aqui injetamos só as rotas */}
           {children}
         </Providers>
       </body>

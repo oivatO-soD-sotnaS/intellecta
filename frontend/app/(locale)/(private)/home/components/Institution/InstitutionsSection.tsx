@@ -1,8 +1,9 @@
 // components/InstitutionsSection.tsx
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { Card, CardBody } from "@heroui/card"
+import { addToast } from "@heroui/toast"
 
 import { Institution, InstitutionCard } from "./InstitutionCard"
 import { CreateInstitutionButton } from "./CreateInstitutionButton"
@@ -11,56 +12,74 @@ import { InstitutionModal } from "./InstitutionModal"
 export interface NewInstitutionData {
   name: string
   email: string
-  phone?: string
   description: string
 }
 
-interface InstitutionsSectionProps {
-  institutions: Institution[]
-  /** Vai ser chamado com os dados do form depois que o usuário submeter */
-  onCreateInstitution?: (data: NewInstitutionData) => Promise<void>
-}
+export const InstitutionsSection: React.FC = () => {
+  const [institutions, setInstitutions] = useState<Institution[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isModalOpen, setModalOpen] = useState(false)
 
-export const InstitutionsSection: React.FC<InstitutionsSectionProps> = ({
-  institutions,
-  onCreateInstitution,
-}) => {
-  const [isModalOpen, setModalOpen] = React.useState(false)
+  // 1) Busca inicial de instituições
+  const fetchInstitutions = async () => {
+    setIsLoading(true)
+    try {
+      const res = await fetch("/api/institutions")
+      const data = await res.json()
 
-  /** passa direto ao modal; quem usar esta seção decide o que fazer */
-  const handleCreate = async (data: NewInstitutionData) => {
-    if (onCreateInstitution) {
-      await onCreateInstitution(data)
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar instituições.")
+      setInstitutions(data)
+    } catch (err: any) {
+      addToast({ title: err.message, color: "danger" })
+    } finally {
+      setIsLoading(false)
     }
-    setModalOpen(false)
+  }
+
+  useEffect(() => {
+    fetchInstitutions()
+  }, [])
+
+  // 2) Criação de nova instituição
+  const handleCreate = async (newInst: NewInstitutionData) => {
+    const res = await fetch("/api/institutions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newInst),
+    })
+    const data = await res.json()
+
+    if (!res.ok) throw new Error(data.error || "Erro ao criar instituição.")
+    // Atualiza lista localmente
+    setInstitutions((prev) => [...prev, data])
   }
 
   return (
-    <Card className="rounded-2xl shadow-lg">
-      <CardBody className="p-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">
-              Minhas Instituições
-            </h2>
-            <CreateInstitutionButton onClick={() => setModalOpen(true)} />
-          </div>
+    <Card className="w-full">
+      <CardBody>
+        {/* Cabeçalho com botão de criação */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Minhas Instituições</h2>
+          <CreateInstitutionButton onClick={() => setModalOpen(true)} />
+        </div>
 
-          {/* Lista de cartões */}
-          <div className="space-y-4">
-            {institutions.map((inst) => (
+        {/* Lista ou indicador de carregamento */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <p>Carregando instituições...</p>
+          ) : (
+            institutions.map((inst) => (
               <InstitutionCard key={inst.id} inst={inst} />
-            ))}
-          </div>
-
-          {/* Modal de criação */}
-          {isModalOpen && (
-            <InstitutionModal
-              onClose={() => setModalOpen(false)}
-              onCreate={handleCreate}
-            />
+            ))
           )}
         </div>
+
+        {/* Modal de criação */}
+        <InstitutionModal
+          isOpen={isModalOpen}
+          onCreate={handleCreate}
+          onOpenChange={setModalOpen}
+        />
       </CardBody>
     </Card>
   )

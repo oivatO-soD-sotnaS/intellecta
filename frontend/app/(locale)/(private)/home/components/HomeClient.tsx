@@ -21,41 +21,8 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ user }: HomeClientProps) {
-  // ainda estamos usando dados mock para instituições, atividades e eventos
-
-  const institutionsData = [
-    {
-      id: "1",
-      role: "Admin",
-      name: "IFPR – Campus Foz do Iguaçu",
-      subtitle: "Instituto Federal do Paraná",
-      members: 1234,
-      disciplines: 15,
-      gradientFrom: "indigo-600",
-      gradientTo: "blue-500",
-    },
-    {
-      id: "2",
-      role: "Professor",
-      name: "Universidade Tecnológica",
-      subtitle: "Cursos de Tecnologia",
-      members: 856,
-      disciplines: 8,
-      gradientFrom: "purple-600",
-      gradientTo: "violet-500",
-    },
-    {
-      id: "3",
-      role: "Aluno",
-      name: "Curso de Especialização",
-      subtitle: "Desenvolvimento Web Avançado",
-      members: 45,
-      disciplines: 6,
-      gradientFrom: "emerald-600",
-      gradientTo: "lime-500",
-    },
-  ]
-  const activities = [
+  // mocks para atividades e eventos (continua igual)
+  const activities: Activity[] = [
     {
       id: "1",
       title: "Trabalho Final",
@@ -84,7 +51,7 @@ export default function HomeClient({ user }: HomeClientProps) {
       when: "2 horas atrás",
       type: "discussion",
     },
-  ] as Activity[]
+  ]
 
   const events = [
     {
@@ -112,8 +79,10 @@ export default function HomeClient({ user }: HomeClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Conteúdo principal */}
         <div className="lg:col-span-2 space-y-8">
-          <InstitutionsSection institutions={institutionsData} />
+          {/* Removi o prop 'institutions={institutionsData}' */}
+          <InstitutionsSection />
         </div>
+
         {/* Sidebar */}
         <aside className="space-y-6">
           <ProfileCard
@@ -123,9 +92,9 @@ export default function HomeClient({ user }: HomeClientProps) {
                 : undefined
             }
             disciplinesCount={0}
-            institutionsCount={institutionsData.length}
             name={user.full_name}
           />
+
           <RecentActivities activities={activities} />
           <UpcomingEvents events={events} />
         </aside>
