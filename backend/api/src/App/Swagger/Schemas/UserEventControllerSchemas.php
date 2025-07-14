@@ -56,11 +56,4 @@ use OpenApi\Attributes as OA;
         )
     ]
 )]
-#[OA\Schema(
-    schema: "ErrorResponse",
-    properties: [
-        new OA\Property(property: "error", type: "string"),
-        new OA\Property(property: "code", type: "integer")
-    ]
-)]
 class UserEventControllerSchemas {}

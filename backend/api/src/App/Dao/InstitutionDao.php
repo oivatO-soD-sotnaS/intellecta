@@ -92,11 +92,11 @@ class InstitutionDao {
     $stmt = $pdo->prepare($sql);
 
     $stmt->bindValue(':institution_id', $institution->getInstitutionId(), PDO::PARAM_STR);
-    $stmt->bindValue(':user_id', $institution->getOwnerId(), PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $institution->getUserId(), PDO::PARAM_STR);
     $stmt->bindValue(':name', $institution->getName(), PDO::PARAM_STR);
     $stmt->bindValue(':email', $institution->getEmail(), PDO::PARAM_STR);
     $stmt->bindValue(':description', $institution->getDescription(), PDO::PARAM_STR);
-    $stmt->bindValue(':profile_picture_id', $institution->getThumbnailId(), PDO::PARAM_STR);
+    $stmt->bindValue(':profile_picture_id', $institution->getProfilePictureId(), PDO::PARAM_STR);
     $stmt->bindValue(':banner_id', $institution->getBannerId(), PDO::PARAM_STR);
 
     $success = $stmt->execute();
@@ -164,5 +164,35 @@ class InstitutionDao {
     }
 
     return $institutions;
+  }
+
+  public function updateInstitution(Institution $institution): ?Institution {
+    $sql = "UPDATE institutions
+            SET name = :name, description = :description, profile_picture_id = :profile_picture_id, banner_id = :banner_id
+            WHERE institution_id = :institution_id";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':name', $institution->getName(), PDO::PARAM_STR);
+    $stmt->bindValue(':description', $institution->getDescription(), PDO::PARAM_STR);
+    $stmt->bindValue(':profile_picture_id', $institution->getProfilePictureId(), PDO::PARAM_STR);
+    $stmt->bindValue(':banner_id', $institution->getBannerId(), PDO::PARAM_STR);
+    $stmt->bindValue(':institution_id', $institution->getInstitutionId(), PDO::PARAM_STR);
+
+    $success = $stmt->execute();
+
+    return $success ? $institution : null;
+  }
+
+  public function deleteInstitution(string $institutionId): bool {
+    $sql = "DELETE FROM institutions
+            WHERE institution_id = :institution_id";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':institution_id', $institutionId, PDO::PARAM_STR);
+
+    return $stmt->execute();
   }
 }

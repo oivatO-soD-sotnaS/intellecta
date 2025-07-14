@@ -68,7 +68,7 @@
                 }
             }
         },
-        "/auth/verify-account": {
+        "/auth/verify-code": {
             "post": {
                 "tags": [
                     "Autenticação"
@@ -225,6 +225,81 @@
                     },
                     "401": {
                         "description": "Token inválido ou não fornecido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/files/upload-profile-assets": {
+            "post": {
+                "tags": [
+                    "Arquivos"
+                ],
+                "summary": "Upload de foto de perfil/banner do usuário/instituição/etc",
+                "description": "Faz upload de uma nova foto de perfil",
+                "operationId": "uploadProfilePicture",
+                "requestBody": {
+                    "description": "Arquivo de imagem para upload",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "profile-picture": {
+                                        "description": "Imagem de perfil (formatos: jpg, jpeg, png)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upload realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FileResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Arquivo inválido ou ausente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validação falhou",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -459,90 +534,7 @@
                     }
                 }
             },
-            "delete": {
-                "tags": [
-                    "Eventos Institucionais"
-                ],
-                "summary": "Excluir evento institucional",
-                "description": "Remove um evento institucional (requer privilégios de admin)",
-                "operationId": "deleteInstitutionalEvent",
-                "parameters": [
-                    {
-                        "name": "institution_id",
-                        "in": "path",
-                        "description": "ID da instituição",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
-                    {
-                        "name": "event_id",
-                        "in": "path",
-                        "description": "ID do evento institucional",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Evento excluído com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Institutional event deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Acesso não autorizado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Evento ou instituição não encontrados",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno do servidor",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "patch": {
+            "put": {
                 "tags": [
                     "Eventos Institucionais"
                 ],
@@ -639,6 +631,89 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Eventos Institucionais"
+                ],
+                "summary": "Excluir evento institucional",
+                "description": "Remove um evento institucional (requer privilégios de admin)",
+                "operationId": "deleteInstitutionalEvent",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "event_id",
+                        "in": "path",
+                        "description": "ID do evento institucional",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Evento excluído com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Institutional event deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Evento ou instituição não encontrados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/institutions/summary": {
@@ -691,7 +766,7 @@
                 ]
             }
         },
-        "/institutions/{institution_id}/summary": {
+        "/institutions/summary/{institution_id}": {
             "get": {
                 "tags": [
                     "Instituições"
@@ -942,6 +1017,174 @@
                         }
                     }
                 }
+            },
+            "delete": {
+                "tags": [
+                    "Instituições"
+                ],
+                "summary": "Excluir instituição",
+                "description": "Exclui uma instituição. Apenas administradores podem excluir.",
+                "operationId": "deleteInstitution",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Instituição excluída com sucesso"
+                    },
+                    "403": {
+                        "description": "Usuário não é administrador da instituição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Instituição não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Instituições"
+                ],
+                "summary": "Atualizar instituição",
+                "description": "Atualiza os dados de uma instituição. Apenas administradores podem atualizar.",
+                "operationId": "updateInstitution",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Dados da instituição e arquivos de imagem (ao menos um campo deve ser enviado)",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "profile-picture": {
+                                        "description": "Imagem de perfil da instituição",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "banner": {
+                                        "description": "Banner da instituição",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Instituição atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstitutionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Usuário não é administrador da instituição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Instituição não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos ou ausentes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/users/{user_id}": {
@@ -1012,80 +1255,7 @@
                     }
                 ]
             },
-            "delete": {
-                "tags": [
-                    "Usuários"
-                ],
-                "summary": "Excluir usuário",
-                "description": "Remove permanentemente um usuário (requer autenticação do próprio usuário)",
-                "operationId": "deleteUser",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "ID do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Usuário excluído com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "User deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Não autorizado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Usuário não encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno do servidor",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "patch": {
+            "put": {
                 "tags": [
                     "Usuários"
                 ],
@@ -1200,47 +1370,45 @@
                         "bearerAuth": []
                     }
                 ]
-            }
-        },
-        "/users/upload-profile-picture": {
-            "post": {
+            },
+            "delete": {
                 "tags": [
                     "Usuários"
                 ],
-                "summary": "Upload de foto de perfil",
-                "description": "Faz upload de uma nova foto de perfil para o usuário",
-                "operationId": "uploadProfilePicture",
-                "requestBody": {
-                    "description": "Arquivo de imagem para upload",
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "properties": {
-                                    "profile-picture": {
-                                        "description": "Imagem de perfil (formatos: jpg, jpeg, png)",
-                                        "type": "string",
-                                        "format": "binary"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Excluir usuário",
+                "description": "Remove permanentemente um usuário (requer autenticação do próprio usuário)",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
-                        "description": "Upload realizado com sucesso",
+                        "description": "Usuário excluído com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/FileResponse"
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Arquivo inválido ou ausente",
+                    "401": {
+                        "description": "Não autorizado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1249,8 +1417,8 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validação falhou",
+                    "404": {
+                        "description": "Usuário não encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1481,80 +1649,7 @@
                     }
                 ]
             },
-            "delete": {
-                "tags": [
-                    "Eventos de Usuário"
-                ],
-                "summary": "Excluir evento",
-                "description": "Remove um evento do usuário autenticado",
-                "operationId": "deleteUserEvent",
-                "parameters": [
-                    {
-                        "name": "event_id",
-                        "in": "path",
-                        "description": "ID do evento do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Evento excluído com sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "Message": {
-                                            "type": "string",
-                                            "example": "User event deleted successfully"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Não autorizado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Evento não encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno do servidor",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "patch": {
+            "put": {
                 "tags": [
                     "Eventos de Usuário"
                 ],
@@ -1651,11 +1746,95 @@
                         "bearerAuth": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Eventos de Usuário"
+                ],
+                "summary": "Excluir evento",
+                "description": "Remove um evento do usuário autenticado",
+                "operationId": "deleteUserEvent",
+                "parameters": [
+                    {
+                        "name": "event_id",
+                        "in": "path",
+                        "description": "ID do evento do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Evento excluído com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Message": {
+                                            "type": "string",
+                                            "example": "User event deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Evento não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
     "components": {
         "schemas": {
+            "ErrorResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "SignUpRequest": {
                 "required": [
                     "full_name",
@@ -1729,36 +1908,6 @@
                 },
                 "type": "object"
             },
-            "UserResponse": {
-                "properties": {
-                    "user_id": {
-                        "type": "string",
-                        "format": "uuid"
-                    },
-                    "full_name": {
-                        "type": "string"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email"
-                    },
-                    "profile_picture": {
-                        "properties": {
-                            "file_id": {
-                                "type": "string",
-                                "format": "uuid"
-                            },
-                            "url": {
-                                "type": "string",
-                                "format": "uri"
-                            }
-                        },
-                        "type": "object",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
             "AuthResponse": {
                 "properties": {
                     "token": {
@@ -1796,19 +1945,6 @@
                     "message": {
                         "type": "string",
                         "example": "Token blacklisted with success"
-                    }
-                },
-                "type": "object"
-            },
-            "ErrorResponse": {
-                "properties": {
-                    "error": {
-                        "description": "Mensagem de erro",
-                        "type": "string"
-                    },
-                    "code": {
-                        "description": "Código de status HTTP",
-                        "type": "integer"
                     }
                 },
                 "type": "object"
@@ -1987,7 +2123,7 @@
                         "type": "string",
                         "format": "email"
                     },
-                    "thumbnail": {
+                    "profile_picture": {
                         "properties": {
                             "file_id": {
                                 "type": "string",
@@ -2011,6 +2147,45 @@
                         "nullable": true
                     },
                     "banner": {
+                        "properties": {
+                            "file_id": {
+                                "type": "string",
+                                "format": "uuid"
+                            },
+                            "url": {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            "filename": {
+                                "type": "string"
+                            },
+                            "mime_type": {
+                                "type": "string"
+                            },
+                            "size": {
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UserResponse": {
+                "properties": {
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "full_name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "profile_picture": {
                         "properties": {
                             "file_id": {
                                 "type": "string",
@@ -2194,7 +2369,11 @@
         },
         {
             "name": "Eventos de Usuário",
-            "description": "Eventos de Usuário"
+            "description": "Operações relacionadas a eventos de usuários"
+        },
+        {
+            "name": "Arquivos",
+            "description": "Arquivos"
         }
     ]
 }

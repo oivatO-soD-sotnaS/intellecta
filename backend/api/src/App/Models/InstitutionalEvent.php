@@ -33,4 +33,15 @@ class InstitutionalEvent implements \JsonSerializable {
     public function getInstitutionalEventId(): string { return $this->institutional_event_id; }
     public function getEventId(): string { return $this->event_id; }
     public function getInstitutionId(): string { return $this->institution_id; }
+    public function setInstitutionalEventId(string $institutional_event_id): void {
+        $this->institutional_event_id = $institutional_event_id;
+    }
+
+    public function setEventId(string $event_id): void {
+        $this->event_id = $event_id;
+    }
+
+    public function setInstitutionId(string $institution_id): void {
+        $this->institution_id = $institution_id;
+    }
 }

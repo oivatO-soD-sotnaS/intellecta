@@ -5,6 +5,7 @@ CREATE TABLE `files` (
   `url` TEXT NOT NULL,
   `filename` VARCHAR(128) NOT NULL,
   `mime_type` VARCHAR(100),
+  `type` ENUM('image', 'video', 'audio', 'document', 'other') NOT NULL DEFAULT 'other',
   `size` INT UNSIGNED, -- Tamanho em bytes
   `uploaded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

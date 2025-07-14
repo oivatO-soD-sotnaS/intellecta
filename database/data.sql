@@ -1,7 +1,7 @@
-INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `size`, `uploaded_at`) VALUES
-('f7dcef54-c374-4ea3-af0c-24f19bda74b8', 'https://example.com/files/1', 'profile1.jpg', 'image/jpeg', 102400, '2023-01-01 10:00:00'),
-('9b317eae-e4c4-4de0-a244-2eef9558e2e7', 'https://example.com/files/2', 'document.pdf', 'application/pdf', 512000, '2023-01-02 11:00:00'),
-('e27d83a7-4329-43d9-b011-e1289cf2b5f9', 'https://example.com/files/3', 'presentation.pptx', 'application/vnd.ms-powerpoint', 2048000, '2023-01-03 12:00:00');
+INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `type`, `size`, `uploaded_at`) VALUES
+('f7dcef54-c374-4ea3-af0c-24f19bda74b8', 'https://example.com/files/1', 'profile1.jpg', 'image/jpeg', 'image', 102400, '2023-01-01 10:00:00'),
+('9b317eae-e4c4-4de0-a244-2eef9558e2e7', 'https://example.com/files/2', 'document.pdf', 'application/pdf', 'document', 512000, '2023-01-02 11:00:00'),
+('e27d83a7-4329-43d9-b011-e1289cf2b5f9', 'https://example.com/files/3', 'presentation.pptx', 'application/vnd.ms-powerpoint', 'document', 2048000, '2023-01-03 12:00:00');
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_verified`, `created_at`, `changed_at`, `profile_picture_id`) VALUES
 ('e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'John Doe', 'john@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', 'f7dcef54-c374-4ea3-af0c-24f19bda74b8'),

@@ -28,6 +28,8 @@ use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+use OpenApi\Attributes as OA;
+#[OA\Tag(name: "Usuários", description: "Operações relacionadas a gestão de usuários")]
 class UserController {
   public function __construct(
     private UserDao $userDao,
@@ -37,6 +39,45 @@ class UserController {
     private FilesDao $filesDao
   ) {}
  
+  #[OA\Get(
+        path: "/users/{user_id}",
+        tags: ["Usuários"],
+        summary: "Obter dados do usuário",
+        description: "Retorna os dados completos de um usuário específico (requer autenticação do próprio usuário)",
+        operationId: "getUser",
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "user_id",
+                in: "path",
+                required: true,
+                description: "ID do usuário",
+                schema: new OA\Schema(type: "string", format: "uuid")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Dados do usuário",
+                content: new OA\JsonContent(ref: "#/components/schemas/UserResponse")
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Não autorizado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Usuário não encontrado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Erro interno do servidor",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            )
+        ]
+    )]
   public function getUser(Request $request, Response $response, string $user_id): Response {
     try {
       $user = $this->userDao->getById($user_id);
@@ -71,6 +112,66 @@ class UserController {
     }
   }
 
+  #[OA\Put(
+        path: "/users/{user_id}",
+        tags: ["Usuários"],
+        summary: "Atualizar usuário",
+        description: "Atualiza os dados de um usuário (requer autenticação do próprio usuário)",
+        operationId: "updateUser",
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "user_id",
+                in: "path",
+                required: true,
+                description: "ID do usuário",
+                schema: new OA\Schema(type: "string", format: "uuid")
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: "Dados do usuário para atualização",
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "full_name", type: "string", nullable: true, minLength: 3, maxLength: 255),
+                    new OA\Property(property: "password", type: "string", format: "password", nullable: true, minLength: 8),
+                    new OA\Property(property: "profile_picture_id", type: "string", format: "uuid", nullable: true)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Usuário atualizado com sucesso",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "User updated successfully"),
+                        new OA\Property(property: "user", ref: "#/components/schemas/UserResponse")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Dados inválidos",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Não autorizado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Usuário não encontrado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Erro interno do servidor",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            )
+        ]
+    )]
   public function updateUser(Request $request, Response $response, string $user_id): Response {
     $body = $request->getParsedBody();
 
@@ -116,6 +217,16 @@ class UserController {
       }
 
       if (!empty($profilePictureId)) {
+        $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
+        if(empty($profilePicture)) {
+          LogService::http404("/users/{$user_id}", "Profile picture with ID {$profilePictureId->getValue()} not found");
+          throw new HttpNotFoundException($request, "Profile picture with ID {$profilePictureId->getValue()} not found");
+        }
+        if($profilePicture->getFileType()->value !== 'image') {
+          LogService::http422("/users/{$user_id}", "File (Profile picture) with ID {$profilePictureId->getValue()} is not an image");
+          throw new HttpException($request, "File (Profile picture) with ID {$profilePictureId->getValue()} is not an image", 422);
+        }
+
         $user->setProfilePictureId($profilePictureId->getValue());
       }
       
@@ -145,6 +256,49 @@ class UserController {
     }
   }
 
+  #[OA\Delete(
+        path: "/users/{user_id}",
+        tags: ["Usuários"],
+        summary: "Excluir usuário",
+        description: "Remove permanentemente um usuário (requer autenticação do próprio usuário)",
+        operationId: "deleteUser",
+        security: [["bearerAuth" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "user_id",
+                in: "path",
+                required: true,
+                description: "ID do usuário",
+                schema: new OA\Schema(type: "string", format: "uuid")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Usuário excluído com sucesso",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "User deleted successfully")
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Não autorizado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Usuário não encontrado",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Erro interno do servidor",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            )
+        ]
+    )]
   public function deleteUser(Request $request, Response $response, string $user_id): Response {
     try {
       $user = $this->userDao->getById($user_id);
@@ -178,52 +332,5 @@ class UserController {
       LogService::http500("/users/$user_id", $e->getMessage());
       throw new HttpInternalServerErrorException($request, 'Unexpected error. See logs for more detail');
     }
-  }
-
-  public function uploadProfilePicture(Request $request, Response $response): Response {
-    $uploadedFiles = $request->getUploadedFiles();
-    
-    /**
-     * @var UploadedFileInterface|null
-     */
-    $profilePicture = $uploadedFiles['profile-picture'] ?? null;
-
-    if (!$profilePicture) {
-      LogService::http422('/users/upload-profile-picture', "'profile-picture' file is required");
-      throw new HttpException($request, "Missing file", 422);
-    }
-
-    try {
-      $picture = new ProfilePictureVo($profilePicture);
-      $fileUrl = $this->uploadService->userProfilePicture($picture->getExtension(), $picture->getContent());
-
-      $file = $this->fileDao->createFile(new File([
-        "file_id" => Uuid::uuid4()->toString(),
-        "url" => $fileUrl,
-        "filename" => $picture->getSafeFilename(),
-        "mime_type" => $picture->getMimeType(),
-        "size" => $picture->getSize(),
-        "uploaded_at" => date('Y-m-d H:i:s')
-      ]));
-
-      $response->getBody()->write(json_encode($file));
-      
-      LogService::info('/users/upload-profile-picture', "Avatar uploaded successfully!");
-      return $response;
-    } catch (InvalidArgumentException $e) {
-      LogService::http422('/users/upload-profile-picture', $e->getMessage());
-      throw new HttpException($request, $e->getMessage(), 422);
-    } catch (RuntimeException $e) {
-      LogService::error('/users/upload-profile-picture', 'Could not upload avatar due to a run time error: '.$e->getMessage());
-      throw new HttpInternalServerErrorException($request, 'Could not upload avatar due to an run time error. See logs for more details');
-    } catch (PDOException $e) {
-      LogService::error('/users/upload-profile-picture', 'Could not upload avatar due to a database error:'.$e->getMessage());
-      throw new HttpInternalServerErrorException($request, 'Could not upload avatar due to a database error. See logs for more details');      
-    } catch (HttpException $e) {
-      throw $e;
-    } catch (Exception $e) {
-      LogService::error('/users/upload-profile-picture', 'Could not upload avatar due to an unknown error:'.$e->getMessage());
-      throw new HttpInternalServerErrorException($request, 'Could not upload avatar due to an unknown error. See logs for more details');
-    }    
   }
 }

@@ -13,8 +13,8 @@ class FilesDao {
   ) {}
 
   public function createFile (File $file): ?File {
-    $sql = "INSERT INTO files (file_id, url, filename, mime_type, size, uploaded_at)
-            VALUE (:file_id, :url, :filename, :mime_type, :size, :uploaded_at)";
+    $sql = "INSERT INTO files (file_id, url, filename, file_type, mime_type, size, uploaded_at)
+            VALUE (:file_id, :url, :filename, :file_type, :mime_type, :size, :uploaded_at)";
 
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
@@ -22,6 +22,7 @@ class FilesDao {
     $stmt->bindValue(':file_id', $file->getFileId(), PDO::PARAM_STR);
     $stmt->bindValue(':url', $file->getUrl(), PDO::PARAM_STR);
     $stmt->bindValue(':filename', $file->getFilename(), PDO::PARAM_STR);
+    $stmt->bindValue(':file_type', $file->getFileType()->value, PDO::PARAM_STR);
     $stmt->bindValue(':mime_type', $file->getMimeType(), PDO::PARAM_STR);
     $stmt->bindValue(':size', $file->getSize(), PDO::PARAM_STR);
     $stmt->bindValue(':uploaded_at', $file->getUploadedAt(), PDO::PARAM_STR);

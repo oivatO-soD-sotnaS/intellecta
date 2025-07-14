@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\FilesController;
 use App\Controllers\InstitutionalEventController;
 use App\Controllers\InstitutionsController;
 use App\Controllers\UserController;
@@ -44,8 +45,6 @@ return function (App $app) {
         ->add(RequireAuth::class);
     $app->delete('/users/{user_id:'.UUIDv4_REGEX.'}', UserController::class . ':deleteUser')
         ->add(RequireAuth::class);
-    $app->post('/users/upload-profile-picture', UserController::class . ':uploadProfilePicture');
-        // ->add(RequireAuth::class);
 
     // Rotas de evento da instituição
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events', InstitutionalEventController::class . ':getInstitutionalEvents')
@@ -65,17 +64,24 @@ return function (App $app) {
         ->add(RequireAuth::class);
 
     // Rotas de instituição
-    $app->get('/institutions', InstitutionsController::class . ":getInstitutions")
-        ->add(RequireAuth::class);
-    $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":getInstitutionById")
-        ->add(RequireInstitutionMembership::class)
-        ->add(RequireAuth::class);
     $app->get('/institutions/summary', InstitutionsController::class . ':getInstitutionsSummary')
         ->add(RequireAuth::class);
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/summary', InstitutionsController::class . ':getInstitutionSummaryById')
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
+        
+    $app->get('/institutions', InstitutionsController::class . ":getInstitutions")
+        ->add(RequireAuth::class);
     $app->post('/institutions', InstitutionsController::class . ":createInstitution")
+        ->add(RequireAuth::class);
+    $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":getInstitutionById")
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    $app->patch('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":updateInstitution")
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    $app->delete('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":deleteInstitution")
+        ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
     // Rotas de turma
 
@@ -99,4 +105,5 @@ return function (App $app) {
 
 
     // Rotas de arquivo
+    $app->post('/files/upload-profile-assets', FilesController::class . ':uploadProfileAssets');
 };

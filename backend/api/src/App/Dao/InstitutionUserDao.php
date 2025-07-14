@@ -34,4 +34,22 @@ class InstitutionUserDao {
 
     return $data ? new InstitutionUser($data) : null;
   }
+
+  public function createInstitutionUser(InstitutionUser $institutionUser): ?InstitutionUser {
+    $sql = "INSERT INTO institution_users (institution_users_id, role, joined_at, institution_id, user_id)
+            VALUES (:institution_users_id, :role, :joined_at, :institution_id, :user_id)";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':institution_users_id', $institutionUser->getInstitutionUsersId(), PDO::PARAM_STR);
+    $stmt->bindValue(':role', $institutionUser->getRole(), PDO::PARAM_STR);
+    $stmt->bindValue(':joined_at', $institutionUser->getJoinedAt(), PDO::PARAM_STR);
+    $stmt->bindValue(':institution_id', $institutionUser->getInstitutionId(), PDO::PARAM_STR);
+    $stmt->bindValue(':user_id', $institutionUser->getUserId(), PDO::PARAM_STR);
+
+    $success = $stmt->execute();
+
+    return $success ? $institutionUser : null;
+  }
 }
