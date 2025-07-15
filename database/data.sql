@@ -15,15 +15,15 @@ INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `p
 ('c7579a48-cddb-43f3-af78-d0f26edb327c', 'MIT', 'info@mit.edu', 'Technology institute', NULL, NULL, '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('f6989a00-0032-4068-a2d0-efd8b1085aad', 'Stanford University', 'admin@stanford.edu', 'Private research university', NULL, NULL, 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
 
-INSERT INTO `institution_users` (`institution_users_id`, `role`, `joined_at`, `institution_id`, `user_id`) VALUES
+INSERT INTO `institution_users` (`institution_user_id`, `role`, `joined_at`, `institution_id`, `user_id`) VALUES
 ('f256ae5c-694f-4766-bd3b-3614c0d511c1', 'admin', '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('d58cbc3d-0d46-40fd-9b29-9ba5edaaa92f', 'teacher', '2023-01-02 11:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('014a55e8-e20f-44d9-91f9-c58096704d27', 'student', '2023-01-03 12:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
 
-INSERT INTO `invitations` (`invitation_id`, `email`, `role`, `token`, `expires_at`, `accepted_at`, `created_at`, `institution_id`, `invited_by`) VALUES
-('e9c22b07-4d63-40fb-b9fd-b212575fabf6', 'newuser1@example.com', 'teacher', 'token1abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv', '2023-02-01 10:00:00', NULL, '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
-('99ee192f-fa77-4925-8307-9c3c69115e44', 'newuser2@example.com', 'student', 'token2abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv', '2023-02-02 11:00:00', '2023-01-15 11:00:00', '2023-01-02 11:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
-('8e3ac162-1095-4915-99c5-79c2f87abe56', 'newuser3@example.com', 'admin', 'token3abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuv', '2023-02-03 12:00:00', NULL, '2023-01-03 12:00:00', 'f6989a00-0032-4068-a2d0-efd8b1085aad', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6');
+INSERT INTO `invitations` (`invitation_id`, `email`, `role`, `expires_at`, `accepted_at`, `created_at`, `institution_id`, `invited_by`) VALUES
+('e9c22b07-4d63-40fb-b9fd-b212575fabf6', 'newuser1@example.com', 'teacher', '2023-02-01 10:00:00', NULL, '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
+('99ee192f-fa77-4925-8307-9c3c69115e44', 'newuser2@example.com', 'student', '2023-02-02 11:00:00', '2023-01-15 11:00:00', '2023-01-02 11:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
+('8e3ac162-1095-4915-99c5-79c2f87abe56', 'newuser3@example.com', 'admin', '2023-02-03 12:00:00', NULL, '2023-01-03 12:00:00', 'f6989a00-0032-4068-a2d0-efd8b1085aad', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6');
 
 INSERT INTO `classes` (`class_id`, `name`, `description`, `profile_picture_id`, `banner_id`, `institution_id`) VALUES
 ('7bae5f09-48fd-47d6-958d-26809f97a2e0', 'Computer Science 101', 'Intro to Computer Science', NULL, NULL, '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),

@@ -7,7 +7,7 @@ if (!API) throw new Error("API_BASE_URL não definida")
 
 async function proxyToPHP(
   req: NextRequest,
-  method: "GET" | "PATCH" | "DELETE",
+  method: "GET" | "PUT" | "DELETE",
   path: string,
   includeBody = false
 ): Promise<NextResponse> {
@@ -51,13 +51,13 @@ export async function GET(
   return proxyToPHP(req, "GET", `/users/${id}`)
 }
 
-export async function PATCH(
+export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params
 
-  return proxyToPHP(req, "PATCH", `/users/${id}`, true)
+  return proxyToPHP(req, "PUT", `/users/${id}`, true)
 }
 
 export async function DELETE(

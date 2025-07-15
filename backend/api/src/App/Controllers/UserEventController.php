@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Controllers;
@@ -15,21 +14,15 @@ use App\Dto\UserEventDto;
 use App\Vo\EventDateVo;
 use App\Vo\EventDescriptionVo;
 use App\Vo\EventTitleVo;
-use Exception;
 use InvalidArgumentException;
-use PDOException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
-use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-use OpenApi\Attributes as OA;
-
-#[OA\Tag(name: "Eventos de Usuário", description: "Operações relacionadas a eventos de usuários")]
-class UserEventController {
+class UserEventController extends BaseController {
     public function __construct(
         private UserEventDao $userEventDao,
         private EventDao $eventDao,
@@ -37,43 +30,10 @@ class UserEventController {
         private EmailService $emailService
     ) {}
 
-    #[OA\Get(
-        path: "/users/events",
-        tags: ["Eventos de Usuário"],
-        summary: "Listar eventos do usuário",
-        description: "Retorna todos os eventos associados ao usuário autenticado",
-        operationId: "getUserEvents",
-        security: [["bearerAuth" => []]],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Lista de eventos do usuário",
-                content: new OA\JsonContent(
-                    type: "array",
-                    items: new OA\Items(ref: "#/components/schemas/UserEventResponse")
-                )
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Nenhum evento encontrado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            )
-        ]
-    )]
-    public function getUserEvents(Request $request, Response $response) {
-        $token = $request->getAttribute("token");
-
-        try {
+    public function getUserEvents(Request $request, Response $response): Response {
+        return $this->handleErrors($request, function() use ($request, $response) {
+            $token = $request->getAttribute("token");
+    
             $user = $this->userDao->getById($token["sub"]);
             if (empty($user)) {
                 LogService::http401("/users/events", "User not found: " . $token["sub"]);
@@ -93,81 +53,33 @@ class UserEventController {
             $response->getBody()->write(json_encode($userEventsDto));
             LogService::info("/users/events", "User events fetched for: $user");
             return $response;
-        } catch (PDOException $e) {
-            LogService::http500("/users/events", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Database error");
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Exception $e) {
-            LogService::http500("/users/events", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Unexpected error");
-        }
+        });
     }
 
-    #[OA\Post(
-        path: "/users/events",
-        tags: ["Eventos de Usuário"],
-        summary: "Criar novo evento",
-        description: "Cria um novo evento associado ao usuário autenticado",
-        operationId: "createUserEvent",
-        security: [["bearerAuth" => []]],
-        requestBody: new OA\RequestBody(
-            required: true,
-            description: "Dados do evento a ser criado",
-            content: new OA\JsonContent(ref: "#/components/schemas/CreateUserEventRequest")
-        ),
-        responses: [
-            new OA\Response(
-                response: 201,
-                description: "Evento criado com sucesso",
-                content: new OA\JsonContent(ref: "#/components/schemas/UserEventCreatedResponse")
-            ),
-            new OA\Response(
-                response: 400,
-                description: "Dados inválidos",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 422,
-                description: "Validação falhou",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            )
-        ]
-    )]
-    public function createUserEvent(Request $request, Response $response) {
-        $token = $request->getAttribute("token");
-        $body = $request->getParsedBody();
-
-        $title = $body['title'] ?? null;
-        $description = $body['description'] ?? null;
-        $eventDate = $body['event_date'] ?? null;
-        $eventType = $body['event_type'] ?? null;
-
-        if (empty($title) || empty($description) || empty($eventDate) || empty($eventType)) {
-            LogService::http422("/users/events", "Missing parameters");
-            throw new HttpException($request, "'title', 'description', 'event_date' and 'event_type' are required", 422);
-        }
-
-        try {
-            $title = new EventTitleVo($title);
-            $description = new EventDescriptionVo($description);
-            $eventDate = new EventDateVo($eventDate);
-        } catch (InvalidArgumentException $e) {
-            LogService::http422("/users/events", $e->getMessage());
-            throw new HttpException($request, $e->getMessage(), 422);
-        }
-
-        try {
+    public function createUserEvent(Request $request, Response $response): Response {
+        return $this->handleErrors($request, function() use ($request, $response) {
+            $token = $request->getAttribute("token");
+            $body = $request->getParsedBody();
+    
+            $title = $body['title'] ?? null;
+            $description = $body['description'] ?? null;
+            $eventDate = $body['event_date'] ?? null;
+            $eventType = $body['event_type'] ?? null;
+    
+            if (empty($title) || empty($description) || empty($eventDate) || empty($eventType)) {
+                LogService::http422("/users/events", "Missing parameters");
+                throw new HttpException($request, "'title', 'description', 'event_date' and 'event_type' are required", 422);
+            }
+    
+            try {
+                $title = new EventTitleVo($title);
+                $description = new EventDescriptionVo($description);
+                $eventDate = new EventDateVo($eventDate);
+            } catch (InvalidArgumentException $e) {
+                LogService::http422("/users/events", $e->getMessage());
+                throw new HttpException($request, $e->getMessage(), 422);
+            }
+    
             $user = $this->userDao->getById($token["sub"]);
             if (!$user) {
                 LogService::http404("/users/events", "User not found: " . $token["sub"]);
@@ -197,94 +109,27 @@ class UserEventController {
 
             LogService::info("/users/events", "User event created: $userEvent");
             return $response->withStatus(201);
-        } catch (PDOException $e) {
-            LogService::http500("/users/events", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Database error");
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Exception $e) {
-            LogService::http500("/users/events", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Unexpected error");
-        }
+        });
     }
 
-    #[OA\Put(
-        path: "/users/events/{event_id}",
-        tags: ["Eventos de Usuário"],
-        summary: "Atualizar evento",
-        description: "Atualiza um evento existente do usuário autenticado",
-        operationId: "updateUserEvent",
-        security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "event_id",
-                in: "path",
-                required: true,
-                description: "ID do evento do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
-        requestBody: new OA\RequestBody(
-            required: true,
-            description: "Dados do evento a serem atualizados",
-            content: new OA\JsonContent(ref: "#/components/schemas/UpdateUserEventRequest")
-        ),
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Evento atualizado com sucesso",
-                content: new OA\JsonContent(ref: "#/components/schemas/UserEventUpdatedResponse")
-            ),
-            new OA\Response(
-                response: 400,
-                description: "Dados inválidos",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Evento não encontrado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 422,
-                description: "Validação falhou",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            )
-        ]
-    )]
-    public function updateUserEvent(Request $request, Response $response, string $event_id) {
-        $body = $request->getParsedBody();
-
-        $title = $body['title'] ?? null;
-        $description = $body['description'] ?? null;
-        $eventDate = $body['event_date'] ?? null;
-        $eventType = $body['event_type'] ?? null;
-
-        if (empty($title) && empty($description) && empty($eventDate) && empty($eventType)) {
-            LogService::http422("/users/events/$event_id", "No valid fields to update");
-            throw new HttpException($request, "At least one field is required for update", 422);
-        }
-
-        try {
+    public function updateUserEvent(Request $request, Response $response, string $event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
+            $body = $request->getParsedBody();
+    
+            $title = $body['title'] ?? null;
+            $description = $body['description'] ?? null;
+            $eventDate = $body['event_date'] ?? null;
+            $eventType = $body['event_type'] ?? null;
+    
+            if (empty($title) && empty($description) && empty($eventDate) && empty($eventType)) {
+                LogService::http422("/users/events/$event_id", "No valid fields to update");
+                throw new HttpException($request, "At least one field is required for update", 422);
+            }
+    
             if(!empty($title)) $title = new EventTitleVo($title);
             if(!empty($description)) $description = new EventDescriptionVo($description);
             if(!empty($eventDate)) $eventDate = new EventDateVo($eventDate);
-        } catch (InvalidArgumentException $e) {
-            LogService::http422("/users/events", $e->getMessage());
-            throw new HttpException($request, $e->getMessage(), 422);
-        }
-
-        try {
+    
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
                 LogService::http404("/users/events/$event_id", "User event not found");
@@ -325,62 +170,11 @@ class UserEventController {
 
             LogService::info("/users/events/$event_id", "User event updated: $userEvent");
             return $response;
-        } catch (PDOException $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Database error");
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Exception $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Unexpected error");
-        }
+        });
     }
 
-    #[OA\Delete(
-        path: "/users/events/{event_id}",
-        tags: ["Eventos de Usuário"],
-        summary: "Excluir evento",
-        description: "Remove um evento do usuário autenticado",
-        operationId: "deleteUserEvent",
-        security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "event_id",
-                in: "path",
-                required: true,
-                description: "ID do evento do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Evento excluído com sucesso",
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: "Message", type: "string", example: "User event deleted successfully")
-                    ]
-                )
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Evento não encontrado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            )
-        ]
-    )]
-    public function deleteUserEvent(Request $request, Response $response, string $event_id) {
-        try {
+    public function deleteUserEvent(Request $request, Response $response, string $event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
                 LogService::http404("/users/events/$event_id", "User event not found");
@@ -403,58 +197,11 @@ class UserEventController {
 
             $response->getBody()->write(json_encode(["Message" => "User event deleted successfully"]));
             return $response;
-        } catch (PDOException $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Database error");
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Exception $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Unexpected error");
-        }
+        });
     }
 
-    #[OA\Get(
-        path: "/users/events/{event_id}",
-        tags: ["Eventos de Usuário"],
-        summary: "Obter detalhes de um evento",
-        description: "Retorna os detalhes de um evento específico do usuário autenticado",
-        operationId: "getUserEvent",
-        security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "event_id",
-                in: "path",
-                required: true,
-                description: "ID do evento do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: "Detalhes do evento",
-                content: new OA\JsonContent(ref: "#/components/schemas/UserEventResponse")
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 404,
-                description: "Evento não encontrado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            )
-        ]
-    )]
-    public function getUserEvent(Request $request, Response $response, string $event_id) {
-        try {
+    public function getUserEvent(Request $request, Response $response, string $event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
                 LogService::http404("/users/events/$event_id", "User event not found");
@@ -477,14 +224,6 @@ class UserEventController {
             $response->getBody()->write(json_encode($userEventDto));
 
             return $response;
-        } catch (PDOException $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Database error");
-        } catch (HttpException $e) {
-            throw $e;
-        } catch (Exception $e) {
-            LogService::http500("/users/events/$event_id", $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Unexpected error");
-        }
+        });
     }
 }

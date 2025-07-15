@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Vo\EmailAddressVo;
+
 class User implements \JsonSerializable {
     private $user_id;
     private $full_name;

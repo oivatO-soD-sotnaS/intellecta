@@ -1,0 +1,19 @@
+FROM php:8.3-cli
+
+# Ensure all packages are updated to the latest security patches
+RUN apt-get update && apt-get upgrade -y
+
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && apt-get install -y zip unzip git \
+    && docker-php-ext-install sockets
+
+COPY api/composer.json api/composer.lock ./
+RUN curl -sS https://getcomposer.org/installer | php && php composer.phar install
+
+COPY api/src/ ./src/
+COPY api/worker/ ./worker/
+COPY api/vendor/ ./vendor/
+
+CMD ["php", "worker/email_worker.php"]

@@ -13,8 +13,9 @@ final class PasswordVo
   public function __construct(string $password)
   {
     $password = trim($password);
-
+    $password = strip_tags($password);
     $length = strlen($password);
+
     if ($length < 8 || $length > 64) {
       throw new InvalidArgumentException('Password must be between 8 and 64 characters.');
     }

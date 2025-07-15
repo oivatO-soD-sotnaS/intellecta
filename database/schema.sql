@@ -49,7 +49,7 @@ CREATE TABLE `institutions` (
 
 -- Tabela de relação MxN entre users e institutions
 CREATE TABLE `institution_users` (
-  `institution_users_id` CHAR(36) PRIMARY KEY,
+  `institution_user_id` CHAR(36) PRIMARY KEY,
   `role` ENUM('student', 'teacher', 'admin') NOT NULL DEFAULT 'student',
   `joined_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `institution_id` CHAR(36) NOT NULL,
@@ -64,7 +64,6 @@ CREATE TABLE `invitations` (
   `invitation_id` CHAR(36) NOT NULL PRIMARY KEY,
   `email` VARCHAR(255) NOT NULL,
   `role` ENUM('student', 'teacher', 'admin') NOT NULL DEFAULT 'student',
-  `token` CHAR(64) NOT NULL UNIQUE,
   `expires_at` TIMESTAMP NOT NULL,
   `accepted_at` TIMESTAMP DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

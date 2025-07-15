@@ -129,7 +129,7 @@ export function useProfileForm() {
       if (storedPictureId) body.profile_picture_id = storedPictureId
 
       const res = await fetch(`/api/users/${user.user_id}`, {
-        method: "PATCH",
+        method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

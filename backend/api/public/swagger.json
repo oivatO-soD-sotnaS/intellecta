@@ -257,7 +257,7 @@
                     "Arquivos"
                 ],
                 "summary": "Upload de foto de perfil/banner do usuário/instituição/etc",
-                "description": "Faz upload de uma nova foto de perfil",
+                "description": "Faz upload de um novo ativo de perfil (imagem de perfil ou banner)",
                 "operationId": "uploadProfilePicture",
                 "requestBody": {
                     "description": "Arquivo de imagem para upload",
@@ -266,8 +266,8 @@
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "profile-picture": {
-                                        "description": "Imagem de perfil (formatos: jpg, jpeg, png)",
+                                    "profile-asset": {
+                                        "description": "Ativo de perfil (formatos: jpg, jpeg, png)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -300,6 +300,413 @@
                     },
                     "422": {
                         "description": "Validação falhou",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/users": {
+            "get": {
+                "tags": [
+                    "Usuários da Instituição"
+                ],
+                "summary": "Obter usuários da instituição",
+                "description": "Retorna todos os usuários pertencentes a uma instituição específica",
+                "operationId": "getInstitutionUsers",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários da instituição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InstitutionUserDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Instituição não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/users/invite": {
+            "post": {
+                "tags": [
+                    "Usuários da Instituição"
+                ],
+                "summary": "Convidar usuários para instituição",
+                "description": "Envia convites para usuários se juntarem à instituição",
+                "operationId": "inviteUsers",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Detalhes do convite",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "convites"
+                                ],
+                                "properties": {
+                                    "convites": {
+                                        "description": "Lista de e-mails para convidar",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "email",
+                                            "example": "usuario@exemplo.com"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Convites enviados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InvitationResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Entrada inválida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/users/{institution_user_id}": {
+            "delete": {
+                "tags": [
+                    "Usuários da Instituição"
+                ],
+                "summary": "Remover usuário da instituição",
+                "description": "Remove um usuário da instituição",
+                "operationId": "removeUser",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "institution_user_id",
+                        "in": "path",
+                        "description": "ID do relacionamento usuário-instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário removido com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuário removido da instituição com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário ou instituição não encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Usuários da Instituição"
+                ],
+                "summary": "Alterar cargo do usuário",
+                "description": "Atualiza o cargo de um usuário dentro da instituição",
+                "operationId": "changeUserRole",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "institution_user_id",
+                        "in": "path",
+                        "description": "ID do relacionamento usuário-instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Novo cargo para o usuário",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "novo_cargo"
+                                ],
+                                "properties": {
+                                    "novo_cargo": {
+                                        "description": "Novo cargo do usuário",
+                                        "type": "string",
+                                        "enum": [
+                                            "admin",
+                                            "teacher",
+                                            "student"
+                                        ],
+                                        "example": "teacher"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cargo atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstitutionUserDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Entrada inválida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Acesso negado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário ou instituição não encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -716,7 +1123,67 @@
                 ]
             }
         },
-        "/institutions/summary": {
+        "/institutions/owned": {
+            "get": {
+                "tags": [
+                    "Instituições"
+                ],
+                "summary": "Obter instituições do usuário",
+                "description": "Retorna todas as instituições que o usuário autenticado é proprietário",
+                "operationId": "getUserInstitutions",
+                "responses": {
+                    "200": {
+                        "description": "Lista de instituições do usuário",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InstitutionResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Usuário não é dono de nenhuma instituição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/summaries": {
             "get": {
                 "tags": [
                     "Instituições"
@@ -766,7 +1233,7 @@
                 ]
             }
         },
-        "/institutions/summary/{institution_id}": {
+        "/institutions/summaries/{institution_id}": {
             "get": {
                 "tags": [
                     "Instituições"
@@ -1018,67 +1485,7 @@
                     }
                 }
             },
-            "delete": {
-                "tags": [
-                    "Instituições"
-                ],
-                "summary": "Excluir instituição",
-                "description": "Exclui uma instituição. Apenas administradores podem excluir.",
-                "operationId": "deleteInstitution",
-                "parameters": [
-                    {
-                        "name": "institution_id",
-                        "in": "path",
-                        "description": "ID da instituição",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Instituição excluída com sucesso"
-                    },
-                    "403": {
-                        "description": "Usuário não é administrador da instituição",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Instituição não encontrada",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Erro interno do servidor",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "patch": {
+            "put": {
                 "tags": [
                     "Instituições"
                 ],
@@ -1171,6 +1578,244 @@
                     },
                     "500": {
                         "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Instituições"
+                ],
+                "summary": "Excluir instituição",
+                "description": "Exclui uma instituição. Apenas administradores podem excluir.",
+                "operationId": "deleteInstitution",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID da instituição",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Instituição excluída com sucesso"
+                    },
+                    "403": {
+                        "description": "Usuário não é administrador da instituição",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Instituição não encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/invitations/{invitation_id}/accept": {
+            "post": {
+                "tags": [
+                    "Invitations"
+                ],
+                "summary": "Accept an invitation",
+                "description": "Accept an invitation to join an institution",
+                "operationId": "acceptInvitation",
+                "parameters": [
+                    {
+                        "name": "invitation_id",
+                        "in": "path",
+                        "description": "ID of the invitation to accept",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation accepted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InstitutionUserDto"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (invitation expired, already accepted, or email mismatch)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Invitation not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/invitations/{invitation_id}": {
+            "get": {
+                "tags": [
+                    "Invitations"
+                ],
+                "summary": "Get invitation details",
+                "description": "Retrieve details of a specific invitation",
+                "operationId": "getInvitation",
+                "parameters": [
+                    {
+                        "name": "invitation_id",
+                        "in": "path",
+                        "description": "ID of the invitation",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvitationDto"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (email mismatch)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Invitation not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/invitations": {
+            "get": {
+                "tags": [
+                    "Invitations"
+                ],
+                "summary": "Get all invitations",
+                "description": "Retrieve all invitations for the authenticated user",
+                "operationId": "getAllInvitations",
+                "responses": {
+                    "200": {
+                        "description": "List of invitations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InvitationDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1824,6 +2469,136 @@
     },
     "components": {
         "schemas": {
+            "InstitutionUserDto": {
+                "description": "DTO de usuário da instituição",
+                "properties": {
+                    "institution_user_id": {
+                        "description": "ID do relacionamento",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "institution_id": {
+                        "description": "ID da instituição",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "description": "ID do usuário",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "description": "Cargo do usuário",
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "teacher",
+                            "student"
+                        ]
+                    },
+                    "created_at": {
+                        "description": "Data de criação",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserDto"
+                    }
+                },
+                "type": "object"
+            },
+            "InvitationResponse": {
+                "description": "Resposta de convite",
+                "properties": {
+                    "invitation_id": {
+                        "description": "ID do convite",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "description": "E-mail convidado",
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "role": {
+                        "description": "Cargo proposto",
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "teacher",
+                            "student"
+                        ]
+                    },
+                    "token": {
+                        "description": "Token de convite",
+                        "type": "string"
+                    },
+                    "expires_at": {
+                        "description": "Data de expiração",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "institution_id": {
+                        "description": "ID da instituição",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "invited_by": {
+                        "description": "ID do usuário que convidou",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "type": "object"
+            },
+            "InvitationDto": {
+                "properties": {
+                    "invitation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "teacher",
+                            "student"
+                        ]
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "accepted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "institution_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "invited_by": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "institution": {
+                        "$ref": "#/components/schemas/InstitutionDto"
+                    },
+                    "invited_by_user": {
+                        "$ref": "#/components/schemas/UserDto"
+                    }
+                },
+                "type": "object"
+            },
             "ErrorResponse": {
                 "properties": {
                     "error": {
@@ -1945,6 +2720,111 @@
                     "message": {
                         "type": "string",
                         "example": "Token blacklisted with success"
+                    }
+                },
+                "type": "object"
+            },
+            "File": {
+                "description": "Represents a file in the system",
+                "properties": {
+                    "file_id": {
+                        "description": "Unique identifier for the file",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "url": {
+                        "description": "URL to access the file",
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://storage.example.com/files/profile.jpg"
+                    },
+                    "filename": {
+                        "description": "Original filename",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "profile.jpg"
+                    },
+                    "mime_type": {
+                        "description": "MIME type of the file",
+                        "type": "string",
+                        "example": "image/jpeg",
+                        "nullable": true
+                    },
+                    "size": {
+                        "description": "File size in bytes",
+                        "type": "integer",
+                        "example": 102400,
+                        "nullable": true
+                    },
+                    "uploaded_at": {
+                        "description": "When the file was uploaded",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "file_type": {
+                        "$ref": "#/components/schemas/FileType"
+                    }
+                },
+                "type": "object"
+            },
+            "FileType": {
+                "description": "Type classification of files",
+                "type": "string",
+                "enum": [
+                    "image",
+                    "document",
+                    "video",
+                    "audio",
+                    "archive",
+                    "other"
+                ],
+                "example": "image"
+            },
+            "InstitutionDto": {
+                "description": "Data Transfer Object for institution information",
+                "properties": {
+                    "institution_id": {
+                        "description": "Unique identifier for the institution",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "name": {
+                        "description": "Name of the institution",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Universidade Federal de Minas Gerais"
+                    },
+                    "email": {
+                        "description": "Institution's contact email",
+                        "type": "string",
+                        "format": "email",
+                        "example": "contato@ufmg.br"
+                    },
+                    "description": {
+                        "description": "Detailed description of the institution",
+                        "type": "string",
+                        "example": "Universidade pública brasileira sediada em Belo Horizonte"
+                    },
+                    "profilePicture": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Institution's profile picture"
+                    },
+                    "banner": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Institution's banner image"
                     }
                 },
                 "type": "object"
@@ -2237,6 +3117,51 @@
                 },
                 "type": "object"
             },
+            "UserDto": {
+                "description": "Data Transfer Object for user information",
+                "properties": {
+                    "user_id": {
+                        "description": "Unique identifier for the user",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "full_name": {
+                        "description": "Full name of the user",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "João da Silva"
+                    },
+                    "email": {
+                        "description": "User's email address",
+                        "type": "string",
+                        "format": "email",
+                        "example": "joao@example.com"
+                    },
+                    "created_at": {
+                        "description": "When the user account was created",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "changed_at": {
+                        "description": "When the user account was last updated",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-01-02T13:30:00Z"
+                    },
+                    "profile_picture": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "User's profile picture"
+                    }
+                },
+                "type": "object"
+            },
             "UserEventResponse": {
                 "properties": {
                     "user_event_id": {
@@ -2356,6 +3281,14 @@
             "description": "Operações relacionadas a autenticação de usuários"
         },
         {
+            "name": "Arquivos",
+            "description": "Operações relacionadas a arquivos de usuários, instituições, turmas e disciplinas"
+        },
+        {
+            "name": "Usuários da Instituição",
+            "description": "Operações relacionadas à gestão de usuários de instituições"
+        },
+        {
             "name": "Eventos Institucionais",
             "description": "Operações relacionadas a eventos institucionais"
         },
@@ -2364,16 +3297,16 @@
             "description": "Operações relacionadas a instituições"
         },
         {
+            "name": "Invitations",
+            "description": "Operations related to institution invitations"
+        },
+        {
             "name": "Usuários",
             "description": "Operações relacionadas a gestão de usuários"
         },
         {
             "name": "Eventos de Usuário",
             "description": "Operações relacionadas a eventos de usuários"
-        },
-        {
-            "name": "Arquivos",
-            "description": "Arquivos"
         }
     ]
 }

@@ -6,36 +6,38 @@ namespace App\Vo;
 use InvalidArgumentException;
 
 final class EmailAddressVo {
-    private string $value;
+    private string $email;
 
-    public function __construct(string $value)
+    public function __construct(string $email)
     {
-        $value = trim(strtolower($value));
+        $email = trim($email);
+        $email = strtolower($email);
+        $email = strip_tags($email);
 
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidArgumentException("Invalid email format");
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException("Invalid email format: $email");
         }
 
-        $length = strlen($value);
+        $length = strlen($email);
         if ($length < 5 || $length > 64) {
             throw new InvalidArgumentException('Email must be between 5 and 64 characters.');
         }
 
-        $this->value = $value;
+        $this->email = $email;
     }
 
     public function getValue(): string
     {
-        return $this->value;
+        return $this->email;
     }
 
     public function equals(EmailAddressVo $other): bool
     {
-        return $this->value === $other->value;
+        return $this->email === $other->email;
     }
 
     public function __toString(): string
     {
-        return $this->value;
+        return $this->email;
     }
 }

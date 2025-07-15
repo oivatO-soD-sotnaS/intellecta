@@ -13,6 +13,7 @@ final class UsernameVo
   public function __construct(string $fullName)
   {
     $fullName = trim($fullName);
+    $fullName = strip_tags($fullName);
 
     $length = strlen($fullName);
     if ($length < 5 || $length > 64) {

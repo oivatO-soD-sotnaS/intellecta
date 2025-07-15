@@ -4,8 +4,11 @@ use App\Controllers\AuthController;
 use App\Controllers\FilesController;
 use App\Controllers\InstitutionalEventController;
 use App\Controllers\InstitutionsController;
+use App\Controllers\InstitutionUsersController;
+use App\Controllers\InvitationsController;
 use App\Controllers\UserController;
 use App\Controllers\UserEventController;
+use App\Middleware\RequireAdmin;
 use App\Middleware\RequireAuth;
 use App\Middleware\RequireInstitutionMembership;
 use Slim\App;
@@ -31,7 +34,7 @@ return function (App $app) {
         ->add(RequireAuth::class);
     $app->post('/users/events', UserEventController::class . ':createUserEvent')
         ->add(RequireAuth::class);
-    $app->patch('/users/events/{event_id:'.UUIDv4_REGEX.'}', UserEventController::class . ':updateUserEvent')
+    $app->put('/users/events/{event_id:'.UUIDv4_REGEX.'}', UserEventController::class . ':updateUserEvent')
         ->add(RequireAuth::class);
     $app->delete('/users/events/{event_id:'.UUIDv4_REGEX.'}', UserEventController::class . ':deleteUserEvent')
         ->add(RequireAuth::class);
@@ -41,22 +44,24 @@ return function (App $app) {
     // Rotas de usuário
     $app->get('/users/{user_id:'.UUIDv4_REGEX.'}', UserController::class . ':getUser')
         ->add(RequireAuth::class);
-    $app->patch('/users/{user_id:'.UUIDv4_REGEX.'}', UserController::class . ':updateUser')
+    $app->put('/users/{user_id:'.UUIDv4_REGEX.'}', UserController::class . ':updateUser')
         ->add(RequireAuth::class);
     $app->delete('/users/{user_id:'.UUIDv4_REGEX.'}', UserController::class . ':deleteUser')
         ->add(RequireAuth::class);
-
     // Rotas de evento da instituição
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events', InstitutionalEventController::class . ':getInstitutionalEvents')
         ->add(RequireInstitutionMembership::class)    
         ->add(RequireAuth::class);
     $app->post('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events', InstitutionalEventController::class . ':createInstitutionalEvent')
+        ->add(RequireAdmin::class)    
         ->add(RequireInstitutionMembership::class)    
         ->add(RequireAuth::class);
-    $app->patch('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':updateInstitutionalEvent')
+    $app->put('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':updateInstitutionalEvent')
+        ->add(RequireAdmin::class)    
         ->add(RequireInstitutionMembership::class)    
         ->add(RequireAuth::class);
     $app->delete('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':deleteInstitutionalEvent')
+        ->add(RequireAdmin::class)    
         ->add(RequireInstitutionMembership::class)    
         ->add(RequireAuth::class);
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/events/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':getInstitutionalEvent')
@@ -64,12 +69,13 @@ return function (App $app) {
         ->add(RequireAuth::class);
 
     // Rotas de instituição
-    $app->get('/institutions/summary', InstitutionsController::class . ':getInstitutionsSummary')
+    $app->get('/institutions/summaries', InstitutionsController::class . ':getInstitutionsSummary')
         ->add(RequireAuth::class);
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/summary', InstitutionsController::class . ':getInstitutionSummaryById')
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
-        
+    $app->get('/institutions/owned', InstitutionsController::class . ":getUserInstitutions")
+        ->add(RequireAuth::class);
     $app->get('/institutions', InstitutionsController::class . ":getInstitutions")
         ->add(RequireAuth::class);
     $app->post('/institutions', InstitutionsController::class . ":createInstitution")
@@ -77,12 +83,39 @@ return function (App $app) {
     $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":getInstitutionById")
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
-    $app->patch('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":updateInstitution")
+    $app->put('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":updateInstitution")
+        ->add(RequireAdmin::class)
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
     $app->delete('/institutions/{institution_id:'.UUIDv4_REGEX.'}', InstitutionsController::class . ":deleteInstitution")
+        ->add(RequireAdmin::class)
         ->add(RequireInstitutionMembership::class)
         ->add(RequireAuth::class);
+    // Rotas de usuário da instituição
+    $app->get('/institutions/{institution_id:'.UUIDv4_REGEX.'}/users', InstitutionUsersController::class . ":getInstitutionUsers")
+        ->add(RequireAdmin::class)    
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    $app->post('/institutions/{institution_id:'.UUIDv4_REGEX.'}/users/invite', InstitutionUsersController::class . ":inviteUsers")
+        ->add(RequireAdmin::class)    
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    $app->patch('/institutions/{institution_id:'.UUIDv4_REGEX.'}/users/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ":changeUserRole")
+        ->add(RequireAdmin::class)    
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    $app->delete('/institutions/{institution_id:'.UUIDv4_REGEX.'}/users/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ":removeUser")
+        ->add(RequireAdmin::class)    
+        ->add(RequireInstitutionMembership::class)
+        ->add(RequireAuth::class);
+    // Rotas de convite
+    $app->post('/invitations/{invitation_id:'.UUIDv4_REGEX.'}/accept', InvitationsController::class . ":acceptInvitation")
+        ->add(RequireAuth::class);
+    $app->get('/invitations', InvitationsController::class . ":getAllInvitations")
+        ->add(RequireAuth::class);
+    $app->get('/invitations/{invitation_id:'.UUIDv4_REGEX.'}', InvitationsController::class . ":getInvitation")
+        ->add(RequireAuth::class);
+        
     // Rotas de turma
 
 

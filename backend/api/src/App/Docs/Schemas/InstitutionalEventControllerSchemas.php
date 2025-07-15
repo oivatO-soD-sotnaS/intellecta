@@ -1,9 +1,7 @@
 <?php
-
-namespace App\Swagger\Schemas;
+namespace App\Docs\Schemas;
 
 use OpenApi\Attributes as OA;
-
 
 // Schemas podem ser definidos em um arquivo separado ou como classes
 #[OA\Schema(

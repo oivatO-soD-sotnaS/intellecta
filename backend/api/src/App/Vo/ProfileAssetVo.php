@@ -6,7 +6,7 @@ namespace App\Vo;
 use InvalidArgumentException;
 use Psr\Http\Message\UploadedFileInterface;
 
-final class ProfilePictureVo {
+final class ProfileAssetVo {
     private string $originalName;
     private string $safeName;
     private string $mimeType;
