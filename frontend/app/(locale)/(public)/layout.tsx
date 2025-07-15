@@ -4,8 +4,8 @@ import { ReactNode } from "react"
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br ">
-      <main className="flex-1 flex items-center justify-center px-4">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br">
+      <main className="flex-1 flex items-center justify-center px-4 font-sans">
         {children}
       </main>
       <footer className="flex-shrink-0 py-4">
