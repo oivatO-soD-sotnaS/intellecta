@@ -19,7 +19,6 @@ use Slim\Routing\RouteContext;
 
 class RequireInstitutionMembership{
   public function __construct(
-    private JwtService $jwtService,
     private InstitutionUserDao $institutionUserDao
   ) {}
 

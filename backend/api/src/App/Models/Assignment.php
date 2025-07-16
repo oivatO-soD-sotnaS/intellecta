@@ -40,8 +40,4 @@ class Assignment implements \JsonSerializable {
     public function getDeadline(): string { return $this->deadline; }
     public function getSubjectId(): string { return $this->subject_id; }
     public function getAttachmentId(): ?string { return $this->attachment_id; }
-
-    public function isPastDue(): bool {
-        return strtotime($this->deadline) < time();
-    }
 }

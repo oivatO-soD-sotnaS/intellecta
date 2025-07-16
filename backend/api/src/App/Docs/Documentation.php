@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Swagger;
+namespace App\Docs;
 
 use OpenApi\Attributes as OA;
 

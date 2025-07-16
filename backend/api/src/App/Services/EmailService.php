@@ -9,7 +9,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 class EmailService {
-  public function __construct(private Database $database, private PHPMailer $mailer){
+  private PHPMailer $mailer;
+
+  public function __construct(){
     $this->mailer = new PHPMailer(true);
 
     // Configurações do Gmail SMTP
@@ -38,6 +40,7 @@ class EmailService {
     $this->mailer->send();
     return "E-mail enviado com sucesso";
   }
+
   public function getVerificationEmailTemplate(string $userName, string $code): string
   {
     return "
@@ -124,4 +127,88 @@ class EmailService {
     ";
   }
 
+  public function getInstitutionInvitationEmailTemplate(string $institutionName, string $acceptLink): string
+  {
+    return "
+    <html>
+    <head>
+      <meta charset='UTF-8'>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f2f0f8;
+          padding: 40px 20px;
+          color: #333;
+        }
+        .email-wrapper {
+          max-width: 600px;
+          margin: 0 auto;
+          background-color: #f5f5fa;
+          padding: 40px 30px;
+          border-radius: 12px;
+          box-shadow: 0px 8px 25px 0px rgba(126, 87, 194, 0.15);
+          border-top: 6px solid #7e57c2;
+          text-align: center;
+        }
+        .logo {
+          font-size: 24px;
+          font-weight: bold;
+          color: #7e57c2;
+          margin-bottom: 20px;
+        }
+        .title {
+          font-size: 20px;
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: #333;
+        }
+        .message {
+          font-size: 15px;
+          margin-bottom: 25px;
+          color: #555;
+          line-height: 1.6;
+        }
+        .button {
+          display: inline-block;
+          padding: 14px 28px;
+          background-color: #7e57c2;
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
+          border-radius: 8px;
+          text-decoration: none;
+          margin: 25px 0;
+        }
+        .info {
+          font-size: 14px;
+          color: #666;
+          margin-top: 20px;
+        }
+        .footer {
+          font-size: 12px;
+          color: #aaa;
+          margin-top: 40px;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+      <div class='email-wrapper'>
+        <div class='logo'>Intellecta</div>
+        <div class='message'>
+          Você foi convidado(a) para fazer parte da instituição <strong>$institutionName</strong> na plataforma Intellecta.<br>
+          Para aceitar o convite e se juntar à instituição, clique no botão abaixo:
+        </div>
+        <a class='button' href='$acceptLink' style='background-color: #fff; color: #7e57c2; text-decoration: none;'>Aceitar Convite</a>
+        <div class='info'>
+          Caso você não reconheça esta solicitação, basta ignorar este e-mail.
+        </div>
+        <div class='footer'>
+          &copy; " . date('Y') . " IFPR - Intellecta. Todos os direitos reservados.
+        </div>
+      </div>
+    </body>
+    </html>
+    ";
+  }
 }

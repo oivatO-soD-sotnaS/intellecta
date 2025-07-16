@@ -26,6 +26,23 @@ services:
         aliases:
           - api.intellecta
           - files.intellecta
+  email-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: email_worker_container
+    depends_on:
+      - redis
+    networks:
+      - intellecta-network
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    networks:
+      - intellecta-network
   swagger:
     image: swaggerapi/swagger-ui
     container_name: swagger_container

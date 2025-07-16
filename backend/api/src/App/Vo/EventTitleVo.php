@@ -13,8 +13,9 @@ final class EventTitleVo
   public function __construct(string $title)
   {
     $title = trim($title);
-
+    $title = strip_tags($title);
     $length = strlen($title);
+    
     if ($length < 5 || $length > 64) {
       throw new InvalidArgumentException('Event title must be between 5 and 64 characters.');
     }
