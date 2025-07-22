@@ -41,9 +41,9 @@ class RequireInstitutionMembership{
     $token = $request->getAttribute("token");
     
     try {
-      $institutionUser = $this->institutionUserDao->getInstitutionUserByIds($institutionId, $token['sub']);
+      $institutionUser = $this->institutionUserDao->getInstitutionUserByInstitutionIdAndUserId($institutionId, $token['sub']);
       if(empty($institutionUser)) {
-        LogService::http403('RequireInstitutionMembership', "User ".$token['sub']. " is not a member of the institution $institutionId");
+        LogService::http403('RequireInstitutionMembership', "User ".$token['email']. " is not a member of the institution $institutionId");
         throw new HttpForbiddenException($request, 'User is not a member of the institution');
       }
 

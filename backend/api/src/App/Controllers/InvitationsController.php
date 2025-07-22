@@ -22,6 +22,7 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+// Documented
 class InvitationsController extends BaseController {
     public function __construct(
         private InvitationDao $invitationDao,

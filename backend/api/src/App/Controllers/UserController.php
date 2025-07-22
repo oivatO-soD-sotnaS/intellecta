@@ -19,6 +19,7 @@ use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+// Documented
 class UserController extends BaseController
 {
   public function __construct(

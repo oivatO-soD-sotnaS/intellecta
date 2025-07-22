@@ -251,6 +251,633 @@
                 ]
             }
         },
+        "/institutions/{institution_id}/classes/{class_id}/users": {
+            "get": {
+                "tags": [
+                    "Class Users"
+                ],
+                "summary": "Get all users in a class",
+                "operationId": "getClassUsers",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of class users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClassUserResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Institution or class not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Class Users"
+                ],
+                "summary": "Add users to a class",
+                "operationId": "createClassUsers",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "User IDs to add to the class",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_ids"
+                                ],
+                                "properties": {
+                                    "user_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Users added successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Institution or class not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/classes/{class_id}/users/{class_users_id}": {
+            "get": {
+                "tags": [
+                    "Class Users"
+                ],
+                "summary": "Get a specific user in a class",
+                "operationId": "getClassUserById",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_users_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class user details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassUserResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found in class"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Class Users"
+                ],
+                "summary": "Remove a user from a class",
+                "operationId": "removeClassUser",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_users_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User removed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found in class"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/classes": {
+            "get": {
+                "tags": [
+                    "Classes"
+                ],
+                "summary": "Get institution classes",
+                "description": "Retrieve classes for an institution (all classes for admins, only participating classes for others)",
+                "operationId": "getInstitutionClasses",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID of the institution",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of classes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClassModelDto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No classes found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Classes"
+                ],
+                "summary": "Create a new class",
+                "description": "Create a new class in the specified institution",
+                "operationId": "createClass",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID of the institution",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Class creation data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Name of the class",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3
+                                    },
+                                    "description": {
+                                        "description": "Detailed description of the class",
+                                        "type": "string"
+                                    },
+                                    "profile-picture": {
+                                        "description": "Profile picture file",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "banner": {
+                                        "description": "Banner image file",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created class details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassModelDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/classes/{class_id}": {
+            "get": {
+                "tags": [
+                    "Classes"
+                ],
+                "summary": "Get class details",
+                "description": "Retrieve details of a specific class",
+                "operationId": "getClassById",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID of the institution",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "description": "ID of the class",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassModelDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Classes"
+                ],
+                "summary": "Update a class",
+                "description": "Update details of an existing class",
+                "operationId": "updateClass",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID of the institution",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "description": "ID of the class",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Class update data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Updated name of the class",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3
+                                    },
+                                    "description": {
+                                        "description": "Updated description of the class",
+                                        "type": "string"
+                                    },
+                                    "profile_picture_id": {
+                                        "description": "ID of the new profile picture",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    },
+                                    "banner_id": {
+                                        "description": "ID of the new banner image",
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated class details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassModelDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class or file not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Classes"
+                ],
+                "summary": "Delete a class",
+                "description": "Permanently delete a class",
+                "operationId": "deleteClass",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "ID of the institution",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "description": "ID of the class to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "description": "Confirmation message",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/files/upload-profile-assets": {
             "post": {
                 "tags": [
@@ -2469,6 +3096,30 @@
     },
     "components": {
         "schemas": {
+            "ClassUserResponse": {
+                "properties": {
+                    "class_users_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "joined_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "class_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    }
+                },
+                "type": "object"
+            },
             "InstitutionUserDto": {
                 "description": "DTO de usuário da instituição",
                 "properties": {
@@ -2720,6 +3371,49 @@
                     "message": {
                         "type": "string",
                         "example": "Token blacklisted with success"
+                    }
+                },
+                "type": "object"
+            },
+            "ClassModelDto": {
+                "description": "Data Transfer Object for class information",
+                "properties": {
+                    "class_id": {
+                        "description": "Unique identifier for the class",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "description": "Name of the class",
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "description": "Detailed description of the class",
+                        "type": "string"
+                    },
+                    "institution_id": {
+                        "description": "ID of the institution this class belongs to",
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "profile_picture": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Class profile picture"
+                    },
+                    "banner": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/File"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "Class banner image"
                     }
                 },
                 "type": "object"
@@ -3279,6 +3973,14 @@
         {
             "name": "Autenticação",
             "description": "Operações relacionadas a autenticação de usuários"
+        },
+        {
+            "name": "Class Users",
+            "description": "Manage users within a class in an institution"
+        },
+        {
+            "name": "Classes",
+            "description": "Operations related to class management"
         },
         {
             "name": "Arquivos",

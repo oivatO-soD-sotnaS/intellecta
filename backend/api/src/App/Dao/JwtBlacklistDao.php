@@ -6,9 +6,7 @@ namespace App\Dao;
 
 use App\Database;
 
-class JwtBlacklistDao {
-  public function __construct(private Database $database) {}
-
+class JwtBlacklistDao extends BaseDao {
   /**
    * Summary of addToken
    * @param string $token

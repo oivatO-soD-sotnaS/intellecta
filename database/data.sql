@@ -4,12 +4,24 @@ INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `type`, `size`, 
 ('e27d83a7-4329-43d9-b011-e1289cf2b5f9', 'https://example.com/files/3', 'presentation.pptx', 'application/vnd.ms-powerpoint', 'document', 2048000, '2023-01-03 12:00:00');
 
 INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_verified`, `created_at`, `changed_at`, `profile_picture_id`) VALUES
-('e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'John Doe', 'john@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', 'f7dcef54-c374-4ea3-af0c-24f19bda74b8'),
 -- Senha: Password1!
-('65fe5128-3fbd-424c-86e9-6d8e42ef9286', 'Jane Smith', 'jane@example.com', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, '2023-01-02 11:00:00', '2023-01-02 11:00:00', NULL),
+('e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'John Doe', 'john@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', 'f7dcef54-c374-4ea3-af0c-24f19bda74b8'),
+('3fa85f64-5717-4562-b3fc-2c963f66afa6', 'Alice Wonderland', 'alice@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('c56a4180-65aa-42ec-a945-5fd21dec0538', 'Charlie Brown', 'charlie@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('21ec2020-3aea-4069-a2dd-08002b30309d', 'David Gilmour', 'david@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('7d444840-9dc0-11d1-b245-5ffdce74fad2', 'Eve Polastri', 'eve@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('e02fd0e4-00fd-090A-ca30-0d00a0038ba0', 'Frank Underwood', 'frank@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'Grace Hopper', 'grace@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('9c858901-8a57-4791-81fe-4c455b099bc9', 'Hannah Baker', 'hannah@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('16fd2706-8baf-433b-82eb-8c7fada847da', 'Ian Curtis', 'ian@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('6fa459ea-ee8a-3ca4-894e-db77e160355e', 'Julia Roberts', 'julia@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Kevin Spacey', 'kevin@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, NOW(), NOW(), NULL),
+('7bae5f09-48fd-47d6-958d-26809f97a2e0', 'Blibs Blobs', 'bblobs@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, '2023-01-01 10:00:00', '2023-01-01 10:00:00', NULL),
 -- Senha: Password2!
-('bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
+('65fe5128-3fbd-424c-86e9-6d8e42ef9286', 'Jane Smith', 'jane@example.com', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, '2023-01-02 11:00:00', '2023-01-02 11:00:00', NULL),
 -- Senha: Password3!
+('bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, '2023-01-03 12:00:00', '2023-01-03 12:00:00', NULL);
+
 INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `profile_picture_id`, `banner_id`, `user_id`) VALUES
 ('2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'Harvard University', 'contact@harvard.edu', 'Ivy League university', NULL, NULL, 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('c7579a48-cddb-43f3-af78-d0f26edb327c', 'MIT', 'info@mit.edu', 'Technology institute', NULL, NULL, '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
@@ -17,8 +29,20 @@ INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `p
 
 INSERT INTO `institution_users` (`institution_user_id`, `role`, `joined_at`, `institution_id`, `user_id`) VALUES
 ('f256ae5c-694f-4766-bd3b-3614c0d511c1', 'admin', '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
+('3827894f-2c54-412a-aa2c-f178511d0553', 'student', '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '7bae5f09-48fd-47d6-958d-26809f97a2e0'),
 ('d58cbc3d-0d46-40fd-9b29-9ba5edaaa92f', 'teacher', '2023-01-02 11:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
-('014a55e8-e20f-44d9-91f9-c58096704d27', 'student', '2023-01-03 12:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
+('014a55e8-e20f-44d9-91f9-c58096704d27', 'student', '2023-01-03 12:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e'),
+('3fa85f64-5717-4562-b3fc-2c963f66afa7', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '3fa85f64-5717-4562-b3fc-2c963f66afa6'),
+('c56a4180-65aa-42ec-a945-5fd21dec0539', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'c56a4180-65aa-42ec-a945-5fd21dec0538'),
+('21ec2020-3aea-4069-a2dd-08002b30309e', 'teacher', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '21ec2020-3aea-4069-a2dd-08002b30309d'),
+('7d444840-9dc0-11d1-b245-5ffdce74fad3', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '7d444840-9dc0-11d1-b245-5ffdce74fad2'),
+('e02fd0e4-00fd-090A-ca30-0d00a0038ba1', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e02fd0e4-00fd-090A-ca30-0d00a0038ba0'),
+('f47ac10b-58cc-4372-a567-0e02b2c3d470', 'teacher', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
+('9c858901-8a57-4791-81fe-4c455b099bca', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '9c858901-8a57-4791-81fe-4c455b099bc9'),
+('16fd2706-8baf-433b-82eb-8c7fada847db', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '16fd2706-8baf-433b-82eb-8c7fada847da'),
+('6fa459ea-ee8a-3ca4-894e-db77e160355f', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '6fa459ea-ee8a-3ca4-894e-db77e160355e'),
+('7c9e6679-7425-40de-944b-e07fc1f90ae8', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '7c9e6679-7425-40de-944b-e07fc1f90ae7');
+
 
 INSERT INTO `invitations` (`invitation_id`, `email`, `role`, `expires_at`, `accepted_at`, `created_at`, `institution_id`, `invited_by`) VALUES
 ('e9c22b07-4d63-40fb-b9fd-b212575fabf6', 'newuser1@example.com', 'teacher', '2023-02-01 10:00:00', NULL, '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),

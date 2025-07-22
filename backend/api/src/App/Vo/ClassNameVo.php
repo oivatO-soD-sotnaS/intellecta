@@ -6,20 +6,21 @@ namespace App\Vo;
 
 use InvalidArgumentException;
 
-final class InstitutionNameVo
+final class ClassNameVo
 {
   private string $value;
 
-  public function __construct(string $title)
+  public function __construct(string $name)
   {
-    $title = trim($title);
+    $name = trim($name);
+    $name = strip_tags($name);
 
-    $length = strlen($title);
+    $length = strlen($name);
     if ($length < 5 || $length > 128) {
-      throw new InvalidArgumentException('Institution name must be between 5 and 128 characters.');
+      throw new InvalidArgumentException('Class name must be between 5 and 128 characters.');
     }
 
-    $this->value = $title;
+    $this->value = $name;
   }
 
   public function getValue(): string

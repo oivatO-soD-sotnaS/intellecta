@@ -8,10 +8,7 @@ use App\Database;
 use App\Models\InstitutionalEvent;
 use PDO;
 
-class InstitutionalEventDao {
-  public function __construct(
-    private Database $database
-  ) {}
+class InstitutionalEventDao extends BaseDao {
 
   /**
    * Summary of getInstitutionalEventById

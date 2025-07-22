@@ -9,11 +9,7 @@ use App\Models\Institution;
 use App\Models\InstitutionSummary;
 use PDO;
 
-class InstitutionDao {
-  public function __construct(
-    private Database $database
-  ) {}
-
+class InstitutionDao extends BaseDao {
   /**
    * Summary of getInstitutionById
    * @param string $id

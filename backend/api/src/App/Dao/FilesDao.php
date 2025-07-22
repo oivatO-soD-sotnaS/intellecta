@@ -7,13 +7,15 @@ use App\Database;
 use App\Models\File;
 use PDO;
 
-class FilesDao {
-  public function __construct(
-    private Database $database
-  ) {}
+class FilesDao extends BaseDao {
 
+  /**
+   * Summary of createFile
+   * @param \App\Models\File $file
+   * @return File|null
+   */
   public function createFile (File $file): ?File {
-    $sql = "INSERT INTO files (file_id, url, filename, file_type, mime_type, size, uploaded_at)
+    $sql = "INSERT INTO files (file_id, url, filename, type, mime_type, size, uploaded_at)
             VALUE (:file_id, :url, :filename, :file_type, :mime_type, :size, :uploaded_at)";
 
     $pdo = $this->database->getConnection();
@@ -31,6 +33,11 @@ class FilesDao {
     return $success ? $file : null;
   }
 
+  /**
+   * Summary of getFileById
+   * @param string $fileId
+   * @return File|null
+   */
   public function getFileById(string $fileId): ?File {
     $sql = "SELECT * FROM files
             WHERE file_id LIKE :file_id";

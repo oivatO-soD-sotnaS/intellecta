@@ -9,11 +9,7 @@ use App\Models\Event;
 use App\Models\UserEvent;
 use PDO;
 
-class UserEventDao {
-  public function __construct(
-    private Database $database
-  ) {}
-
+class UserEventDao extends BaseDao {
   /**
    * Summary of getUserEventById
    * @param string $userEventId

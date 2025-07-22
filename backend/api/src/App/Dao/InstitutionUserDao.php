@@ -8,11 +8,13 @@ use App\Database;
 use App\Models\InstitutionUser;
 use PDO;
 
-class InstitutionUserDao {
-  public function __construct(
-    private Database $database
-  ) {}
-
+class InstitutionUserDao extends BaseDao {
+  
+  /**
+   * Summary of getInstitutionUserById
+   * @param string $institution_user_id
+   * @return InstitutionUser|null
+   */
   public function getInstitutionUserById(string $institution_user_id): ?InstitutionUser {
     $sql = "SELECT * FROM institution_users
             WHERE institution_user_id LIKE :institution_user_id";
@@ -33,7 +35,7 @@ class InstitutionUserDao {
    * @param string $user_id
    * @return InstitutionUser|null
    */
-  public function getInstitutionUserByIds(string $institution_id, string $user_id): ?InstitutionUser {
+  public function getInstitutionUserByInstitutionIdAndUserId(string $institution_id, string $user_id): ?InstitutionUser {
     $sql = "SELECT * FROM institution_users
             WHERE user_id = :user_id
             AND institution_id = :institution_id";
@@ -43,12 +45,18 @@ class InstitutionUserDao {
     $stmt->bindValue(':institution_id', $institution_id, PDO::PARAM_STR);
     $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
     $stmt->execute();
+    
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
     return $data ? new InstitutionUser($data) : null;
   }
 
+  /**
+   * Summary of createInstitutionUser
+   * @param \App\Models\InstitutionUser $institutionUser
+   * @return InstitutionUser|null
+   */
   public function createInstitutionUser(InstitutionUser $institutionUser): ?InstitutionUser {
     $sql = "INSERT INTO institution_users (institution_user_id, role, joined_at, institution_id, user_id)
             VALUES (:institution_user_id, :role, :joined_at, :institution_id, :user_id)";

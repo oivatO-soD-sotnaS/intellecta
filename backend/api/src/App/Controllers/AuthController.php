@@ -25,6 +25,7 @@ use App\Services\ValidatorService;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpNotFoundException;
 
+// Documented
 class AuthController extends BaseController {
 
   public function __construct(

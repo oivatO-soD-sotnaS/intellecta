@@ -6,17 +6,18 @@ namespace App\Vo;
 
 use InvalidArgumentException;
 
-final class InstitutionDescriptionVo
+final class ClassDescriptionVo
 {
   private string $value;
 
   public function __construct(string $description)
   {
     $description = trim($description);
+    $description = strip_tags($description);
 
     $length = strlen($description);
     if ($length > 500) {
-      throw new InvalidArgumentException('Institution descrip must have at maximum 500 characters.');
+      throw new InvalidArgumentException('Class description cannot have more than 500 characters.');
     }
 
     $this->value = $description;

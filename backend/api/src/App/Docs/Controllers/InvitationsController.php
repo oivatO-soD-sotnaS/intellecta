@@ -9,8 +9,6 @@ use OpenApi\Attributes as OA;
 )]
 class InvitationsController
 {
-    // ... constructor remains the same ...
-
     #[OA\Post(
         path: "/invitations/{invitation_id}/accept",
         tags: ["Invitations"],

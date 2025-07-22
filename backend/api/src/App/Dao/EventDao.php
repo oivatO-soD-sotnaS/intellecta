@@ -7,11 +7,7 @@ namespace App\Dao;
 use App\Database;
 use App\Models\Event;
 
-class EventDao {
-  public function __construct(
-    private Database $database
-  ) {}
-
+class EventDao extends BaseDao {
   /**
    * Summary of getEventById
    * @param string $eventId

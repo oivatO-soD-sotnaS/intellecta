@@ -26,6 +26,7 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+// Documented
 class InstitutionUsersController extends BaseController
 {
   public function __construct(
@@ -118,7 +119,6 @@ class InstitutionUsersController extends BaseController
       
       $newRole = InstitutionUserType::tryFrom($body['new_role']);
       if(empty($newRole)) {
-        // /institutions/{$institution_id}/users/{$user_id}
         throw new HttpException($request, "Only 'admin', 'teacher' and 'student' are allowed as roles", 422);
       }
 

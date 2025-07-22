@@ -7,11 +7,7 @@ use App\Database;
 use App\Models\Invitation;
 use PDO;
 
-class InvitationDao {
-  public function __construct(
-    private Database $database,
-  ) {}
-
+class InvitationDao extends BaseDao {
   /**
    * Summary of getAllUserInvitations
    * @param string $email

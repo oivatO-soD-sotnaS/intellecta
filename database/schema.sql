@@ -36,8 +36,8 @@ CREATE TABLE verification_codes (
 -- Tabela de instituição
 CREATE TABLE `institutions` (
   `institution_id` CHAR(36) PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(256) NOT NULL,
+  `email` VARCHAR(256) NOT NULL,
   `description` TEXT,
   `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
@@ -62,7 +62,7 @@ CREATE TABLE `institution_users` (
 -- Tabela que armazena os convites de participação de uma instituição
 CREATE TABLE `invitations` (
   `invitation_id` CHAR(36) NOT NULL PRIMARY KEY,
-  `email` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(256) NOT NULL,
   `role` ENUM('student', 'teacher', 'admin') NOT NULL DEFAULT 'student',
   `expires_at` TIMESTAMP NOT NULL,
   `accepted_at` TIMESTAMP DEFAULT NULL,
@@ -76,8 +76,8 @@ CREATE TABLE `invitations` (
 -- Tabela de turma
 CREATE TABLE `classes` (
   `class_id` CHAR(36) PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
-  `description` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(256) NOT NULL,
+  `description` VARCHAR(512) NOT NULL,
   `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
   `institution_id` CHAR(36) NOT NULL, -- ID da instituição à qual a turma pertence
@@ -99,7 +99,7 @@ CREATE TABLE `class_users` (
 -- Tabela de Disciplina
 CREATE TABLE `subjects` (
   `subject_id` CHAR(36) PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL,
+  `name` VARCHAR(256) NOT NULL,
   `description` TEXT,
   `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
@@ -124,7 +124,7 @@ CREATE TABLE `subject_classes` (
 -- Tabela de material da disciplina
 CREATE TABLE `materials` (
   `material_id` CHAR(36) PRIMARY KEY,
-  `title` VARCHAR(255) NOT NULL,
+  `title` VARCHAR(256) NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `changed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `subject_id` CHAR(36) NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE `materials` (
 -- Tabela de atividade avaliativa
 CREATE TABLE `assignments` (
   `assignment_id` CHAR(36) PRIMARY KEY,
-  `title` VARCHAR(255) NOT NULL,
+  `title` VARCHAR(256) NOT NULL,
   `description` TEXT NOT NULL,
   `deadline` DATE NOT NULL,
   `subject_id` CHAR(36) NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE `submissions` (
   `submission_id` CHAR(36) PRIMARY KEY,
   `submitted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `grade` DECIMAL,
-  `concept` VARCHAR(255),
+  `concept` VARCHAR(256),
   `feedback` TEXT,
   `assignment_id` CHAR(36) NOT NULL,
   `user_id` CHAR(36),

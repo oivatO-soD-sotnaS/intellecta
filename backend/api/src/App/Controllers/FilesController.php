@@ -11,10 +11,10 @@ use App\Services\ValidatorService;
 use App\Vo\ProfileAssetVo;
 use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Uuid;
-use Slim\Exception\HttpException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+// Documented
 class FilesController extends BaseController
 {
     public function __construct(

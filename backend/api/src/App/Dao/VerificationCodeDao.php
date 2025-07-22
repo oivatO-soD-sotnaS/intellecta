@@ -8,9 +8,7 @@ use App\Database;
 use App\Models\VerificationCode;
 use PDO;
 
-class VerificationCodeDao {
-  public function __construct(private Database $database) {}
-
+class VerificationCodeDao extends BaseDao {
   /**
    * Summary of create
    * @param \App\Models\VerificationCode $verificationCode

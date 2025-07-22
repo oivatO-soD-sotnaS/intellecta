@@ -8,8 +8,7 @@ use App\Database;
 use App\Models\User;
 use PDO;
 
-class UserDao {
-  public function __construct(private Database $database) {}
+class UserDao extends BaseDao {
 
   /**
    * Summary of getById

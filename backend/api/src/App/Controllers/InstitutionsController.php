@@ -8,6 +8,7 @@ use App\Dao\InstitutionDao;
 use App\Dao\InstitutionUserDao;
 use App\Dto\InstitutionDto;
 use App\Dto\InstitutionSummaryDto;
+use App\Enums\InstitutionUserType;
 use App\Models\File;
 use App\Models\Institution;
 use App\Models\InstitutionSummary;
@@ -19,7 +20,6 @@ use App\Vo\InstitutionDescriptionVo;
 use App\Vo\InstitutionNameVo;
 use App\Vo\ProfileAssetVo;
 use App\Vo\UuidV4Vo;
-use Psr\Http\Message\UploadedFileInterface;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
@@ -27,6 +27,7 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
+// Documented
 class InstitutionsController extends BaseController
 {
   public function __construct(
@@ -62,6 +63,7 @@ class InstitutionsController extends BaseController
       return $response;
     });
   }
+  
   public function getInstitutionsSummary(Request $request, Response $response): Response
   {
     return $this->handleErrors($request, function() use ($request, $response) {
@@ -201,6 +203,7 @@ class InstitutionsController extends BaseController
           "filename" => $profilePicture->getSafeFilename(),
           "mime_type" => $profilePicture->getMimeType(),
           "size" => $profilePicture->getSize(),
+          "type" => 'image',
           "uploaded_at" => $timestamp
         ]));
       }
@@ -217,6 +220,7 @@ class InstitutionsController extends BaseController
           "filename" => $banner->getSafeFilename(),
           "mime_type" => $banner->getMimeType(),
           "size" => $banner->getSize(),
+          "type" => 'image',
           "uploaded_at" => $timestamp
         ]));
       }
@@ -233,14 +237,14 @@ class InstitutionsController extends BaseController
 
       $this->institutionUserDao->createInstitutionUser(new InstitutionUser([
         "institution_user_id" => Uuid::uuid4()->toString(),
-        "role" => 'admin',
+        "role" => InstitutionUserType::Admin->value ,
         "joined_at" => $timestamp,
         "institution_id" => $institution->getInstitutionId(),
         "user_id" => $token['sub']
       ]));
 
       $institutionDto = new InstitutionDto($institution, $bannerFile, $profilePictureFile);
-      LogService::info('/institutions', "Create institution {$institution->getInstitutionId()} for user {$token['sub']}");
+      LogService::info('/institutions', "Created institution {$institution->getInstitutionId()} for user {$token['email']}");
       $response->getBody()->write(json_encode($institutionDto));
       return $response;
     });
@@ -254,10 +258,18 @@ class InstitutionsController extends BaseController
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['name', 'description', 'profile_picture_id', 'banner_id']);
 
+      // Required parameters
       $name = new InstitutionNameVo($body["name"]);
       $description = new InstitutionDescriptionVo($body["description"]);
-      $profilePictureId = new UuidV4Vo($body["profile_picture_id"]);
-      $bannerId = new UuidV4Vo($body["banner_id"]);
+      
+      // Optional parameters
+      $profilePictureId = !empty($body["profile_picture_id"]) 
+      ? new UuidV4Vo($body["profile_picture_id"])
+      : null;
+
+      $bannerId = !empty($body["banner_id"])
+      ? new UuidV4Vo($body["banner_id"])
+      : null;
 
       $institution = $this->institutionDao->getInstitutionById($institution_id);
       
@@ -265,32 +277,42 @@ class InstitutionsController extends BaseController
         throw new HttpNotFoundException($request, "Institution not found");
       }
 
-      $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
-      if (empty($profilePicture)) {
-        throw new HttpNotFoundException($request, "Profile picture not found");
-      }
-      if ($profilePicture->getFileType()->value !== 'image') {
-        throw new HttpException($request, "Profile picture must be an image", 422);
-      }
-      
-      $banner = $this->filesDao->getFileById($bannerId->getValue());
-      if (empty($banner)) {
-        throw new HttpNotFoundException($request, "Banner not found");
-      }
-      if ($banner->getFileType()->value !== 'image') {
-        throw new HttpException($request, "Banner must be an image", 422);
+      if($profilePictureId !== null) {
+        $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
+        
+        if (empty($profilePicture)) {
+          throw new HttpNotFoundException($request, "Profile picture not found");
+        }
+        if ($profilePicture->getFileType()->value !== 'image') {
+          throw new HttpException($request, "Profile picture must be an image", 422);
+        }
+
+
+        $institution->setProfilePictureId($profilePicture->getFileId());
       }
       
-      $institution->setProfilePictureId($profilePictureId->getValue());
-      $institution->setBannerId($bannerId->getValue());
+      if($bannerId !== null) {
+        $banner = $this->filesDao->getFileById($bannerId->getValue());
+        
+        if (empty($banner)) {
+          throw new HttpNotFoundException($request, "Banner not found");
+        }
+        if ($banner->getFileType()->value !== 'image') {
+          throw new HttpException($request, "Banner must be an image", 422);
+        }
+        
+        $institution->setBannerId($banner->getFileId());
+      }
+      
       $institution->setName($name->getValue());
       $institution->setDescription($description->getValue());
       
       $institution = $this->institutionDao->updateInstitution($institution);
 
       $institutionDto = new InstitutionDto($institution, $banner, $profilePicture);
-      LogService::info("/institutions/{$institution_id}", "Institution updated by user {$token['sub']}");
       $response->getBody()->write(json_encode($institutionDto));
+      
+      LogService::info("/institutions/{$institution_id}", "Institution updated by user {$token['email']}");
       return $response;
     });
   }
@@ -306,7 +328,7 @@ class InstitutionsController extends BaseController
       }
 
       $this->institutionDao->deleteInstitution($institution_id);
-      LogService::info("/institutions/$institution_id", "Institution deleted by user {$token['sub']}");
+      LogService::info("/institutions/$institution_id", "Institution deleted by user {$token['email']}");
       return $response->withStatus(204);
     });
   }
