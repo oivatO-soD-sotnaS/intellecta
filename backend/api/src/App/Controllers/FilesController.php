@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
+use App\Enums\FileType;
 use App\Models\File;
 use App\Services\LogService;
 use App\Services\UploadService;
@@ -34,7 +35,7 @@ class FilesController extends BaseController
         $profileAsset = $uploadedFiles['profile-asset'];
 
         $picture = new ProfileAssetVo($profileAsset);
-        $fileUrl = $this->uploadService->userProfilePicture(
+        $fileUrl = $this->uploadService->upload(
           $picture->getExtension(), 
           $picture->getContent()
         );
@@ -44,7 +45,7 @@ class FilesController extends BaseController
           "url" => $fileUrl,
           "filename" => $picture->getSafeFilename(),
           "mime_type" => $picture->getMimeType(),
-          "file_type" => "image", 
+          "file_type" => FileType::Image->value, 
           "size" => $picture->getSize(),
           "uploaded_at" => date('Y-m-d H:i:s')
         ]));

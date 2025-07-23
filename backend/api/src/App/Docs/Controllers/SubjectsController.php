@@ -332,41 +332,4 @@ class SubjectsController {
     )]
     public function deleteSubjectById(){
     }
-
-    #[OA\Get(
-        path: '/institutions/{institution_id}/classes/{class_id}/subjects',
-        operationId: 'getClassSubjects',
-        summary: 'Get subjects for a class',
-        tags: ['Subjects'],
-        parameters: [
-            new OA\Parameter(
-                name: 'institution_id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(type: 'string', format: 'uuid')
-            ),
-            new OA\Parameter(
-                name: 'class_id',
-                in: 'path',
-                required: true,
-                schema: new OA\Schema(type: 'string', format: 'uuid')
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'List of subjects for the class',
-                content: new OA\JsonContent(
-                    type: 'array',
-                    items: new OA\Items(ref: '#/components/schemas/SubjectResponse')
-                )
-            ),
-            new OA\Response(
-                response: 404,
-                description: 'Class not found'
-            )
-        ]
-    )]
-    public function getClassSubjects() {
-    }
 }

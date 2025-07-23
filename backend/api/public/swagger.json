@@ -251,6 +251,242 @@
                 ]
             }
         },
+        "/institutions/{institution_id}/classes/{class_id}/subjects": {
+            "get": {
+                "tags": [
+                    "Class Subjects"
+                ],
+                "summary": "Get all subjects for a class",
+                "operationId": "getClassSubjects",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of class subjects",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ClassSubjectResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class not found"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Class Subjects"
+                ],
+                "summary": "Add a subject to a class",
+                "description": "Links a subject to a specific class",
+                "operationId": "addSubjectToClass",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Subject to add to class",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddSubjectToClassRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subject linked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "class_subject": {
+                                            "$ref": "#/components/schemas/ClassSubjectResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Subject not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/classes/{class_id}/subjects/{class_subject_id}": {
+            "get": {
+                "tags": [
+                    "Class Subjects"
+                ],
+                "summary": "Get a specific class subject",
+                "description": "Retrieve details of a specific subject-class relationship",
+                "operationId": "getClassSubjectById",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Class subject details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClassSubjectResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class subject not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Class Subjects"
+                ],
+                "summary": "Remove a subject from a class",
+                "description": "Unlinks a subject from a specific class",
+                "operationId": "removeSubjectFromClass",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "class_subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subject removed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Class subject not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/institutions/{institution_id}/classes/{class_id}/users": {
             "get": {
                 "tags": [
@@ -2730,53 +2966,6 @@
                 ]
             }
         },
-        "/institutions/{institution_id}/classes/{class_id}/subjects": {
-            "get": {
-                "tags": [
-                    "Subjects"
-                ],
-                "summary": "Get subjects for a class",
-                "operationId": "getClassSubjects",
-                "parameters": [
-                    {
-                        "name": "institution_id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
-                    {
-                        "name": "class_id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of subjects for the class",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/SubjectResponse"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Class not found"
-                    }
-                }
-            }
-        },
         "/users/{user_id}": {
             "get": {
                 "tags": [
@@ -3414,6 +3603,35 @@
     },
     "components": {
         "schemas": {
+            "ClassSubjectResponse": {
+                "properties": {
+                    "class_subjects_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "class_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subject": {
+                        "$ref": "#/components/schemas/SubjectResponse"
+                    }
+                },
+                "type": "object"
+            },
+            "AddSubjectToClassRequest": {
+                "required": [
+                    "subject_id"
+                ],
+                "properties": {
+                    "subject_id": {
+                        "description": "ID of the subject to add to the class",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "type": "object"
+            },
             "ClassUserResponse": {
                 "properties": {
                     "class_users_id": {
@@ -4409,6 +4627,10 @@
         {
             "name": "Autenticação",
             "description": "Operações relacionadas a autenticação de usuários"
+        },
+        {
+            "name": "Class Subjects",
+            "description": "Manage subjects within a class"
         },
         {
             "name": "Class Users",

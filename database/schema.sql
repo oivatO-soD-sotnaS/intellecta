@@ -5,7 +5,7 @@ CREATE TABLE `files` (
   `url` TEXT NOT NULL,
   `filename` VARCHAR(128) NOT NULL,
   `mime_type` VARCHAR(100),
-  `type` ENUM('image', 'video', 'audio', 'document', 'other') NOT NULL DEFAULT 'other',
+  `file_type` ENUM('image', 'video', 'audio', 'document', 'other') NOT NULL DEFAULT 'other',
   `size` INT UNSIGNED, -- Tamanho em bytes
   `uploaded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -112,8 +112,8 @@ CREATE TABLE `subjects` (
 );
 
 -- Tabela de relação entre turma e disciplina
-CREATE TABLE `subject_classes` (
-  `subject_classes_id` CHAR(36) PRIMARY KEY,
+CREATE TABLE `class_subjects` (
+  `class_subjects_id` CHAR(36) PRIMARY KEY,
   `class_id` CHAR(36) NOT NULL,
   `subject_id` CHAR(36) NOT NULL,
   FOREIGN KEY (`class_id`) REFERENCES `classes`(`class_id`) ON DELETE CASCADE,

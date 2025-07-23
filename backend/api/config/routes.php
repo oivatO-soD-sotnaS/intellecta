@@ -2,6 +2,7 @@
 
 use App\Controllers\AuthController;
 use App\Controllers\ClassesController;
+use App\Controllers\ClassSubjectsController;
 use App\Controllers\ClassUsersController;
 use App\Controllers\FilesController;
 use App\Controllers\InstitutionalEventController;
@@ -144,8 +145,15 @@ return function (App $app) {
                     });
 
                     // Subjects under a class
-                    $classesWithId->group('/subjects', function ($subjects) {
-                        $subjects->get('', SubjectsController::class . ':getClassSubjects');
+                    $classesWithId->group('/subjects', function ($clasSubjects) {
+                        $clasSubjects->get('', ClassSubjectsController::class . ':getClassSubjects');
+                        $clasSubjects->post('', ClassSubjectsController::class . ':addSubjectToClass')
+                            ->add(RequireAdmin::class);
+                        $clasSubjects->group('/{class_subject_id:'.UUIDv4_REGEX.'}', function($clasSubjectsWithId) {
+                            $clasSubjectsWithId->get('', ClassSubjectsController::class . ':getClassSubjectById');
+                            $clasSubjectsWithId->delete('', ClassSubjectsController::class . ':removeSubjectFromClass')
+                                ->add(RequireAdmin::class);
+                        });
                     });
                 })->add(RequireClassMembership::class);
             });

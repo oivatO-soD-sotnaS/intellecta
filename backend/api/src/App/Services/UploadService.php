@@ -18,7 +18,7 @@ class UploadService {
    * @return void
    * @throws \RuntimeException If the upload fails
    */
-  private function upload(string $path, string $content): void {
+  private function uploadFile(string $path, string $content): void {
     $path = ltrim($path, '/');
     $targetPath = "{$this->uploadDir}{$path}";
 
@@ -50,59 +50,11 @@ class UploadService {
     chmod($targetPath, 0644);
   }
 
-  public function userProfilePicture(string $ext, string $content): string {
+  public function upload(string $ext, string $content): string {
     $fileName = bin2hex(random_bytes(32));
-    $path = "users/profile-pictures/{$fileName}.{$ext}";
+    $path = "{$fileName}.{$ext}";
 
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-
-  public function institutionProfilePicture(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "institutions/profile-pictures/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-
-  public function institutionBanner(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "institutions/banners/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-
-  public function classProfilePicture(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "classes/profile-pictures/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-
-  public function classBanner(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "classes/banners/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-  
-  public function subjectProfilePicture(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "subjects/profile-pictures/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
-    return "http://files.intellecta:8080/{$path}";
-  }
-
-  public function subjectBanner(string $ext, string $content): string {
-    $fileName = bin2hex(random_bytes(32));
-    $path = "subjects/banners/{$fileName}.{$ext}";
-
-    $this->upload($path, $content);
+    $this->uploadFile($path, $content);
     return "http://files.intellecta:8080/{$path}";
   }
 }

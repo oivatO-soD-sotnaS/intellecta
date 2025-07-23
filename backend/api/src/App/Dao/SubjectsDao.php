@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Dao;
 
 use App\Models\Subject;
+use App\Models\ClassSubject;
 use PDO;
 
 class SubjectsDao extends BaseDao {
@@ -29,29 +30,6 @@ class SubjectsDao extends BaseDao {
         return $subjects;
     }
 
-    /**
-     * Summary of getSubjectsByClassId
-     * @param string $class_id
-     * @return Subject[]
-     */
-    public function getSubjectsByClassId(string $class_id): array {
-        $sql = "SELECT s.*
-                FROM subjects s
-                JOIN subject_classes sc ON sc.subject_id = s.subject_id
-                WHERE sc.class_id = :class_id;
-                ";
-
-        $pdo = $this->database->getConnection();
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':class_id', $class_id, PDO::PARAM_STR);
-        $stmt ->execute();
-
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $subjects = array_map(fn(array $row) => new Subject($row), $data);
-
-        return $subjects;
-    }
 
     /**
      * Summary of getSubjectById
@@ -104,7 +82,7 @@ class SubjectsDao extends BaseDao {
      */
     public function updateSubject(Subject $subject): ?Subject {
         $sql = "UPDATE subjects
-                SET name = :name, description = :description, profile_picture_id = :profile_picture_id, banner_id = :banner_id, teacher = :teacher_id
+                SET name = :name, description = :description, profile_picture_id = :profile_picture_id, banner_id = :banner_id, teacher_id = :teacher_id
                 WHERE subject_id = :subject_id
                 ";
 
@@ -116,7 +94,7 @@ class SubjectsDao extends BaseDao {
         $stmt->bindValue(':profile_picture_id', $subject->getProfilePictureId(), PDO::PARAM_STR);
         $stmt->bindValue(':banner_id', $subject->getBannerId(), PDO::PARAM_STR);
         $stmt->bindValue(':teacher_id', $subject->getTeacherId(), PDO::PARAM_STR);
-     
+        $stmt->bindValue(':subject_id', $subject->getSubjectId(), PDO::PARAM_STR);
         $success = $stmt->execute();
 
         return $success ? $subject : null;

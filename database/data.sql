@@ -1,4 +1,4 @@
-INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `type`, `size`, `uploaded_at`) VALUES
+INSERT INTO `files` (`file_id`, `url`, `filename`, `mime_type`, `file_type`, `size`, `uploaded_at`) VALUES
 ('f7dcef54-c374-4ea3-af0c-24f19bda74b8', 'https://example.com/files/1', 'profile1.jpg', 'image/jpeg', 'image', 102400, '2023-01-01 10:00:00'),
 ('9b317eae-e4c4-4de0-a244-2eef9558e2e7', 'https://example.com/files/2', 'document.pdf', 'application/pdf', 'document', 512000, '2023-01-02 11:00:00'),
 ('e27d83a7-4329-43d9-b011-e1289cf2b5f9', 'https://example.com/files/3', 'presentation.pptx', 'application/vnd.ms-powerpoint', 'document', 2048000, '2023-01-03 12:00:00');
@@ -64,7 +64,7 @@ INSERT INTO `subjects` (`subject_id`, `name`, `description`, `profile_picture_id
 ('df4b74b3-4bff-460e-aa77-14bb84435b33', 'Linear Algebra', 'Matrix operations and vector spaces', NULL, NULL, 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('8b046b6f-1fa2-462c-84ba-1c7b88450c87', 'Thermodynamics', 'Study of heat and energy transfer', NULL, NULL, 'f6989a00-0032-4068-a2d0-efd8b1085aad', '65fe5128-3fbd-424c-86e9-6d8e42ef9286');
 
-INSERT INTO `subject_classes` (`subject_classes_id`, `class_id`, `subject_id`) VALUES
+INSERT INTO `class_subjects` (`class_subjects_id`, `class_id`, `subject_id`) VALUES
 ('fadcaaa1-1cae-404c-aa50-8a38af51fd76', '7bae5f09-48fd-47d6-958d-26809f97a2e0', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
 ('9d3693f5-5426-4619-9be6-5b176c3a9482', '3827894f-2c54-412a-aa2c-f178511d0553', 'df4b74b3-4bff-460e-aa77-14bb84435b33'),
 ('43ada8b6-c4dc-40d8-9c49-35423a42e8d2', '3d95fee9-b1c7-417b-a8ac-7f1ce1dfcaed', '8b046b6f-1fa2-462c-84ba-1c7b88450c87');

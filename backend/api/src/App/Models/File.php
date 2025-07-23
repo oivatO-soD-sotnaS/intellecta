@@ -18,7 +18,7 @@ class File implements \JsonSerializable {
         $this->filename = $data['filename'] ?? '';
         $this->mime_type = $data['mime_type'] ?? null;
         $this->size = $data['size'] ?? null;
-        $this->file_type = FileType::tryFrom($data['type'] ?? 'other') ?? FileType::Other;
+        $this->file_type = FileType::tryFrom($data['file_type'] ?? 'other') ?? FileType::Other;
         $this->uploaded_at = $data['uploaded_at'] ?? date('Y-m-d H:i:s');
     }
 

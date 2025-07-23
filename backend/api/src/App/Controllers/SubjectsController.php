@@ -9,6 +9,7 @@ use App\Dao\SubjectsDao;
 use App\Dao\UserDao;
 use App\Dto\SubjectDto;
 use App\Dto\UserDto;
+use App\Enums\FileType;
 use App\Enums\InstitutionUserType;
 use App\Models\File;
 use App\Models\InstitutionUser;
@@ -119,7 +120,7 @@ class SubjectsController extends BaseController {
             $timestamp = date('Y-m-d H:i:s');
 
             if (!empty($profilePicture)) {
-                $fileUrl = $this->uploadService->subjectProfilePicture(
+                $fileUrl = $this->uploadService->upload(
                     $profilePicture->getExtension(), 
                     $profilePicture->getContent()
                 );
@@ -130,13 +131,13 @@ class SubjectsController extends BaseController {
                     "filename" => $profilePicture->getSafeFilename(),
                     "mime_type" => $profilePicture->getMimeType(),
                     "size" => $profilePicture->getSize(),
-                    "type" => 'image',
+                    "file_type" => FileType::Image->value,
                     "uploaded_at" => $timestamp
                 ]));
             }
 
             if (!empty($banner)) {
-                $fileUrl = $this->uploadService->subjectBanner(
+                $fileUrl = $this->uploadService->upload(
                     $banner->getExtension(), 
                     $banner->getContent()
                 );
@@ -147,7 +148,7 @@ class SubjectsController extends BaseController {
                     "filename" => $banner->getSafeFilename(),
                     "mime_type" => $banner->getMimeType(),
                     "size" => $banner->getSize(),
-                    "type" => 'image',
+                    "file_type" => FileType::Image->value,
                     "uploaded_at" => $timestamp
                 ]));
             }
@@ -191,8 +192,8 @@ class SubjectsController extends BaseController {
             $subjectDto = new SubjectDto(
                 $subject, 
                 $teacherDto, 
-                $profilePicture, 
-                $banner
+                $profilePictureFile, 
+                $bannerFile
             );
 
             $response->getBody()->write(json_encode([
@@ -376,7 +377,7 @@ class SubjectsController extends BaseController {
 
             $success = $this->subjectsDao->deleteSubjectById($subject_id);
 
-            if($success) {
+            if(!$success) {
                 throw new HttpInternalServerErrorException($request, "Could not delete subject due to an unknown error.");
             }
 
@@ -385,39 +386,6 @@ class SubjectsController extends BaseController {
             ]));
 
             LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}", "{$token['email']} deleted the subject {$subject->getName()}");
-            return $response;
-        });
-    }
-
-    public function getClassSubjects(Request $request, Response $response, string $institution_id, string $class_id): Response {
-        return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
-            $subjects = $this->subjectsDao->getSubjectsByClassId($class_id);
-
-            $subjectsDtos = array_map(function(Subject $subject) {
-                $teacher = $this->userDao->getById($subject->getTeacherId());
-                $teacherProfilePicture = $teacher->getProfilePictureId()
-                    ? $this->filesDao->getFileById($teacher->getProfilePictureId())
-                    : null;
-
-                $teacherDto = new UserDto($teacher, $teacherProfilePicture);
-
-                $profilePicture = $subject->getProfilePictureId()
-                    ? $this->filesDao->getFileById($subject->getProfilePictureId())
-                    : null;
-                $banner = $subject->getBannerId()
-                    ? $this->filesDao->getFileById($subject->getBannerId())
-                    : null;
-                
-                return new SubjectDto(
-                    $subject, 
-                    $teacherDto, 
-                    $profilePicture, 
-                    $banner
-                );
-            }, $subjects);
-
-            $response->getBody()->write(json_encode($subjectsDtos));
-
             return $response;
         });
     }

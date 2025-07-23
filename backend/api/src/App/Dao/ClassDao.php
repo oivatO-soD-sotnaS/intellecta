@@ -29,7 +29,7 @@ class ClassDao extends BaseDao {
     }
 
     /**
-     * 
+     * Summary of getClassByUserIdAndClassId
      * @param string $user_id
      * @param string $class_id
      * @return ClassModel|null

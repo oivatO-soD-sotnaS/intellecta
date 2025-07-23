@@ -15,7 +15,7 @@ class FilesDao extends BaseDao {
    * @return File|null
    */
   public function createFile (File $file): ?File {
-    $sql = "INSERT INTO files (file_id, url, filename, type, mime_type, size, uploaded_at)
+    $sql = "INSERT INTO files (file_id, url, filename, file_type, mime_type, size, uploaded_at)
             VALUE (:file_id, :url, :filename, :file_type, :mime_type, :size, :uploaded_at)";
 
     $pdo = $this->database->getConnection();

@@ -8,6 +8,7 @@ use App\Dao\InstitutionDao;
 use App\Dao\InstitutionUserDao;
 use App\Dto\InstitutionDto;
 use App\Dto\InstitutionSummaryDto;
+use App\Enums\FileType;
 use App\Enums\InstitutionUserType;
 use App\Models\File;
 use App\Models\Institution;
@@ -192,7 +193,7 @@ class InstitutionsController extends BaseController
 
       $timestamp = date('Y-m-d H:i:s');
       if (!empty($profilePicture)) {
-        $fileUrl = $this->uploadService->institutionProfilePicture(
+        $fileUrl = $this->uploadService->upload(
           $profilePicture->getExtension(), 
           $profilePicture->getContent()
         );
@@ -203,13 +204,13 @@ class InstitutionsController extends BaseController
           "filename" => $profilePicture->getSafeFilename(),
           "mime_type" => $profilePicture->getMimeType(),
           "size" => $profilePicture->getSize(),
-          "type" => 'image',
+          "file_type" => FileType::Image->value,
           "uploaded_at" => $timestamp
         ]));
       }
 
       if (!empty($banner)) {
-        $fileUrl = $this->uploadService->institutionBanner(
+        $fileUrl = $this->uploadService->upload(
           $banner->getExtension(), 
           $banner->getContent()
         );
@@ -220,7 +221,7 @@ class InstitutionsController extends BaseController
           "filename" => $banner->getSafeFilename(),
           "mime_type" => $banner->getMimeType(),
           "size" => $banner->getSize(),
-          "type" => 'image',
+          "file_type" => FileType::Image->value,
           "uploaded_at" => $timestamp
         ]));
       }

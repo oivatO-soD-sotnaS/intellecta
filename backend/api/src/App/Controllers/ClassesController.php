@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Dao\ClassDao;
 use App\Dao\FilesDao;
 use App\Dto\ClassModelDto;
+use App\Enums\FileType;
 use App\Enums\InstitutionUserType;
 use App\Models\ClassModel;
 use App\Models\File;
@@ -90,7 +91,7 @@ class ClassesController extends BaseController {
             $timestamp = date('Y-m-d H:i:s');
             
             if($profilePicture !== null) {
-                $fileUrl = $this->uploadService->classProfilePicture(
+                $fileUrl = $this->uploadService->upload(
                     $profilePicture->getExtension(), 
                     $profilePicture->getContent()
                 );
@@ -101,12 +102,12 @@ class ClassesController extends BaseController {
                     "filename" => $profilePicture->getSafeFilename(),
                     "mime_type" => $profilePicture->getMimeType(),
                     "size" => $profilePicture->getSize(),
-                    "type" => 'image',
+                    "file_type" => FileType::Image->value,
                     "uploaded_at" => $timestamp
                 ]));
             }
             if($banner !== null) {
-                $fileUrl = $this->uploadService->classBanner(
+                $fileUrl = $this->uploadService->upload(
                     $banner->getExtension(), 
                     $banner->getContent()
                 );
@@ -117,7 +118,7 @@ class ClassesController extends BaseController {
                     "filename" => $banner->getSafeFilename(),
                     "mime_type" => $banner->getMimeType(),
                     "size" => $banner->getSize(),
-                    "type" => 'image',
+                    "file_type" => FileType::Image->value,
                     "uploaded_at" => $timestamp
                 ]));
             }
@@ -152,6 +153,7 @@ class ClassesController extends BaseController {
             if(empty($class)) {
                 throw new HttpNotFoundException($request, "Class not found");
             }
+            
             if($class->getInstitutionId() !== $institution_id) {
                 LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to fetch a class of another institution.");
                 throw new HttpNotFoundException($request, "Class not found");
