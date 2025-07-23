@@ -256,7 +256,7 @@ class InstitutionsController extends BaseController
       $token= $request->getAttribute('token');
 
       $body = $request->getParsedBody();
-      $this->validatorService->validateRequired($body, ['name', 'description', 'profile_picture_id', 'banner_id']);
+      $this->validatorService->validateRequired($body, ['name', 'description']);
 
       // Required parameters
       $name = new InstitutionNameVo($body["name"]);

@@ -6,7 +6,7 @@ namespace App\Vo;
 
 use InvalidArgumentException;
 
-final class InstitutionDescriptionVo
+final class SubjectDescriptionVo
 {
   private string $value;
 
@@ -16,7 +16,7 @@ final class InstitutionDescriptionVo
 
     $length = strlen($description);
     if ($length > 500) {
-      throw new InvalidArgumentException('Institution description must have at maximum 500 characters.');
+      throw new InvalidArgumentException('Subject description must have at maximum 500 characters.');
     }
 
     $this->value = $description;

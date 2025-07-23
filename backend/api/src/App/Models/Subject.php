@@ -8,7 +8,7 @@ class Subject implements \JsonSerializable {
     private $profile_picture_id;
     private $banner_id;
     private $institution_id;
-    private $professor_id;
+    private $teacher_id;
 
     public function __construct(array $data = []) {
         $this->subject_id = $data['subject_id'] ?? '';
@@ -17,7 +17,7 @@ class Subject implements \JsonSerializable {
         $this->profile_picture_id = $data['profile_picture_id'] ?? null;
         $this->banner_id = $data['banner_id'] ?? null;
         $this->institution_id = $data['institution_id'] ?? '';
-        $this->professor_id = $data['professor_id'] ?? null;
+        $this->teacher_id = $data['teacher_id'] ?? null;
     }
 
     private function toArray(): array {
@@ -28,7 +28,7 @@ class Subject implements \JsonSerializable {
             'profile_picture_id' => $this->profile_picture_id,
             'banner_id' => $this->banner_id,
             'institution_id' => $this->institution_id,
-            'professor_id' => $this->professor_id
+            'teacher_id' => $this->teacher_id
         ];
     }
 
@@ -43,5 +43,34 @@ class Subject implements \JsonSerializable {
     public function getProfilePictureId(): ?string { return $this->profile_picture_id; }
     public function getBannerId(): ?string { return $this->banner_id; }
     public function getInstitutionId(): string { return $this->institution_id; }
-    public function getProfessorId(): ?string { return $this->professor_id; }
+    public function getTeacherId(): ?string { return $this->teacher_id; }
+
+    // Setters
+    public function setSubjectId(string $subject_id): void {
+        $this->subject_id = $subject_id;
+    }
+
+    public function setName(string $name): void {
+        $this->name = $name;
+    }
+
+    public function setDescription(?string $description): void {
+        $this->description = $description;
+    }
+
+    public function setProfilePictureId(?string $profile_picture_id): void {
+        $this->profile_picture_id = $profile_picture_id;
+    }
+
+    public function setBannerId(?string $banner_id): void {
+        $this->banner_id = $banner_id;
+    }
+
+    public function setInstitutionId(string $institution_id): void {
+        $this->institution_id = $institution_id;
+    }
+
+    public function setTeacherId(?string $teacher_id): void {
+        $this->teacher_id = $teacher_id;
+    }
 }

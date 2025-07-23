@@ -90,4 +90,19 @@ class UploadService {
     return "http://files.intellecta:8080/{$path}";
   }
   
+  public function subjectProfilePicture(string $ext, string $content): string {
+    $fileName = bin2hex(random_bytes(32));
+    $path = "subjects/profile-pictures/{$fileName}.{$ext}";
+
+    $this->upload($path, $content);
+    return "http://files.intellecta:8080/{$path}";
+  }
+
+  public function subjectBanner(string $ext, string $content): string {
+    $fileName = bin2hex(random_bytes(32));
+    $path = "subjects/banners/{$fileName}.{$ext}";
+
+    $this->upload($path, $content);
+    return "http://files.intellecta:8080/{$path}";
+  }
 }

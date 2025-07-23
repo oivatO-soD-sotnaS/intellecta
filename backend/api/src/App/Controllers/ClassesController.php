@@ -262,7 +262,6 @@ class ClassesController extends BaseController {
                 throw new HttpNotFoundException($request, "Class not found");
             }
 
-            /** @var boolean $success */
             $success = $this->classDao->deleteClass($class->getClassId());
 
             if(!$success) {

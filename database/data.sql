@@ -59,7 +59,7 @@ INSERT INTO `class_users` (`class_users_id`, `joined_at`, `class_id`, `user_id`)
 ('5e58f6f7-4a0c-4673-a3a4-a326ac69628a', '2023-01-02 11:00:00', '7bae5f09-48fd-47d6-958d-26809f97a2e0', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('9bce115a-a1ef-4ceb-9e9c-68b327c1b77b', '2023-01-03 12:00:00', '3827894f-2c54-412a-aa2c-f178511d0553', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e');
 
-INSERT INTO `subjects` (`subject_id`, `name`, `description`, `profile_picture_id`, `banner_id`, `institution_id`, `professor_id`) VALUES
+INSERT INTO `subjects` (`subject_id`, `name`, `description`, `profile_picture_id`, `banner_id`, `institution_id`, `teacher_id`) VALUES
 ('5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', 'Programming Fundamentals', 'Learn basic programming concepts', NULL, NULL, '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '65fe5128-3fbd-424c-86e9-6d8e42ef9286'),
 ('df4b74b3-4bff-460e-aa77-14bb84435b33', 'Linear Algebra', 'Matrix operations and vector spaces', NULL, NULL, 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('8b046b6f-1fa2-462c-84ba-1c7b88450c87', 'Thermodynamics', 'Study of heat and energy transfer', NULL, NULL, 'f6989a00-0032-4068-a2d0-efd8b1085aad', '65fe5128-3fbd-424c-86e9-6d8e42ef9286');

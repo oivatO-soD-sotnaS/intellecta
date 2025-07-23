@@ -8,6 +8,7 @@ use App\Controllers\InstitutionalEventController;
 use App\Controllers\InstitutionsController;
 use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
+use App\Controllers\SubjectsController;
 use App\Controllers\UserController;
 use App\Controllers\UserEventController;
 use App\Middleware\RequireAdmin;
@@ -64,44 +65,60 @@ return function (App $app) {
         });
     })->add(RequireAuth::class);
 
-    $app->group('/institutions', function ($group) {
+    $app->group('/institutions', function ($institution) {
 
-        $group->get('', InstitutionsController::class . ':getInstitutions');
-        $group->post('', InstitutionsController::class . ':createInstitution');
-        $group->get('/owned', InstitutionsController::class . ':getUserInstitutions');
-        $group->get('/summaries', InstitutionsController::class . ':getInstitutionsSummary');
+        $institution->get('', InstitutionsController::class . ':getInstitutions');
+        $institution->post('', InstitutionsController::class . ':createInstitution');
+        $institution->get('/owned', InstitutionsController::class . ':getUserInstitutions');
+        $institution->get('/summaries', InstitutionsController::class . ':getInstitutionsSummary');
 
-        $group->group('/{institution_id:'.UUIDv4_REGEX.'}', function ($institution) {
+        $institution->group('/{institution_id:'.UUIDv4_REGEX.'}', function ($institutionWithId) {
+            $institutionWithId->get('', InstitutionsController::class . ':getInstitutionById');
+            $institutionWithId->put('', InstitutionsController::class . ':updateInstitution')
+                ->add(RequireAdmin::class);
+            $institutionWithId->delete('', InstitutionsController::class . ':deleteInstitution')
+                ->add(RequireAdmin::class);
+            $institutionWithId->get('/summary', InstitutionsController::class . ':getInstitutionSummaryById');
+            
+            $institutionWithId->group('/subjects', function ($institutionSubjects) {
+                $institutionSubjects->get('', SubjectsController::class . ':getInstitutionSubjects');
+                $institutionSubjects->post('', SubjectsController::class . ':createSubject');
 
-            $institution->get('', InstitutionsController::class . ':getInstitutionById');
-            $institution->put('', InstitutionsController::class . ':updateInstitution')->add(RequireAdmin::class);
-            $institution->delete('', InstitutionsController::class . ':deleteInstitution')->add(RequireAdmin::class);
-            $institution->get('/summary', InstitutionsController::class . ':getInstitutionSummaryById');
+                $institutionSubjects->group('/{subject_id:'.UUIDv4_REGEX.'}', function($institutionSubjectsWithId) {
+                    $institutionSubjectsWithId->get('', SubjectsController::class . ':getSubjectById');
+                    $institutionSubjectsWithId->put('', SubjectsController::class . ':updateSubjectById');
+                    $institutionSubjectsWithId->delete('', SubjectsController::class . ':deleteSubjectById');
+                });
+            });
+            
 
             // Institution Users
-            $institution->group('/users', function ($users) {
-                $users->get('', InstitutionUsersController::class . ':getInstitutionUsers')->add(RequireAdmin::class);
-                $users->post('/invite', InstitutionUsersController::class . ':inviteUsers')->add(RequireAdmin::class);
+            $institutionWithId->group('/users', function ($users) {
+                $users->get('', InstitutionUsersController::class . ':getInstitutionUsers')
+                    ->add(RequireAdmin::class);
+                $users->post('/invite', InstitutionUsersController::class . ':inviteUsers')
+                    ->add(RequireAdmin::class);
                 $users->patch('/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ':changeUserRole')->add(RequireAdmin::class);
                 $users->delete('/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ':removeUser')->add(RequireAdmin::class);
             });
 
             // Institutional Events
-            $institution->group('/events', function ($events) {
-                $events->get('', InstitutionalEventController::class . ':getInstitutionalEvents');
-                $events->post('', InstitutionalEventController::class . ':createInstitutionalEvent')->add(RequireAdmin::class);
-                $events->get('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':getInstitutionalEvent');
-                $events->put('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':updateInstitutionalEvent')->add(RequireAdmin::class);
-                $events->delete('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':deleteInstitutionalEvent')->add(RequireAdmin::class);
+            $institutionWithId->group('/events', function ($institutionEvents) {
+                $institutionEvents->get('', InstitutionalEventController::class . ':getInstitutionalEvents');
+                $institutionEvents->post('', InstitutionalEventController::class . ':createInstitutionalEvent')
+                    ->add(RequireAdmin::class);
+                $institutionEvents->get('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':getInstitutionalEvent');
+                $institutionEvents->put('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':updateInstitutionalEvent')->add(RequireAdmin::class);
+                $institutionEvents->delete('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':deleteInstitutionalEvent')->add(RequireAdmin::class);
             });
 
             // Classes
-            $institution->group('/classes', function ($classes) {
-                $classes->get('', ClassesController::class . ':getInstitutionClasses');
-                $classes->post('', ClassesController::class . ':createClass')
+            $institutionWithId->group('/classes', function ($institutionClasses) {
+                $institutionClasses->get('', ClassesController::class . ':getInstitutionClasses');
+                $institutionClasses->post('', ClassesController::class . ':createClass')
                     ->add(RequireAdmin::class);
 
-                $classes->group('/{class_id:'.UUIDv4_REGEX.'}', function ($classesWithId) {
+                $institutionClasses->group('/{class_id:'.UUIDv4_REGEX.'}', function ($classesWithId) {
                     $classesWithId->get('', ClassesController::class . ':getClassById');
                     $classesWithId->put('', ClassesController::class . ':updateClass')
                         ->add(RequireAdmin::class);
@@ -121,16 +138,18 @@ return function (App $app) {
                     });
 
                     // Subjects under a class
-                    // $classesWithId->group('/subjects', function ($subjects) {
-                    //     $subjects->get('', SubjectsController::class . ':getSubjects');
-                    //     $subjects->post('', SubjectsController::class . ':createSubject')
-                    //         ->add(RequireAdmin::class);
-                    //     $subjects->get('/{subject_id:'.UUIDv4_REGEX.'}', SubjectsController::class . ':getSubjectById');
-                    //     $subjects->put('/{subject_id:'.UUIDv4_REGEX.'}', SubjectsController::class . ':updateSubject')
-                    //         ->add(RequireAdmin::class);
-                    //     $subjects->delete('/{subject_id:'.UUIDv4_REGEX.'}', SubjectsController::class . ':deleteSubject')
-                    //         ->add(RequireAdmin::class);
-                    // });
+                    $classesWithId->group('/subjects', function ($subjects) {
+                        $subjects->get('', SubjectsController::class . ':getClassSubjects');
+                        //
+                        //
+                        //
+                        //
+                        // 
+                        // 
+                        // 
+                        // 
+                        // 
+                    });
                 })->add(RequireClassMembership::class);
             });
 

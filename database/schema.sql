@@ -104,9 +104,9 @@ CREATE TABLE `subjects` (
   `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
   `institution_id` CHAR(36) NOT NULL, -- ID da instituição à qual a disciplina pertence
-  `professor_id` CHAR(36), -- ID do usuário que criou a disciplina -- Professor da disciplina.
+  `teacher_id` CHAR(36), -- ID do usuário que criou a disciplina -- professor da disciplina.
   FOREIGN KEY (`institution_id`) REFERENCES `institutions`(`institution_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`professor_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL,
+  FOREIGN KEY (`teacher_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL,
   FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`banner_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
