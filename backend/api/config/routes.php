@@ -79,7 +79,7 @@ return function (App $app) {
             $institutionWithId->delete('', InstitutionsController::class . ':deleteInstitution')
                 ->add(RequireAdmin::class);
             $institutionWithId->get('/summary', InstitutionsController::class . ':getInstitutionSummaryById');
-            
+
             $institutionWithId->group('/subjects', function ($institutionSubjects) {
                 $institutionSubjects->get('', SubjectsController::class . ':getInstitutionSubjects');
                 $institutionSubjects->post('', SubjectsController::class . ':createSubject');
@@ -91,15 +91,17 @@ return function (App $app) {
                 });
             });
             
-
             // Institution Users
-            $institutionWithId->group('/users', function ($users) {
-                $users->get('', InstitutionUsersController::class . ':getInstitutionUsers')
+            $institutionWithId->group('/users', function ($institutionUsers) {
+                $institutionUsers->get('', InstitutionUsersController::class . ':getInstitutionUsers')
                     ->add(RequireAdmin::class);
-                $users->post('/invite', InstitutionUsersController::class . ':inviteUsers')
+                $institutionUsers->post('/invite', InstitutionUsersController::class . ':inviteUsers')
                     ->add(RequireAdmin::class);
-                $users->patch('/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ':changeUserRole')->add(RequireAdmin::class);
-                $users->delete('/{institution_user_id:'.UUIDv4_REGEX.'}', InstitutionUsersController::class . ':removeUser')->add(RequireAdmin::class);
+                $institutionUsers->group('/{institution_user_id:'.UUIDv4_REGEX.'}', function($institutionUsersWithId) {
+                    $institutionUsersWithId->patch('/change-role', InstitutionUsersController::class . ':changeUserRole')
+                        ->add(RequireAdmin::class);
+                    $institutionUsersWithId->delete('', InstitutionUsersController::class . ':removeUser');
+                });
             });
 
             // Institutional Events
@@ -107,9 +109,13 @@ return function (App $app) {
                 $institutionEvents->get('', InstitutionalEventController::class . ':getInstitutionalEvents');
                 $institutionEvents->post('', InstitutionalEventController::class . ':createInstitutionalEvent')
                     ->add(RequireAdmin::class);
-                $institutionEvents->get('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':getInstitutionalEvent');
-                $institutionEvents->put('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':updateInstitutionalEvent')->add(RequireAdmin::class);
-                $institutionEvents->delete('/{event_id:'.UUIDv4_REGEX.'}', InstitutionalEventController::class . ':deleteInstitutionalEvent')->add(RequireAdmin::class);
+                $institutionEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($institutionEventsWithId) {
+                    $institutionEventsWithId->get('', InstitutionalEventController::class . ':getInstitutionalEvent');
+                    $institutionEventsWithId->put('', InstitutionalEventController::class . ':updateInstitutionalEvent')
+                        ->add(RequireAdmin::class);
+                    $institutionEventsWithId->delete('', InstitutionalEventController::class . ':deleteInstitutionalEvent')
+                        ->add(RequireAdmin::class);
+                });
             });
 
             // Classes
@@ -140,15 +146,6 @@ return function (App $app) {
                     // Subjects under a class
                     $classesWithId->group('/subjects', function ($subjects) {
                         $subjects->get('', SubjectsController::class . ':getClassSubjects');
-                        //
-                        //
-                        //
-                        //
-                        // 
-                        // 
-                        // 
-                        // 
-                        // 
                     });
                 })->add(RequireClassMembership::class);
             });

@@ -135,10 +135,10 @@ class InstitutionUsersController
     }
 
     #[OA\Patch(
-        path: "/institutions/{institution_id}/users/{institution_user_id}",
+        path: "/institutions/{institution_id}/users/{institution_user_id}/change-role",
         tags: ["Usuários da Instituição"],
-        summary: "Alterar cargo do usuário",
-        description: "Atualiza o cargo de um usuário dentro da instituição",
+        summary: "Alterar cargo do usuário na instituição",
+        description: "Atualiza o cargo de um usuário dentro da instituição (apenas administradores)",
         operationId: "changeUserRole",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -153,7 +153,7 @@ class InstitutionUsersController
                 name: "institution_user_id",
                 in: "path",
                 required: true,
-                description: "ID do relacionamento usuário-instituição",
+                description: "ID do vínculo usuário-instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
@@ -161,10 +161,10 @@ class InstitutionUsersController
             required: true,
             description: "Novo cargo para o usuário",
             content: new OA\JsonContent(
-                required: ["novo_cargo"],
+                required: ["new_role"],
                 properties: [
                     new OA\Property(
-                        property: "novo_cargo",
+                        property: "new_role",
                         type: "string",
                         enum: ["admin", "teacher", "student"],
                         description: "Novo cargo do usuário",
@@ -176,46 +176,46 @@ class InstitutionUsersController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Cargo atualizado com sucesso",
+                description: "Cargo alterado com sucesso",
                 content: new OA\JsonContent(ref: "#/components/schemas/InstitutionUserDto")
             ),
             new OA\Response(
                 response: 400,
-                description: "Entrada inválida",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
-                response: 401,
-                description: "Não autorizado",
+                description: "Dados inválidos",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 403,
-                description: "Acesso negado",
+                description: "Acesso negado - apenas administradores podem alterar cargos",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 404,
-                description: "Usuário ou instituição não encontrado",
+                description: "Usuário não encontrado na instituição",
+                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Cargo inválido",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 500,
-                description: "Erro interno do servidor",
+                description: "Erro interno ao atualizar cargo",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
     )]
     public function changeUserRole()
     {
-        // ... implementação permanece a mesma ...
+        // ... implementation ...
     }
 
     #[OA\Delete(
         path: "/institutions/{institution_id}/users/{institution_user_id}",
         tags: ["Usuários da Instituição"],
         summary: "Remover usuário da instituição",
-        description: "Remove um usuário da instituição",
+        description: "Remove um usuário da instituição (apenas administradores ou o próprio usuário)",
         operationId: "removeUser",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -230,7 +230,7 @@ class InstitutionUsersController
                 name: "institution_user_id",
                 in: "path",
                 required: true,
-                description: "ID do relacionamento usuário-instituição",
+                description: "ID do vínculo usuário-instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
@@ -249,30 +249,25 @@ class InstitutionUsersController
                 )
             ),
             new OA\Response(
-                response: 401,
-                description: "Não autorizado",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
-            ),
-            new OA\Response(
                 response: 403,
-                description: "Acesso negado",
+                description: "Acesso negado - apenas administradores ou o próprio usuário podem remover",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 404,
-                description: "Usuário ou instituição não encontrado",
+                description: "Vínculo usuário-instituição não encontrado",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 500,
-                description: "Erro interno do servidor",
+                description: "Erro interno ao remover usuário",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
     )]
     public function removeUser()
     {
-        // ... implementação permanece a mesma ...
+        // ... implementation ...
     }
 }
 

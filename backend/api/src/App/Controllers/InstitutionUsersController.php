@@ -114,6 +114,8 @@ class InstitutionUsersController extends BaseController
 
   public function changeUserRole(Request $request, Response $response, string $institution_id, string $institution_user_id): Response {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
+      $token = $request->getAttribute("token");
+      
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['new_role']);
       
@@ -145,18 +147,31 @@ class InstitutionUsersController extends BaseController
       $institutionUserDto = new InstitutionUserDto($institutionUser, $userDto);
       $response->getBody()->write(json_encode($institutionUserDto));
 
+      LogService::info("/institutions/{$institution_id}/users/{$institution_user_id}/change-role", "{$token["email"]} changed {$user->getFullName()} role to {$newRole->value}");
       return $response;
     });
   }
   
   public function removeUser(Request $request, Response $response, string $institution_id, string $institution_user_id): Response {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
+      /** @var InstitutionUser $membership */
+      $membership = $request->getAttribute('membership');
+      $token = $request->getAttribute('token');
+
       $institutionUser = $this->institutionUserDao->getInstitutionUserById($institution_user_id);
-      if(empty($institutionUser)) {
-        throw new HttpNotFoundException($request, "Institution user with ID {$institution_user_id} does not exist");
+      
+      if(
+        empty($institutionUser)
+        || $institutionUser->getInstitutionId() !== $institution_id
+      ) {
+        throw new HttpNotFoundException($request, "Institution user with ID {$institution_user_id} not found");
       }
-      if($institutionUser->getInstitutionId() !== $institution_id) {
-        throw new HttpForbiddenException($request, "User does not belong to your institution");
+
+      if(
+        $membership->getRole() !== InstitutionUserType::Admin->value
+        && $institutionUser->getUserId() !== $token['sub']
+      ) {
+        throw new HttpForbiddenException($request, 'Only admins and the user itself can access this endpoint');
       }
 
       $this->institutionUserDao->deleteInstitutionUser($institutionUser);
