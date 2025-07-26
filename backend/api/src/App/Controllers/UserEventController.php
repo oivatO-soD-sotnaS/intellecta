@@ -11,23 +11,28 @@ use App\Models\UserEvent;
 use App\Services\EmailService;
 use App\Services\LogService;
 use App\Dto\UserEventDto;
+use App\Enums\EventType;
+use App\Services\ValidatorService;
 use App\Vo\EventDateVo;
 use App\Vo\EventDescriptionVo;
 use App\Vo\EventTitleVo;
 use InvalidArgumentException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
+use Slim\Exception\HttpForbiddenException;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-class UserEventController extends BaseController {
+readonly class UserEventController extends BaseController {
     public function __construct(
         private UserEventDao $userEventDao,
         private EventDao $eventDao,
         private UserDao $userDao,
-        private EmailService $emailService
+        private EmailService $emailService,
+        private ValidatorService $validatorService
     ) {}
 
     public function getUserEvents(Request $request, Response $response): Response {
@@ -36,18 +41,19 @@ class UserEventController extends BaseController {
     
             $user = $this->userDao->getById($token["sub"]);
             if (empty($user)) {
-                LogService::http401("/users/events", "User not found: " . $token["sub"]);
-                throw new HttpUnauthorizedException($request, 'User not found');
+                LogService::http401("/users/events", "User not found: {$token["sub"]}");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $userEvents = $this->userEventDao->getAllUserEventsById($user->getUserId());
-            if (empty($userEvents)) {
-                LogService::http404("/users/events", "No events found for user: ".$user->getEmail());
-                throw new HttpNotFoundException($request, 'No events found for this user');
+            
+            if(count($userEvents) === 0){
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $userEventsDto = array_map(function (UserEvent $userEvent) {
-                return new UserEventDto($userEvent, $this->eventDao->getEventById($userEvent->getEventId()));
+                $event = $this->eventDao->getEventById($userEvent->getEventId());
+                return new UserEventDto($userEvent, $event);
             }, $userEvents);
 
             $response->getBody()->write(json_encode($userEventsDto));
@@ -60,30 +66,20 @@ class UserEventController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response) {
             $token = $request->getAttribute("token");
             $body = $request->getParsedBody();
+            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            $title = new EventTitleVo($body['title']);
+            $description = new EventDescriptionVo($body['description']);
+            $eventDate = new EventDateVo($body['event_date']);
+            $eventType = EventType::tryFrom($body['event_type']);
     
-            $title = $body['title'] ?? null;
-            $description = $body['description'] ?? null;
-            $eventDate = $body['event_date'] ?? null;
-            $eventType = $body['event_type'] ?? null;
-    
-            if (empty($title) || empty($description) || empty($eventDate) || empty($eventType)) {
-                LogService::http422("/users/events", "Missing parameters");
-                throw new HttpException($request, "'title', 'description', 'event_date' and 'event_type' are required", 422);
+            if($eventType === null) {
+                throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
-    
-            try {
-                $title = new EventTitleVo($title);
-                $description = new EventDescriptionVo($description);
-                $eventDate = new EventDateVo($eventDate);
-            } catch (InvalidArgumentException $e) {
-                LogService::http422("/users/events", $e->getMessage());
-                throw new HttpException($request, $e->getMessage(), 422);
-            }
-    
+
             $user = $this->userDao->getById($token["sub"]);
             if (!$user) {
-                LogService::http404("/users/events", "User not found: " . $token["sub"]);
-                throw new HttpNotFoundException($request, 'User not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $event = $this->eventDao->createEvent(new Event([
@@ -91,7 +87,7 @@ class UserEventController extends BaseController {
                 'title' => $title->getValue(),
                 'description' => $description->getValue(),
                 'event_date' => $eventDate->toString(),
-                'type' => $eventType
+                'type' => $eventType->value
             ]));
 
             $userEvent = $this->userEventDao->createUserEvent(new UserEvent([
@@ -114,51 +110,41 @@ class UserEventController extends BaseController {
 
     public function updateUserEvent(Request $request, Response $response, string $event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $event_id) {
+            $token = $request->getAttribute("token");
+
             $body = $request->getParsedBody();
-    
-            $title = $body['title'] ?? null;
-            $description = $body['description'] ?? null;
-            $eventDate = $body['event_date'] ?? null;
-            $eventType = $body['event_type'] ?? null;
-    
-            if (empty($title) && empty($description) && empty($eventDate) && empty($eventType)) {
-                LogService::http422("/users/events/$event_id", "No valid fields to update");
-                throw new HttpException($request, "At least one field is required for update", 422);
+            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            $title = new EventTitleVo($body['title']);
+            $description = new EventDescriptionVo($body['description']);
+            $eventDate = new EventDateVo($body['event_date']);
+            $eventType = EventType::tryFrom($body['event_type']);
+            
+            if($eventType === null) {
+                throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
-    
-            if(!empty($title)) $title = new EventTitleVo($title);
-            if(!empty($description)) $description = new EventDescriptionVo($description);
-            if(!empty($eventDate)) $eventDate = new EventDateVo($eventDate);
-    
+                
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
                 LogService::http404("/users/events/$event_id", "User event not found");
-                throw new HttpNotFoundException($request, 'User event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $token = $request->getAttribute("token");
             if ($userEvent->getUserId() !== $token["sub"]) {
                 LogService::http401("/users/events/$event_id", "User not authorized to update");
-                throw new HttpUnauthorizedException($request, 'Unauthorized');
+                throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
             $event = $this->eventDao->getEventById($userEvent->getEventId());
             if (empty($event)) {
                 LogService::http404("/users/events/$event_id", "Event not found");
-                throw new HttpNotFoundException($request, 'Event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            if(!empty($title)) {
-                $event->setTitle($title->getValue());
-            }
-            if(!empty($description)) {
-                $event->setDescription($description->getValue());
-            }
-            if(!empty($eventDate)) {
-                $event->setEventDate($eventDate->toString());
-            }
-
-            $event->setType($eventType ?? $event->getType());
+            $event->setTitle($title->getValue());
+            $event->setDescription($description->getValue());
+            $event->setEventDate($eventDate->toString());
+            $event->setType($eventType->value);
 
             $this->eventDao->updateEvent($event);
 
@@ -175,27 +161,33 @@ class UserEventController extends BaseController {
 
     public function deleteUserEvent(Request $request, Response $response, string $event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $event_id) {
+            $token = $request->getAttribute("token");
+            
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
-                LogService::http404("/users/events/$event_id", "User event not found");
-                throw new HttpNotFoundException($request, 'User event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $token = $request->getAttribute("token");
             if ($userEvent->getUserId() !== $token["sub"]) {
                 LogService::http401("/users/events/$event_id", "Unauthorized delete attempt");
-                throw new HttpUnauthorizedException($request, 'Unauthorized');
+                throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
             $event = $this->eventDao->getEventById($userEvent->getEventId());
             if (empty($event)) {
                 LogService::http404("/users/events/$event_id", "Event not found");
-                throw new HttpNotFoundException($request, 'Event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $this->eventDao->deleteEventById($event->getEventId());
+            $success = $this->eventDao->deleteEventById($event->getEventId());
+            if(! $success) {
+                throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
+            }
 
-            $response->getBody()->write(json_encode(["Message" => "User event deleted successfully"]));
+            $response->getBody()->write(json_encode([
+                "Message" => "User event deleted successfully"
+            ]));
+
             return $response;
         });
     }
@@ -204,20 +196,18 @@ class UserEventController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $event_id) {
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (empty($userEvent)) {
-                LogService::http404("/users/events/$event_id", "User event not found");
-                throw new HttpNotFoundException($request, 'User event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $token = $request->getAttribute("token");
             if ($userEvent->getUserId() !== $token["sub"]) {
-                LogService::http401("/users/events/$event_id", "Unauthorized read attempt");
-                throw new HttpUnauthorizedException($request, 'Unauthorized');
+                throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
             $event = $this->eventDao->getEventById($userEvent->getEventId());
             if (empty($event)) {
                 LogService::http404("/users/events/$event_id", "Event not found");
-                throw new HttpNotFoundException($request, 'Event not found');
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $userEventDto = new UserEventDto($userEvent, $event);

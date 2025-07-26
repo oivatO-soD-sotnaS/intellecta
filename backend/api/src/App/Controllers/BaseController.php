@@ -13,7 +13,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 
-abstract class BaseController
+abstract readonly class BaseController
 {
     protected function handleErrors(Request $request, callable $action): Response
     {
@@ -21,18 +21,18 @@ abstract class BaseController
             return $action();
         } catch (InvalidArgumentException $e) {
             LogService::http422($request->getUri()->getPath(), $e->getMessage());
-            throw new HttpException($request, $e->getMessage(), 422);
+            throw new HttpException($request, LogService::HTTP_422 . $e->getMessage(), 422);
         } catch (PDOException $e) {
             LogService::http500($request->getUri()->getPath(), $e->getMessage());
             if ($e->getCode() === 23000) {
-                throw new HttpException($request, 'Asset already registered', 409);
+                throw new HttpException($request, LogService::HTTP_409 . 'Asset already registered', 409);
             }
-            throw new HttpInternalServerErrorException($request, "Could not complete the operation due to a database error. See logs for more details.");
+            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . "See logs for more details.");
         } catch (HttpException $e) {
             throw $e;
         } catch (Exception $e) {
             LogService::http500($request->getUri()->getPath(), $e->getMessage());
-            throw new HttpInternalServerErrorException($request, "Could not complete operation due to an unknown error. See logs for more details.");
+            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . "See logs for more details.");
         }
     }
 }

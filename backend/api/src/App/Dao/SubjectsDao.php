@@ -10,6 +10,39 @@ use PDO;
 class SubjectsDao extends BaseDao {
 
     /**
+     * Check if a user is related to a subject using the subject_users view
+     * or if the user is the teacher of the subject.
+     */
+    public function isUserRelatedToSubject(string $userId, string $subjectId): bool {
+        $sql = 
+            "
+                (
+                    SELECT 1
+                    FROM subject_users
+                    WHERE user_id = :user_id AND subject_id = :subject_id
+                )
+                UNION
+                (
+                    SELECT 1
+                    FROM subjects
+                    WHERE subject_id = :subject_id_2 AND teacher_id = :user_id_2
+                )
+                LIMIT 1
+            ";
+
+        $pdo = $this->database->getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':subject_id', $subjectId);
+        $stmt->bindParam(':user_id_2', $userId);
+        $stmt->bindParam(':subject_id_2', $subjectId);
+
+        $stmt->execute();
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    /**
      * Summary of getSubjectsByInstitutionId
      * @param string $institution_id
      * @return Subject[]

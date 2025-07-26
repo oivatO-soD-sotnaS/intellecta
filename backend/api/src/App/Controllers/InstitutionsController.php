@@ -21,6 +21,7 @@ use App\Vo\InstitutionDescriptionVo;
 use App\Vo\InstitutionNameVo;
 use App\Vo\ProfileAssetVo;
 use App\Vo\UuidV4Vo;
+use InvalidArgumentException;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
@@ -29,7 +30,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class InstitutionsController extends BaseController
+readonly class InstitutionsController extends BaseController
 {
   public function __construct(
     private InstitutionDao $institutionDao,
@@ -45,7 +46,7 @@ class InstitutionsController extends BaseController
       $userOwnedInstitutions = $this->institutionDao->getOwnedInstitutions($token['sub']);
       
       if(empty($userOwnedInstitutions) || count($userOwnedInstitutions) === 0) {
-        throw new HttpNotFoundException($request, "O usuário não é dono de nenhuma instituição");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $userOwnedInstitutionsDtos = array_map(function(Institution $institution) {
@@ -73,7 +74,7 @@ class InstitutionsController extends BaseController
       
       if (empty($summaries)) {
         LogService::info("/institutions/summaries", "User does not participate in any institution");
-        throw new HttpNotFoundException($request, "User does not participate in any institution");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $summariesDtos = array_map(function(InstitutionSummary $summary) {
@@ -100,7 +101,7 @@ class InstitutionsController extends BaseController
       $summary = $this->institutionDao->getInstitutionSummaryById($token['sub'], $institution_id);
       
       if (empty($summary)) {
-        throw new HttpNotFoundException($request, "No summary found for the user {$token['sub']} and institution $institution_id");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $banner = !empty($summary->getBannerId()) 
@@ -124,7 +125,7 @@ class InstitutionsController extends BaseController
       $institutions = $this->institutionDao->getInstitutionsByUserId($token['sub']);
       
       if (empty($institutions)) {
-        throw new HttpNotFoundException($request, "User does not participate in any institutions");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $institutionsDtos = array_map(function(Institution $institution) {
@@ -170,7 +171,7 @@ class InstitutionsController extends BaseController
       $userOwnedInstitutions = $this->institutionDao->getOwnedInstitutions($token['sub']);
       
       if (count($userOwnedInstitutions) >= 3) {
-        throw new HttpForbiddenException($request, "User has reached the maximum number of owned institutions (3)");
+        throw new HttpForbiddenException($request, LogService::HTTP_403 . "User has reached the maximum number of owned institutions (3)");
       }
 
       $body = $request->getParsedBody();
@@ -275,19 +276,18 @@ class InstitutionsController extends BaseController
       $institution = $this->institutionDao->getInstitutionById($institution_id);
       
       if (empty($institution)) {
-        throw new HttpNotFoundException($request, "Institution not found");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       if($profilePictureId !== null) {
         $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
         
         if (empty($profilePicture)) {
-          throw new HttpNotFoundException($request, "Profile picture not found");
+          throw new HttpNotFoundException($request, LogService::HTTP_404);
         }
-        if ($profilePicture->getFileType()->value !== 'image') {
-          throw new HttpException($request, "Profile picture must be an image", 422);
+        if ($profilePicture->getFileType()->value !== FileType::Image->value) {
+          throw new InvalidArgumentException("Profile picture must be an image");
         }
-
 
         $institution->setProfilePictureId($profilePicture->getFileId());
       }
@@ -296,10 +296,10 @@ class InstitutionsController extends BaseController
         $banner = $this->filesDao->getFileById($bannerId->getValue());
         
         if (empty($banner)) {
-          throw new HttpNotFoundException($request, "Banner not found");
+          throw new HttpNotFoundException($request, LogService::HTTP_404);
         }
-        if ($banner->getFileType()->value !== 'image') {
-          throw new HttpException($request, "Banner must be an image", 422);
+        if ($banner->getFileType()->value !== FileType::Image->value) {
+          throw new InvalidArgumentException("Banner must be an image");
         }
         
         $institution->setBannerId($banner->getFileId());
@@ -325,7 +325,7 @@ class InstitutionsController extends BaseController
 
       $institution = $this->institutionDao->getInstitutionById($institution_id);
       if (empty($institution)) {
-        throw new HttpNotFoundException($request, "Institution not found");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $this->institutionDao->deleteInstitution($institution_id);

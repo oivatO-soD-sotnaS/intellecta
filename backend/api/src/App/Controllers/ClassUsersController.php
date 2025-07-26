@@ -15,12 +15,13 @@ use App\Services\LogService;
 use App\Services\ValidatorService;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class ClassUsersController extends BaseController {
+readonly class ClassUsersController extends BaseController {
     public function __construct(
         private ClassUsersDao $classUsersDao,
         private InstitutionUserDao $institutionUserDao,
@@ -30,8 +31,12 @@ class ClassUsersController extends BaseController {
     ) {}
         
     public function getClassUsers(Request $request, Response $response, string $institution_id, string $class_id): Response {
-        return $this->handleErrors($request, function() use ($response, $class_id) {
+        return $this->handleErrors($request, function() use ($request, $response, $class_id) {
             $classUsers = $this->classUsersDao->getClassUsersByClassId($class_id);
+
+            if(count($classUsers) === 0) {
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
+            }
 
             $classUsersDtos = array_map(function(ClassUser $classUser) {
                 $user = $this->userDao->getById($classUser->getUserId());
@@ -108,7 +113,7 @@ class ClassUsersController extends BaseController {
             $classUser = $this->classUsersDao->getClassUserByClassUserIdAndClassId($class_user_id, $class_id);
         
             if(empty($classUser)) {
-                throw new HttpNotFoundException($request, "Could not find user {$class_user_id} in this class");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $user = $this->userDao->getById($classUser->getUserId());
@@ -132,12 +137,12 @@ class ClassUsersController extends BaseController {
             $classUser = $this->classUsersDao->getClassUserByClassUserIdAndClassId($class_user_id, $class_id);
         
             if(empty($classUser)) {
-                throw new HttpNotFoundException($request, "Could not find user {$class_user_id} in this class");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $success = $this->classUsersDao->deleteClassUser($classUser);
             if(!$success) {
-
+                throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
             $response->getBody()->write(json_encode([

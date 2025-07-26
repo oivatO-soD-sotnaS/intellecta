@@ -26,8 +26,7 @@ use Ramsey\Uuid\Nonstandard\Uuid;
 use Slim\Exception\HttpNotFoundException;
 
 // Documented
-class AuthController extends BaseController {
-
+readonly class AuthController extends BaseController {
   public function __construct(
     private UserDao $userDao,
     private VerificationCodeDao $verificationCodeDao,
@@ -67,7 +66,7 @@ class AuthController extends BaseController {
         $this->userDao->update($user);
         LogService::info("/auth/sign-up", "Unverified user UPDATED: $user");
       } else {
-        throw new HttpException($request, 'E-mail already registered', 409);
+        throw new HttpException($request, LogService::HTTP_409 . 'E-mail already registered', 409);
       }
 
       // Create a unique verification code
@@ -117,21 +116,21 @@ class AuthController extends BaseController {
       
       if(empty($user)){
         LogService::http404("/auth/verify-code", "e-mail: $email does not correspond to any user");
-        throw new HttpNotFoundException($request,'User not found');
+        throw new HttpNotFoundException($request,LogService::HTTP_404);
       } 
   
       if($user->isEmailVerified()){
         LogService::http409("/auth/verify-code", "user account already registred and verified");
         throw new HttpException(
           $request,
-          'User account already verified. No additional actions required.',
+          LogService::HTTP_409 . 'User account already verified. No additional actions required.',
           409
         );
       } 
       $verificationCode = $this->verificationCodeDao->getLatestVerificationCode($user->getUserId(), $code);
       if(empty($verificationCode)) {
         LogService::http422("/auth/verify-code", "No verification code found for: $user");
-        throw new HttpException($request,'Verification code expired or invalid', 422);
+        throw new HttpException($request,LogService::HTTP_422 . 'Verification code expired or invalid', 422);
       }
 
       $verificationCode->setIsPending(false);
@@ -171,17 +170,17 @@ class AuthController extends BaseController {
 
       if (empty($user)) {
         LogService::http404("/auth/sign-in", "No user found with email: {$email->getValue()}");
-        throw new HttpNotFoundException($request, 'Usuário não encontrado');
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      if (! $user->isEmailVerified()) {
-        LogService::http403("/auth/sign-in", "User not verified, sign-in denied: $user");
-        throw new HttpException($request, 'E-mail or password incorrect', 403);
+      if (!$user->isEmailVerified()) {
+        LogService::http401("/auth/sign-in", "User not verified, sign-in denied: $user");
+        throw new HttpUnauthorizedException($request, LogService::HTTP_401 . 'Incorrect e-mail or password');
       }
 
       if (!password_verify($password->getValue(), $user->getPasswordHash())) {
         LogService::http401("/auth/sign-in", "Password incorrect for: $user");
-        throw new HttpUnauthorizedException($request, 'E-mail or password incorrect');
+        throw new HttpUnauthorizedException($request, LogService::HTTP_401 . 'Incorrect e-mail or password');
       }
       
       if(!empty($user->getProfilePictureId())) {
@@ -213,11 +212,10 @@ class AuthController extends BaseController {
   
       if (! $this->jwtService->blacklistJwt($token)) {
         LogService::http500("/auth/sign-out", "Could not blacklist token: $token");
-        throw new HttpInternalServerErrorException($request, 'There was an error in the sign-out process.');
+        throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }
       
       $response->getBody()->write(json_encode([
-        'status' => 'success',
         'message' => 'Token blacklisted with success'
       ]));
 

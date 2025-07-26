@@ -21,8 +21,8 @@ use App\Vo\ProfileAssetVo;
 use App\Vo\SubjectDescriptionVo;
 use App\Vo\SubjectNameVo;
 use App\Vo\UuidV4Vo;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
@@ -30,7 +30,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class SubjectsController extends BaseController {
+readonly class SubjectsController extends BaseController {
     public function __construct(
         private SubjectsDao $subjectsDao,
         private FilesDao $filesDao,
@@ -44,6 +44,10 @@ class SubjectsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
             $subjects = $this->subjectsDao->getSubjectsByInstitutionId($institution_id);
     
+            if(count($subjects) === 0) {
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
+            }
+
             $subjectsDtos = array_map(function(Subject $subject) {
                 $teacher = $this->userDao->getById($subject->getTeacherId());
                 $teacherProfilePicture = $teacher->getProfilePictureId()
@@ -85,7 +89,7 @@ class SubjectsController extends BaseController {
                 $membership->getRole() !== InstitutionUserType::Teacher->value
             ) {
                 LogService::warn("/institutions/{$institution_id}/subjects", "{$token['email']} tried to create a class");
-                throw new HttpForbiddenException($request, "Only admins and teachers can create subjects");
+                throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and teachers can create subjects");
             }
 
             $body = $request->getParsedBody();
@@ -106,7 +110,7 @@ class SubjectsController extends BaseController {
                 $teacher_id !== null &&
                 $membership->getRole() !== InstitutionUserType::Admin->value
             ) {
-                throw new HttpForbiddenException($request, "Only admins can create subjects for other users");
+                throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins can create subjects for other users");
             }
 
             $profilePicture = !empty($uploadedFiles['profile-picture']) 
@@ -159,8 +163,7 @@ class SubjectsController extends BaseController {
                 $teacher = $this->institutionUserDao->getInstitutionUserByInstitutionIdAndUserId($institution_id, $teacher_id->getValue());
 
                 if (empty($teacher)) {
-                    LogService::http403("/institutions/{$institution_id}/subjects", "User with id {$teacher_id->getValue()} is not a member of the institution");
-                    throw new HttpForbiddenException($request, 'User is not a member of the institution');
+                    throw new HttpNotFoundException($request, LogService::HTTP_404 . "User (teacher) with id {$teacher_id} was not found");
                 }
 
                 if (
@@ -168,7 +171,7 @@ class SubjectsController extends BaseController {
                     $teacher->getRole() !== InstitutionUserType::Teacher->value
                 ) {
                     LogService::http403("/institutions/{$institution_id}/subjects", "User with id {$teacher->getUserId()} is neither admin nor teacher.");
-                    throw new HttpForbiddenException($request, "User with id {$teacher->getUserId()} is neither admin nor teacher.");
+                    throw new HttpForbiddenException($request, LogService::HTTP_403 . "User (teacher) with id {$teacher->getUserId()} is neither admin nor teacher.");
                 }
             }
 
@@ -208,21 +211,10 @@ class SubjectsController extends BaseController {
 
     public function getSubjectById(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
-            /** @var InstitutionUser $membership */
-            $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
-
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
             if(empty($subject)) { 
-                throw new HttpNotFoundException($request, "Subject with id {$subject_id} not found");
-            }
-
-            if(
-                $membership->getRole() !== InstitutionUserType::Admin->value
-                && $subject->getTeacherId() !== $token['sub']    
-            ) {
-                throw new HttpForbiddenException($request, "Only admins and the subject teacher can access this endpoint");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $subjectProfilePicture = $subject->getProfilePictureId()
@@ -260,14 +252,14 @@ class SubjectsController extends BaseController {
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
             if(empty($subject)) { 
-                throw new HttpNotFoundException($request, "Subject with id {$subject_id} not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             if(
                 $membership->getRole() !== InstitutionUserType::Admin->value
                 && $subject->getTeacherId() !== $token['sub']    
             ) {
-                throw new HttpForbiddenException($request, "Only admins and the subject teacher can access this endpoint");
+                throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }
 
             $body = $request->getParsedBody();
@@ -295,17 +287,17 @@ class SubjectsController extends BaseController {
                 $teacherId !== null
                 && $membership->getRole() !== InstitutionUserType::Admin->value
             ) {
-                throw new HttpForbiddenException($request, "Only admins can change the subject teacher");
+                throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins can change the subject teacher");
             }
 
             if($profilePictureId !== null) {
                 $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
                 
                 if (empty($profilePicture)) {
-                    throw new HttpNotFoundException($request, "Profile picture not found");
+                    throw new HttpNotFoundException($request, LogService::HTTP_404 . "Profile picture not found");
                 }
-                if ($profilePicture->getFileType()->value !== 'image') {
-                    throw new HttpException($request, "Profile picture must be an image", 422);
+                if ($profilePicture->getFileType()->value !== FileType::Image->value) {
+                    throw new InvalidArgumentException("Profile picture must be an image");
                 }
 
                 $subject->setProfilePictureId($profilePicture->getFileId());
@@ -315,10 +307,10 @@ class SubjectsController extends BaseController {
                 $banner = $this->filesDao->getFileById($bannerId->getValue());
                 
                 if (empty($banner)) {
-                    throw new HttpNotFoundException($request, "Banner not found");
+                    throw new HttpNotFoundException($request, LogService::HTTP_404 . "Banner not found");
                 }
-                if ($banner->getFileType()->value !== 'image') {
-                    throw new HttpException($request, "Banner must be an image", 422);
+                if ($banner->getFileType()->value !== FileType::Image->value) {
+                    throw new InvalidArgumentException("Banner must be an image");
                 }
 
                 $subject->setBannerId($banner->getFileId());
@@ -372,7 +364,7 @@ class SubjectsController extends BaseController {
                 $membership->getRole() !== InstitutionUserType::Admin->value
                 && $subject->getTeacherId() !== $token['sub']    
             ) {
-                throw new HttpForbiddenException($request, "Only admins and the subject teacher can access this endpoint");
+                throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }
 
             $success = $this->subjectsDao->deleteSubjectById($subject_id);

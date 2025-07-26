@@ -40,4 +40,28 @@ class Material implements \JsonSerializable {
     public function getChangedAt(): string { return $this->changed_at; }
     public function getSubjectId(): string { return $this->subject_id; }
     public function getFileId(): string { return $this->file_id; }
+    // Setters
+    public function setMaterialId(string $material_id): void {
+        $this->material_id = $material_id;
+    }
+
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function setCreatedAt(string $created_at): void {
+        $this->created_at = $created_at;
+    }
+
+    public function setChangedAt(string $changed_at): void {
+        $this->changed_at = $changed_at;
+    }
+
+    public function setSubjectId(string $subject_id): void {
+        $this->subject_id = $subject_id;
+    }
+
+    public function setFileId(string $file_id): void {
+        $this->file_id = $file_id;
+    }    
 }

@@ -20,7 +20,7 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-class ClassSubjectsController extends BaseController {
+readonly class ClassSubjectsController extends BaseController {
     public function __construct(
         private SubjectsDao $subjectsDao,
         private ClassSubjectsDao $classSubjectsDao,
@@ -79,7 +79,7 @@ class ClassSubjectsController extends BaseController {
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subjectId->getValue(), $institution_id);
             
             if(empty($subject)) {
-                throw new HttpNotFoundException($request, "Subject not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $classSubject = $this->classSubjectsDao->createClassSubject(new ClassSubject([
@@ -126,7 +126,7 @@ class ClassSubjectsController extends BaseController {
             $classSubject = $this->classSubjectsDao->getClassSubjectByClassSubjectIdAndClassId($class_subject_id, $class_id);
 
             if(empty($classSubject)) {
-                throw new HttpNotFoundException($request, "Class subject with ID {$class_subject_id} was not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($classSubject->getSubjectId(), $institution_id);
@@ -166,13 +166,13 @@ class ClassSubjectsController extends BaseController {
             $classSubject = $this->classSubjectsDao->getClassSubjectByClassSubjectIdAndClassId($class_subject_id, $class_id);
 
             if(empty($classSubject)) {
-                throw new HttpNotFoundException($request, "Class subject with ID {$class_subject_id} was not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             
             $success = $this->classSubjectsDao->deleteClassSubjectById($classSubject->getClassSubjectsId());
 
             if(!$success) {
-                throw new HttpInternalServerErrorException($request, "The server could not remove the subject from the class due to an  unknown error.");
+                throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
             $response->getBody()->write(json_encode([

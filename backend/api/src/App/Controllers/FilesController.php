@@ -16,7 +16,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class FilesController extends BaseController
+readonly class FilesController extends BaseController
 {
     public function __construct(
       private readonly UploadService $uploadService,
@@ -34,19 +34,19 @@ class FilesController extends BaseController
         /** @var UploadedFileInterface|null $profileAsset */
         $profileAsset = $uploadedFiles['profile-asset'];
 
-        $picture = new ProfileAssetVo($profileAsset);
+        $profileAsset = new ProfileAssetVo($profileAsset);
         $fileUrl = $this->uploadService->upload(
-          $picture->getExtension(), 
-          $picture->getContent()
+          $profileAsset->getExtension(), 
+          $profileAsset->getContent()
         );
 
         $file = $this->fileDao->createFile(new File([
           "file_id" => Uuid::uuid4()->toString(),
           "url" => $fileUrl,
-          "filename" => $picture->getSafeFilename(),
-          "mime_type" => $picture->getMimeType(),
+          "filename" => $profileAsset->getSafeFilename(),
+          "mime_type" => $profileAsset->getMimeType(),
           "file_type" => FileType::Image->value, 
-          "size" => $picture->getSize(),
+          "size" => $profileAsset->getSize(),
           "uploaded_at" => date('Y-m-d H:i:s')
         ]));
 

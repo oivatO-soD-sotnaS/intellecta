@@ -18,6 +18,7 @@ use App\Services\EmailService;
 use App\Services\LogService;
 use App\Services\ValidatorService;
 use App\Vo\InvitationVo;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
@@ -27,7 +28,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class InstitutionUsersController extends BaseController
+readonly class InstitutionUsersController extends BaseController
 {
   public function __construct(
     private InstitutionUserDao $institutionUserDao,
@@ -42,8 +43,12 @@ class InstitutionUsersController extends BaseController
 
   public function getInstitutionUsers(Request $request, Response $response, string $institution_id): Response
   {
-    return $this->handleErrors($request, function() use ($response, $institution_id) {
+    return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
       $institutionUsers = $this->institutionUserDao->getUsersByInstitutionId($institution_id);
+
+      if(count($institutionUsers) === 0) {
+        throw new HttpNotFoundException($request, LogService::HTTP_404);        
+      }
 
       $institutionUsersDto = array_map(function(InstitutionUser $institutionUser) {
         $user = $this->userDao->getById($institutionUser->getUserId());
@@ -69,7 +74,7 @@ class InstitutionUsersController extends BaseController
       $invites = $body['invites'];
 
       if (!is_array($invites)) {
-        throw new HttpException($request, "'invites' must be an array", 422);
+        throw new InvalidArgumentException("'invites' must be an array");
       }
 
       $invitesVo = array_map(fn($inviteEmail) => new InvitationVo($inviteEmail), $invites);
@@ -121,21 +126,21 @@ class InstitutionUsersController extends BaseController
       
       $newRole = InstitutionUserType::tryFrom($body['new_role']);
       if(empty($newRole)) {
-        throw new HttpException($request, "Only 'admin', 'teacher' and 'student' are allowed as roles", 422);
+        throw new InvalidArgumentException("Only 'admin', 'teacher' and 'student' are allowed as roles");
       }
 
       $institutionUser = $this->institutionUserDao->getInstitutionUserById($institution_user_id);
       if(empty($institutionUser)) {
-        throw new HttpNotFoundException($request, "Institution user with ID {$institution_user_id} does not exist");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
       if($institutionUser->getInstitutionId() !== $institution_id) {
-        throw new HttpForbiddenException($request, "User does not belong to your institution");
+        throw new HttpForbiddenException($request, LogService::HTTP_403);
       }
 
       $institutionUser->setRole($newRole);      
       $institutionUser = $this->institutionUserDao->updateInstitutionUserRole($institutionUser);
       if(empty($institutionUser)) {
-        throw new HttpInternalServerErrorException($request, "Could not update user role due to an unknown error.");
+        throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }
 
       $user = $this->userDao->getById($institutionUser->getUserId());
@@ -164,14 +169,14 @@ class InstitutionUsersController extends BaseController
         empty($institutionUser)
         || $institutionUser->getInstitutionId() !== $institution_id
       ) {
-        throw new HttpNotFoundException($request, "Institution user with ID {$institution_user_id} not found");
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       if(
         $membership->getRole() !== InstitutionUserType::Admin->value
         && $institutionUser->getUserId() !== $token['sub']
       ) {
-        throw new HttpForbiddenException($request, 'Only admins and the user itself can access this endpoint');
+        throw new HttpForbiddenException($request, LogService::HTTP_403 . 'Only admins and the user itself can access this endpoint');
       }
 
       $this->institutionUserDao->deleteInstitutionUser($institutionUser);

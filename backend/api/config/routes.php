@@ -9,6 +9,7 @@ use App\Controllers\InstitutionalEventController;
 use App\Controllers\InstitutionsController;
 use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
+use App\Controllers\SubjectMaterialsController;
 use App\Controllers\SubjectsController;
 use App\Controllers\UserController;
 use App\Controllers\UserEventController;
@@ -16,6 +17,8 @@ use App\Middleware\RequireAdmin;
 use App\Middleware\RequireAuth;
 use App\Middleware\RequireClassMembership;
 use App\Middleware\RequireInstitutionMembership;
+use App\Middleware\RequireSubjectRelationship;
+use App\Middleware\RequireSubjectTeacher;
 use Slim\App;
 use Slim\Handlers\Strategies\RequestResponseArgs;
 
@@ -81,15 +84,31 @@ return function (App $app) {
                 ->add(RequireAdmin::class);
             $institutionWithId->get('/summary', InstitutionsController::class . ':getInstitutionSummaryById');
 
+            // Institution subjects
             $institutionWithId->group('/subjects', function ($institutionSubjects) {
-                $institutionSubjects->get('', SubjectsController::class . ':getInstitutionSubjects');
+                $institutionSubjects->get('', SubjectsController::class . ':getInstitutionSubjects')
+                    ->add(RequireAdmin::class);
                 $institutionSubjects->post('', SubjectsController::class . ':createSubject');
 
                 $institutionSubjects->group('/{subject_id:'.UUIDv4_REGEX.'}', function($institutionSubjectsWithId) {
                     $institutionSubjectsWithId->get('', SubjectsController::class . ':getSubjectById');
                     $institutionSubjectsWithId->put('', SubjectsController::class . ':updateSubjectById');
                     $institutionSubjectsWithId->delete('', SubjectsController::class . ':deleteSubjectById');
-                });
+
+                    // Subject materials
+                    $institutionSubjectsWithId->group('/materials', function($subjectMaterials) {
+                        $subjectMaterials->get('', SubjectMaterialsController::class . ':getSubjectMaterials');
+                        $subjectMaterials->post('', SubjectMaterialsController::class . ':createSubjectMaterial')
+                            ->add(RequireSubjectTeacher::class);
+                        $subjectMaterials->group('/{material_id:'.UUIDv4_REGEX.'}', function($subjectMaterialWithId) {
+                            $subjectMaterialWithId->get('', SubjectMaterialsController::class . ':getMaterialById');
+                            $subjectMaterialWithId->patch('', SubjectMaterialsController::class . ':updateMaterial')
+                                ->add(RequireSubjectTeacher::class);
+                            $subjectMaterialWithId->delete('', SubjectMaterialsController::class . ':deleteMaterial')
+                                ->add(RequireSubjectTeacher::class);
+                        });
+                    });
+                })->add(RequireSubjectRelationship::class);
             });
             
             // Institution Users

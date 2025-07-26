@@ -259,3 +259,10 @@ LEFT JOIN events e ON e.event_id = ie.event_id
                    AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
 
 GROUP BY i.institution_id, i.name, i.email, iu.user_id, iu.role;
+
+CREATE VIEW `subject_users` AS
+SELECT DISTINCT
+  cu.user_id,
+  cs.subject_id
+FROM class_users cu
+JOIN class_subjects cs ON cu.class_id = cs.class_id;

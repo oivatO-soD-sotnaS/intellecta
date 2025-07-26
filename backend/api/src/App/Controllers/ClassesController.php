@@ -18,6 +18,7 @@ use App\Vo\ClassDescriptionVo;
 use App\Vo\ClassNameVo;
 use App\Vo\ProfileAssetVo;
 use App\Vo\UuidV4Vo;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpInternalServerErrorException;
@@ -26,7 +27,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class ClassesController extends BaseController {
+readonly class ClassesController extends BaseController {
     public function __construct(
         private ClassDao $classDao,
         private FilesDao $filesDao,
@@ -46,7 +47,7 @@ class ClassesController extends BaseController {
                 : $this->classDao->getClassesByUserIdAndInstitutionId($token['sub'], $institution_id);
 
             if(count($classes) === 0) {
-                throw new HttpNotFoundException($request, "There are no classes to be fetched");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             
             $classesDto = array_map(function(ClassModel $classModel) {
@@ -151,12 +152,12 @@ class ClassesController extends BaseController {
                 : $this->classDao->getClassById($class_id);
 
             if(empty($class)) {
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             
             if($class->getInstitutionId() !== $institution_id) {
                 LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to fetch a class of another institution.");
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $classProfilePicture = $class->getProfilePictureId()
@@ -195,22 +196,22 @@ class ClassesController extends BaseController {
             $class = $this->classDao->getClassById($class_id);
             
             if (empty($class)) {
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             if($class->getInstitutionId() !== $institution_id) {
                 LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to update a class of another institution.");
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             if($profilePictureId !== null) {
                 $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
                 
                 if (empty($profilePicture)) {
-                    throw new HttpNotFoundException($request, "Profile picture not found");
+                    throw new HttpNotFoundException($request, LogService::HTTP_404 . "Profile picture not found");
                 }
-                if ($profilePicture->getFileType()->value !== 'image') {
-                    throw new HttpException($request, "Profile picture must be an image", 422);
+                if ($profilePicture->getFileType()->value !== FileType::Image->value) {
+                    throw new InvalidArgumentException("Profile picture must be an image");
                 }
 
                 $class->setProfilePictureId($profilePicture->getFileId());
@@ -220,10 +221,10 @@ class ClassesController extends BaseController {
                 $banner = $this->filesDao->getFileById($bannerId->getValue());
                 
                 if (empty($banner)) {
-                    throw new HttpNotFoundException($request, "Banner not found");
+                    throw new HttpNotFoundException($request, LogService::HTTP_404 . "Banner not found");
                 }
-                if ($banner->getFileType()->value !== 'image') {
-                    throw new HttpException($request, "Banner must be an image", 422);
+                if ($banner->getFileType()->value !== FileType::Image->value) {
+                    throw new InvalidArgumentException("Banner must be an image");
                 }
 
                 $class->setBannerId($banner->getFileId());
@@ -256,18 +257,18 @@ class ClassesController extends BaseController {
             
             $class = $this->classDao->getClassById($class_id);
             if (empty($class)) {
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             if($class->getInstitutionId() !== $institution_id) {
                 LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to delete a class of another institution.");
-                throw new HttpNotFoundException($request, "Class not found");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $success = $this->classDao->deleteClass($class->getClassId());
 
             if(!$success) {
-                throw new HttpInternalServerErrorException($request, "Could not delete class due to an unknown error.");
+                throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
             $response->getBody()->write(json_encode([

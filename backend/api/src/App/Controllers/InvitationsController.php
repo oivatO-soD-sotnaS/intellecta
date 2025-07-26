@@ -16,6 +16,7 @@ use App\Models\InstitutionUser;
 use App\Models\Invitation;
 use App\Services\LogService;
 use Ramsey\Uuid\Uuid;
+use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
@@ -23,7 +24,7 @@ use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-class InvitationsController extends BaseController {
+readonly class InvitationsController extends BaseController {
     public function __construct(
         private InvitationDao $invitationDao,
         private InstitutionUserDao $institutionUserDao,
@@ -36,17 +37,17 @@ class InvitationsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $invitation_id) {
             $invitation = $this->invitationDao->getInvitationById($invitation_id);
             if(empty($invitation)) {
-                throw new HttpNotFoundException($request, "There is no invitation with the given ID: {$invitation_id}");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             $token = $request->getAttribute('token');
             $user = $this->userDao->getById($token['sub']);
 
             if($invitation->getEmail() !== $user->getEmail()) {
                 LogService::http403("/invitation/{$invitation_id}/accept", "User {$user->getEmail()} tried using invitation for {$invitation->getEmail()}");
-                throw new HttpForbiddenException($request, "You cannot use this invitation. See logs for more detail.");
+                throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
             if($invitation->isExpired() || $invitation->isAccepted()) {
-                throw new HttpForbiddenException($request, "Invitation already accepted or expired.");
+                throw new HttpException($request, LogService::HTTP_422 . "Invitation already accepted or expired.", 422);
             }
 
             $timestamp = date('Y-m-d H:i:s');
@@ -55,7 +56,7 @@ class InvitationsController extends BaseController {
 
             if(empty($invitation)) {
                 LogService::http500("/invitation/{$invitation_id}/accept", "Could not accept invitation due to an unknown error.");
-                throw new HttpInternalServerErrorException($request, "Could not accept invitation due to an unknown error.");
+                throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
             $institutionUser = $this->institutionUserDao->createInstitutionUser(new InstitutionUser([
@@ -82,13 +83,13 @@ class InvitationsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $invitation_id) {
             $invitation = $this->invitationDao->getInvitationById($invitation_id);
             if(empty($invitation)) {
-                throw new HttpNotFoundException($request, "There is no invitation with the given ID: {$invitation_id}");
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             $token = $request->getAttribute('token');
 
             if($invitation->getEmail() !== $token['email']) {
                 LogService::http403("/invitation/{$invitation_id}", "User {$token['email']} tried fetching invitation for {$invitation->getEmail()}");
-                throw new HttpForbiddenException($request, "You cannot fetch this invitation. See logs for more detail.");
+                throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
             $institution = $this->institutionDao->getInstitutionById($invitation->getInstitutionId());
@@ -120,6 +121,9 @@ class InvitationsController extends BaseController {
             $token = $request->getAttribute('token');
             $invitations = $this->invitationDao->getAllUserInvitations($token['email']);
             
+            if(count($invitations) === 0){
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
+            }
             $invitationDtos = array_map(function(Invitation $invitation) {
                 $institution = $this->institutionDao->getInstitutionById($invitation->getInstitutionId());
                 if(!empty($institution->getProfilePictureId())) {
