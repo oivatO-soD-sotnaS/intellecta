@@ -6,7 +6,7 @@ namespace App\Vo;
 use InvalidArgumentException;
 use Psr\Http\Message\UploadedFileInterface;
 
-final class MaterialFileVo {
+final class FileVo {
     private string $originalName;
     private string $safeName;
     private string $mimeType;

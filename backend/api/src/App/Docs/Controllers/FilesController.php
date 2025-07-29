@@ -1,30 +1,36 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Docs\Controllers;
 
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: "Arquivos", description: "Operações relacionadas a arquivos de usuários, instituições, turmas e disciplinas")]
-class FilesController {
-
-  #[OA\Post(
-        path: "/files/upload-profile-assets",
-        tags: ["Arquivos"],
-        summary: "Upload de foto de perfil/banner do usuário/instituição/etc",
-        description: "Faz upload de um novo ativo de perfil (imagem de perfil ou banner)",
-        operationId: "uploadProfilePicture",
-        security: [["bearerAuth" => []]],
+#[OA\Tag(
+    name: 'Files',
+    description: 'File upload and management operations'
+)]
+class FilesController
+{
+    #[OA\Post(
+        path: '/files/upload-profile-assets',
+        operationId: 'uploadProfileAsset',
+        summary: 'Upload profile asset',
+        description: 'Upload an image file to be used as a profile picture or banner',
+        tags: ['Files'],
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
+            description: 'Profile image file',
             required: true,
-            description: "Arquivo de imagem para upload",
             content: new OA\MediaType(
-                mediaType: "multipart/form-data",
+                mediaType: 'multipart/form-data',
                 schema: new OA\Schema(
+                    required: ['profile-asset'],
                     properties: [
                         new OA\Property(
-                            property: "profile-asset",
-                            type: "string",
-                            format: "binary",
-                            description: "Ativo de perfil (formatos: jpg, jpeg, png)"
+                            property: 'profile-asset',
+                            type: 'string',
+                            format: 'binary',
+                            description: 'Image file for profile (avatar, banner, etc.)'
                         )
                     ]
                 )
@@ -33,25 +39,73 @@ class FilesController {
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Upload realizado com sucesso",
-                content: new OA\JsonContent(ref: "#/components/schemas/FileResponse")
+                description: 'File uploaded successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/FileResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: "Arquivo inválido ou ausente",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+                description: 'No file provided or invalid file'
             ),
             new OA\Response(
-                response: 422,
-                description: "Validação falhou",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+                response: 415,
+                description: 'Unsupported media type - must be an image'
             ),
             new OA\Response(
                 response: 500,
-                description: "Erro interno do servidor",
-                content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
+                description: 'File upload failed'
             )
         ]
     )]
-  public function uploadProfileAssets() {}
+    public function uploadProfileAssets()
+    {
+    }
+
+    #[OA\Post(
+        path: '/files/upload-file',
+        operationId: 'uploadFile',
+        summary: 'Upload a generic file',
+        description: 'Upload any type of file with automatic type detection',
+        tags: ['Files'],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody(
+            description: 'File to upload',
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['file'],
+                    properties: [
+                        new OA\Property(
+                            property: 'file',
+                            type: 'string',
+                            format: 'binary',
+                            description: 'File to upload'
+                        )
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'File uploaded successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/FileResponse')
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'No file provided'
+            ),
+            new OA\Response(
+                response: 413,
+                description: 'File too large'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'File upload failed'
+            )
+        ]
+    )]
+    public function uploadFile()
+    {
+    }
 }

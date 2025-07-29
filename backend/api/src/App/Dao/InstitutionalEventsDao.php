@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\InstitutionalEvent;
 use PDO;
 
-class InstitutionalEventDao extends BaseDao {
+readonly class InstitutionalEventsDao extends BaseDao {
 
   /**
    * Summary of getInstitutionalEventById
@@ -38,7 +37,7 @@ class InstitutionalEventDao extends BaseDao {
    * @param string $institutionId
    * @return InstitutionalEvent[]
    */
-  public function getAllInstitutionalEventsById(string $institutionId): ?array {
+  public function getInstitutionalEventsByInstitutionId(string $institutionId): ?array {
     $sql = 'SELECT * FROM institutional_events
             WHERE institution_id = :institution_id';
     

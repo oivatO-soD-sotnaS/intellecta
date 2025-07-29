@@ -5,14 +5,16 @@ use App\Controllers\ClassesController;
 use App\Controllers\ClassSubjectsController;
 use App\Controllers\ClassUsersController;
 use App\Controllers\FilesController;
-use App\Controllers\InstitutionalEventController;
+use App\Controllers\InstitutionalEventsController;
 use App\Controllers\InstitutionsController;
 use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
+use App\Controllers\SubjectAssignmentsController;
+use App\Controllers\SubjectEventsController;
 use App\Controllers\SubjectMaterialsController;
 use App\Controllers\SubjectsController;
-use App\Controllers\UserController;
-use App\Controllers\UserEventController;
+use App\Controllers\UsersController;
+use App\Controllers\UserEventsController;
 use App\Middleware\RequireAdmin;
 use App\Middleware\RequireAuth;
 use App\Middleware\RequireClassMembership;
@@ -43,21 +45,23 @@ return function (App $app) {
         $group->post('/sign-out', AuthController::class . ':signOut');
     })->add(RequireAuth::class);
 
-    $app->group('/users', function ($group) {
-        $group->group('/{user_id:'.UUIDv4_REGEX.'}', function($usersWithId) {
-            $usersWithId->get('', UserController::class . ':getUser');
-            $usersWithId->put('', UserController::class . ':updateUser');
-            $usersWithId->delete('', UserController::class . ':deleteUser');
+    $app->group('/users', function ($users) {
+        $users->group('/{user_id:'.UUIDv4_REGEX.'}', function($usersWithId) {
+            $usersWithId->get('', UsersController::class . ':getUser');
+            $usersWithId->put('', UsersController::class . ':updateUser');
+            $usersWithId->delete('', UsersController::class . ':deleteUser');
         });
 
-        $group->post('/events', UserEventController::class . ':createUserEvent');
-        $group->get('/events', UserEventController::class . ':getUserEvents');
-        $group->group('/events/{event_id:'.UUIDv4_REGEX.'}', function($eventsWithId) {
-            $eventsWithId->get('', UserEventController::class . ':getUserEvent');
-            $eventsWithId->put('', UserEventController::class . ':updateUserEvent');
-            $eventsWithId->delete('', UserEventController::class . ':deleteUserEvent');
+        $users->group('/events', function($userEvents) {
+            $userEvents->post('', UserEventsController::class . ':createUserEvent');
+            $userEvents->get('', UserEventsController::class . ':getUserEvents');
+            
+            $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
+                $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
+                $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');
+                $userEventsWithId->delete('', UserEventsController::class . ':deleteUserEvent');
+            });
         });
-
     })->add(RequireAuth::class);
 
     $app->group('/invitations', function ($group) {
@@ -108,6 +112,36 @@ return function (App $app) {
                                 ->add(RequireSubjectTeacher::class);
                         });
                     });
+
+                    // Subject Assignments
+                    $institutionSubjectsWithId->group('/assignments', function($subjectAssignments) {
+                        $subjectAssignments->get('', SubjectAssignmentsController::class . ':getSubjectAssignments');
+                        $subjectAssignments->post('', SubjectAssignmentsController::class . ':createSubjectAssignment')
+                            ->add(RequireSubjectTeacher::class);
+                        
+                        $subjectAssignments->group('/{assignment_id:'.UUIDv4_REGEX.'}', function($subjectAssignmentWithId) {
+                            $subjectAssignmentWithId->get('', SubjectAssignmentsController::class . ':getSubjectAssignmentById');
+                            $subjectAssignmentWithId->patch('', SubjectAssignmentsController::class . ':patchSubjectAssignmentById')
+                                ->add(RequireSubjectTeacher::class);
+                            $subjectAssignmentWithId->delete('', SubjectAssignmentsController::class . ':deleteSubjectAssignmentById')
+                                ->add(RequireSubjectTeacher::class);
+                        });
+                    });
+
+                    // Subject Events
+                    $institutionSubjectsWithId->group('/events', function($subjectEvents) {
+                        $subjectEvents->get('', SubjectEventsController::class . ':getSubjectEvents');
+                        $subjectEvents->post('', SubjectEventsController::class . ':createSubjectEvent')
+                            ->add(RequireSubjectTeacher::class);
+                        
+                        $subjectEvents->group('/{subject_event_id:'.UUIDv4_REGEX.'}', function($subjectEventsWithId) {
+                            $subjectEventsWithId->get('', SubjectEventsController::class . ':getSubjectEvent');
+                            $subjectEventsWithId->patch('', SubjectEventsController::class . ':updateSubjectEvent')
+                                ->add(RequireSubjectTeacher::class);
+                            $subjectEventsWithId->delete('', SubjectEventsController::class . ':deleteSubjectEvent')
+                                ->add(RequireSubjectTeacher::class);
+                        });
+                    });
                 })->add(RequireSubjectRelationship::class);
             });
             
@@ -126,14 +160,14 @@ return function (App $app) {
 
             // Institutional Events
             $institutionWithId->group('/events', function ($institutionEvents) {
-                $institutionEvents->get('', InstitutionalEventController::class . ':getInstitutionalEvents');
-                $institutionEvents->post('', InstitutionalEventController::class . ':createInstitutionalEvent')
+                $institutionEvents->get('', InstitutionalEventsController::class . ':getInstitutionalEvents');
+                $institutionEvents->post('', InstitutionalEventsController::class . ':createInstitutionalEvent')
                     ->add(RequireAdmin::class);
                 $institutionEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($institutionEventsWithId) {
-                    $institutionEventsWithId->get('', InstitutionalEventController::class . ':getInstitutionalEvent');
-                    $institutionEventsWithId->put('', InstitutionalEventController::class . ':updateInstitutionalEvent')
+                    $institutionEventsWithId->get('', InstitutionalEventsController::class . ':getInstitutionalEvent');
+                    $institutionEventsWithId->put('', InstitutionalEventsController::class . ':updateInstitutionalEvent')
                         ->add(RequireAdmin::class);
-                    $institutionEventsWithId->delete('', InstitutionalEventController::class . ':deleteInstitutionalEvent')
+                    $institutionEventsWithId->delete('', InstitutionalEventsController::class . ':deleteInstitutionalEvent')
                         ->add(RequireAdmin::class);
                 });
             });
@@ -181,6 +215,9 @@ return function (App $app) {
 
     })->add(RequireAuth::class); 
 
+    // Files
     $app->post('/files/upload-profile-assets', FilesController::class . ':uploadProfileAssets')
+        ->add(RequireAuth::class);
+    $app->post('/files/upload-file', FilesController::class . 'uploadFile')
         ->add(RequireAuth::class);
 };

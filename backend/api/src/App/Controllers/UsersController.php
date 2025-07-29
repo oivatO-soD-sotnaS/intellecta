@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
-use App\Dao\UserDao;
+use App\Dao\UsersDao;
 use App\Dto\UserDto;
 use App\Enums\FileType;
 use App\Services\EmailService;
@@ -15,19 +15,17 @@ use App\Vo\PasswordVo;
 use App\Vo\UsernameVo;
 use App\Vo\UuidV4Vo;
 use InvalidArgumentException;
-use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
-use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
 // Documented
-readonly class UserController extends BaseController
+readonly class UsersController extends BaseController
 {
   public function __construct(
-    private UserDao $userDao,
+    private UsersDao $usersDao,
     private FilesDao $fileDao,
     private FilesDao $filesDao,
     private EmailService $emailService,
@@ -38,7 +36,7 @@ readonly class UserController extends BaseController
   public function getUser(Request $request, Response $response, string $user_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->userDao->getById($user_id);
+      $user = $this->usersDao->getUserBydId($user_id);
       
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -75,7 +73,7 @@ readonly class UserController extends BaseController
       if (!empty($password)) $password = new PasswordVo($password);
       if (!empty($profilePictureId)) $profilePictureId = new UuidV4Vo($profilePictureId);
 
-      $user = $this->userDao->getById($user_id);
+      $user = $this->usersDao->getUserBydId($user_id);
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -104,7 +102,7 @@ readonly class UserController extends BaseController
         $user->setProfilePictureId($profilePictureId->getValue());
       }
       
-      $user = $this->userDao->update($user);
+      $user = $this->usersDao->updateUser($user);
       $profilePicture = $user->getProfilePictureId() 
         ? $this->filesDao->getFileById($user->getProfilePictureId()) 
         : null;
@@ -123,7 +121,7 @@ readonly class UserController extends BaseController
   public function deleteUser(Request $request, Response $response, string $user_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->userDao->getById($user_id);
+      $user = $this->usersDao->getUserBydId($user_id);
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -133,7 +131,7 @@ readonly class UserController extends BaseController
         throw new HttpForbiddenException($request, LogService::HTTP_403);
       }
 
-      $success = $this->userDao->delete($user->getUserId());
+      $success = $this->usersDao->deleteUser($user->getUserId());
       if (!$success) {
         throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }

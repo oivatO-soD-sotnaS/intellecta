@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
-use App\Dao\InstitutionDao;
-use App\Dao\InstitutionUserDao;
-use App\Dao\InvitationDao;
-use App\Dao\UserDao;
+use App\Dao\InstitutionsDao;
+use App\Dao\InstitutionUsersDao;
+use App\Dao\InvitationsDao;
+use App\Dao\UsersDao;
 use App\Dto\InstitutionUserDto;
 use App\Dto\UserDto;
 use App\Enums\InstitutionUserType;
@@ -31,10 +31,10 @@ use Slim\Psr7\Response;
 readonly class InstitutionUsersController extends BaseController
 {
   public function __construct(
-    private InstitutionUserDao $institutionUserDao,
-    private InstitutionDao $institutionDao,
-    private InvitationDao $invitationDao,
-    private UserDao $userDao,
+    private InstitutionUsersDao $institutionUsersDao,
+    private InstitutionsDao $institutionsDao,
+    private InvitationsDao $invitationsDao,
+    private UsersDao $usersDao,
     private FilesDao $filesDao,
     private EmailService $emailService,
     private ValidatorService $validatorService,
@@ -44,14 +44,14 @@ readonly class InstitutionUsersController extends BaseController
   public function getInstitutionUsers(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-      $institutionUsers = $this->institutionUserDao->getUsersByInstitutionId($institution_id);
+      $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
 
       if(count($institutionUsers) === 0) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);        
       }
 
       $institutionUsersDto = array_map(function(InstitutionUser $institutionUser) {
-        $user = $this->userDao->getById($institutionUser->getUserId());
+        $user = $this->usersDao->getUserBydId($institutionUser->getUserId());
         $profilePicture = !empty($user->getProfilePictureId())
           ? $this->filesDao->getFileById($user->getProfilePictureId())
           : null;
@@ -79,10 +79,10 @@ readonly class InstitutionUsersController extends BaseController
 
       $invitesVo = array_map(fn($inviteEmail) => new InvitationVo($inviteEmail), $invites);
       $token = $request->getAttribute('token');
-      $institution = $this->institutionDao->getInstitutionById($institution_id);
+      $institution = $this->institutionsDao->getInstitutionById($institution_id);
 
       $invitations = array_map(function(InvitationVo $invite) use ($institution, $token) {
-        $invitation = $this->invitationDao->createInvitation(new Invitation([
+        $invitation = $this->invitationsDao->createInvitation(new Invitation([
           'invitation_id' => Uuid::uuid4()->toString(),
           'email' => $invite->getEmail(),
           'role' => $invite->getRole()->value,
@@ -129,7 +129,7 @@ readonly class InstitutionUsersController extends BaseController
         throw new InvalidArgumentException("Only 'admin', 'teacher' and 'student' are allowed as roles");
       }
 
-      $institutionUser = $this->institutionUserDao->getInstitutionUserById($institution_user_id);
+      $institutionUser = $this->institutionUsersDao->getInstitutionUserById($institution_user_id);
       if(empty($institutionUser)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -138,12 +138,12 @@ readonly class InstitutionUsersController extends BaseController
       }
 
       $institutionUser->setRole($newRole);      
-      $institutionUser = $this->institutionUserDao->updateInstitutionUserRole($institutionUser);
+      $institutionUser = $this->institutionUsersDao->updateInstitutionUserRole($institutionUser);
       if(empty($institutionUser)) {
         throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }
 
-      $user = $this->userDao->getById($institutionUser->getUserId());
+      $user = $this->usersDao->getUserBydId($institutionUser->getUserId());
       $profilePicture = !empty($user->getProfilePictureId())
         ? $this->filesDao->getFileById($user->getProfilePictureId())
         : null;
@@ -163,7 +163,7 @@ readonly class InstitutionUsersController extends BaseController
       $membership = $request->getAttribute('membership');
       $token = $request->getAttribute('token');
 
-      $institutionUser = $this->institutionUserDao->getInstitutionUserById($institution_user_id);
+      $institutionUser = $this->institutionUsersDao->getInstitutionUserById($institution_user_id);
       
       if(
         empty($institutionUser)
@@ -179,7 +179,7 @@ readonly class InstitutionUsersController extends BaseController
         throw new HttpForbiddenException($request, LogService::HTTP_403 . 'Only admins and the user itself can access this endpoint');
       }
 
-      $this->institutionUserDao->deleteInstitutionUser($institutionUser);
+      $this->institutionUsersDao->deleteInstitutionUser($institutionUser);
 
       $response->getBody()->write(json_encode([
         "message" => "User removed from institution successfully"

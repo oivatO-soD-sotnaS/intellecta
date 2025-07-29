@@ -4,7 +4,7 @@ declare(strict_types= 1);
 
 namespace App\Middleware;
 
-use App\Dao\UserDao;
+use App\Dao\UsersDao;
 use App\Services\JwtService;
 use App\Services\LogService;
 use Exception;
@@ -19,7 +19,7 @@ use Slim\Exception\HttpUnauthorizedException;
 class RequireAuth{
   public function __construct(
     private JwtService $jwtService,
-    private UserDao $userDao
+    private UsersDao $usersDao
   ) {}
 
   public function __invoke(Request $request, RequestHandler $handler): Response
@@ -47,7 +47,7 @@ class RequireAuth{
         throw new HttpUnauthorizedException($request, 'Invalid token signature');
       }
 
-      $user = $this->userDao->getById($decoded["sub"]);
+      $user = $this->usersDao->getUserBydId($decoded["sub"]);
       if(empty($user) || !$user->isEmailVerified()){
         throw new HttpUnauthorizedException($request, 'User not found');
       }

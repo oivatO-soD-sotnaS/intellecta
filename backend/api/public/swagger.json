@@ -1117,20 +1117,23 @@
         "/files/upload-profile-assets": {
             "post": {
                 "tags": [
-                    "Arquivos"
+                    "Files"
                 ],
-                "summary": "Upload de foto de perfil/banner do usuário/instituição/etc",
-                "description": "Faz upload de um novo ativo de perfil (imagem de perfil ou banner)",
-                "operationId": "uploadProfilePicture",
+                "summary": "Upload profile asset",
+                "description": "Upload an image file to be used as a profile picture or banner",
+                "operationId": "uploadProfileAsset",
                 "requestBody": {
-                    "description": "Arquivo de imagem para upload",
+                    "description": "Profile image file",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
+                                "required": [
+                                    "profile-asset"
+                                ],
                                 "properties": {
                                     "profile-asset": {
-                                        "description": "Ativo de perfil (formatos: jpg, jpeg, png)",
+                                        "description": "Image file for profile (avatar, banner, etc.)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -1142,7 +1145,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Upload realizado com sucesso",
+                        "description": "File uploaded successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1152,34 +1155,70 @@
                         }
                     },
                     "400": {
-                        "description": "Arquivo inválido ou ausente",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
+                        "description": "No file provided or invalid file"
                     },
-                    "422": {
-                        "description": "Validação falhou",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
-                                }
-                            }
-                        }
+                    "415": {
+                        "description": "Unsupported media type - must be an image"
                     },
                     "500": {
-                        "description": "Erro interno do servidor",
+                        "description": "File upload failed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/files/upload-file": {
+            "post": {
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Upload a generic file",
+                "description": "Upload any type of file with automatic type detection",
+                "operationId": "uploadFile",
+                "requestBody": {
+                    "description": "File to upload",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "File to upload",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "File uploaded successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ErrorResponse"
+                                    "$ref": "#/components/schemas/FileResponse"
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "No file provided"
+                    },
+                    "413": {
+                        "description": "File too large"
+                    },
+                    "500": {
+                        "description": "File upload failed"
                     }
                 },
                 "security": [
@@ -2687,6 +2726,637 @@
                 ]
             }
         },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments": {
+            "get": {
+                "tags": [
+                    "Subject Assignments"
+                ],
+                "summary": "Get all assignments for a subject",
+                "operationId": "getSubjectAssignments",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of subject assignments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AssignmentResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No assignments found for this subject"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Subject Assignments"
+                ],
+                "summary": "Create a new assignment",
+                "description": "Create a new assignment for the specified subject with optional attachment",
+                "operationId": "createSubjectAssignment",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Assignment creation data",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAssignmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Assignment created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Subject not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}": {
+            "get": {
+                "tags": [
+                    "Subject Assignments"
+                ],
+                "summary": "Get assignment details",
+                "description": "Retrieve details of a specific assignment",
+                "operationId": "getSubjectAssignmentById",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Assignment details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Assignment not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Subject Assignments"
+                ],
+                "summary": "Delete an assignment",
+                "description": "Permanently remove an assignment",
+                "operationId": "deleteSubjectAssignment",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Assignment deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Assignment not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Subject Assignments"
+                ],
+                "summary": "Update an assignment",
+                "description": "Update details of an existing assignment",
+                "operationId": "updateSubjectAssignment",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Assignment update data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAssignmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Assignment updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "assignment": {
+                                            "$ref": "#/components/schemas/AssignmentResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Assignment not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/events": {
+            "get": {
+                "tags": [
+                    "Subject Events"
+                ],
+                "summary": "Get all events for a subject",
+                "operationId": "getSubjectEvents",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of subject events",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SubjectEventResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No events found for this subject"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Subject Events"
+                ],
+                "summary": "Create a new subject event",
+                "description": "Create a new event associated with a subject",
+                "operationId": "createSubjectEvent",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Event creation data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateSubjectEventRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Event created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Message": {
+                                            "type": "string"
+                                        },
+                                        "subject_event": {
+                                            "$ref": "#/components/schemas/SubjectEventResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Subject not found"
+                    },
+                    "422": {
+                        "description": "Invalid event type"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/events/{subject_event_id}": {
+            "get": {
+                "tags": [
+                    "Subject Events"
+                ],
+                "summary": "Get a specific subject event",
+                "description": "Retrieve details of a specific subject event",
+                "operationId": "getSubjectEvent",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_event_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubjectEventResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Subject Events"
+                ],
+                "summary": "Update a subject event",
+                "description": "Update details of an existing subject event",
+                "operationId": "updateSubjectEvent",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_event_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Event update data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateSubjectEventRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Event updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Message": {
+                                            "type": "string"
+                                        },
+                                        "subject_event": {
+                                            "$ref": "#/components/schemas/SubjectEventResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    },
+                    "422": {
+                        "description": "Invalid event type"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Subject Events"
+                ],
+                "summary": "Delete a subject event",
+                "description": "Permanently remove a subject event",
+                "operationId": "deleteSubjectEvent",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_event_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "Message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/institutions/{institution_id}/subjects/{subject_id}/materials": {
             "get": {
                 "tags": [
@@ -4088,6 +4758,190 @@
                 },
                 "type": "object"
             },
+            "AssignmentResponse": {
+                "properties": {
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "deadline": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "attachment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "attachment": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FileResponse"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CreateAssignmentRequest": {
+                "required": [
+                    "title",
+                    "description",
+                    "deadline"
+                ],
+                "properties": {
+                    "title": {
+                        "description": "Title of the assignment",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 3
+                    },
+                    "description": {
+                        "description": "Detailed description of the assignment",
+                        "type": "string"
+                    },
+                    "deadline": {
+                        "description": "Due date for the assignment",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "attachment": {
+                        "description": "Optional attachment file",
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateAssignmentRequest": {
+                "required": [
+                    "title",
+                    "description",
+                    "deadline"
+                ],
+                "properties": {
+                    "title": {
+                        "description": "Updated title of the assignment",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 3
+                    },
+                    "description": {
+                        "description": "Updated description of the assignment",
+                        "type": "string"
+                    },
+                    "deadline": {
+                        "description": "Updated due date for the assignment",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "attachment_id": {
+                        "description": "ID of the new attachment file",
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "SubjectEventResponse": {
+                "properties": {
+                    "subject_event_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subject_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "event_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "event": {
+                        "$ref": "#/components/schemas/EventResponse"
+                    }
+                },
+                "type": "object"
+            },
+            "EventResponse": {
+                "properties": {
+                    "event_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "event_date": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "class",
+                            "exam",
+                            "assignment",
+                            "holiday",
+                            "other"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "CreateSubjectEventRequest": {
+                "required": [
+                    "title",
+                    "description",
+                    "event_date",
+                    "event_type"
+                ],
+                "properties": {
+                    "title": {
+                        "description": "Title of the event",
+                        "type": "string",
+                        "maxLength": 255,
+                        "minLength": 3
+                    },
+                    "description": {
+                        "description": "Detailed description of the event",
+                        "type": "string"
+                    },
+                    "event_date": {
+                        "description": "Date and time of the event",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "event_type": {
+                        "description": "Type of the event",
+                        "type": "string",
+                        "enum": [
+                            "class",
+                            "exam",
+                            "assignment",
+                            "holiday",
+                            "other"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
             "MaterialResponse": {
                 "properties": {
                     "material_id": {
@@ -5007,8 +5861,8 @@
             "description": "Operations related to class management"
         },
         {
-            "name": "Arquivos",
-            "description": "Operações relacionadas a arquivos de usuários, instituições, turmas e disciplinas"
+            "name": "Files",
+            "description": "File upload and management operations"
         },
         {
             "name": "Usuários da Instituição",
@@ -5025,6 +5879,14 @@
         {
             "name": "Invitations",
             "description": "Operations related to institution invitations"
+        },
+        {
+            "name": "Subject Assignments",
+            "description": "Manage assignments for subjects"
+        },
+        {
+            "name": "Subject Events",
+            "description": "Manage events related to subjects"
         },
         {
             "name": "Subject Materials",

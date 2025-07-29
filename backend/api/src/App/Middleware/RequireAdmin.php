@@ -3,7 +3,7 @@ declare(strict_types= 1);
 
 namespace App\Middleware;
 
-use App\Dao\InstitutionUserDao;
+use App\Dao\InstitutionUsersDao;
 use App\Enums\InstitutionUserType;
 use App\Models\InstitutionUser;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,7 +13,7 @@ use Slim\Exception\HttpForbiddenException;
 
 class RequireAdmin{
   public function __construct(
-    private InstitutionUserDao $institutionUserDao
+    private InstitutionUsersDao $institutionUsersDao
   ) {}
 
   public function __invoke(Request $request, RequestHandler $handler): Response

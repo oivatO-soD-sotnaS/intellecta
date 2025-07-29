@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\ClassModel;
 use PDO;
 
-class ClassDao extends BaseDao {
+readonly class ClassesDao extends BaseDao {
+    
     /**
      * Summary of getInstitutionclasses
      * @param string $institution_id
      * @return ClassModel[]
      */
-    public function getAllInstitutionclasses(string $institution_id): array {
+    public function getClassesByInstitutionId(string $institution_id): array {
         $sql = "SELECT * FROM classes WHERE institution_id = :institution_id";
 
         $pdo = $this->database->getConnection();

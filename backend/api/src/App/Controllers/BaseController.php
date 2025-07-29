@@ -21,18 +21,18 @@ abstract readonly class BaseController
             return $action();
         } catch (InvalidArgumentException $e) {
             LogService::http422($request->getUri()->getPath(), $e->getMessage());
-            throw new HttpException($request, LogService::HTTP_422 . $e->getMessage(), 422);
+            throw new HttpException($request, LogService::HTTP_422 . " {$e->getMessage()}", 422);
         } catch (PDOException $e) {
-            LogService::http500($request->getUri()->getPath(), $e->getMessage());
+            LogService::http500($request->getUri()->getPath(), " {$e->getMessage()}");
             if ($e->getCode() === 23000) {
-                throw new HttpException($request, LogService::HTTP_409 . 'Asset already registered', 409);
+                throw new HttpException($request, LogService::HTTP_409 . ' Asset already registered', 409);
             }
-            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . "See logs for more details.");
+            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . " See logs for more details.");
         } catch (HttpException $e) {
             throw $e;
         } catch (Exception $e) {
-            LogService::http500($request->getUri()->getPath(), $e->getMessage());
-            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . "See logs for more details.");
+            LogService::http500($request->getUri()->getPath(), " {$e->getMessage()}");
+            throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . " See logs for more details.");
         }
     }
 }

@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\File;
 use PDO;
 
-class FilesDao extends BaseDao {
+readonly class FilesDao extends BaseDao {
 
   /**
    * Summary of createFile

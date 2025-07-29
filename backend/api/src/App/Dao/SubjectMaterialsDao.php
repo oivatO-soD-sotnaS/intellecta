@@ -6,7 +6,7 @@ namespace App\Dao;
 use App\Models\Material;
 use PDO;
 
-class SubjectMaterialsDao extends BaseDao {
+readonly class SubjectMaterialsDao extends BaseDao {
 
     /**
      * Summary of getMaterialsBySubjectId

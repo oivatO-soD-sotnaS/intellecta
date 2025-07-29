@@ -6,7 +6,7 @@ namespace App\Dao;
 use App\Models\ClassSubject;
 use PDO;
 
-class ClassSubjectsDao extends BaseDao {
+readonly class ClassSubjectsDao extends BaseDao {
 
     /**
      * Summary of createClassSubject

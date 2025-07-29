@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
-use App\Dao\InstitutionUserDao;
+use App\Dao\InstitutionUsersDao;
 use App\Dao\SubjectsDao;
-use App\Dao\UserDao;
+use App\Dao\UsersDao;
 use App\Dto\SubjectDto;
 use App\Dto\UserDto;
 use App\Enums\FileType;
@@ -34,8 +34,8 @@ readonly class SubjectsController extends BaseController {
     public function __construct(
         private SubjectsDao $subjectsDao,
         private FilesDao $filesDao,
-        private UserDao $userDao,
-        private InstitutionUserDao $institutionUserDao,
+        private UsersDao $usersDao,
+        private InstitutionUsersDao $institutionUsersDao,
         private ValidatorService $validatorService,
         private UploadService $uploadService
     ) {}
@@ -49,7 +49,7 @@ readonly class SubjectsController extends BaseController {
             }
 
             $subjectsDtos = array_map(function(Subject $subject) {
-                $teacher = $this->userDao->getById($subject->getTeacherId());
+                $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
                 $teacherProfilePicture = $teacher->getProfilePictureId()
                     ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                     : null;
@@ -160,7 +160,7 @@ readonly class SubjectsController extends BaseController {
             $teacher = null;
 
             if ($teacher_id !== null) {
-                $teacher = $this->institutionUserDao->getInstitutionUserByInstitutionIdAndUserId($institution_id, $teacher_id->getValue());
+                $teacher = $this->institutionUsersDao->getInstitutionUserByInstitutionIdAndUserId($institution_id, $teacher_id->getValue());
 
                 if (empty($teacher)) {
                     throw new HttpNotFoundException($request, LogService::HTTP_404 . "User (teacher) with id {$teacher_id} was not found");
@@ -185,7 +185,7 @@ readonly class SubjectsController extends BaseController {
                 "teacher_id" => $teacher ? $teacher->getUserId() : $token["sub"],
             ]));
 
-            $teacherUser = $this->userDao->getById($teacher ? $teacher->getUserId() : $token['sub']);
+            $teacherUser = $this->usersDao->getUserBydId($teacher ? $teacher->getUserId() : $token['sub']);
             $teacherProfilePicture = $teacherUser->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacherUser->getProfilePictureId())
                 : null;
@@ -224,7 +224,7 @@ readonly class SubjectsController extends BaseController {
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
             
-            $teacher = $this->userDao->getById($subject->getTeacherId());
+            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;
@@ -328,7 +328,7 @@ readonly class SubjectsController extends BaseController {
             $subjectBanner = $subject->getBannerId()
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
-            $teacherUser = $this->userDao->getById($subject->getTeacherId());
+            $teacherUser = $this->usersDao->getUserBydId($subject->getTeacherId());
             $teacherUserProfilePictue = $teacherUser->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacherUser->getProfilePictureId())
                 : null;

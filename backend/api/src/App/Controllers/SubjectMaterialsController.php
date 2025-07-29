@@ -13,7 +13,7 @@ use App\Models\Material;
 use App\Services\LogService;
 use App\Services\UploadService;
 use App\Services\ValidatorService;
-use App\Vo\MaterialFileVo;
+use App\Vo\FileVo;
 use App\Vo\MaterialTitleVo;
 use Ramsey\Uuid\Uuid;
 use Slim\Exception\HttpInternalServerErrorException;
@@ -59,7 +59,7 @@ readonly class SubjectMaterialsController extends BaseController {
             $this->validatorService->validateRequired($uploadedFiles, ['material_file']);
 
             $materialTitle = new MaterialTitleVo($body['title']);
-            $materialFile = new MaterialFileVo($uploadedFiles['material_file']);
+            $materialFile = new FileVo($uploadedFiles['material_file']);
 
             $timestamp = date('Y-m-d H:i:s');
 

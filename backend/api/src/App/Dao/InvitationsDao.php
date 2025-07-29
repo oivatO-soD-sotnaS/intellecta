@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\Invitation;
 use PDO;
 
-class InvitationDao extends BaseDao {
+readonly class InvitationsDao extends BaseDao {
+
   /**
    * Summary of getAllUserInvitations
    * @param string $email

@@ -40,4 +40,28 @@ class Assignment implements \JsonSerializable {
     public function getDeadline(): string { return $this->deadline; }
     public function getSubjectId(): string { return $this->subject_id; }
     public function getAttachmentId(): ?string { return $this->attachment_id; }
+    // Setters
+    public function setAssignmentId(string $assignment_id): void {
+        $this->assignment_id = $assignment_id;
+    }
+
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function setDescription(string $description): void {
+        $this->description = $description;
+    }
+
+    public function setDeadline(string $deadline): void {
+        $this->deadline = $deadline;
+    }
+
+    public function setSubjectId(string $subject_id): void {
+        $this->subject_id = $subject_id;
+    }
+
+    public function setAttachmentId(?string $attachment_id): void {
+        $this->attachment_id = $attachment_id;
+    }
 }

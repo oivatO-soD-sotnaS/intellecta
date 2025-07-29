@@ -4,17 +4,17 @@ declare(strict_types= 1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\VerificationCode;
 use PDO;
 
-class VerificationCodeDao extends BaseDao {
+readonly class VerificationCodesDao extends BaseDao {
+  
   /**
    * Summary of create
    * @param \App\Models\VerificationCode $verificationCode
    * @return VerificationCode|null
    */
-  public function create(VerificationCode $verificationCode): ?VerificationCode {
+  public function createVerificationCode(VerificationCode $verificationCode): ?VerificationCode {
     $sql = 'INSERT INTO verification_codes (verification_code_id, code, expires_at, user_id)
             VALUES (:verification_code_id, :code, :expires_at, :user_id)';
 
@@ -61,7 +61,7 @@ class VerificationCodeDao extends BaseDao {
    * @param \App\Models\VerificationCode $verificationCode
    * @return VerificationCode|null
    */
-  public function update(VerificationCode $verificationCode): ?VerificationCode {
+  public function updateVerificationCode(VerificationCode $verificationCode): ?VerificationCode {
     $sql = 'UPDATE verification_codes SET
               code = :code,
               is_pending = :is_pending,

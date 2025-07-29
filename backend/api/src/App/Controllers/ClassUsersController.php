@@ -5,8 +5,8 @@ namespace App\Controllers;
 
 use App\Dao\ClassUsersDao;
 use App\Dao\FilesDao;
-use App\Dao\InstitutionUserDao;
-use App\Dao\UserDao;
+use App\Dao\InstitutionUsersDao;
+use App\Dao\UsersDao;
 use App\Dto\ClassUserDto;
 use App\Dto\UserDto;
 use App\Models\ClassUser;
@@ -24,8 +24,8 @@ use Slim\Psr7\Response;
 readonly class ClassUsersController extends BaseController {
     public function __construct(
         private ClassUsersDao $classUsersDao,
-        private InstitutionUserDao $institutionUserDao,
-        private UserDao $userDao,
+        private InstitutionUsersDao $institutionUsersDao,
+        private UsersDao $usersDao,
         private ValidatorService $validatorService,
         private FilesDao $filesDao,
     ) {}
@@ -39,7 +39,7 @@ readonly class ClassUsersController extends BaseController {
             }
 
             $classUsersDtos = array_map(function(ClassUser $classUser) {
-                $user = $this->userDao->getById($classUser->getUserId());
+                $user = $this->usersDao->getUserBydId($classUser->getUserId());
                 
                 $profilePicture = $user->getProfilePictureId()
                     ? $this->filesDao->getFileById($user->getProfilePictureId())
@@ -70,7 +70,7 @@ readonly class ClassUsersController extends BaseController {
             }
 
             $classUsers = $this->classUsersDao->getClassUsersByClassId($class_id);
-            $institutionUsers = $this->institutionUserDao->getUsersByInstitutionId($institution_id);
+            $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
 
             $classUsersMap = array_flip(array_map(fn(ClassUser $u) => $u->getUserId(), $classUsers));
             $institutionUsersMap = array_flip(array_map(fn(InstitutionUser $u) => $u->getUserId(), $institutionUsers));
@@ -116,7 +116,7 @@ readonly class ClassUsersController extends BaseController {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $user = $this->userDao->getById($classUser->getUserId());
+            $user = $this->usersDao->getUserBydId($classUser->getUserId());
             $profilePicture = $user->getProfilePictureId()
                 ? $this->filesDao->getFileById($user->getProfilePictureId())
                 : null;

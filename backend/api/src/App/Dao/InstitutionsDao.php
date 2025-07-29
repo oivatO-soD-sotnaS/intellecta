@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\Institution;
 use App\Models\InstitutionSummary;
 use PDO;
 
-class InstitutionDao extends BaseDao {
+readonly class InstitutionsDao extends BaseDao {
+  
   /**
    * Summary of getInstitutionById
    * @param string $id
@@ -34,7 +34,7 @@ class InstitutionDao extends BaseDao {
    * @param string $userId
    * @return InstitutionSummary[]
    */
-  public function getInstitutionsSummary(string $userId): array {
+  public function getInstitutionsSummaryByUserId(string $userId): array {
     $sql = 'SELECT * FROM institution_summary WHERE user_id LIKE :user_id';
 
     $pdo = $this->database->getConnection();
@@ -59,7 +59,7 @@ class InstitutionDao extends BaseDao {
    * @param string $institutionId
    * @return InstitutionSummary|null
    */
-  public function getInstitutionSummaryById(string $userId, string $institutionId): ?InstitutionSummary {
+  public function getInstitutionSummaryByUserIdAndInstitutionId(string $userId, string $institutionId): ?InstitutionSummary {
     $sql = 'SELECT * FROM institution_summary 
             WHERE user_id LIKE :user_id
             AND institution_id LIKE :institution_id';
@@ -105,7 +105,7 @@ class InstitutionDao extends BaseDao {
    * @param string $user_id
    * @return Institution[]
    */
-  public function getOwnedInstitutions(string $user_id): array {
+  public function getUserOwnedInstitutions(string $user_id): array {
     $sql = "SELECT * FROM institutions
             WHERE user_id LIKE :user_id";
 

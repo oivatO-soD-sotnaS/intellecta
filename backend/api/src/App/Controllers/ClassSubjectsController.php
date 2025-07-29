@@ -6,7 +6,7 @@ namespace App\Controllers;
 use App\Dao\ClassSubjectsDao;
 use App\Dao\FilesDao;
 use App\Dao\SubjectsDao;
-use App\Dao\UserDao;
+use App\Dao\UsersDao;
 use App\Dto\ClassSubjectDto;
 use App\Dto\SubjectDto;
 use App\Dto\UserDto;
@@ -24,7 +24,7 @@ readonly class ClassSubjectsController extends BaseController {
     public function __construct(
         private SubjectsDao $subjectsDao,
         private ClassSubjectsDao $classSubjectsDao,
-        private UserDao $userDao,
+        private UsersDao $usersDao,
         private FilesDao $filesDao,
         private ValidatorService $validatorService
     ) {}
@@ -37,7 +37,7 @@ readonly class ClassSubjectsController extends BaseController {
             $subjectsDtos = array_map(function(ClassSubject $classSubject) use($institution_id) {
                 $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($classSubject->getSubjectId(), $institution_id);
                 
-                $teacher = $this->userDao->getById($subject->getTeacherId());
+                $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
                 $teacherProfilePicture = $teacher->getProfilePictureId()
                     ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                     : null;
@@ -88,7 +88,7 @@ readonly class ClassSubjectsController extends BaseController {
                 "subject_id" => $subject->getSubjectId()
             ]));
 
-            $teacher = $this->userDao->getById($subject->getTeacherId());
+            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;
@@ -131,7 +131,7 @@ readonly class ClassSubjectsController extends BaseController {
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($classSubject->getSubjectId(), $institution_id);
                 
-            $teacher = $this->userDao->getById($subject->getTeacherId());
+            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;

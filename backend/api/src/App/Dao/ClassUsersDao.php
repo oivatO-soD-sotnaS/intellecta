@@ -6,7 +6,8 @@ namespace App\Dao;
 use App\Models\ClassUser;
 use PDO;
 
-class ClassUsersDao extends BaseDao {
+readonly class ClassUsersDao extends BaseDao {
+
     /**
      * Summary of isUserMemberOfClass
      * @param string $user_id
@@ -17,7 +18,7 @@ class ClassUsersDao extends BaseDao {
         $sql = "SELECT EXISTS (
                 SELECT 1
                 FROM class_users
-                WHERE class_id = :class_id
+                    WHERE class_id = :class_id
                     AND user_id = :user_id
                 ) AS is_member
                 ";
@@ -56,30 +57,9 @@ class ClassUsersDao extends BaseDao {
     }
 
     /**
-     * Summary of createClassUser
-     * @param \App\Models\ClassUser $classUser
-     * @return ClassUser|null
-     */
-    public function createClassUser(ClassUser $classUser): ?ClassUser {
-        $sql = "INSERT INTO class_users (class_users_id, joined_at, class_id, user_id)
-                VALUES (:class_users_id, :joined_at, :class_id, :user_id)";
-
-        $pdo = $this->database->getConnection();
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(":class_users_id", $classUser->getClassUsersId(), PDO::PARAM_STR);
-        $stmt->bindValue(":joined_at", $classUser->getJoinedAt(), PDO::PARAM_STR);
-        $stmt->bindValue(":class_id", $classUser->getClassId(), PDO::PARAM_STR);
-        $stmt->bindValue(":user_id", $classUser->getUserId(), PDO::PARAM_STR);
-        $success = $stmt->execute();
-
-        return $success ? $classUser : null;
-    }
-
-    /**
-     * Inserts multiple ClassUser records in a single query.
-     * 
-     * @param ClassUser[] $classUsers
-     * @return int Number of successfully inserted users
+     * Summary of createMultipleClassUsers
+     * @param array $classUsers
+     * @return int
      */
     public function createMultipleClassUsers(array $classUsers): int {
         if (empty($classUsers)) return 0;

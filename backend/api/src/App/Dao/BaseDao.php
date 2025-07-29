@@ -5,7 +5,7 @@ namespace App\Dao;
 
 use App\Database;
 
-class BaseDao {
+readonly class BaseDao {
     public function __construct(
         protected Database $database
     ){}

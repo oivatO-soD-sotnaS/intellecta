@@ -3,7 +3,7 @@ declare(strict_types= 1);
 
 namespace App\Controllers;
 
-use App\Dao\ClassDao;
+use App\Dao\ClassesDao;
 use App\Dao\FilesDao;
 use App\Dto\ClassModelDto;
 use App\Enums\FileType;
@@ -29,7 +29,7 @@ use Slim\Psr7\Response;
 // Documented
 readonly class ClassesController extends BaseController {
     public function __construct(
-        private ClassDao $classDao,
+        private ClassesDao $classesDao,
         private FilesDao $filesDao,
         private UploadService $uploadService,
         private ValidatorService $validatorService
@@ -43,8 +43,8 @@ readonly class ClassesController extends BaseController {
 
             // If admin: fetches all classes, else; only the ones the user participates. 
             $classes = $membership->getRole() === InstitutionUserType::Admin->value
-                ? $this->classDao->getAllInstitutionclasses($institution_id)
-                : $this->classDao->getClassesByUserIdAndInstitutionId($token['sub'], $institution_id);
+                ? $this->classesDao->getClassesByInstitutionId($institution_id)
+                : $this->classesDao->getClassesByUserIdAndInstitutionId($token['sub'], $institution_id);
 
             if(count($classes) === 0) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -124,7 +124,7 @@ readonly class ClassesController extends BaseController {
                 ]));
             }
 
-            $class = $this->classDao->createClass(new ClassModel([
+            $class = $this->classesDao->createClass(new ClassModel([
                 "class_id" => Uuid::uuid4()->toString(),
                 "name" => $name->getValue(),
                 "description" => $description->getValue(),
@@ -148,8 +148,8 @@ readonly class ClassesController extends BaseController {
             $token = $request->getAttribute('token');
             
             $class = $membership->getRole() !== InstitutionUserType::Admin->value
-                ? $this->classDao->getClassByUserIdAndClassId($token['sub'], $class_id)
-                : $this->classDao->getClassById($class_id);
+                ? $this->classesDao->getClassByUserIdAndClassId($token['sub'], $class_id)
+                : $this->classesDao->getClassById($class_id);
 
             if(empty($class)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -193,7 +193,7 @@ readonly class ClassesController extends BaseController {
                 ? new UuidV4Vo($body["banner_id"])
                 : null;
 
-            $class = $this->classDao->getClassById($class_id);
+            $class = $this->classesDao->getClassById($class_id);
             
             if (empty($class)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -233,7 +233,7 @@ readonly class ClassesController extends BaseController {
             $class->setName($name->getValue());
             $class->setDescription($description->getValue());
 
-            $this->classDao->updateClass($class);
+            $this->classesDao->updateClass($class);
 
             $classProfilePicture = $class->getProfilePictureId()
                 ? $this->filesDao->getFileById($class->getProfilePictureId())
@@ -255,7 +255,7 @@ readonly class ClassesController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
             $token = $request->getAttribute('token');
             
-            $class = $this->classDao->getClassById($class_id);
+            $class = $this->classesDao->getClassById($class_id);
             if (empty($class)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -265,7 +265,7 @@ readonly class ClassesController extends BaseController {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $success = $this->classDao->deleteClass($class->getClassId());
+            $success = $this->classesDao->deleteClass($class->getClassId());
 
             if(!$success) {
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500);

@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\User;
 use PDO;
 
-class UserDao extends BaseDao {
+readonly class UsersDao extends BaseDao {
 
   /**
    * Summary of getById
    * @param string $id
    * @return User|null
    */
-  public function getById(string $id): ?User {
+  public function getUserBydId(string $id): ?User {
     $sql = 'SELECT * FROM users WHERE user_id = :id';
     
     $pdo = $this->database->getConnection();
@@ -33,7 +32,7 @@ class UserDao extends BaseDao {
    * @param string $email
    * @return User|null
    */
-  public function getByEmail(string $email): ?User {
+  public function getUserByEmail(string $email): ?User {
     $sql = 'SELECT * FROM users WHERE email = :email';
     
     $pdo = $this->database->getConnection();
@@ -51,7 +50,7 @@ class UserDao extends BaseDao {
    * @param \App\Models\User $user
    * @return User|null
    */
-  public function create(User $user): ?User {
+  public function createUser(User $user): ?User {
     $sql = 'INSERT INTO users (user_id, full_name, email, password_hash, profile_picture_id) 
             VALUES (:user_id, :full_name, :email, :password_hash, :profile_picture_id)';
 
@@ -73,7 +72,7 @@ class UserDao extends BaseDao {
    * @param \App\Models\User $user
    * @return User|null
    */
-  public function update(User $user): ?User {
+  public function updateUser(User $user): ?User {
     $sql = 'UPDATE users SET 
               full_name = :full_name,
               email = :email,
@@ -101,7 +100,7 @@ class UserDao extends BaseDao {
    * @param string $userId
    * @return bool
    */
-  public function delete(string $userId): bool {
+  public function deleteUser(string $userId): bool {
     $sql = 'DELETE FROM users WHERE user_id = :user_id';
 
     $pdo = $this->database->getConnection();

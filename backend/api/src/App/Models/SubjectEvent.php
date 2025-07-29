@@ -25,7 +25,7 @@ class SubjectEvent implements \JsonSerializable {
     }
 
     // Getters
-    public function getSubjectEventsId(): string { return $this->subject_event_id; }
+    public function getSubjectEventId(): string { return $this->subject_event_id; }
     public function getEventId(): string { return $this->event_id; }
     public function getSubjectId(): string { return $this->subject_id; }
 }

@@ -1,15 +1,13 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
-use App\Models\Event;
 use App\Models\UserEvent;
 use PDO;
 
-class UserEventDao extends BaseDao {
+readonly class UserEventsDao extends BaseDao {
+  
   /**
    * Summary of getUserEventById
    * @param string $userEventId
@@ -34,7 +32,7 @@ class UserEventDao extends BaseDao {
    * @param string $userId
    * @return UserEvent[]
    */
-  public function getAllUserEventsById(string $userId): array {
+  public function getAllUserEventsByUserId(string $userId): array {
     $sql = 'SELECT * FROM user_events
             WHERE user_id = :user_id';
     

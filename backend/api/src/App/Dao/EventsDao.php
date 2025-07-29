@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\Event;
 
-class EventDao extends BaseDao {
+readonly class EventsDao extends BaseDao {
+  
   /**
    * Summary of getEventById
    * @param string $eventId

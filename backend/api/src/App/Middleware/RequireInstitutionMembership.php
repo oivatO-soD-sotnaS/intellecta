@@ -3,7 +3,7 @@ declare(strict_types= 1);
 
 namespace App\Middleware;
 
-use App\Dao\InstitutionUserDao;
+use App\Dao\InstitutionUsersDao;
 use App\Services\JwtService;
 use App\Services\LogService;
 use Exception;
@@ -19,7 +19,7 @@ use Slim\Routing\RouteContext;
 
 class RequireInstitutionMembership{
   public function __construct(
-    private InstitutionUserDao $institutionUserDao
+    private InstitutionUsersDao $institutionUsersDao
   ) {}
 
   public function __invoke(Request $request, RequestHandler $handler): Response
@@ -41,7 +41,7 @@ class RequireInstitutionMembership{
     $token = $request->getAttribute("token");
     
     try {
-      $institutionUser = $this->institutionUserDao->getInstitutionUserByInstitutionIdAndUserId($institutionId, $token['sub']);
+      $institutionUser = $this->institutionUsersDao->getInstitutionUserByInstitutionIdAndUserId($institutionId, $token['sub']);
       if(empty($institutionUser)) {
         LogService::http403('RequireInstitutionMembership', "User ".$token['email']. " is not a member of the institution $institutionId");
         throw new HttpForbiddenException($request, 'User is not a member of the institution');

@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Dao\EventDao;
-use App\Dao\InstitutionalEventDao;
-use App\Dao\InstitutionDao;
-use App\Dao\UserDao;
+use App\Dao\EventsDao;
+use App\Dao\InstitutionalEventsDao;
+use App\Dao\InstitutionsDao;
+use App\Dao\UsersDao;
 use App\Dto\InstitutionalEventDto;
 use App\Models\Event;
 use App\Models\InstitutionalEvent;
@@ -21,13 +21,13 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
-readonly class InstitutionalEventController extends BaseController
+readonly class InstitutionalEventsController extends BaseController
 {
   public function __construct(
-    private InstitutionalEventDao $institutionalEventDao,
-    private EventDao $eventDao,
-    private UserDao $userDao,
-    private InstitutionDao $institutionDao,
+    private InstitutionalEventsDao $institutionalEventsDao,
+    private EventsDao $eventsDao,
+    private UsersDao $usersDao,
+    private InstitutionsDao $institutionsDao,
     private EmailService $emailService,
     private ValidatorService $validatorService
   ) {}
@@ -35,14 +35,14 @@ readonly class InstitutionalEventController extends BaseController
   public function getInstitutionalEvents(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-      $institutionalEvents = $this->institutionalEventDao->getAllInstitutionalEventsById($institution_id);
+      $institutionalEvents = $this->institutionalEventsDao->getInstitutionalEventsByInstitutionId($institution_id);
 
       if (empty($institutionalEvents)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $data = array_map(function ($institutionalEvent) {
-        $event = $this->eventDao->getEventById($institutionalEvent->getEventId());
+        $event = $this->eventsDao->getEventById($institutionalEvent->getEventId());
         return new InstitutionalEventDto($institutionalEvent, $event);
       }, $institutionalEvents);
 
@@ -64,12 +64,12 @@ readonly class InstitutionalEventController extends BaseController
       $eventDate = new EventDateVo($body['event_date']);
       $eventType = $body['event_type'];
 
-      $institution = $this->institutionDao->getInstitutionById($institution_id);
+      $institution = $this->institutionsDao->getInstitutionById($institution_id);
       if (!$institution) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $event = $this->eventDao->createEvent(new Event([
+      $event = $this->eventsDao->createEvent(new Event([
         'event_id' => Uuid::uuid4()->toString(),
         'title' => $title->getValue(),
         'description' => $description->getValue(),
@@ -77,7 +77,7 @@ readonly class InstitutionalEventController extends BaseController
         'type' => $eventType
       ]));
 
-      $institutionalEvent = $this->institutionalEventDao->createInstitutionalEvent(new InstitutionalEvent([
+      $institutionalEvent = $this->institutionalEventsDao->createInstitutionalEvent(new InstitutionalEvent([
         "institutional_event_id" => Uuid::uuid4()->toString(),
         "institution_id" => $institution->getInstitutionId(),
         "event_id" => $event->getEventId()
@@ -106,7 +106,7 @@ readonly class InstitutionalEventController extends BaseController
       $eventDate = new EventDateVo($body['event_date']);
       $eventType = $body['event_type'];
       
-      $institutionalEvent = $this->institutionalEventDao->getInstitutionalEventById($event_id);
+      $institutionalEvent = $this->institutionalEventsDao->getInstitutionalEventById($event_id);
       if (empty($institutionalEvent)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -115,7 +115,7 @@ readonly class InstitutionalEventController extends BaseController
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $event = $this->eventDao->getEventById($institutionalEvent->getEventId());
+      $event = $this->eventsDao->getEventById($institutionalEvent->getEventId());
       if (empty($event)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -132,7 +132,7 @@ readonly class InstitutionalEventController extends BaseController
 
       $event->setType($eventType ?? $event->getType());
 
-      $event = $this->eventDao->updateEvent($event);
+      $event = $this->eventsDao->updateEvent($event);
 
       $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
       
@@ -149,7 +149,7 @@ readonly class InstitutionalEventController extends BaseController
   public function deleteInstitutionalEvent(Request $request, Response $response, string $institution_id, string $event_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $event_id) {
-      $institutionalEvent = $this->institutionalEventDao->getInstitutionalEventById($event_id);
+      $institutionalEvent = $this->institutionalEventsDao->getInstitutionalEventById($event_id);
       if (empty($institutionalEvent)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -158,12 +158,12 @@ readonly class InstitutionalEventController extends BaseController
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $event = $this->eventDao->getEventById($institutionalEvent->getEventId());
+      $event = $this->eventsDao->getEventById($institutionalEvent->getEventId());
       if (empty($event)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $this->eventDao->deleteEventById($event->getEventId());
+      $this->eventsDao->deleteEventById($event->getEventId());
       
       LogService::info("/institutions/$institution_id/events/$event_id", "Institutional event deleted: $institutionalEvent");
       $response->getBody()->write(json_encode(["Message" => "Institutional event deleted successfully"]));
@@ -174,7 +174,7 @@ readonly class InstitutionalEventController extends BaseController
   public function getInstitutionalEvent(Request $request, Response $response, string $institution_id, string $event_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $event_id) {
-      $institutionalEvent = $this->institutionalEventDao->getInstitutionalEventById($event_id);
+      $institutionalEvent = $this->institutionalEventsDao->getInstitutionalEventById($event_id);
       if (empty($institutionalEvent)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -183,7 +183,7 @@ readonly class InstitutionalEventController extends BaseController
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $event = $this->eventDao->getEventById($institutionalEvent->getEventId());
+      $event = $this->eventsDao->getEventById($institutionalEvent->getEventId());
       if (empty($event)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }

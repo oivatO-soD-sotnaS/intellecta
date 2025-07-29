@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
-use App\Dao\InstitutionDao;
-use App\Dao\InstitutionUserDao;
-use App\Dao\InvitationDao;
-use App\Dao\UserDao;
+use App\Dao\InstitutionsDao;
+use App\Dao\InstitutionUsersDao;
+use App\Dao\InvitationsDao;
+use App\Dao\UsersDao;
 use App\Dto\InstitutionDto;
 use App\Dto\InstitutionUserDto;
 use App\Dto\InvitationDto;
@@ -26,21 +26,21 @@ use Slim\Psr7\Response;
 // Documented
 readonly class InvitationsController extends BaseController {
     public function __construct(
-        private InvitationDao $invitationDao,
-        private InstitutionUserDao $institutionUserDao,
-        private UserDao $userDao,
+        private InvitationsDao $invitationsDao,
+        private InstitutionUsersDao $institutionUsersDao,
+        private UsersDao $usersDao,
         private FilesDao $filesDao,
-        private InstitutionDao $institutionDao
+        private InstitutionsDao $institutionsDao
     ){}
 
     public function acceptInvitation(Request $request, Response $response, string $invitation_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $invitation_id) {
-            $invitation = $this->invitationDao->getInvitationById($invitation_id);
+            $invitation = $this->invitationsDao->getInvitationById($invitation_id);
             if(empty($invitation)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             $token = $request->getAttribute('token');
-            $user = $this->userDao->getById($token['sub']);
+            $user = $this->usersDao->getUserBydId($token['sub']);
 
             if($invitation->getEmail() !== $user->getEmail()) {
                 LogService::http403("/invitation/{$invitation_id}/accept", "User {$user->getEmail()} tried using invitation for {$invitation->getEmail()}");
@@ -52,14 +52,14 @@ readonly class InvitationsController extends BaseController {
 
             $timestamp = date('Y-m-d H:i:s');
             $invitation->setAcceptedAt($timestamp);
-            $invitation = $this->invitationDao->updateInvitation($invitation);
+            $invitation = $this->invitationsDao->updateInvitation($invitation);
 
             if(empty($invitation)) {
                 LogService::http500("/invitation/{$invitation_id}/accept", "Could not accept invitation due to an unknown error.");
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
-            $institutionUser = $this->institutionUserDao->createInstitutionUser(new InstitutionUser([
+            $institutionUser = $this->institutionUsersDao->createInstitutionUser(new InstitutionUser([
                 "institution_user_id" => Uuid::uuid4()->toString(),
                 "role" => $invitation->getRole(),
                 "joined_at" => $timestamp,
@@ -81,7 +81,7 @@ readonly class InvitationsController extends BaseController {
 
     public function getInvitation(Request $request, Response $response, string $invitation_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $invitation_id) {
-            $invitation = $this->invitationDao->getInvitationById($invitation_id);
+            $invitation = $this->invitationsDao->getInvitationById($invitation_id);
             if(empty($invitation)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -92,7 +92,7 @@ readonly class InvitationsController extends BaseController {
                 throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
-            $institution = $this->institutionDao->getInstitutionById($invitation->getInstitutionId());
+            $institution = $this->institutionsDao->getInstitutionById($invitation->getInstitutionId());
             if(!empty($institution->getProfilePictureId())) {
                 $institutionProfilePicture = $this->filesDao->getFileById($institution->getProfilePictureId());
             }
@@ -102,7 +102,7 @@ readonly class InvitationsController extends BaseController {
 
             $institutionDto = new InstitutionDto($institution, $institutionBanner, $institutionProfilePicture);
 
-            $invitedBy = $this->userDao->getById($invitation->getInvitedBy());
+            $invitedBy = $this->usersDao->getUserBydId($invitation->getInvitedBy());
             if(!empty($invitedBy->getProfilePictureId())) {
                 $invitedByProfilePicture = $this->filesDao->getFileById($invitedBy->getProfilePictureId());
             }
@@ -119,13 +119,13 @@ readonly class InvitationsController extends BaseController {
     public function getAllInvitations(Request $request, Response $response): Response {
         return $this->handleErrors($request, function() use ($request, $response) {
             $token = $request->getAttribute('token');
-            $invitations = $this->invitationDao->getAllUserInvitations($token['email']);
+            $invitations = $this->invitationsDao->getAllUserInvitations($token['email']);
             
             if(count($invitations) === 0){
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             $invitationDtos = array_map(function(Invitation $invitation) {
-                $institution = $this->institutionDao->getInstitutionById($invitation->getInstitutionId());
+                $institution = $this->institutionsDao->getInstitutionById($invitation->getInstitutionId());
                 if(!empty($institution->getProfilePictureId())) {
                     $institutionProfilePicture = $this->filesDao->getFileById($institution->getProfilePictureId());
                 }
@@ -135,7 +135,7 @@ readonly class InvitationsController extends BaseController {
 
                 $institutionDto = new InstitutionDto($institution, $institutionBanner, $institutionProfilePicture);
 
-                $invitedBy = $this->userDao->getById($invitation->getInvitedBy());
+                $invitedBy = $this->usersDao->getUserBydId($invitation->getInvitedBy());
                 if(!empty($invitedBy->getProfilePictureId())) {
                     $invitedByProfilePicture = $this->filesDao->getFileById($invitedBy->getProfilePictureId());
                 }

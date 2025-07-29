@@ -4,8 +4,8 @@ declare(strict_types= 1);
 namespace App\Controllers;
 
 use App\Dao\FilesDao;
-use App\Dao\UserDao;
-use App\Dao\VerificationCodeDao;
+use App\Dao\UsersDao;
+use App\Dao\VerificationCodesDao;
 use App\Dto\UserDto;
 use App\Models\User;
 use App\Models\VerificationCode;
@@ -28,8 +28,8 @@ use Slim\Exception\HttpNotFoundException;
 // Documented
 readonly class AuthController extends BaseController {
   public function __construct(
-    private UserDao $userDao,
-    private VerificationCodeDao $verificationCodeDao,
+    private UsersDao $usersDao,
+    private VerificationCodesDao $verificationCodesDao,
     private FilesDao $filesDao,
     private JwtService $jwtService,
     private EmailService $emailService,
@@ -48,11 +48,11 @@ readonly class AuthController extends BaseController {
       $email = new EmailAddressVo($body['email']);
       $password = new PasswordVo($body['password']);
 
-      $user = $this->userDao->getByEmail($email->getValue());
+      $user = $this->usersDao->getUserByEmail($email->getValue());
 
       $passwordHash = password_hash($password->getValue(), PASSWORD_BCRYPT);
       if (empty($user)) {
-        $user = $this->userDao->create(new User([
+        $user = $this->usersDao->createUser(new User([
           "user_id" => Uuid::uuid4()->toString(),
           "full_name" => $fullName->getValue(),
           "email" => $email->getValue(),
@@ -63,7 +63,7 @@ readonly class AuthController extends BaseController {
         $user = $user->setFullName($fullName->getValue());
         $user->setEmail($email->getValue());
         $user->setPasswordHash($passwordHash);
-        $this->userDao->update($user);
+        $this->usersDao->updateUser($user);
         LogService::info("/auth/sign-up", "Unverified user UPDATED: $user");
       } else {
         throw new HttpException($request, LogService::HTTP_409 . 'E-mail already registered', 409);
@@ -86,7 +86,7 @@ readonly class AuthController extends BaseController {
       // Insert verification code into DB
       $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-      $this->verificationCodeDao->create(new VerificationCode([
+      $this->verificationCodesDao->createVerificationCode(new VerificationCode([
         'verification_code_id' => Uuid::uuid4()->toString(),
         'code' => $code,
         'expires_at' => $expiresAt,
@@ -112,7 +112,7 @@ readonly class AuthController extends BaseController {
       $code = trim($body['verification_code']);
   
       
-      $user = $this->userDao->getByEmail($email->getValue());
+      $user = $this->usersDao->getUserByEmail($email->getValue());
       
       if(empty($user)){
         LogService::http404("/auth/verify-code", "e-mail: $email does not correspond to any user");
@@ -127,17 +127,17 @@ readonly class AuthController extends BaseController {
           409
         );
       } 
-      $verificationCode = $this->verificationCodeDao->getLatestVerificationCode($user->getUserId(), $code);
+      $verificationCode = $this->verificationCodesDao->getLatestVerificationCode($user->getUserId(), $code);
       if(empty($verificationCode)) {
         LogService::http422("/auth/verify-code", "No verification code found for: $user");
         throw new HttpException($request,LogService::HTTP_422 . 'Verification code expired or invalid', 422);
       }
 
       $verificationCode->setIsPending(false);
-      $this->verificationCodeDao->update($verificationCode);
+      $this->verificationCodesDao->updateVerificationCode($verificationCode);
 
       $user->setEmailVerified(true);
-      $user = $this->userDao->update($user);
+      $user = $this->usersDao->updateUser($user);
 
       $jwt = $this->jwtService->generateToken(
         userId: $user->getUserId(),
@@ -166,7 +166,7 @@ readonly class AuthController extends BaseController {
       $email = new EmailAddressVo($body['email']);
       $password = new PasswordVo($body['password']);
   
-      $user = $this->userDao->getByEmail($email->getValue());
+      $user = $this->usersDao->getUserByEmail($email->getValue());
 
       if (empty($user)) {
         LogService::http404("/auth/sign-in", "No user found with email: {$email->getValue()}");

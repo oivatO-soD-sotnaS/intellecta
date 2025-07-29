@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
-use App\Database;
 use App\Models\InstitutionUser;
 use PDO;
 
-class InstitutionUserDao extends BaseDao {
+readonly class InstitutionUsersDao extends BaseDao {
   
   /**
    * Summary of getInstitutionUserById
@@ -80,7 +79,7 @@ class InstitutionUserDao extends BaseDao {
    * @param string $institution_id
    * @return InstitutionUser[]
    */
-  public function getUsersByInstitutionId(string $institution_id): array {
+  public function getInstitutionUsersByInstitutionId(string $institution_id): array {
     $sql = "SELECT * FROM institution_users WHERE institution_id = :institution_id";
     
     $pdo = $this->database->getConnection();

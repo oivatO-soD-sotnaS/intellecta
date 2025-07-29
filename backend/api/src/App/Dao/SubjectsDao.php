@@ -4,19 +4,19 @@ declare(strict_types=1);
 namespace App\Dao;
 
 use App\Models\Subject;
-use App\Models\ClassSubject;
 use PDO;
 
-class SubjectsDao extends BaseDao {
+readonly class SubjectsDao extends BaseDao {
 
     /**
      * Check if a user is related to a subject using the subject_users view
      * or if the user is the teacher of the subject.
+     * @param string $userId
+     * @param string $subjectId
+     * @return bool
      */
     public function isUserRelatedToSubject(string $userId, string $subjectId): bool {
-        $sql = 
-            "
-                (
+        $sql = "(
                     SELECT 1
                     FROM subject_users
                     WHERE user_id = :user_id AND subject_id = :subject_id
@@ -28,7 +28,7 @@ class SubjectsDao extends BaseDao {
                     WHERE subject_id = :subject_id_2 AND teacher_id = :user_id_2
                 )
                 LIMIT 1
-            ";
+                ";
 
         $pdo = $this->database->getConnection();
         $stmt = $pdo->prepare($sql);
@@ -63,7 +63,6 @@ class SubjectsDao extends BaseDao {
         return $subjects;
     }
 
-
     /**
      * Summary of getSubjectById
      * @param string $subject_id
@@ -83,7 +82,6 @@ class SubjectsDao extends BaseDao {
 
         return $data ? new Subject($data) : null;
     }
-
 
     /**
      * Summary of createSubject
