@@ -2,7 +2,6 @@
 // app/(locale)/(private)/home/page.tsx
 import { cookies } from "next/headers"
 
-import EventCalendarTest from "../components/EventCalendarTest"
 
 import { DashboardBanner } from "./components/DashboardBanner"
 import HomeClient from "./components/HomeClient"
@@ -84,7 +83,7 @@ export default async function HomePage() {
       <DashboardBanner date={new Date()} name={firstName} />
       <HomeClient user={user} />
       <hr />
-      <EventCalendarTest />
+      {/* <EventCalendarTest /> */}
     </>
   )
 }

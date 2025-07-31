@@ -5,12 +5,12 @@ import React from "react"
 import { Avatar } from "@heroui/avatar"
 import { Spinner } from "@heroui/spinner"
 
-import { useProfileForm } from "../hooks/useProfileForm"
-import { useProfileAnimations } from "../hooks/useProfileAnimations"
 
 import { InputField } from "@/app/(locale)/(public)/_components/InputField"
 import { PasswordInput } from "@/app/(locale)/(public)/_components/PasswordInput"
 import { PrimaryButton } from "@/app/(locale)/(public)/_components/PrimaryButton"
+import { useProfileForm } from "@/hooks/useProfileForm"
+import { useProfileAnimations } from "@/hooks/useProfileAnimations"
 import FileInputCustom from "@/components/Inputs/FileInputCustom"
 
 export default function ProfileClient() {

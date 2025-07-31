@@ -5,7 +5,6 @@ import React, { useState, useEffect } from "react"
 import { Card, CardBody } from "@heroui/card"
 import { Form } from "@heroui/form"
 import Link from "next/link"
-import { addToast } from "@heroui/toast"
 
 import { InputField } from "../InputField"
 import { PasswordInput } from "../PasswordInput"
@@ -13,6 +12,7 @@ import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
 import { PrimaryButton } from "../PrimaryButton"
 
 import { VerifyEmailModal } from "./VerifyEmailModal"
+import { addToast } from "@heroui/toast"
 
 export const SignUpForm: React.FC = () => {
 

@@ -3,8 +3,8 @@ import "@/styles/globals.css"
 import { ReactNode } from "react"
 
 import { Providers } from "../../providers"
-
 import { Header } from "./components/Header"
+
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (

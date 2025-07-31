@@ -5,9 +5,10 @@
 import React from "react"
 import { useQueryClient, useMutation } from "@tanstack/react-query"
 import { addToast } from "@heroui/toast"
+import { useUser } from "./useUser"
+import { useProfileStore } from "@/store/profileStore"
 
-import { useUser } from "../../hooks/useUser"
-import { useProfileStore } from "../store/profileStore"
+
 
 // === Tipagens ===
 interface User {

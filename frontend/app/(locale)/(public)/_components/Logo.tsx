@@ -10,7 +10,6 @@ interface LogoProps {
 export const Logo: React.FC<LogoProps> = ({ className = "" }) => {
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      {/* Ícone do livro com chat bubble - baseado no Figma */}
       <div className="relative">
         <Image
           src="/IntellectaLogo.png"

@@ -40,7 +40,7 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "min-h-screen flex flex-col bg-background text-foreground antialiased font-sans",
+          "min-h-screen flex flex-col bg-background text-foreground antialiased font-sans ",
           fontSans.variable
         )}
       >
