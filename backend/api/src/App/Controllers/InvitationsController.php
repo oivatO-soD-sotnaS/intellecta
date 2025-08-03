@@ -40,7 +40,7 @@ readonly class InvitationsController extends BaseController {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
             $token = $request->getAttribute('token');
-            $user = $this->usersDao->getUserBydId($token['sub']);
+            $user = $this->usersDao->getUserById($token['sub']);
 
             if($invitation->getEmail() !== $user->getEmail()) {
                 LogService::http403("/invitation/{$invitation_id}/accept", "User {$user->getEmail()} tried using invitation for {$invitation->getEmail()}");
@@ -102,7 +102,7 @@ readonly class InvitationsController extends BaseController {
 
             $institutionDto = new InstitutionDto($institution, $institutionBanner, $institutionProfilePicture);
 
-            $invitedBy = $this->usersDao->getUserBydId($invitation->getInvitedBy());
+            $invitedBy = $this->usersDao->getUserById($invitation->getInvitedBy());
             if(!empty($invitedBy->getProfilePictureId())) {
                 $invitedByProfilePicture = $this->filesDao->getFileById($invitedBy->getProfilePictureId());
             }
@@ -120,7 +120,7 @@ readonly class InvitationsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response) {
             $token = $request->getAttribute('token');
             $invitations = $this->invitationsDao->getAllUserInvitations($token['email']);
-            
+
             if(count($invitations) === 0){
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -135,7 +135,7 @@ readonly class InvitationsController extends BaseController {
 
                 $institutionDto = new InstitutionDto($institution, $institutionBanner, $institutionProfilePicture);
 
-                $invitedBy = $this->usersDao->getUserBydId($invitation->getInvitedBy());
+                $invitedBy = $this->usersDao->getUserById($invitation->getInvitedBy());
                 if(!empty($invitedBy->getProfilePictureId())) {
                     $invitedByProfilePicture = $this->filesDao->getFileById($invitedBy->getProfilePictureId());
                 }
@@ -143,7 +143,7 @@ readonly class InvitationsController extends BaseController {
 
                 return new InvitationDto($invitation, $institutionDto, $invitedByDto);
             }, $invitations);
-            
+
             $response->getBody()->write(json_encode($invitationDtos));
 
             return $response;

@@ -36,8 +36,8 @@ readonly class UsersController extends BaseController
   public function getUser(Request $request, Response $response, string $user_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->usersDao->getUserBydId($user_id);
-      
+      $user = $this->usersDao->getUserById($user_id);
+
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -47,8 +47,8 @@ readonly class UsersController extends BaseController
         throw new HttpForbiddenException($request, LogService::HTTP_403);
       }
 
-      $profilePicture = !empty($user->getProfilePictureId()) 
-        ? $this->fileDao->getFileById($user->getProfilePictureId()) 
+      $profilePicture = !empty($user->getProfilePictureId())
+        ? $this->fileDao->getFileById($user->getProfilePictureId())
         : null;
 
       $userDto = new UserDto($user, $profilePicture);
@@ -64,7 +64,7 @@ readonly class UsersController extends BaseController
       $fullName = $body['full_name'] ?? null;
       $password = $body['password'] ?? null;
       $profilePictureId = $body['profile_picture_id'] ?? null;
-      
+
       if (empty($fullName) && empty($password) && empty($profilePictureId)) {
         throw new InvalidArgumentException("'full_name', 'password' or 'profile_picture_id' are necessary to update the user");
       }
@@ -73,7 +73,7 @@ readonly class UsersController extends BaseController
       if (!empty($password)) $password = new PasswordVo($password);
       if (!empty($profilePictureId)) $profilePictureId = new UuidV4Vo($profilePictureId);
 
-      $user = $this->usersDao->getUserBydId($user_id);
+      $user = $this->usersDao->getUserById($user_id);
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -101,10 +101,10 @@ readonly class UsersController extends BaseController
         }
         $user->setProfilePictureId($profilePictureId->getValue());
       }
-      
+
       $user = $this->usersDao->updateUser($user);
-      $profilePicture = $user->getProfilePictureId() 
-        ? $this->filesDao->getFileById($user->getProfilePictureId()) 
+      $profilePicture = $user->getProfilePictureId()
+        ? $this->filesDao->getFileById($user->getProfilePictureId())
         : null;
 
       $userDto = new UserDto($user, $profilePicture);
@@ -121,7 +121,7 @@ readonly class UsersController extends BaseController
   public function deleteUser(Request $request, Response $response, string $user_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->usersDao->getUserBydId($user_id);
+      $user = $this->usersDao->getUserById($user_id);
       if (empty($user)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }

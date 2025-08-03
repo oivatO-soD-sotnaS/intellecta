@@ -44,7 +44,7 @@ class RequireSubjectTeacher{
         $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
         
         if($subject->getTeacherId() !== $token['sub']) {
-            throw new HttpForbiddenException($request, "Only the teacher of the subject can access this subject");
+          throw new HttpForbiddenException($request, "Only the teacher of the subject can access this subject");
         }
 
         return $handler->handle($request);

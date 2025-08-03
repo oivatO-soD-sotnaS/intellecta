@@ -14,16 +14,16 @@ readonly class UsersDao extends BaseDao {
    * @param string $id
    * @return User|null
    */
-  public function getUserBydId(string $id): ?User {
+  public function getUserById(string $id): ?User {
     $sql = 'SELECT * FROM users WHERE user_id = :id';
-    
+
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':id', $id, PDO::PARAM_STR);
     $stmt->execute();
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     return $data ?  new User($data) : null;
   }
 
@@ -34,14 +34,14 @@ readonly class UsersDao extends BaseDao {
    */
   public function getUserByEmail(string $email): ?User {
     $sql = 'SELECT * FROM users WHERE email = :email';
-    
+
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
 
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     return $data ? new User($data) : null;
   }
 
@@ -51,7 +51,7 @@ readonly class UsersDao extends BaseDao {
    * @return User|null
    */
   public function createUser(User $user): ?User {
-    $sql = 'INSERT INTO users (user_id, full_name, email, password_hash, profile_picture_id) 
+    $sql = 'INSERT INTO users (user_id, full_name, email, password_hash, profile_picture_id)
             VALUES (:user_id, :full_name, :email, :password_hash, :profile_picture_id)';
 
     $pdo = $this->database->getConnection();
@@ -73,7 +73,7 @@ readonly class UsersDao extends BaseDao {
    * @return User|null
    */
   public function updateUser(User $user): ?User {
-    $sql = 'UPDATE users SET 
+    $sql = 'UPDATE users SET
               full_name = :full_name,
               email = :email,
               password_hash = :password_hash,
@@ -83,7 +83,7 @@ readonly class UsersDao extends BaseDao {
 
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
-    
+
     $stmt->bindValue(':user_id', $user->getUserId(), PDO::PARAM_STR);
     $stmt->bindValue(':full_name', $user->getFullName(), PDO::PARAM_STR);
     $stmt->bindValue(':email', $user->getEmail(), PDO::PARAM_STR);
@@ -105,7 +105,7 @@ readonly class UsersDao extends BaseDao {
 
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
-    
+
     return $stmt->execute([':user_id' => $userId]);
   }
 }

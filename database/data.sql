@@ -79,10 +79,10 @@ INSERT INTO `assignments` (`assignment_id`, `title`, `description`, `deadline`, 
 ('3d7e4c1f-be71-4898-9791-edc3d0a4d9e1', 'Matrix Quiz', 'Solve matrix problems', '2023-02-15', 'df4b74b3-4bff-460e-aa77-14bb84435b33', NULL),
 ('54e4a6aa-9e20-46ee-a827-84691260f1f2', 'Thermo Lab Report', 'Report on heat transfer experiment', '2023-03-01', '8b046b6f-1fa2-462c-84ba-1c7b88450c87', NULL);
 
-INSERT INTO `submissions` (`submission_id`, `submitted_at`, `grade`, `concept`, `feedback`, `assignment_id`, `user_id`, `file_id`) VALUES
-('73cce72b-2c86-44dd-b6d9-c4f8c5aa7f9a', '2023-01-25 10:00:00', 9.5, 'Excellent', 'Great work!', '9d583a3b-6d4c-4f2a-819b-7120130e70ec', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'e27d83a7-4329-43d9-b011-e1289cf2b5f9'),
-('3319c4e0-9271-4d80-9664-c2b0e09d959a', '2023-01-30 11:00:00', 7.0, 'Good', 'Needs more explanation', '3d7e4c1f-be71-4898-9791-edc3d0a4d9e1', '65fe5128-3fbd-424c-86e9-6d8e42ef9286', '9b317eae-e4c4-4de0-a244-2eef9558e2e7'),
-('4422b6cf-eb79-4b02-8a1f-eb7256dba44f', '2023-02-28 12:00:00', NULL, NULL, NULL, '54e4a6aa-9e20-46ee-a827-84691260f1f2', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', NULL);
+INSERT INTO `submissions` (`submission_id`, `submitted_at`, `concept`, `feedback`, `assignment_id`, `user_id`, `attachment_id`) VALUES
+('73cce72b-2c86-44dd-b6d9-c4f8c5aa7f9a', '2023-01-25 10:00:00', 'Excellent', 'Great work!', '9d583a3b-6d4c-4f2a-819b-7120130e70ec', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'e27d83a7-4329-43d9-b011-e1289cf2b5f9'),
+('3319c4e0-9271-4d80-9664-c2b0e09d959a', '2023-01-30 11:00:00', 'Good', 'Needs more explanation', '3d7e4c1f-be71-4898-9791-edc3d0a4d9e1', '65fe5128-3fbd-424c-86e9-6d8e42ef9286', '9b317eae-e4c4-4de0-a244-2eef9558e2e7'),
+('4422b6cf-eb79-4b02-8a1f-eb7256dba44f', '2023-02-28 12:00:00', NULL, NULL, '54e4a6aa-9e20-46ee-a827-84691260f1f2', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', NULL);
 
 INSERT INTO `forum_messages` (`forum_messages_id`, `content`, `created_at`, `changed_at`, `sent_by`, `subject_id`) VALUES
 ('79b77a40-4c33-484a-826c-ac085ef8e12f', 'When is the project due?', '2023-01-10 10:00:00', '2023-01-10 10:00:00', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),

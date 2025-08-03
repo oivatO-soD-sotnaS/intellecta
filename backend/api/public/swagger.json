@@ -3938,6 +3938,474 @@
                 ]
             }
         },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions": {
+            "get": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Get all submissions for an assignment",
+                "description": "Retrieve all submissions for a specific assignment (visible to teachers and the submitting student)",
+                "operationId": "getAssignmentSubmissions",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of submissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SubmissionResponse"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No submissions found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Submit an assignment",
+                "description": "Create a new assignment submission with an attached file",
+                "operationId": "createSubmission",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Submission file",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateSubmissionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Submission created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No file provided"
+                    },
+                    "404": {
+                        "description": "Assignment not found"
+                    },
+                    "500": {
+                        "description": "Failed to create submission"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}": {
+            "get": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Get submission details",
+                "description": "Retrieve details of a specific submission (visible to teachers and the submitting student)",
+                "operationId": "getSubmission",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner or teacher"
+                    },
+                    "404": {
+                        "description": "Submission not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Delete a submission",
+                "description": "Delete a submission (only allowed before assignment deadline)",
+                "operationId": "deleteSubmission",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner or after deadline"
+                    },
+                    "404": {
+                        "description": "Submission not found"
+                    },
+                    "500": {
+                        "description": "Failed to delete submission"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}/attachment": {
+            "patch": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Update submission attachment",
+                "description": "Replace the attachment file for a submission (only before deadline)",
+                "operationId": "updateSubmissionAttachment",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "New attachment ID",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateAttachmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Attachment updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "submission": {
+                                            "$ref": "#/components/schemas/SubmissionResponse"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "403": {
+                        "description": "Forbidden - not owner or after deadline"
+                    },
+                    "404": {
+                        "description": "Submission or file not found"
+                    },
+                    "500": {
+                        "description": "Failed to update attachment"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}/evaluate": {
+            "post": {
+                "tags": [
+                    "Submissions"
+                ],
+                "summary": "Evaluate a submission",
+                "description": "Provide feedback and evaluation for a submission (teacher only)",
+                "operationId": "evaluateSubmission",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "assignment_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "submission_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Evaluation data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EvaluateSubmissionRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Submission evaluated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    },
+                    "403": {
+                        "description": "Forbidden - not teacher"
+                    },
+                    "404": {
+                        "description": "Submission not found"
+                    },
+                    "500": {
+                        "description": "Failed to evaluate submission"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/users/{user_id}": {
             "get": {
                 "tags": [
@@ -5124,6 +5592,94 @@
                 },
                 "type": "object"
             },
+            "SubmissionResponse": {
+                "properties": {
+                    "submission_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "concept": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "attachment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/UserResponse"
+                    },
+                    "attachment": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FileResponse"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CreateSubmissionRequest": {
+                "required": [
+                    "attachment"
+                ],
+                "properties": {
+                    "attachment": {
+                        "description": "Submission file attachment",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateAttachmentRequest": {
+                "required": [
+                    "attachment_id"
+                ],
+                "properties": {
+                    "attachment_id": {
+                        "description": "ID of the new attachment file",
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "type": "object"
+            },
+            "EvaluateSubmissionRequest": {
+                "required": [
+                    "concept",
+                    "feedback"
+                ],
+                "properties": {
+                    "concept": {
+                        "description": "Evaluation concept (e.g., \"approved\", \"rejected\")",
+                        "type": "string"
+                    },
+                    "feedback": {
+                        "description": "Detailed feedback for the submission",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "ErrorResponse": {
                 "properties": {
                     "error": {
@@ -5895,6 +6451,10 @@
         {
             "name": "Subjects",
             "description": "Operations related to subject management"
+        },
+        {
+            "name": "Submissions",
+            "description": "Manage assignment submissions and evaluations"
         },
         {
             "name": "Usuários",
