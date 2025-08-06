@@ -9,12 +9,14 @@
     "lint": "eslint --fix"
   },
   "dependencies": {
+    "@heroui/alert": "^2.2.24",
     "@heroui/avatar": "^2.2.20",
     "@heroui/badge": "^2.2.15",
     "@heroui/button": "2.2.24",
     "@heroui/card": "^2.2.23",
     "@heroui/checkbox": "^2.3.24",
     "@heroui/code": "2.2.18",
+    "@heroui/form": "^2.1.24",
     "@heroui/input": "2.4.25",
     "@heroui/input-otp": "^2.1.24",
     "@heroui/kbd": "2.2.19",
@@ -23,9 +25,12 @@
     "@heroui/modal": "^2.2.21",
     "@heroui/navbar": "2.2.22",
     "@heroui/popover": "^2.3.24",
+    "@heroui/select": "^2.4.25",
     "@heroui/snippet": "2.2.25",
+    "@heroui/spinner": "^2.2.21",
     "@heroui/switch": "2.2.22",
     "@heroui/system": "2.4.20",
+    "@heroui/tabs": "^2.2.21",
     "@heroui/theme": "2.4.20",
     "@heroui/toast": "^2.0.14",
     "@react-aria/ssr": "3.9.10",
@@ -44,6 +49,7 @@
     "react-dom": "18.3.1",
     "react-icons": "^5.5.0",
     "tailwind-merge": "^3.3.1",
+    "zod": "^4.0.14",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
