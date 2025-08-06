@@ -1,15 +1,25 @@
-// app/api/institutions/[institutionId]/summary/route.ts
-import { Params } from "next/dist/server/request/params"
-import { NextResponse } from "next/server"
-import type { NextRequest,  } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-const API = process.env.API_BASE_URL
+const API = process.env.API_URL!
 
-export async function GET(req: NextRequest, { params }: { params: Params }) {
-  const res = await fetch(
-    `${API}/institutions/${params.institutionId}/summary`,
-    { headers: { Authorization: req.headers.get("Authorization")! } }
-  )
-  const body = await res.json()
-  return NextResponse.json(body, { status: res.status })
+interface ParamsPromise {
+  params: Promise<{ institutionId: string }>
+}
+
+export async function GET(req: NextRequest, { params }: ParamsPromise) {
+  const { institutionId } = await params
+
+  const response = await fetch(`${API}/institutions/${institutionId}/summary`, {
+    headers: { Authorization: req.headers.get("Authorization")! },
+  })
+
+  if (!response.ok) {
+    return NextResponse.json(
+      { error: `Erro ao buscar resumo (status ${response.status})` },
+      { status: response.status }
+    )
+  }
+
+  const summary = await response.json()
+  return NextResponse.json(summary)
 }

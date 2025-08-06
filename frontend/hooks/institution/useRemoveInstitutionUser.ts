@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { removeInstitutionUser } from "../../app/(locale)/(private)/institution/[id]/services/institutionUsersService"
+import { removeInstitutionUser } from "../../app/(locale)/(private)/institutions/[id]/services/institutionUsersService"
 
 export function useRemoveInstitutionUser(institutionId: string) {
   const qc = useQueryClient()

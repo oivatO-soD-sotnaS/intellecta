@@ -11,13 +11,8 @@ import type { InstitutionUserDto } from "../schema/institutionUserSchema"
 import { Card, CardBody } from "@heroui/card"
 import { Input } from "@heroui/input"
 import { Button } from "@heroui/button"
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@heroui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 
 interface MembersListProps {
   users: InstitutionUserDto[]
@@ -33,7 +28,6 @@ export default function MembersList({
   const changeRole = useChangeUserRole(institutionId)
   const removeUser = useRemoveInstitutionUser(institutionId)
 
-  // Estado local para o form de convite
   const [emailToInvite, setEmailToInvite] = useState("")
 
   const handleInvite = () => {

@@ -1,7 +1,7 @@
 // app/(locale)/(private)/institution/[id]/components/Nav.tsx
 "use client"
 
-import { Tabs,   } from "@heroui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { InstitutionTab } from "@/store/institutionStore"
 
 interface NavProps {

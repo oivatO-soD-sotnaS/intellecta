@@ -32,10 +32,19 @@ export async function fetchInstitutionSummary(
 export async function fetchInstitutionSubjects(
   institutionId: string
 ): Promise<SubjectDto[]> {
-  const res = await fetch(`${BASE}/${institutionId}/subjects`)
-  if (!res.ok) throw new Error("Erro ao carregar disciplinas")
-  const json = await res.json()
-  return subjectSchema.array().parse(json)
+  const res = await fetch(`/api/institutions/${institutionId}/subjects`)
+  const rawList = await res.json()
+
+  return (rawList as any[]).map((raw) =>
+    subjectSchema.parse({
+      subjectId: raw.subjectId,
+      name: raw.name,
+      teacherName: raw.teacherName,
+      activitiesCount: raw.activitiesCount,
+      materialsCount: raw.materialsCount,
+      progress: raw.progress ?? 0,
+    })
+  )
 }
 
 export async function updateInstitution(

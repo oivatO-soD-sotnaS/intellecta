@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { updateInstitution } from "../../app/(locale)/(private)/institution/[id]/services/institutionService"
-import type { InstitutionDto } from "../../app/(locale)/(private)/institution/[id]/schema/institutionSchema"
-import type { InstitutionUpdateInput } from "../../app/(locale)/(private)/institution/[id]/schema/institutionSchema"
+import { updateInstitution } from "../../app/(locale)/(private)/institutions/[id]/services/institutionService"
+import type { InstitutionDto } from "../../app/(locale)/(private)/institutions/[id]/schema/institutionSchema"
+import type { InstitutionUpdateInput } from "../../app/(locale)/(private)/institutions/[id]/schema/institutionSchema"
 
 export function useUpdateInstitution(institutionId: string) {
   const qc = useQueryClient()

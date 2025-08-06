@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { changeUserRole } from "../../app/(locale)/(private)/institution/[id]/services/institutionUsersService"
-import type { InstitutionUserDto } from "../../app/(locale)/(private)/institution/[id]/schema/institutionUserSchema"
+import { changeUserRole } from "../../app/(locale)/(private)/institutions/[id]/services/institutionUsersService"
+import type { InstitutionUserDto } from "../../app/(locale)/(private)/institutions/[id]/schema/institutionUserSchema"
 
 export function useChangeUserRole(institutionId: string) {
   const qc = useQueryClient()
