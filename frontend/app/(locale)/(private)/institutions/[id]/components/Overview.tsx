@@ -7,11 +7,17 @@ interface OverviewProps {
 }
 
 export default function Overview({ summary }: OverviewProps) {
+
+  console.log("Overview Summary: ", summary);
+  
   const items = [
     { label: "Disciplinas", value: summary.subjectsCount },
     { label: "Usuários", value: summary.usersCount },
     { label: "Eventos", value: summary.eventsCount },
   ]
+
+  console.log("Overview Items: ", items)
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

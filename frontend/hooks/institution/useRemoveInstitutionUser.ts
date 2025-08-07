@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { removeInstitutionUser } from "../../app/(locale)/(private)/institutions/[id]/services/institutionUsersService"
 
-export function useRemoveInstitutionUser(institutionId: string) {
+export function useRemoveInstitutionUser(id: string) {
   const qc = useQueryClient()
   return useMutation<void, Error, string>({
     mutationFn: (institutionUserId) =>
-      removeInstitutionUser(institutionId, institutionUserId),
+      removeInstitutionUser(id, institutionUserId),
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: ["institution", institutionId, "users"],
+        queryKey: ["institution", id, "users"],
       })
     },
   })

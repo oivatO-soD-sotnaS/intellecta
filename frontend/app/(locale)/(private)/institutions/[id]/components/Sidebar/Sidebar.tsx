@@ -12,14 +12,14 @@ import { menuItems } from "../../schema/menuItems"
 
 export default function Sidebar() {
   const params = useParams()
-  const institutionId = Array.isArray(params.id) ? params.id[0] : params.id
-  if (!institutionId) return null
+  const id = Array.isArray(params.id) ? params.id[0] : params.id
+  if (!id) return null
 
   const { collapsed } = useSidebarStore()
 
   const itemsWithId = menuItems.map((item) => ({
     ...item,
-    href: item.href.replace("[id]", institutionId),
+    href: item.href.replace("[id]", id),
   }))
 
   return (

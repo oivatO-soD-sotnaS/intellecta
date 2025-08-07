@@ -16,17 +16,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface MembersListProps {
   users: InstitutionUserDto[]
-  institutionId: string
+  id: string
 }
 
 export default function MembersList({
   users,
-  institutionId,
+  id,
 }: MembersListProps) {
   // Mutations
-  const invite = useInviteUsers(institutionId)
-  const changeRole = useChangeUserRole(institutionId)
-  const removeUser = useRemoveInstitutionUser(institutionId)
+  const invite = useInviteUsers(id)
+  const changeRole = useChangeUserRole(id)
+  const removeUser = useRemoveInstitutionUser(id)
 
   const [emailToInvite, setEmailToInvite] = useState("")
 

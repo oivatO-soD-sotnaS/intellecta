@@ -8,11 +8,11 @@ import { useSidebarStore } from "@/store/sidebarStore"
 
 export default function SidebarHeader() {
   const params = useParams()
-  const institutionId = Array.isArray(params.id) ? params.id[0] : params.id
+  const id = Array.isArray(params.id) ? params.id[0] : params.id
 
-  if (!institutionId) return null
+  if (!id) return null
 
-  const { data, isLoading } = useInstitution(institutionId)
+  const { data, isLoading } = useInstitution(id)
   const { collapsed, toggle } = useSidebarStore()
 
   return (

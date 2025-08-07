@@ -2,7 +2,7 @@
 import { z } from "zod"
 
 export const institutionSchema = z.object({
-  institutionId: z.string().uuid(),
+  id: z.string().uuid(),
   name: z.string(),
   description: z.string().optional(),
   bannerUrl: z.string().url().optional(),
@@ -11,7 +11,7 @@ export const institutionSchema = z.object({
 export type InstitutionDto = z.infer<typeof institutionSchema>
 
 export const institutionSummarySchema = z.object({
-  institutionId: z.string().uuid(),
+  id: z.string().uuid(),
   subjectsCount: z.number(),
   usersCount: z.number(),
   eventsCount: z.number(),

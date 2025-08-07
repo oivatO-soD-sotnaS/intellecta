@@ -1,13 +1,13 @@
 // hooks/institution/useInstitution.ts
 import { useQuery } from "@tanstack/react-query"
-import { fetchInstitution } from "@/app/(locale)/(private)/institutions/[id]/services/institutionService"
 import type { InstitutionDto } from "@/app/(locale)/(private)/institutions/[id]/schema/institutionSchema"
+import { fetchInstitutionById } from "@/app/(locale)/(private)/institutions/[id]/services/institutionService"
 
-export function useInstitution(institutionId: string) {
+export function useInstitution(id: string) {
   return useQuery<InstitutionDto, Error>({
-    queryKey: ["institution", institutionId],
-    queryFn: () => fetchInstitution(institutionId),
+    queryKey: ["institution", id],
+    queryFn: () => fetchInstitutionById(id),
     staleTime: 1000 * 60 * 5,
-    enabled: Boolean(institutionId),
+    enabled: Boolean(id),
   })
 }

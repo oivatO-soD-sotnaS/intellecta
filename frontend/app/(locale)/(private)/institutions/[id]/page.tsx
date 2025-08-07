@@ -1,11 +1,7 @@
 // app/(locale)/(private)/institution/[id]/page.tsx
-import InstitutionClient from "./InstitutionClient"
 
-export default function InstitutionPage({
-  params,
-}: {
-  params: { id: string }
-}) {
-  // Server Component: parâmetros já validados pela rota
-  return <InstitutionClient params={params} />
-}
+import InstitutionPageClient from "./InstitutionClient"
+
+export default async function InstitutionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params 
+  return <InstitutionPageClient id={id} />}

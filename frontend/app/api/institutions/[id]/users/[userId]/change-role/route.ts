@@ -1,14 +1,16 @@
-// app/api/institutions/[institutionId]/users/[userId]/change-role/route.ts
+// app/api/institutions/[id]/users/[userId]/change-role/route.ts
 import { Params } from "next/dist/server/request/params"
 import { NextResponse } from "next/server"
-import type { NextRequest,  } from "next/server"
+import type { NextRequest } from "next/server"
 
-const API = process.env.API_BASE_URL
+const API = process.env.API_BASE_URL!
+
+if (!API) throw new Error("API_BASE_URL não definida")
 
 export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   const { new_role } = await req.json() // { new_role: "teacher" }
   const res = await fetch(
-    `${API}/institutions/${params.institutionId}/users/${params.userId}/change-role`,
+    `${API}/institutions/${params.id}/users/${params.userId}/change-role`,
     {
       method: "PATCH",
       headers: {

@@ -10,7 +10,6 @@ import { useUpdateInstitution } from "@/hooks/institution/useUpdateInstitution"
 import { Form } from "@heroui/form"
 import { Button } from "@heroui/button"
 
-
 interface SettingsProps {
   institution: InstitutionDto
 }
@@ -24,7 +23,7 @@ export default function Settings({ institution }: SettingsProps) {
     },
   })
 
-  const mutation = useUpdateInstitution(institution.institutionId)
+  const mutation = useUpdateInstitution(institution.id)
 
   function onSubmit(values: React.infer<typeof institutionUpdateSchema>) {
     mutation.mutate(values)

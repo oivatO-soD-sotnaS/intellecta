@@ -1,60 +1,49 @@
-// app/(locale)/(private)/institution/[id]/InstitutionClient.tsx
+// app/(locale)/(private)/institutions/[id]/InstitutionClient.tsx
 "use client"
 
 import React from "react"
+
+import Overview from "./components/Overview"
+import MembersList from "./components/MembersList"
 import { useInstitution } from "@/hooks/institution/useInstitution"
 import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
 import { useInstitutionUsers } from "@/hooks/institution/useInstitutionUsers"
-import { useInstitutionUI } from "@/store/institutionStore"
-
-import InstitutionHeader from "./components/Header"
-import Nav from "./components/Nav"
-import Overview from "./components/Overview"
-import CoursesList from "./components/CoursesList"
-import MembersList from "./components/MembersList"
-import Settings from "./components/Settings"
-import { Spinner } from "@heroui/spinner"
 
 interface Props {
-  params: { id: string }
+  id: string
 }
 
-export default function InstitutionClient({ params }: Props) {
-  const { id } = params
+export default function InstitutionClient({ id }: Props) {
+  const { data: inst, isLoading: lo1, isError: err1 } = useInstitution(id)
+  const {
+    data: summary,
+    isLoading: lo2,
+    isError: err2,
+  } = useInstitutionSummary(id)
+  const {
+    data: users = [],
+    isLoading: lo3,
+    isError: err3,
+  } = useInstitutionUsers(id)
 
-  const { data: inst, isLoading: li1, error: e1 } = useInstitution(id)
+  // 1) loading
+  if (lo1 || lo2 || lo3) return <p>Carregando...</p>
 
-  const { data: sum, isLoading: li2, error: e2 } = useInstitutionSummary(id)
+  console.log("Log erros -> ", err1, err2, err3)
+  
+  // 2) erro
+  if ((err1 && !inst) || (err2 && !summary))
+    return <p>Falha ao carregar dados da instituição.</p>
 
-  const { data: users, isLoading: li3, error: e3 } = useInstitutionUsers(id)
-
-  const { activeTab, setActiveTab } = useInstitutionUI()
-
-  const isLoading = li1 || li2 || li3
-  const error = e1 || e2 || e3
-
-  if (isLoading) return <Spinner />
-  if (error) return <div className="p-6 text-red-600">Deu erro!</div>
-
-  if (!sum) return <div className="p-6">Resumo não disponível.</div>
+  if (!summary) return null
 
   return (
-    <div className="space-y-6">
-      {/* Header com dados básicos e resumo */}
-      {/* <InstitutionHeader institution={inst!} summary={sum} /> */}
+    <div className="space-y-8">
+      {/* Overview exige um summary não-undefined */}
+      <Overview summary={summary} />
 
-      {/* Nav de abas */}
-      <Nav activeTab={activeTab} onChange={setActiveTab} />
-
-      {/* Conteúdo por aba */}
-      <div>
-        {activeTab === "overview" && <Overview summary={sum} />}
-        {activeTab === "courses" && <CoursesList  />}
-        {activeTab === "members"   && (
-          <MembersList users={users!} institutionId={id} />
-        )}
-        {activeTab === "settings"  && <Settings institution={inst!} />}
-      </div>
+      {/* MembersList agora recebe também o id */}
+      <MembersList id={id} users={users} />
     </div>
   )
 }

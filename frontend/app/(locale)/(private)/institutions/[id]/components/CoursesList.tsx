@@ -11,12 +11,8 @@ import type { SubjectDto } from "../schema/subjectSchema"
 
 export default function CoursesList() {
   const params = useParams()
-  const institutionId = Array.isArray(params.id) ? params.id[0] : params.id!
-  const {
-    data: subjects,
-    isLoading,
-    error,
-  } = useInstitutionSubjects(institutionId)
+  const id = Array.isArray(params.id) ? params.id[0] : params.id!
+  const { data: subjects, isLoading, error } = useInstitutionSubjects(id)
 
   if (isLoading) return <div>Carregando disciplinas…</div>
   if (error)
@@ -27,7 +23,7 @@ export default function CoursesList() {
       <div className="flex items-center justify-between px-6">
         <h2 className="text-xl font-semibold">Suas Disciplinas</h2>
         <Link
-          href={`/institution/${institutionId}/courses`}
+          href={`/institution/${id}/courses`}
           className="text-sm font-medium text-violet-600 hover:underline"
         >
           Ver todas &rarr;
