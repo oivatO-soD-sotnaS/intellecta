@@ -8,7 +8,7 @@ import { Header } from "./components/Header"
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-br">
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
           {/* Header em full-width */}

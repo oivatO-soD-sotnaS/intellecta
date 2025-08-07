@@ -7,14 +7,14 @@ export default function InstitutionLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar fixa à esquerda */}
-      <aside className="fixed top-0 left-0 h-full w-64">
+    <div className=" w-full h-screen ">
+      {/* Sidebar fixa à esquerda, acima de todo o conteúdo */}
+      {/* <aside className="fixed top-0 left-0 h-full w-64 bg-white z-10">
         <Sidebar />
-      </aside>
+      </aside> */}
 
-      {/* Conteúdo principal com margem para a sidebar */}
-      <main className="flex-1 mx-auto overflow-auto p-6">{children}</main>
+      {/* Área principal full width */}
+      {children}
     </div>
   )
 }

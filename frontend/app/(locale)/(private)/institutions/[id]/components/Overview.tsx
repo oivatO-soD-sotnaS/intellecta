@@ -1,33 +1,67 @@
-// app/(locale)/(private)/institution/[id]/components/Overview.tsx
-import { Card, CardBody } from "@heroui/card"
+// app/(locale)/(private)/institutions/[id]/components/Overview.tsx
+"use client"
+
+import React from "react"
+import { motion } from "framer-motion"
+import {
+  ClipboardList,
+  Calendar as CalendarIcon,
+  MessageCircle,
+} from "lucide-react"
 import type { InstitutionSummaryDto } from "../schema/institutionSchema"
+import { Card, CardBody } from "@heroui/card"
 
 interface OverviewProps {
-  summary: InstitutionSummaryDto
+  summary: InstitutionSummaryDto & {
+    pendingActivities: number
+    upcomingEvents: number
+    unreadMessages: number
+  }
 }
 
 export default function Overview({ summary }: OverviewProps) {
-
-  console.log("Overview Summary: ", summary);
-  
   const items = [
-    { label: "Disciplinas", value: summary.subjectsCount },
-    { label: "Usuários", value: summary.usersCount },
-    { label: "Eventos", value: summary.eventsCount },
+    {
+      label: "Atividades Pendentes",
+      value: summary.pendingActivities,
+      icon: ClipboardList,
+      iconBg: "bg-purple-100 text-purple-600",
+    },
+    {
+      label: "Eventos Próximos",
+      value: summary.upcomingEvents,
+      icon: CalendarIcon,
+      iconBg: "bg-blue-100 text-blue-600",
+    },
+    {
+      label: "Mensagens Não Lidas",
+      value: summary.unreadMessages,
+      icon: MessageCircle,
+      iconBg: "bg-green-100 text-green-600",
+    },
   ]
-
-  console.log("Overview Items: ", items)
-
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {items.map(({ label, value }) => (
-        <Card key={label} className="rounded-2xl">
-          <CardBody className="flex flex-col items-center py-6">
-            <span className="text-3xl font-bold">{value}</span>
-            <span className="mt-1 text-sm text-gray-500">{label}</span>
-          </CardBody>
-        </Card>
+      {items.map(({ label, value, icon: Icon, iconBg }, idx) => (
+        <motion.div
+          key={label}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
+        >
+          <Card className="rounded-lg shadow-sm">
+            <CardBody className="flex items-center gap-4 p-4">
+              <div className={`p-2 rounded-md ${iconBg}`}>
+                <Icon className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold leading-none">{value}</p>
+                <p className="text-sm text-gray-500">{label}</p>
+              </div>
+            </CardBody>
+          </Card>
+        </motion.div>
       ))}
     </div>
   )
