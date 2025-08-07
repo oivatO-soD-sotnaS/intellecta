@@ -2,48 +2,103 @@
 "use client"
 
 import React from "react"
-
-import Overview from "./components/Overview"
-import MembersList from "./components/MembersList"
-import { useInstitution } from "@/hooks/institution/useInstitution"
+import { useParams } from "next/navigation"
 import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
-import { useInstitutionUsers } from "@/hooks/institution/useInstitutionUsers"
+import Overview from "./components/Overview"
+import CoursesList from "./components/CoursesList"
+import { Card, CardBody, CardHeader, } from "@heroui/card"
+import { Separator } from "@radix-ui/react-select"
 
-interface Props {
+
+interface InstitutionClientProps{
   id: string
 }
 
-export default function InstitutionClient({ id }: Props) {
-  const { data: inst, isLoading: lo1, isError: err1 } = useInstitution(id)
+
+export default function InstitutionClient({id}: InstitutionClientProps) {
   const {
     data: summary,
-    isLoading: lo2,
-    isError: err2,
-  } = useInstitutionSummary(id)
-  const {
-    data: users = [],
-    isLoading: lo3,
-    isError: err3,
-  } = useInstitutionUsers(id)
+    isLoading: loadingSummary,
+    isError: errorSummary,
+  } = useInstitutionSummary(id!)
 
-  // 1) loading
-  if (lo1 || lo2 || lo3) return <p>Carregando...</p>
+  if (loadingSummary) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="animate-pulse text-gray-500">Carregando dados...</span>
+      </div>
+    )
+  }
 
-  console.log("Log erros -> ", err1, err2, err3)
-  
-  // 2) erro
-  if ((err1 && !inst) || (err2 && !summary))
-    return <p>Falha ao carregar dados da instituição.</p>
-
-  if (!summary) return null
+  if (errorSummary || !summary) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-red-600">Erro ao carregar a instituição.</span>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">
-      {/* Overview exige um summary não-undefined */}
-      <Overview summary={summary} />
+      {/* Sessão: Visão Geral */}
+      <Card>
+        <CardHeader>
+          <h1>Visão Geral</h1>
+        </CardHeader>
+        <CardBody>
+          <Overview summary={summary} />
+        </CardBody>
+      </Card>
 
-      {/* MembersList agora recebe também o id */}
-      <MembersList id={id} users={users} />
+      {/* Separator opcional */}
+      <Separator />
+
+      {/* Sessão: Disciplinas */}
+      <Card>
+        <CardHeader>
+          <h1>Suas Disciplinas</h1>
+        </CardHeader>
+        <CardBody>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CoursesList />
+          </div>
+        </CardBody>
+      </Card>
+
+      <Separator />
+
+      {/* Sessão: Calendário e Próximos Eventos */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <h1>Calendário</h1>
+          </CardHeader>
+          <CardBody>
+            {/* <Calendar institutionId={id!} /> */}
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h1>Próximos Eventos</h1>
+          </CardHeader>
+          <CardBody>
+            {/* <EventsList institutionId={id!} /> */}
+          </CardBody>
+        </Card>
+      </div>
+
+      <Separator />
+
+      {/* Sessão: Atividades Recentes */}
+      <Card>
+        <CardHeader>
+          <h1>Atividades Recentes</h1>
+        </CardHeader>
+        <CardBody>
+          {/* <RecentActivities institutionId={id!} /> */}
+        </CardBody>
+      </Card>
     </div>
   )
 }

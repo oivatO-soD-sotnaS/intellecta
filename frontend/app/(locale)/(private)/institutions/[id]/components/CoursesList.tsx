@@ -15,7 +15,8 @@ export default function CoursesList() {
   const { data: subjects, isLoading, error } = useInstitutionSubjects(id)
 
   if (isLoading) return <div>Carregando disciplinas…</div>
-  if (error)
+
+    if (error)
     return <div className="text-red-600">Erro ao carregar disciplinas.</div>
 
   return (

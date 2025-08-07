@@ -7,7 +7,6 @@ import { useSidebarStore } from "@/store/sidebarStore"
 import SidebarHeader from "./SidebarHeader"
 import SidebarNavGroup from "./SidebarNavGroup"
 
-// 📌 Import correto:
 import { menuItems } from "../../schema/menuItems"
 
 export default function Sidebar() {
