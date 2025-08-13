@@ -1228,6 +1228,340 @@
                 ]
             }
         },
+        "/institutions/{institution_id}/subjects/{subject_id}/forum/messages": {
+            "get": {
+                "tags": [
+                    "Forum Messages"
+                ],
+                "summary": "Get forum messages for a subject",
+                "description": "Retrieve forum messages for a subject, optionally filtered and paginated.",
+                "operationId": "569161df9e540eba6b0c69d47a6b7af0",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "Institution UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "description": "Subject UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "content",
+                        "in": "query",
+                        "description": "Filter by content substring",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at_from",
+                        "in": "query",
+                        "description": "Filter by creation date (from)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_at_to",
+                        "in": "query",
+                        "description": "Filter by creation date (to)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Number of results per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                10,
+                                15,
+                                20,
+                                25,
+                                30,
+                                35,
+                                40,
+                                45,
+                                50
+                            ]
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of forum messages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginationDto_ForumMessageDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No forum messages found"
+                    },
+                    "400": {
+                        "description": "Invalid parameters"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Forum Messages"
+                ],
+                "summary": "Create a forum message",
+                "description": "Creates a new forum message for a subject.",
+                "operationId": "0ef85c498ef7b5ad55ecab327e3bb8af",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "Institution UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "description": "Subject UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "This is a forum message content"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Forum message created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForumMessageDto"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to create forum message"
+                    }
+                }
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/count": {
+            "get": {
+                "tags": [
+                    "Forum Messages"
+                ],
+                "summary": "Count forum messages for a subject",
+                "description": "Returns the total number of forum messages for a subject, optionally filtered.",
+                "operationId": "3a522eb2a6317540c25b45e7338ad17a",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "Institution UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "description": "Subject UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "content",
+                        "in": "query",
+                        "description": "Filter by content substring",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at_from",
+                        "in": "query",
+                        "description": "Filter by creation date (from)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_at_to",
+                        "in": "query",
+                        "description": "Filter by creation date (to)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Count of forum messages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/{forum_message_id}": {
+            "put": {
+                "tags": [
+                    "Forum Messages"
+                ],
+                "summary": "Update a forum message",
+                "description": "Updates a forum message if it is less than 15 minutes old.",
+                "operationId": "bf64d99a454738b2657515c768424183",
+                "parameters": [
+                    {
+                        "name": "institution_id",
+                        "in": "path",
+                        "description": "Institution UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject_id",
+                        "in": "path",
+                        "description": "Subject UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "forum_message_id",
+                        "in": "path",
+                        "description": "Forum message UUID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "content"
+                                ],
+                                "properties": {
+                                    "content": {
+                                        "type": "string",
+                                        "example": "Updated forum message content"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Forum message updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForumMessageDto"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forum message cannot be updated after 15 minutes"
+                    },
+                    "404": {
+                        "description": "Forum message not found"
+                    },
+                    "500": {
+                        "description": "Failed to update forum message"
+                    }
+                }
+            }
+        },
         "/institutions/{institution_id}/users": {
             "get": {
                 "tags": [
@@ -5906,6 +6240,58 @@
                 ],
                 "example": "image"
             },
+            "ForumMessageDto": {
+                "title": "Forum Message",
+                "description": "Represents a forum message and its author information.",
+                "required": [
+                    "forum_messages_id",
+                    "content",
+                    "created_at",
+                    "changed_at",
+                    "subject_id"
+                ],
+                "properties": {
+                    "forum_messages_id": {
+                        "description": "Unique identifier of the forum message",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+                    },
+                    "content": {
+                        "description": "Content of the forum message",
+                        "type": "string",
+                        "example": "This is the message content"
+                    },
+                    "created_at": {
+                        "description": "Message creation timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-13T14:30:00Z"
+                    },
+                    "changed_at": {
+                        "description": "Last modification timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-13T14:40:00Z"
+                    },
+                    "sent_by": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/UserDto"
+                            }
+                        ],
+                        "nullable": true,
+                        "description": "User who sent the message"
+                    },
+                    "subject_id": {
+                        "description": "Identifier of the subject related to this message",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "2f3f6c1b-7f24-4a9c-9a8d-5b5f92e9c2e3"
+                    }
+                },
+                "type": "object"
+            },
             "InstitutionDto": {
                 "description": "Data Transfer Object for institution information",
                 "properties": {
@@ -6176,6 +6562,49 @@
                 },
                 "type": "object"
             },
+            "PaginationDto_ForumMessageDto": {
+                "title": "Paginated Forum Messages",
+                "description": "Paginated list of forum messages with metadata.",
+                "required": [
+                    "paging",
+                    "records"
+                ],
+                "properties": {
+                    "paging": {
+                        "required": [
+                            "page",
+                            "total_pages",
+                            "total_records"
+                        ],
+                        "properties": {
+                            "page": {
+                                "description": "Current page number",
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "total_pages": {
+                                "description": "Total number of pages",
+                                "type": "integer",
+                                "example": 10
+                            },
+                            "total_records": {
+                                "description": "Total number of available records",
+                                "type": "integer",
+                                "example": 95
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "records": {
+                        "description": "List of forum messages for the current page",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ForumMessageDto"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "UserResponse": {
                 "properties": {
                     "user_id": {
@@ -6419,6 +6848,10 @@
         {
             "name": "Files",
             "description": "File upload and management operations"
+        },
+        {
+            "name": "Forum Messages",
+            "description": "Endpoints for managing forum messages related to a subject."
         },
         {
             "name": "Usuários da Instituição",

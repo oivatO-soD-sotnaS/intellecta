@@ -10,6 +10,7 @@ use App\Controllers\InstitutionsController;
 use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
 use App\Controllers\AssignmentsController;
+use App\Controllers\ForumMessagesController;
 use App\Controllers\SubjectEventsController;
 use App\Controllers\SubjectMaterialsController;
 use App\Controllers\SubjectsController;
@@ -100,7 +101,18 @@ return function (App $app) {
                     $institutionSubjectsWithId->put('', SubjectsController::class . ':updateSubjectById');
                     $institutionSubjectsWithId->delete('', SubjectsController::class . ':deleteSubjectById');
 
-                    // Subject materials
+                    // Subject Forum messages
+                    $institutionSubjectsWithId->group('/forum/messages', function($institutionSubjectsWithIdForum) {
+                        $institutionSubjectsWithIdForum->get('', ForumMessagesController::class . ':getSubjectForumMessages');
+                        $institutionSubjectsWithIdForum->get('/count', ForumMessagesController::class . ':countSubjectForumMessages');
+                        $institutionSubjectsWithIdForum->post('', ForumMessagesController::class . ':createSubjectForumMessage')
+                            ->add(RequireSubjectTeacher::class);
+
+                        $institutionSubjectsWithIdForum->patch('/{forum_message_id:'.UUIDv4_REGEX.'}', ForumMessagesController::class . ':updateForumMessage')
+                            ->add(RequireSubjectTeacher::class);
+                    });
+
+                    // Subject Materials
                     $institutionSubjectsWithId->group('/materials', function($subjectMaterials) {
                         $subjectMaterials->get('', SubjectMaterialsController::class . ':getSubjectMaterials');
                         $subjectMaterials->post('', SubjectMaterialsController::class . ':createSubjectMaterial')
