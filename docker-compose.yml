@@ -21,6 +21,9 @@ services:
     volumes:
       - ./backend/files:/var/www/files.intellecta
       - ./backend/api:/var/www/api.intellecta
+    env_file:
+      - ./database/.env
+      - ./backend/.env
     networks:
       intellecta-network:
         aliases:
@@ -61,11 +64,8 @@ services:
       - ./volumes/mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
       - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql
-    environment:
-      MYSQL_ROOT_PASSWORD: SegredoInsano
-      MYSQL_DATABASE: intellecta
-      MYSQL_USER: www_root
-      MYSQL_PASSWORD: foraelecriadoParahabitaruminstantequefosseNasvizinhascasdoteucoracao
+    env_file:
+      - ./database/.env
     ports:
       - "3306:3306"
     networks:

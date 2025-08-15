@@ -18,15 +18,18 @@ class EmailService {
     $this->mailer->isSMTP();
     $this->mailer->Host       = 'smtp.gmail.com';
     $this->mailer->SMTPAuth   = true;
-    $this->mailer->Username   = 'otavio.santos.lima.tds.2022@gmail.com';
-    $this->mailer->Password   = 'ksmq tpst gdzm bvzo';
+    $this->mailer->Username   = getenv('EMAIL_USERNAME');
+    $this->mailer->Password   = getenv('EMAIL_PASSWORD');
     $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $this->mailer->Port       = 587;
     $this->mailer->CharSet    = 'UTF-8';
     $this->mailer->Encoding   = 'base64';
     
     // Remetente padrão
-    $this->mailer->setFrom('otavio.santos.lima.tds.2022@gmail.com', 'Otavio dos Santos Lima');
+    $this->mailer->setFrom(
+      address: getenv('EMAIL_USERNAME'), 
+      name: getenv('EMAIL_SENDER')
+    );
   }
 
   public function sendMail(string $to, string $toName, string $subject, string $body, string $altBody = ''){
