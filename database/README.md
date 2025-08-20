@@ -1,5 +1,6 @@
 ## Mudanças no esquema da base de dados
 Mudanças no esquema de base de dados requerem que o diretório '/volumes' seja excluído para que as alterações sejam refletidas no banco de dados. Execute o comando abaixo para tal:
+
 ```bash
 sudo rm -rf ./volumes
 ```

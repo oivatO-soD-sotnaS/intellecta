@@ -4,9 +4,7 @@ declare(strict_types= 1);
 
 namespace App\Services;
 
-use App\Database;
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
 class EmailService {
   private PHPMailer $mailer;

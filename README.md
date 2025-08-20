@@ -8,34 +8,11 @@ A Intellecta foi conceituada em um momento de estresse dos desenvolvedores com r
 
 Mais do que uma plataforma de ensino, a Intellecta, ao utilizar das mais recentes tecnologias para desenvolvimento web e em conjunto com um interface e experiência de usuário modernas, traz um ambiente de ensino digital com foco na facilidade de comunicação entre discente e docente.
 
-Dito isso, segue abaixo uma lista de comandos para utilizar da aplicação de forma correta e fácil.
-
 > Este repositório permanecerá recebendo atualizações até o dia 15/12/2025.
 
-## Definindo hosts
-A aplicação do back-end utiliza dois hosts virtuais para separar o servidor de arquivos do servidor da API, files.intellecta.com e api.intellecta.com, respectivamente. Portanto, é necessário instruir ao seu computador como resolver os subdomínios, para isso:
+## Configurando projeto
+Para facilitar a configuração do projeto nós criamos um script em bash que automatiza todas as configurações necessárias. Todos os scripts de configuração se encontram na basta ***conf/***.
+Dessa forma, para configurar o projeto, execute o comando abaixo:
 ```bash
-echo "127.0.0.1  api.intellecta files.intellecta" | sudo tee -a /etc/hosts
+./conf/main.sh
 ```
-## Inicializando a aplicação
-```bash
-sudo docker compose up --build
-```
-## Encerrando a aplicação
-```bash
-sudo docker compose down
-```
-## Para instalar novas dependências no *front-end*
-```bash
-sudo docker exec -it frontend_container npm install <nome-da-dependencia>
-```
-## Para instalar novas dependências no *back-end*
-```bash
-sudo docker exec -it backend_container composer require <pacote>
-```
-## Como acessar a base de dados
-```bash
-mysql -u root -p -P 3306 -h 127.0.0.1
-```
-Conforme definido dentro de *docker-composer.yml*, a senha do usuário root — por padrão — é 'SegredoInsano'.
-Os arquivos de esquema da base de dados e dos dados simulados se encontra dentro do diretório './database'.

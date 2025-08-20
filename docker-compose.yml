@@ -34,6 +34,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile.worker
     container_name: email_worker_container
+    env_file:
+      - ./backend/.env
     depends_on:
       - redis
     networks:
