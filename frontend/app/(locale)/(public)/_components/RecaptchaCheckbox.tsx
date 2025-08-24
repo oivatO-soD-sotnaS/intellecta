@@ -1,59 +1,68 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 // components/ui/RecaptchaCheckbox.tsx
+"use client"
+
 import React from "react"
 import Image from "next/image"
 import { Checkbox } from "@heroui/checkbox"
 
 interface RecaptchaCheckboxProps {
+  /** Nome do campo (opcional, só pra aria) */
+  name?: string
+  /** <<< Preferível para controlar via RHF */
+  checked?: boolean
+  /** compat: caso em algum lugar ainda use isSelected */
   isSelected?: boolean
-  onChange?: (isSelected: boolean) => void
+  /** callback padrão boolean (compatível com RHF field.onChange) */
+  onChange?: (checked: boolean) => void
+
+  /** feedback */
+  errorMessage?: string
+  isInvalid?: boolean
+
   className?: string
 }
 
 export const RecaptchaCheckbox: React.FC<RecaptchaCheckboxProps> = ({
-  isSelected = false,
+  name,
+  checked,
+  isSelected,
   onChange,
+  errorMessage,
+  isInvalid,
   className = "",
 }) => {
+  // HeroUI usa isSelected/onValueChange; vamos mapear
+  const selected = checked ?? isSelected ?? false
+
   return (
-    <div
-      className={`
-        flex items-center justify-between
-        bg-gray-50 dark:bg-gray-800
-        border border-gray-200 dark:border-gray-700
-        rounded-lg shadow-sm
-        p-4
-        w-full
-        ${className}
-      `}
-    >
-      {/* Checkbox + label */}
-      <label className="flex items-center space-x-3">
+    <div className={`w-full ${className}`}>
+      <div className="flex items-center gap-3 rounded-xl border bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
         <Checkbox
-          classNames={{
-            base: "rounded-sm border-gray-300 dark:border-gray-600",
-            label: "text-sm font-medium text-gray-700 dark:text-gray-300",
-          }}
-          isSelected={isSelected}
-          size="md"
+          name={name}
+          isSelected={selected}
           onValueChange={onChange}
+          aria-invalid={isInvalid || undefined}
         >
           Sou humano
         </Checkbox>
-      </label>
 
-      {/* reCAPTCHA text + icon */}
-      <div className="flex items-center space-x-2">
-        <div className="w-10 h-10 relative">
-          <Image
-            fill
-            alt="reCAPTCHA"
-            className="object-contain"
-            sizes="50px"
-            src="/recaptcha.svg"
-          />
+        <div className="ml-auto flex items-center space-x-2">
+          <div className="relative h-10 w-10">
+            <Image
+              fill
+              alt="reCAPTCHA"
+              className="object-contain"
+              sizes="40px"
+              src="/recaptcha.svg"
+            />
+          </div>
         </div>
       </div>
+
+      {isInvalid && errorMessage && (
+        <p className="mt-1 text-xs text-red-600">{errorMessage}</p>
+      )}
     </div>
   )
 }

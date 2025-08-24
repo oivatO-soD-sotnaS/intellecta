@@ -4,32 +4,36 @@ import { Input } from "@heroui/input"
 
 export interface InputFieldProps {
   name?: string
-  label: string
-  placeholder: string
+  label?: string
+  placeholder?: string
   type?: string
   isRequired?: boolean
   value?: string
   onChange?: (value: string) => void
+  onBlur?: (e: any) => void
   errorMessage?: React.ReactNode
   isInvalid?: boolean
   startContent?: React.ReactNode
   endContent?: React.ReactNode
   className?: string
+  variant?: "flat" | "faded" | "bordered" | "underlined" | undefined
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
   name,
   label,
-  placeholder,
+  placeholder = "",
   type = "text",
   isRequired = false,
   value = "",
   onChange = () => {},
+  onBlur,
   errorMessage,
   isInvalid = false,
   startContent,
   endContent,
   className = "",
+  variant,
 }) => {
   // Validação simples para e-mail
   const emailRegex = useMemo(
@@ -37,7 +41,7 @@ export const InputField: React.FC<InputFieldProps> = ({
     []
   )
   const emailInvalid =
-    type === "email" && value !== "" && !emailRegex.test(value)
+    type === "email" && value ? !emailRegex.test(value) : false
 
   return (
     <Input
@@ -45,22 +49,16 @@ export const InputField: React.FC<InputFieldProps> = ({
       classNames={{
         label: "text-base font-medium text-gray-700 dark:text-gray-200 pb-3",
         inputWrapper:
-          "h-16 bg-gray-50 dark:bg-gray-700 " +
-          "border border-gray-300 dark:border-gray-600 " +
-          "rounded-lg px-4 flex items-center " +
-          "focus-within:border-indigo-500 dark:focus-within:border-indigo-400 " +
-          "transition-colors",
+          "h-16 rounded-lg px-4 flex items-center focus-within:border-indigo-500 dark:focus-within:border-indigo-400 transition-colors",
         input:
-          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 " +
-          "bg-transparent focus:outline-none",
+          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 bg-transparent focus:outline-none",
       }}
-      name={name}
       label={label}
       labelPlacement="outside"
+      name={name}
       placeholder={placeholder}
       type={type}
       value={value}
-      onValueChange={onChange}
       isRequired={isRequired}
       isInvalid={isInvalid || emailInvalid}
       errorMessage={
@@ -72,7 +70,9 @@ export const InputField: React.FC<InputFieldProps> = ({
       }
       startContent={startContent}
       endContent={endContent}
-      variant="bordered"
+      variant={variant}
+      onValueChange={onChange}
+      onBlur={onBlur}
     />
   )
 }

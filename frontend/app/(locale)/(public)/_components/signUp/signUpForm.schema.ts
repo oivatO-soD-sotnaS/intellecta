@@ -2,10 +2,6 @@
 import { z } from "zod"
 
 export const signUpFormSchema = z.object({
-  fullName: z
-    .string()
-    .min(5, { message: "O nome deve ter entre 5 e 64 caracteres." })
-    .max(64, { message: "O nome deve ter entre 5 e 64 caracteres." }),
   email: z.string().email({ message: "Digite um e-mail válido." }),
   password: z
     .string()

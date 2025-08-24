@@ -11,21 +11,25 @@ export interface PasswordInputProps {
   isRequired?: boolean
   value?: string
   onChange?: (v: string) => void
+  onBlur?: (e: any) => void
   isInvalid?: boolean
   errorMessage?: React.ReactNode
   className?: string
+  variant?: "flat" | "faded" | "bordered" | "underlined" | undefined
 }
 
 export const PasswordInput: React.FC<PasswordInputProps> = ({
   name,
   label = "Senha",
-  placeholder = "Digite sua senha",
+  placeholder = "",
   isRequired = false,
   value = "",
   onChange = () => {},
+  onBlur,
   isInvalid = false,
   errorMessage,
   className = "",
+  variant,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
 
@@ -35,19 +39,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       classNames={{
         label: "text-base font-medium text-gray-700 dark:text-gray-200 pb-3",
         inputWrapper:
-          "h-16 bg-gray-50 dark:bg-gray-700 " +
-          "border border-gray-300 dark:border-gray-600 " +
-          "rounded-lg px-4 flex items-center " +
-          "focus-within:border-indigo-500 dark:focus-within:border-indigo-400 " +
-          "transition-colors",
+          "h-16 rounded-lg px-4 flex items-center focus-within:border-indigo-500 dark:focus-within:border-indigo-400 transition-colors",
         input:
-          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 " +
-          "bg-transparent focus:outline-none",
+          "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 bg-transparent focus:outline-none",
       }}
       endContent={
         <button
           aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          className="p-2 rounded-ful transition-colors"
           type="button"
           onClick={() => setIsVisible((v) => !v)}
         >
@@ -58,8 +57,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           )}
         </button>
       }
-      errorMessage={errorMessage}
       isInvalid={isInvalid}
+      errorMessage={errorMessage}
       isRequired={isRequired}
       label={label}
       labelPlacement="outside"
@@ -67,8 +66,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       placeholder={placeholder}
       type={isVisible ? "text" : "password"}
       value={value}
-      variant="bordered"
+      variant={variant}
       onValueChange={onChange}
+      onBlur={onBlur}
     />
   )
 }

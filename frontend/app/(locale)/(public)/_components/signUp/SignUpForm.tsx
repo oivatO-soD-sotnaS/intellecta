@@ -1,48 +1,50 @@
-// app/(locale)/(public)/_components/signUp/SignUpForm.tsx
 "use client"
 
-import React from "react"
-import { signUpFormSchema, SignUpFormData } from "./signUpForm.schema"
-import { useSignUp } from "@/hooks/auth/useSignUp"
-import { Card, CardBody } from "@heroui/card"
-import { Form } from "@heroui/form"
+import React, { useEffect, useCallback, useRef } from "react"
 import Link from "next/link"
-import { addToast } from "@heroui/toast"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Card, CardBody } from "@heroui/card"
+import { addToast } from "@heroui/toast"
+
 import { InputField } from "../InputField"
 import { PasswordInput } from "../PasswordInput"
 import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
-import { PrimaryButton } from "../PrimaryButton"
+
+import { signUpFormSchema, type SignUpFormData } from "./signUpForm.schema"
+import { useSignUp } from "@/hooks/auth/useSignUp"
 
 interface SignUpFormProps {
+  fullName: string
   onSuccess: (email: string) => void
+  formId: string
+
+  onFormStateChange?: (s: { isPending: boolean }) => void
+  onValidityChange?: (valid: boolean) => void
+
+  /** entrega ao pai um gatilho ESTÁVEL de submit */
+  exposeStableSubmit?: (fn: () => void) => void
 }
 
-export const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
+export const SignUpForm: React.FC<SignUpFormProps> = ({
+  fullName,
+  onSuccess,
+  formId,
+  onFormStateChange,
+  onValidityChange,
+  exposeStableSubmit,
+}) => {
   const {
-    register,
+    control,
     handleSubmit,
-    formState: { errors, isValid },
-    watch,
-    setValue,
+    formState: { isValid },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
+    defaultValues: { email: "", password: "", isHuman: false },
     mode: "onChange",
-    defaultValues: {
-      fullName: "",
-      email: "",
-      password: "",
-      isHuman: false,
-    },
+    reValidateMode: "onChange",
   })
 
-  const { control } = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpFormSchema),
-    mode: "onChange",
-  })
-
-  const isHuman = watch("isHuman")
   const mutation = useSignUp(
     (email) => {
       addToast({
@@ -52,119 +54,126 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
       })
       onSuccess(email)
     },
-    (msg) => {
-      addToast({ title: "Erro", description: msg, color: "danger" })
-    }
+    (msg) =>
+      addToast({
+        title: "Erro",
+        description: msg,
+        color: "danger",
+      })
   )
 
-  const onSubmit = (data: SignUpFormData) => {
-    mutation.mutate(data)
-  }
+  useEffect(() => {
+    onFormStateChange?.({ isPending: mutation.isPending })
+  }, [mutation.isPending, onFormStateChange])
+
+  useEffect(() => {
+    onValidityChange?.(isValid)
+  }, [isValid, onValidityChange])
+
+  // envia full_name junto no payload (evita 422)
+  const onSubmit = useCallback(
+    ({ email, password, isHuman }: SignUpFormData) => {
+      if (mutation.isPending) return
+
+      const full_name = (fullName ?? "").trim()
+      if (!full_name) {
+        addToast({
+          title: "Nome obrigatório",
+          description: "Volte ao passo 1 e informe seu nome completo.",
+          color: "warning",
+        })
+        return
+      }
+
+      mutation.mutate({ email, password, isHuman, full_name } as any)
+    },
+    [mutation, fullName]
+  )
+
+  // gatilho estável via ref (não muda referência a cada render)
+  const submitRef = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    submitRef.current = handleSubmit(onSubmit)
+  }, [handleSubmit, onSubmit])
+
+  const stableTrigger = React.useCallback(() => {
+    submitRef.current?.()
+  }, [])
+
+  useEffect(() => {
+    exposeStableSubmit?.(stableTrigger)
+  }, [exposeStableSubmit, stableTrigger])
 
   return (
-    <Card className="w-full max-w-md mx-auto rounded-lg shadow-xl">
+    <Card className="w-full max-w-md mx-auto rounded-2xl shadow-xl">
       <CardBody className="bg-white dark:bg-gray-800 p-8 space-y-6">
-        <Form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Nome */}
-          <Controller
-            name="fullName"
-            control={control}
-            defaultValue=""
-            render={({ field, fieldState }) => (
-              <InputField
-                name={field.name}
-                label="Nome completo"
-                placeholder="Digite seu nome completo"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                isInvalid={!!fieldState.error}
-                errorMessage={fieldState.error?.message}
-                isRequired
-              />
-            )}
-          />
-
-          {/* E-mail */}
+        <form
+          id={formId}
+          onSubmit={(e) => {
+            e.preventDefault()
+            stableTrigger()
+          }}
+          className="space-y-5"
+        >
           <Controller
             name="email"
             control={control}
-            defaultValue=""
             render={({ field, fieldState }) => (
               <InputField
                 name={field.name}
-                label="E-mail"
-                placeholder="Digite seu e-mail"
+                label="Digite seu E-mail:"
                 type="email"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                isInvalid={!!fieldState.error}
+                placeholder=""
+                value={field.value}
+                onChange={(v) => field.onChange(v)}
+                onBlur={field.onBlur}
                 errorMessage={fieldState.error?.message}
-                isRequired
+                isInvalid={!!fieldState.error}
               />
             )}
           />
-
-          {/* Senha */}
 
           <Controller
             name="password"
             control={control}
-            defaultValue=""
             render={({ field, fieldState }) => (
               <PasswordInput
                 name={field.name}
-                label="Senha"
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                isInvalid={!!fieldState.error}
+                label="Crie uma senha:"
+                placeholder=""
+                value={field.value}
+                onChange={(v) => field.onChange(v)}
+                onBlur={field.onBlur}
                 errorMessage={fieldState.error?.message}
-                isRequired
+                isInvalid={!!fieldState.error}
               />
             )}
           />
 
-          {/* Recaptcha */}
           <Controller
             name="isHuman"
             control={control}
-            defaultValue={false}
             render={({ field, fieldState }) => (
-              <>
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                  <RecaptchaCheckbox
-                    isSelected={!!field.value}
-                    onChange={field.onChange}
-                  />
-                </div>
-                {fieldState.error && (
-                  <span className="text-xs text-red-600">
-                    {fieldState.error.message}
-                  </span>
-                )}
-              </>
+              <RecaptchaCheckbox
+                name={field.name}
+                checked={field.value}
+                onChange={field.onChange}
+                errorMessage={fieldState.error?.message}
+                isInvalid={!!fieldState.error}
+              />
             )}
           />
-          {errors.isHuman && (
-            <span className="text-xs text-red-600">
-              {errors.isHuman.message}
-            </span>
-          )}
 
-          {/* Botão */}
-          <PrimaryButton
-            type="submit"
-            isLoading={mutation.isPending}
-            isDisabled={!isValid || mutation.isPending}
-          >
-            Cadastrar
-          </PrimaryButton>
-        </Form>
-        <div className="text-xs text-center pt-6 tracking-wide">
-          Já tem conta?{" "}
-          <Link className="text-indigo-600" href="/sign-in">
-            Entrar
-          </Link>
-        </div>
+          <div className="text-xs text-center pt-6 tracking-wide">
+            Já tem conta?{" "}
+            <Link className="text-indigo-600" href="/sign-in">
+              Entrar
+            </Link>
+          </div>
+
+          {/* Enter submit */}
+          <button type="submit" className="hidden" aria-hidden />
+        </form>
       </CardBody>
     </Card>
   )
