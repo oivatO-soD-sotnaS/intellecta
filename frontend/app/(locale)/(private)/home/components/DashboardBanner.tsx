@@ -2,8 +2,8 @@
 "use client"
 
 import React from "react"
-import { Card, CardBody } from "@heroui/card"
 import { ClipboardList, Calendar, Mail } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface StatItem {
   label: string
@@ -35,7 +35,7 @@ export const DashboardBanner: React.FC<DashboardBannerProps> = ({
 
   return (
     <Card className="w-full rounded-2xl overflow-hidden">
-      <CardBody className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white">
+      <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-6 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white">
         {/* Boas-vindas */}
         <div className="flex-1 mb-4 md:mb-0">
           <h2 className="text-2xl font-bold">
@@ -66,7 +66,7 @@ export const DashboardBanner: React.FC<DashboardBannerProps> = ({
             </div>
           ))}
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

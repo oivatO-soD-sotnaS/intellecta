@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { useStepper } from "@/components/Stepper/StepperContext"
+import { Input } from "@heroui/input"
 
 type Step1FormProps = {
   /** Recebe o nome válido para ser usado no Step 2 */
@@ -37,18 +38,25 @@ export default function Step1Form({ onNext }: Step1FormProps) {
     >
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-semibold">Bem-vindo!</h2>
-        <p className="text-neutral-500">
-          Vamos começar com suas informações pessoais
-        </p>
+        <p className="text-neutral-500">Fale-nos o seu nome completo</p>
       </div>
 
-      <label className="block text-sm font-medium">Nome completo *</label>
-      <input
+      <Input
+        classNames={{
+          label: "text-medium font-medium text-gray-700 dark:text-gray-200 pb-3",
+          inputWrapper:
+            "h-16 rounded-lg px-4   focus-within:border-indigo-500 dark:focus-within:border-indigo-400 transition-colors",
+          input:
+            "flex-1 text-base placeholder-gray-400 dark:placeholder-gray-500 bg-transparent focus:outline-none",
+        }}
+        label="Nome completo "
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Digite seu nome completo"
-        className="w-full rounded-md border border-neutral-300 px-3 py-2"
+        variant="underlined"
+        className="w-full rounded-md p-6 h-auto font-semibold"
         autoComplete="name"
+        errorMessage={isValid && "O nome deve ter entre 5 e 64 caracteres."}
+        isRequired
       />
       {/* opcional: pequena ajuda de validação */}
       {!isValid && name.length > 0 && (

@@ -10,7 +10,7 @@ import { InputField } from "../InputField"
 import { PasswordInput } from "../PasswordInput"
 import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
 import { PrimaryButton } from "../PrimaryButton"
-import { Card, CardBody } from "@heroui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export const SignInForm: React.FC = () => {
   const router = useRouter()
@@ -106,7 +106,7 @@ export const SignInForm: React.FC = () => {
 
   return (
     <Card className="w-full max-w-md mx-auto rounded-lg shadow-xl">
-      <CardBody className="bg-white dark:bg-gray-800 p-8 space-y-6">
+      <CardContent className="bg-white dark:bg-gray-800 p-8 space-y-6">
         <Form className="space-y-5" onSubmit={handleSubmit}>
           {errors.api && (
             <div className="text-sm text-red-600">{errors.api}</div>
@@ -166,7 +166,7 @@ export const SignInForm: React.FC = () => {
             Inscreva-se
           </Link>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

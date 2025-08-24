@@ -9,7 +9,7 @@ import {
   MessageCircle,
 } from "lucide-react"
 import type { InstitutionSummaryDto } from "../schema/institutionSchema"
-import { Card, CardBody } from "@heroui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface OverviewProps {
   summary: InstitutionSummaryDto & {
@@ -51,7 +51,7 @@ export default function Overview({ summary }: OverviewProps) {
           transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
         >
           <Card className="rounded-lg shadow-sm">
-            <CardBody className="flex items-center gap-4 p-4">
+            <CardContent className="flex items-center gap-4 p-4">
               <div className={`p-2 rounded-md ${iconBg}`}>
                 <Icon className="w-6 h-6" />
               </div>
@@ -59,7 +59,7 @@ export default function Overview({ summary }: OverviewProps) {
                 <p className="text-2xl font-semibold leading-none">{value}</p>
                 <p className="text-sm text-gray-500">{label}</p>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </motion.div>
       ))}

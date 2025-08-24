@@ -4,9 +4,9 @@
 
 import React from "react"
 import Link from "next/link"
-import { Card, CardBody } from "@heroui/card"
 import { Button } from "@heroui/button"
 import { User } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface ProfileCardProps {
   name: string
@@ -25,7 +25,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
 }) => {
   return (
     <Card className="rounded-2xl shadow-lg w-full">
-      <CardBody className="p-6 space-y-6">
+      <CardContent className="p-6 space-y-6">
         {/* Cabeçalho */}
         <div className="flex items-center space-x-4">
           {avatarUrl ? (
@@ -73,7 +73,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             Editar Perfil
           </Button>
         </Link>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

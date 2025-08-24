@@ -1,33 +1,13 @@
-/* eslint-disable unused-imports/no-unused-imports */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import "@/styles/globals.css"
-import { Metadata, Viewport } from "next"
-import { Link } from "@heroui/link"
-import clsx from "clsx"
-
+// app/layout.tsx
+import type { Metadata } from "next"
+import "./../styles/globals.css"
 import { Providers } from "./providers"
-
-import { siteConfig } from "@/config/site"
-import { fontMono, fontSans } from "@/config/fonts"
-import { Navbar } from "@/components/navbar"
+import { fontSans, fontMono } from "@/config/fonts"
 import { ThemeSwitch } from "@/components/theme-switch"
 
 export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  icons: {
-    icon: "/favicon.ico",
-  },
-}
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+  title: "Intellecta",
+  description: "Sua plataforma educacional integrada",
 }
 
 export default function RootLayout({
@@ -36,15 +16,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html suppressHydrationWarning lang="en">
-      <head />
-      <body
-        className={clsx(
-          "min-h-screen flex flex-col bg-background text-foreground antialiased font-sans ",
-          fontSans.variable
-        )}
-      >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+      className={`${fontSans.variable} ${fontMono.variable}`} 
+    >
+      <body className="font-sans min-h-[100svh] bg-background text-foreground antialiased">
+        <Providers>
           <ThemeSwitch className="absolute top-4 right-4 z-50" />
           {children}
         </Providers>

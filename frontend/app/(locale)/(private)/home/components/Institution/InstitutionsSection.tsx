@@ -2,12 +2,12 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Card, CardBody } from "@heroui/card"
 import { addToast } from "@heroui/toast"
 
 import { Institution, InstitutionCard } from "./InstitutionCard"
 import { CreateInstitutionButton } from "./CreateInstitutionButton"
 import { InstitutionModal } from "./InstitutionModal"
+import { Card, CardContent } from "@/components/ui/card"
 
 export interface NewInstitutionData {
   name: string
@@ -88,7 +88,7 @@ export const InstitutionsSection: React.FC = () => {
 
   return (
     <Card className="w-full">
-      <CardBody>
+      <CardContent>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Minhas Instituições</h2>
           <CreateInstitutionButton onClick={() => setModalOpen(true)} />
@@ -111,7 +111,7 @@ export const InstitutionsSection: React.FC = () => {
           onCreate={handleCreate}
           onOpenChange={setModalOpen}
         />
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

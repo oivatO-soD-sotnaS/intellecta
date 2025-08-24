@@ -4,10 +4,10 @@
 import React from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Card, CardBody } from "@heroui/card"
 import { ClipboardList, FileText } from "lucide-react"
 import { useInstitutionSubjects } from "@/hooks/institution/useInstitutionSubjects"
 import type { SubjectDto } from "../schema/subjectSchema"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function CoursesList() {
   const params = useParams()
@@ -38,7 +38,7 @@ export default function CoursesList() {
             className="overflow-hidden rounded-2xl shadow-sm"
           >
             <div className="h-24 bg-gradient-to-br from-indigo-500 to-purple-500" />
-            <CardBody className="pt-5 pb-6 px-5">
+            <CardContent className="pt-5 pb-6 px-5">
               <h3 className="text-lg font-semibold">{disc.name}</h3>
               <p className="text-sm text-gray-600 mb-4">{disc.teacherName}</p>
 
@@ -62,7 +62,7 @@ export default function CoursesList() {
               <div className="mt-1 text-right text-xs font-medium text-gray-700">
                 {disc.progress}%
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         ))}
       </div>

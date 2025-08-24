@@ -1,11 +1,14 @@
-import { Fira_Code as FontMono, Inter as FontSans } from "next/font/google";
+// config/fonts.ts
+import { Inter, JetBrains_Mono } from "next/font/google"
 
-export const fontSans = FontSans({
+export const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-});
+  display: "swap",
+})
 
-export const fontMono = FontMono({
+export const fontMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-});
+  display: "swap",
+})

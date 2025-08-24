@@ -4,8 +4,9 @@
 import React from "react"
 
 import { SignInForm } from "../_components/signIn/SignInForm"
-import { LegalLinks } from "../_components/LegalLinks"
-import { Header } from "../_components/Header"
+import Header from "../_components/Header"
+import LegalLinks from "../_components/LegalLinks"
+
 
 export default function SignInPage() {
   return (
@@ -13,7 +14,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md space-y-6">
         <Header />
         <SignInForm />
-        <LegalLinks className="text-center text-xs text-gray-500 dark:text-gray-400" />
+        <LegalLinks/>
       </div>
     </div>
   )

@@ -4,7 +4,7 @@
 
 import React from "react"
 import Link from "next/link"
-import { Card, CardBody } from "@heroui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface Event {
   id: string
@@ -20,7 +20,7 @@ interface UpcomingEventsProps {
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
   return (
     <Card className="rounded-2xl shadow-lg">
-      <CardBody className="p-6">
+      <CardContent className="p-6">
         <h4 className="text-lg font-semibold mb-4">Próximos Eventos</h4>
         <ul className="space-y-4">
           {events.map((ev) => {
@@ -48,7 +48,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
             Ver todos os eventos →
           </Link>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

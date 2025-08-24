@@ -50,8 +50,6 @@ export default function NameStep({
           className="bg-transparent"
         />
       </div>
-
-
     </div>
   )
 }

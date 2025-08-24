@@ -29,7 +29,6 @@ export default function Step3Form({ email }: { email: string }) {
         onFormStateChange={(s) => setFooterState({ nextLoading: s.isPending })}
         onValidityChange={(valid) => setFooterState({ nextDisabled: !valid })}
         onVerified={() => {
-          // avance mais um passo se houver, ou conclua o fluxo
           nextStep()
           complete()
         }}

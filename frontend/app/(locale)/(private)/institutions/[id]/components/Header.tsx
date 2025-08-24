@@ -1,10 +1,10 @@
 // app/(locale)/(private)/institution/[id]/components/Header.tsx
 import Image from "next/image"
-import { Card, CardBody } from "@heroui/card"
 import type {
   InstitutionDto,
   InstitutionSummaryDto,
 } from "../schema/institutionSchema"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface InstitutionHeaderProps {
   institution: InstitutionDto
@@ -28,7 +28,7 @@ export default function InstitutionHeader({
         </div>
       )}
 
-      <CardBody  className="mt-4 flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <CardContent className="mt-4 flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center">
           {institution.profilePictureUrl && (
             <Image
@@ -69,7 +69,7 @@ export default function InstitutionHeader({
             <span className="block text-sm text-gray-500">Eventos</span>
           </div>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

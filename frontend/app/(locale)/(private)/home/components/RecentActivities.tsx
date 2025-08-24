@@ -3,13 +3,13 @@
 
 import React from "react"
 import Link from "next/link"
-import { Card, CardBody } from "@heroui/card"
 import {
   FileText,
   Calendar as CalendarIcon,
   BookOpen,
   MessageSquare,
 } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 export interface Activity {
   id: string
@@ -35,7 +35,7 @@ export const RecentActivities: React.FC<RecentActivitiesProps> = ({
 }) => {
   return (
     <Card className="rounded-2xl shadow-lg">
-      <CardBody className="p-6">
+      <CardContent className="p-6">
         <h4 className="text-lg font-semibold mb-4">Atividades Recentes</h4>
         <ul className="space-y-4">
           {activities.map((act) => (
@@ -56,7 +56,7 @@ export const RecentActivities: React.FC<RecentActivitiesProps> = ({
             Ver todas as atividades →
           </Link>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

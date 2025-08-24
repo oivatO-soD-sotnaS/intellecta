@@ -6,8 +6,8 @@ import { useParams } from "next/navigation"
 import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
 import Overview from "./components/Overview"
 import CoursesList from "./components/CoursesList"
-import { Card, CardBody, CardHeader, } from "@heroui/card"
 import { Separator } from "@radix-ui/react-select"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 
 interface InstitutionClientProps{
@@ -45,9 +45,9 @@ export default function InstitutionClient({id}: InstitutionClientProps) {
         <CardHeader>
           <h1>Visão Geral</h1>
         </CardHeader>
-        <CardBody>
+        <CardContent>
           <Overview summary={summary} />
-        </CardBody>
+        </CardContent>
       </Card>
 
       {/* Separator opcional */}
@@ -58,11 +58,11 @@ export default function InstitutionClient({id}: InstitutionClientProps) {
         <CardHeader>
           <h1>Suas Disciplinas</h1>
         </CardHeader>
-        <CardBody>
+        <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <CoursesList />
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
 
       <Separator />
@@ -73,18 +73,18 @@ export default function InstitutionClient({id}: InstitutionClientProps) {
           <CardHeader>
             <h1>Calendário</h1>
           </CardHeader>
-          <CardBody>
+          <CardContent>
             {/* <Calendar institutionId={id!} /> */}
-          </CardBody>
+          </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <h1>Próximos Eventos</h1>
           </CardHeader>
-          <CardBody>
+          <CardContent>
             {/* <EventsList institutionId={id!} /> */}
-          </CardBody>
+          </CardContent>
         </Card>
       </div>
 
@@ -95,9 +95,9 @@ export default function InstitutionClient({id}: InstitutionClientProps) {
         <CardHeader>
           <h1>Atividades Recentes</h1>
         </CardHeader>
-        <CardBody>
+        <CardContent>
           {/* <RecentActivities institutionId={id!} /> */}
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   )

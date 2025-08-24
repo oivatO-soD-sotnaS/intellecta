@@ -32,12 +32,11 @@ export const RecaptchaCheckbox: React.FC<RecaptchaCheckboxProps> = ({
   isInvalid,
   className = "",
 }) => {
-  // HeroUI usa isSelected/onValueChange; vamos mapear
   const selected = checked ?? isSelected ?? false
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="flex items-center gap-3 rounded-xl border bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex items-center gap-3 rounded-xl  bg-gray-50 px-4 py-3  dark:bg-gray-950">
         <Checkbox
           name={name}
           isSelected={selected}

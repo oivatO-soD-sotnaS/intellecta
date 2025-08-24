@@ -15,7 +15,6 @@ export type FooterState = {
   nextDisabled?: boolean
   nextLoading?: boolean
   backDisabled?: boolean
-  /** ação direta para o botão primário do footer */
   onNext?: () => void
 }
 

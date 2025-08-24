@@ -1,29 +1,23 @@
-// components/ui/LegalLinks.tsx
+"use client"
+
 import React from "react"
 import Link from "next/link"
 
-interface LegalLinksProps {
-  className?: string
-}
-
-export const LegalLinks: React.FC<LegalLinksProps> = ({ className = "" }) => {
+export default function LegalLinks() {
   return (
-    <div className={`text-center text-xs text-gray-500 ${className}`}>
-      <span>Ao se inscrever, você concorda com nossos </span>
-      <Link
-        className="text-blue-600 hover:text-blue-800 underline transition-colors"
-        href="/terms"
-      >
-        Termos de Uso
-      </Link>
-      <span> e </span>
-      <Link
-        className="text-blue-600 hover:text-blue-800 underline transition-colors"
-        href="/privacy"
-      >
-        Política de Privacidade
-      </Link>
-      <span>.</span>
+    <div className="w-full text-center text-xs text-muted-foreground">
+      <p className="mb-2">
+        Ao se inscrever, você concorda com nossos{" "}
+        <Link href="/terms" className="underline underline-offset-4">
+          Termos de Uso
+        </Link>{" "}
+        e{" "}
+        <Link href="/privacy" className="underline underline-offset-4">
+          Política de Privacidade
+        </Link>
+        .
+      </p>
+      <p className="opacity-80">© 2025 IFPR by Davyd &amp; Otavio</p>
     </div>
   )
 }

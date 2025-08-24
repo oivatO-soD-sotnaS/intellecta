@@ -3,9 +3,9 @@
 
 import React from "react"
 import Link from "next/link"
-import { Card, CardBody } from "@heroui/card"
 import { Button } from "@heroui/button"
 import { Users, BookOpen } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 export interface Institution {
   id: string
@@ -49,7 +49,7 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({ inst }) => {
 
   return (
     <Card className="shadow-none mb-4">
-      <CardBody className="p-0">
+      <CardContent className="p-0">
         {/* Cabeçalho com gradiente */}
         <div
           className={`
@@ -94,7 +94,7 @@ export const InstitutionCard: React.FC<InstitutionCardProps> = ({ inst }) => {
             </Link>
           </div>
         </div>
-      </CardBody>
+      </CardContent>
     </Card>
   )
 }

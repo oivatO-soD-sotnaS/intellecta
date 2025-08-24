@@ -8,10 +8,10 @@ import { useInviteUsers } from "@/hooks/institution/useInviteUsers"
 import { useChangeUserRole } from "@/hooks/institution/useChangeUserRole"
 import { useRemoveInstitutionUser } from "@/hooks/institution/useRemoveInstitutionUser"
 import type { InstitutionUserDto } from "../schema/institutionUserSchema"
-import { Card, CardBody } from "@heroui/card"
 import { Input } from "@heroui/input"
 import { Button } from "@heroui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent } from "@/components/ui/card"
 
 
 interface MembersListProps {
@@ -41,7 +41,7 @@ export default function MembersList({
     <div className="space-y-6">
       {/* Form de convite */}
       <Card className="p-4">
-        <CardBody className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+        <CardContent className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
           <Input
             placeholder="Digite o e-mail para convidar"
             value={emailToInvite}
@@ -55,7 +55,7 @@ export default function MembersList({
           >
             {invite.isLoading ? "Enviando..." : "Convidar usuário"}
           </Button>
-        </CardBody>
+        </CardContent>
       </Card>
 
       {/* Lista de usuários */}

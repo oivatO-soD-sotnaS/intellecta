@@ -21,6 +21,86 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ user }: HomeClientProps) {
+  // Confetti: dispara uma vez quando vier do fluxo de signup
+  // React.useEffect(() => {
+  //   if (typeof window === "undefined") return
+
+  //   const flag = sessionStorage.getItem("celebrate_signup")
+  //   if (flag !== "1") return
+  //   sessionStorage.removeItem("celebrate_signup")
+
+  //   // Acessibilidade: respeita usuários que preferem menos animação
+  //   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+  //     return
+  //   }
+
+  //   let cancelled = false
+  //   const delayMs = 500 // espera um pouco após carregar a Home
+
+  //   const timer = window.setTimeout(async () => {
+  //     if (cancelled) return
+
+  //     // import dinâmico → não pesa no bundle normal
+  //     const confettiMod = await import("canvas-confetti")
+  //     const confetti = confettiMod.default
+
+  //     const duration = 1800 // ms
+  //     const start = performance.now()
+  //     const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"]
+
+  //     // Responsivo: menos partículas/escala em telas pequenas
+  //     const width = window.innerWidth || 1024
+  //     const scalar = width < 420 ? 0.6 : width < 768 ? 0.75 : 0.9
+  //     const particleCount = width < 420 ? 6 : 10
+
+  //     // Throttle (em vez de cada frame) → mais leve
+  //     const stepEvery = 90 // ms
+  //     let last = performance.now()
+
+  //     const tick = (now: number) => {
+  //       if (cancelled) return
+  //       if (now - start > duration) return
+
+  //       if (now - last >= stepEvery) {
+  //         last = now
+  //         // Esquerda
+  //         confetti({
+  //           particleCount,
+  //           angle: 60,
+  //           spread: 55,
+  //           startVelocity: 50,
+  //           origin: { x: 0, y: 0.5 },
+  //           colors,
+  //           scalar,
+  //           ticks: 120,
+  //           zIndex: 30,
+  //         })
+  //         // Direita
+  //         confetti({
+  //           particleCount,
+  //           angle: 120,
+  //           spread: 55,
+  //           startVelocity: 50,
+  //           origin: { x: 1, y: 0.5 },
+  //           colors,
+  //           scalar,
+  //           ticks: 120,
+  //           zIndex: 30,
+  //         })
+  //       }
+
+  //       requestAnimationFrame(tick)
+  //     }
+
+  //     requestAnimationFrame(tick)
+  //   }, delayMs)
+
+  //   return () => {
+  //     cancelled = true
+  //     clearTimeout(timer)
+  //   }
+  // }, [])
+
   // mocks para atividades e eventos (continua igual)
   const activities: Activity[] = [
     {
@@ -79,7 +159,6 @@ export default function HomeClient({ user }: HomeClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Conteúdo principal */}
         <div className="lg:col-span-2 space-y-8">
-          {/* Removi o prop 'institutions={institutionsData}' */}
           <InstitutionsSection />
         </div>
 

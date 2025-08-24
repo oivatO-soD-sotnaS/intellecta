@@ -2,7 +2,6 @@
 "use client"
 
 import React, { useState } from "react"
-import { Card, CardBody } from "@heroui/card"
 import { Form } from "@heroui/form"
 import { Input, Textarea } from "@heroui/input"
 import { Button } from "@heroui/button"
@@ -14,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface InstitutionModalProps {
   isOpen: boolean
@@ -95,7 +95,7 @@ export const InstitutionModal: React.FC<InstitutionModalProps> = ({
 
             <ModalBody>
               <Card>
-                <CardBody className="p-0">
+                <CardContent className="p-0">
                   <Form
                     className="space-y-4 p-4"
                     onSubmit={(e) => {
@@ -163,7 +163,7 @@ export const InstitutionModal: React.FC<InstitutionModalProps> = ({
                       </Button>
                     </div>
                   </Form>
-                </CardBody>
+                </CardContent>
               </Card>
             </ModalBody>
 
