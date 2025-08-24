@@ -36,15 +36,15 @@ readonly class UserEventsController extends BaseController {
     public function getUserEvents(Request $request, Response $response): Response {
         return $this->handleErrors($request, function() use ($request, $response) {
             $token = $request->getAttribute("token");
-    
-            $user = $this->usersDao->getUserBydId($token["sub"]);
+
+            $user = $this->usersDao->getUserById($token["sub"]);
             if (empty($user)) {
                 LogService::http401("/users/events", "User not found: {$token["sub"]}");
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $userEvents = $this->userEventDao->getAllUserEventsByUserId($user->getUserId());
-            
+
             if(count($userEvents) === 0){
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -70,12 +70,12 @@ readonly class UserEventsController extends BaseController {
             $description = new EventDescriptionVo($body['description']);
             $eventDate = new EventDateVo($body['event_date']);
             $eventType = EventType::tryFrom($body['event_type']);
-    
+
             if($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
 
-            $user = $this->usersDao->getUserBydId($token["sub"]);
+            $user = $this->usersDao->getUserById($token["sub"]);
             if (!$user) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -117,11 +117,11 @@ readonly class UserEventsController extends BaseController {
             $description = new EventDescriptionVo($body['description']);
             $eventDate = new EventDateVo($body['event_date']);
             $eventType = EventType::tryFrom($body['event_type']);
-            
+
             if($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
-                
+
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (
                 empty($userEvent)
@@ -156,7 +156,7 @@ readonly class UserEventsController extends BaseController {
     public function deleteUserEvent(Request $request, Response $response, string $event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $event_id) {
             $token = $request->getAttribute("token");
-            
+
             $userEvent = $this->userEventDao->getUserEventById($event_id);
             if (
                 empty($userEvent)

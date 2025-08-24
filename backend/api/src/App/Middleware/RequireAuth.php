@@ -11,7 +11,7 @@ use Exception;
 use PDOException;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Server\RequestHandlerInterface as RequestHandler; 
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Exception\HttpException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpUnauthorizedException;
@@ -25,7 +25,7 @@ class RequireAuth{
   public function __invoke(Request $request, RequestHandler $handler): Response
 {
     $authHeader = $request->getHeaderLine("Authorization");
-    
+
     if (empty($authHeader)) {
       throw new HttpUnauthorizedException($request, 'Authorization header is required');
     }
@@ -33,27 +33,27 @@ class RequireAuth{
     if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
       throw new HttpUnauthorizedException($request, 'Malformed authorization header');
     }
-    
+
     $token = $matches[1];
-    
+
     if (empty($token) || count(explode('.', $token)) !== 3) {
       throw new HttpUnauthorizedException($request, 'Invalid token format');
     }
 
     try {
       $decoded = $this->jwtService->validateToken($token);
-      
+
       if (!$decoded) {
         throw new HttpUnauthorizedException($request, 'Invalid token signature');
       }
 
-      $user = $this->usersDao->getUserBydId($decoded["sub"]);
+      $user = $this->usersDao->getUserById($decoded["sub"]);
       if(empty($user) || !$user->isEmailVerified()){
         throw new HttpUnauthorizedException($request, 'User not found');
       }
-      
+
       $request = $request->withAttribute('token', $decoded);
-        
+
       return $handler->handle($request);
     }catch (PDOException $e) {
       LogService::error('RequireAuth middlware', 'Token validation failed due to a database error: '.$e->getMessage());
@@ -62,7 +62,7 @@ class RequireAuth{
       throw $e;
     }catch (Exception $e) {
       LogService::error('RequireAuth middlware', 'Token validation failed due to a unknown error: '.$e->getMessage());
-      throw new HttpInternalServerErrorException($request, 'Token validation failed due to a unknown error. See logs for more details');          
+      throw new HttpInternalServerErrorException($request, 'Token validation failed due to a unknown error. See logs for more details');
     }
   }
 }

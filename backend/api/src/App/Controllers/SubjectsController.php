@@ -43,13 +43,13 @@ readonly class SubjectsController extends BaseController {
     public function getInstitutionSubjects(Request $request, Response $response, string $institution_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
             $subjects = $this->subjectsDao->getSubjectsByInstitutionId($institution_id);
-    
+
             if(count($subjects) === 0) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $subjectsDtos = array_map(function(Subject $subject) {
-                $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
+                $teacher = $this->usersDao->getUserById($subject->getTeacherId());
                 $teacherProfilePicture = $teacher->getProfilePictureId()
                     ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                     : null;
@@ -62,20 +62,20 @@ readonly class SubjectsController extends BaseController {
                 $banner = $subject->getBannerId()
                     ? $this->filesDao->getFileById($subject->getBannerId())
                     : null;
-                
+
                 return new SubjectDto(
-                    $subject, 
-                    $teacherDto, 
-                    $profilePicture, 
+                    $subject,
+                    $teacherDto,
+                    $profilePicture,
                     $banner
                 );
             }, $subjects);
 
             $response->getBody()->write(json_encode($subjectsDtos));
-    
+
             return $response;
         });
-        
+
     }
 
     public function createSubject(Request $request, Response $response, string $institution_id): Response {
@@ -113,7 +113,7 @@ readonly class SubjectsController extends BaseController {
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins can create subjects for other users");
             }
 
-            $profilePicture = !empty($uploadedFiles['profile-picture']) 
+            $profilePicture = !empty($uploadedFiles['profile-picture'])
                 ? new ProfileAssetVo($uploadedFiles['profile-picture'])
                 : null;
 
@@ -125,7 +125,7 @@ readonly class SubjectsController extends BaseController {
 
             if (!empty($profilePicture)) {
                 $fileUrl = $this->uploadService->upload(
-                    $profilePicture->getExtension(), 
+                    $profilePicture->getExtension(),
                     $profilePicture->getContent()
                 );
 
@@ -142,7 +142,7 @@ readonly class SubjectsController extends BaseController {
 
             if (!empty($banner)) {
                 $fileUrl = $this->uploadService->upload(
-                    $banner->getExtension(), 
+                    $banner->getExtension(),
                     $banner->getContent()
                 );
 
@@ -185,7 +185,7 @@ readonly class SubjectsController extends BaseController {
                 "teacher_id" => $teacher ? $teacher->getUserId() : $token["sub"],
             ]));
 
-            $teacherUser = $this->usersDao->getUserBydId($teacher ? $teacher->getUserId() : $token['sub']);
+            $teacherUser = $this->usersDao->getUserById($teacher ? $teacher->getUserId() : $token['sub']);
             $teacherProfilePicture = $teacherUser->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacherUser->getProfilePictureId())
                 : null;
@@ -193,9 +193,9 @@ readonly class SubjectsController extends BaseController {
             $teacherDto = new UserDto($teacherUser, $teacherProfilePicture);
 
             $subjectDto = new SubjectDto(
-                $subject, 
-                $teacherDto, 
-                $profilePictureFile, 
+                $subject,
+                $teacherDto,
+                $profilePictureFile,
                 $bannerFile
             );
 
@@ -213,7 +213,7 @@ readonly class SubjectsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
-            if(empty($subject)) { 
+            if(empty($subject)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -223,17 +223,17 @@ readonly class SubjectsController extends BaseController {
             $subjectBanner = $subject->getBannerId()
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
-            
-            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
+
+            $teacher = $this->usersDao->getUserById($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;
             $teacherDto = new UserDto($teacher, $teacherProfilePicture);
 
             $subjectDto = new SubjectDto(
-                $subject, 
-                $teacherDto, 
-                $subjectProfilePicture, 
+                $subject,
+                $teacherDto,
+                $subjectProfilePicture,
                 $subjectBanner
             );
 
@@ -251,13 +251,13 @@ readonly class SubjectsController extends BaseController {
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
-            if(empty($subject)) { 
+            if(empty($subject)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             if(
                 $membership->getRole() !== InstitutionUserType::Admin->value
-                && $subject->getTeacherId() !== $token['sub']    
+                && $subject->getTeacherId() !== $token['sub']
             ) {
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }
@@ -268,17 +268,17 @@ readonly class SubjectsController extends BaseController {
 
             // Required parameters
             $name = new SubjectNameVo($body["name"]);
-            $description = new SubjectDescriptionVo($body["description"]);            
-            
+            $description = new SubjectDescriptionVo($body["description"]);
+
             // Optional parameters
-            $profilePictureId = !empty($body["profile_picture_id"]) 
+            $profilePictureId = !empty($body["profile_picture_id"])
                 ? new UuidV4Vo($body["profile_picture_id"])
                 : null;
 
             $bannerId = !empty($body["banner_id"])
                 ? new UuidV4Vo($body["banner_id"])
                 : null;
-            
+
             $teacherId = !empty($body["teacher_id"])
                 ? new UuidV4Vo($body["teacher_id"])
                 : null;
@@ -292,7 +292,7 @@ readonly class SubjectsController extends BaseController {
 
             if($profilePictureId !== null) {
                 $profilePicture = $this->filesDao->getFileById($profilePictureId->getValue());
-                
+
                 if (empty($profilePicture)) {
                     throw new HttpNotFoundException($request, LogService::HTTP_404 . "Profile picture not found");
                 }
@@ -302,10 +302,10 @@ readonly class SubjectsController extends BaseController {
 
                 $subject->setProfilePictureId($profilePicture->getFileId());
             }
-            
+
             if($bannerId !== null) {
                 $banner = $this->filesDao->getFileById($bannerId->getValue());
-                
+
                 if (empty($banner)) {
                     throw new HttpNotFoundException($request, LogService::HTTP_404 . "Banner not found");
                 }
@@ -328,7 +328,7 @@ readonly class SubjectsController extends BaseController {
             $subjectBanner = $subject->getBannerId()
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
-            $teacherUser = $this->usersDao->getUserBydId($subject->getTeacherId());
+            $teacherUser = $this->usersDao->getUserById($subject->getTeacherId());
             $teacherUserProfilePictue = $teacherUser->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacherUser->getProfilePictureId())
                 : null;
@@ -347,7 +347,7 @@ readonly class SubjectsController extends BaseController {
             return $response;
         });
     }
-    
+
     public function deleteSubjectById(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
             /** @var InstitutionUser $membership */
@@ -356,13 +356,13 @@ readonly class SubjectsController extends BaseController {
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
-            if(empty($subject)) { 
+            if(empty($subject)) {
                 throw new HttpNotFoundException($request, "Subject with id {$subject_id} not found");
             }
 
             if(
                 $membership->getRole() !== InstitutionUserType::Admin->value
-                && $subject->getTeacherId() !== $token['sub']    
+                && $subject->getTeacherId() !== $token['sub']
             ) {
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }

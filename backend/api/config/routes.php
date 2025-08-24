@@ -9,10 +9,12 @@ use App\Controllers\InstitutionalEventsController;
 use App\Controllers\InstitutionsController;
 use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
-use App\Controllers\SubjectAssignmentsController;
+use App\Controllers\AssignmentsController;
+use App\Controllers\ForumMessagesController;
 use App\Controllers\SubjectEventsController;
 use App\Controllers\SubjectMaterialsController;
 use App\Controllers\SubjectsController;
+use App\Controllers\SubmissionsController;
 use App\Controllers\UsersController;
 use App\Controllers\UserEventsController;
 use App\Middleware\RequireAdmin;
@@ -29,7 +31,7 @@ return function (App $app) {
     $collector->setDefaultInvocationStrategy(new RequestResponseArgs);
 
     define(
-        'UUIDv4_REGEX', 
+        'UUIDv4_REGEX',
         '[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}'
     );
 
@@ -55,7 +57,7 @@ return function (App $app) {
         $users->group('/events', function($userEvents) {
             $userEvents->post('', UserEventsController::class . ':createUserEvent');
             $userEvents->get('', UserEventsController::class . ':getUserEvents');
-            
+
             $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
                 $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
                 $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');
@@ -66,7 +68,7 @@ return function (App $app) {
 
     $app->group('/invitations', function ($group) {
         $group->get('', InvitationsController::class . ':getAllInvitations');
-        
+
         $group->group('/{invitation_id:'.UUIDv4_REGEX.'}', function($invitationWithId) {
             $invitationWithId->get('', InvitationsController::class . ':getInvitation');
             $invitationWithId->post('/accept', InvitationsController::class . ':acceptInvitation');
@@ -99,7 +101,18 @@ return function (App $app) {
                     $institutionSubjectsWithId->put('', SubjectsController::class . ':updateSubjectById');
                     $institutionSubjectsWithId->delete('', SubjectsController::class . ':deleteSubjectById');
 
-                    // Subject materials
+                    // Subject Forum messages
+                    $institutionSubjectsWithId->group('/forum/messages', function($institutionSubjectsWithIdForum) {
+                        $institutionSubjectsWithIdForum->get('', ForumMessagesController::class . ':getSubjectForumMessages');
+                        $institutionSubjectsWithIdForum->get('/count', ForumMessagesController::class . ':countSubjectForumMessages');
+                        $institutionSubjectsWithIdForum->post('', ForumMessagesController::class . ':createSubjectForumMessage')
+                            ->add(RequireSubjectTeacher::class);
+
+                        $institutionSubjectsWithIdForum->patch('/{forum_message_id:'.UUIDv4_REGEX.'}', ForumMessagesController::class . ':updateForumMessage')
+                            ->add(RequireSubjectTeacher::class);
+                    });
+
+                    // Subject Materials
                     $institutionSubjectsWithId->group('/materials', function($subjectMaterials) {
                         $subjectMaterials->get('', SubjectMaterialsController::class . ':getSubjectMaterials');
                         $subjectMaterials->post('', SubjectMaterialsController::class . ':createSubjectMaterial')
@@ -115,16 +128,36 @@ return function (App $app) {
 
                     // Subject Assignments
                     $institutionSubjectsWithId->group('/assignments', function($subjectAssignments) {
-                        $subjectAssignments->get('', SubjectAssignmentsController::class . ':getSubjectAssignments');
-                        $subjectAssignments->post('', SubjectAssignmentsController::class . ':createSubjectAssignment')
+                        $subjectAssignments->get('', AssignmentsController::class . ':getSubjectAssignments');
+                        $subjectAssignments->post('', AssignmentsController::class . ':createSubjectAssignment')
                             ->add(RequireSubjectTeacher::class);
-                        
+
                         $subjectAssignments->group('/{assignment_id:'.UUIDv4_REGEX.'}', function($subjectAssignmentWithId) {
-                            $subjectAssignmentWithId->get('', SubjectAssignmentsController::class . ':getSubjectAssignmentById');
-                            $subjectAssignmentWithId->patch('', SubjectAssignmentsController::class . ':patchSubjectAssignmentById')
+                            $subjectAssignmentWithId->get('', AssignmentsController::class . ':getSubjectAssignmentById');
+                            $subjectAssignmentWithId->patch('', AssignmentsController::class . ':patchSubjectAssignmentById')
                                 ->add(RequireSubjectTeacher::class);
-                            $subjectAssignmentWithId->delete('', SubjectAssignmentsController::class . ':deleteSubjectAssignmentById')
+                            $subjectAssignmentWithId->delete('', AssignmentsController::class . ':deleteSubjectAssignmentById')
                                 ->add(RequireSubjectTeacher::class);
+
+                            // Assignment submissions
+                            $subjectAssignmentWithId->group('/submissions', function ($assignmentSubmissions) {
+                                $assignmentSubmissions->get('', SubmissionsController::class . ':getAssignmentSubmissions')
+                                    ->add(RequireSubjectTeacher::class);
+                                $assignmentSubmissions->post('', SubmissionsController::class . ':createAssignmentSubmission');
+
+                                $assignmentSubmissions->group('/{submission_id:'.UUIDv4_REGEX.'}', function($assignmentSubmissionWithId) {
+                                    $assignmentSubmissionWithId->get('', SubmissionsController::class .':getSubmissionById');
+                                    $assignmentSubmissionWithId->delete('', SubmissionsController::class . ':deleteSubmissionById');
+                                    
+                                    $assignmentSubmissionWithId->group('attachment', function ($assignmentSubmissionWithIdAttachment) {
+                                        $assignmentSubmissionWithIdAttachment->patch('', SubmissionsController::class . ':updateSubmissionAttachment');
+                                    });
+                                    // Avaliar envio de atividade
+                                    $assignmentSubmissionWithId->group('/evaluate', function ($assignmentSubmissionWithIdGrading) {
+                                        $assignmentSubmissionWithIdGrading->post('', SubmissionsController::class . ':evaluateSubmissionById');
+                                    })->add(RequireSubjectTeacher::class);
+                                });
+                            });
                         });
                     });
 
@@ -133,7 +166,7 @@ return function (App $app) {
                         $subjectEvents->get('', SubjectEventsController::class . ':getSubjectEvents');
                         $subjectEvents->post('', SubjectEventsController::class . ':createSubjectEvent')
                             ->add(RequireSubjectTeacher::class);
-                        
+
                         $subjectEvents->group('/{subject_event_id:'.UUIDv4_REGEX.'}', function($subjectEventsWithId) {
                             $subjectEventsWithId->get('', SubjectEventsController::class . ':getSubjectEvent');
                             $subjectEventsWithId->patch('', SubjectEventsController::class . ':updateSubjectEvent')
@@ -144,7 +177,7 @@ return function (App $app) {
                     });
                 })->add(RequireSubjectRelationship::class);
             });
-            
+
             // Institution Users
             $institutionWithId->group('/users', function ($institutionUsers) {
                 $institutionUsers->get('', InstitutionUsersController::class . ':getInstitutionUsers')
@@ -184,7 +217,7 @@ return function (App $app) {
                         ->add(RequireAdmin::class);
                     $classesWithId->delete('', ClassesController::class . ':deleteClass')
                         ->add(RequireAdmin::class);
-                    
+
                     $classesWithId->group('/users', function ($classUsers) {
                         $classUsers->get('', ClassUsersController::class . ':getClassUsers');
                         $classUsers->post('', ClassUsersController::class . ':createClassUsers')
@@ -213,7 +246,7 @@ return function (App $app) {
 
         })->add(RequireInstitutionMembership::class)->add(RequireAuth::class);
 
-    })->add(RequireAuth::class); 
+    })->add(RequireAuth::class);
 
     // Files
     $app->post('/files/upload-profile-assets', FilesController::class . ':uploadProfileAssets')

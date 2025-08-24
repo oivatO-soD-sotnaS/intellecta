@@ -10,16 +10,19 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class JwtService {
-  private static $secretKey = 'guerraEPaz;LiberdadeEEscravidao;IgnoranciaEForca';
-  private static $algorithm = 'HS256';
+  private static string $secretKey;
+  private static string $algorithm;
+  private int $expirationTime;
 
-  private int $expirationTime = 600; // 15 minutos
-
-  public function __construct(private JwtBlacklistDao $dao) {}
+  public function __construct(private JwtBlacklistDao $dao) {
+      self::$secretKey      = getenv('JWT_SECRET_KEY') ?: '';
+      self::$algorithm      = getenv('JWT_ALGORITHM') ?: 'HS256';
+      $this->expirationTime = (int) getenv('JWT_EXPIRATION_TIME') ?: 3600;
+  }
 
   public function generateToken(string $userId, string $email): string {
     $issuedAt = time();
-    $expirationTime = $issuedAt + $this->expirationTime; // 1 hora de validade
+    $expirationTime = $issuedAt + $this->expirationTime;
     
     $payload = [
         'iat' => $issuedAt,

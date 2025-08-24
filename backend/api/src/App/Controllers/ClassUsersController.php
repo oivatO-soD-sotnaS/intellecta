@@ -29,7 +29,7 @@ readonly class ClassUsersController extends BaseController {
         private ValidatorService $validatorService,
         private FilesDao $filesDao,
     ) {}
-        
+
     public function getClassUsers(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $class_id) {
             $classUsers = $this->classUsersDao->getClassUsersByClassId($class_id);
@@ -39,19 +39,19 @@ readonly class ClassUsersController extends BaseController {
             }
 
             $classUsersDtos = array_map(function(ClassUser $classUser) {
-                $user = $this->usersDao->getUserBydId($classUser->getUserId());
-                
+                $user = $this->usersDao->getUserById($classUser->getUserId());
+
                 $profilePicture = $user->getProfilePictureId()
                     ? $this->filesDao->getFileById($user->getProfilePictureId())
                     : null;
-                
+
                 $userDto = new UserDto($user, $profilePicture);
 
                 return new ClassUserDto($classUser, $userDto);
             }, $classUsers);
 
             $response->getBody()->write(json_encode($classUsersDtos));
-            
+
             return $response;
         });
     }
@@ -102,7 +102,7 @@ readonly class ClassUsersController extends BaseController {
             ]));
 
             $userList = implode(",", $added);
-            
+
             LogService::info("/institutions/{$institution_id}/classes/{$class_id}/users", "{$token['email']} added {$userList} to the class {$class_id}");
             return $response;
         });
@@ -111,12 +111,12 @@ readonly class ClassUsersController extends BaseController {
     public function getClassUserById(Request $request, Response $response, string $institution_id, string $class_id, string $class_user_id): Response {
         return $this->handleErrors($request, function() use ($response, $request, $institution_id, $class_id, $class_user_id) {
             $classUser = $this->classUsersDao->getClassUserByClassUserIdAndClassId($class_user_id, $class_id);
-        
+
             if(empty($classUser)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
-            $user = $this->usersDao->getUserBydId($classUser->getUserId());
+            $user = $this->usersDao->getUserById($classUser->getUserId());
             $profilePicture = $user->getProfilePictureId()
                 ? $this->filesDao->getFileById($user->getProfilePictureId())
                 : null;
@@ -135,7 +135,7 @@ readonly class ClassUsersController extends BaseController {
             $token = $request->getAttribute('token');
 
             $classUser = $this->classUsersDao->getClassUserByClassUserIdAndClassId($class_user_id, $class_id);
-        
+
             if(empty($classUser)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }

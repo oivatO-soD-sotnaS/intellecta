@@ -98,7 +98,7 @@ readonly class AssignmentsDao extends BaseDao {
       * @param string $subject_id
       * @return Assignment|null
       */
-     public function getAssignmentByAssignemntIdAndSubjectId(string $assignment_id, string $subject_id): ?Assignment {
+     public function getAssignmentByAssignmentIdAndSubjectId(string $assignment_id, string $subject_id): ?Assignment {
         $sql = "SELECT * FROM assignments
                 WHERE assignment_id = :assignment_id
                 AND subject_id = :subject_id";

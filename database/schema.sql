@@ -41,8 +41,8 @@ CREATE TABLE `institutions` (
   `description` TEXT,
   `profile_picture_id` CHAR(36),
   `banner_id` CHAR(36),
-  `user_id` CHAR(36) NOT NULL, -- ID do usuário que criou a instituição
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
+  `user_id` CHAR(36), -- ID do usuário que criou a instituição
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL,
   FOREIGN KEY (`profile_picture_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`banner_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL
 );
@@ -149,15 +149,15 @@ CREATE TABLE `assignments` (
 CREATE TABLE `submissions` (
   `submission_id` CHAR(36) PRIMARY KEY,
   `submitted_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `grade` DECIMAL,
   `concept` VARCHAR(256),
   `feedback` TEXT,
   `assignment_id` CHAR(36) NOT NULL,
   `user_id` CHAR(36),
-  `file_id` CHAR(36),
-  FOREIGN KEY (`file_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
+  `attachment_id` CHAR(36),
+  UNIQUE KEY unique_submission (assignment_id, user_id),
+  FOREIGN KEY (`attachment_id`) REFERENCES `files`(`file_id`) ON DELETE SET NULL,
   FOREIGN KEY (`assignment_id`) REFERENCES `assignments`(`assignment_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 );
 
 -- Tabela de mensgens do fórum de disciplina
@@ -192,7 +192,7 @@ CREATE TABLE `institutional_events` (
   `institutional_event_id` CHAR(36) PRIMARY KEY,
   `event_id` CHAR(36) NOT NULL,
   `institution_id` CHAR(36) NOT NULL,
-  FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE, 
+  FOREIGN KEY (`event_id`) REFERENCES `events`(`event_id`) ON DELETE CASCADE,
   FOREIGN KEY (`institution_id`) REFERENCES `institutions`(`institution_id`) ON DELETE CASCADE
 );
 
@@ -254,8 +254,8 @@ LEFT JOIN institution_users iu2 ON iu2.institution_id = i.institution_id
 
 -- Left join to institutional_events with upcoming events
 LEFT JOIN institutional_events ie ON ie.institution_id = i.institution_id
-LEFT JOIN events e ON e.event_id = ie.event_id 
-                   AND e.event_date >= CURRENT_TIMESTAMP 
+LEFT JOIN events e ON e.event_id = ie.event_id
+                   AND e.event_date >= CURRENT_TIMESTAMP
                    AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
 
 GROUP BY i.institution_id, i.name, i.email, iu.user_id, iu.role;

@@ -29,15 +29,15 @@ readonly class ClassSubjectsController extends BaseController {
         private ValidatorService $validatorService
     ) {}
 
-    
+
     public function getClassSubjects(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
             $classSubjects = $this->classSubjectsDao->getClassSubjectsByClassId($class_id);
 
             $subjectsDtos = array_map(function(ClassSubject $classSubject) use($institution_id) {
                 $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($classSubject->getSubjectId(), $institution_id);
-                
-                $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
+
+                $teacher = $this->usersDao->getUserById($subject->getTeacherId());
                 $teacherProfilePicture = $teacher->getProfilePictureId()
                     ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                     : null;
@@ -50,11 +50,11 @@ readonly class ClassSubjectsController extends BaseController {
                 $banner = $subject->getBannerId()
                     ? $this->filesDao->getFileById($subject->getBannerId())
                     : null;
-                
+
                 $subjectDto = new SubjectDto(
-                    $subject, 
-                    $teacherDto, 
-                    $profilePicture, 
+                    $subject,
+                    $teacherDto,
+                    $profilePicture,
                     $banner
                 );
 
@@ -70,14 +70,14 @@ readonly class ClassSubjectsController extends BaseController {
     public function addSubjectToClass(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
             $token = $request->getAttribute('token');
-            
+
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ["subject_id"]);
 
             $subjectId = new UuidV4Vo($body["subject_id"]);
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subjectId->getValue(), $institution_id);
-            
+
             if(empty($subject)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -88,7 +88,7 @@ readonly class ClassSubjectsController extends BaseController {
                 "subject_id" => $subject->getSubjectId()
             ]));
 
-            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
+            $teacher = $this->usersDao->getUserById($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;
@@ -101,11 +101,11 @@ readonly class ClassSubjectsController extends BaseController {
             $banner = $subject->getBannerId()
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
-            
+
             $subjectDto = new SubjectDto(
-                $subject, 
-                $teacherDto, 
-                $profilePicture, 
+                $subject,
+                $teacherDto,
+                $profilePicture,
                 $banner
             );
 
@@ -130,8 +130,8 @@ readonly class ClassSubjectsController extends BaseController {
             }
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($classSubject->getSubjectId(), $institution_id);
-                
-            $teacher = $this->usersDao->getUserBydId($subject->getTeacherId());
+
+            $teacher = $this->usersDao->getUserById($subject->getTeacherId());
             $teacherProfilePicture = $teacher->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacher->getProfilePictureId())
                 : null;
@@ -144,16 +144,16 @@ readonly class ClassSubjectsController extends BaseController {
             $banner = $subject->getBannerId()
                 ? $this->filesDao->getFileById($subject->getBannerId())
                 : null;
-            
+
             $subjectDto = new SubjectDto(
-                $subject, 
-                $teacherDto, 
-                $profilePicture, 
+                $subject,
+                $teacherDto,
+                $profilePicture,
                 $banner
             );
 
             $classSubjectDto =  new ClassSubjectDto($classSubject, $subjectDto);
-                        
+
             $response->getBody()->write(json_encode($classSubjectDto));
             return $response;
         });
@@ -168,7 +168,7 @@ readonly class ClassSubjectsController extends BaseController {
             if(empty($classSubject)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
-            
+
             $success = $this->classSubjectsDao->deleteClassSubjectById($classSubject->getClassSubjectsId());
 
             if(!$success) {

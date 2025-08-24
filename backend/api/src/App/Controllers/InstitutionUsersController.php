@@ -47,11 +47,11 @@ readonly class InstitutionUsersController extends BaseController
       $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
 
       if(count($institutionUsers) === 0) {
-        throw new HttpNotFoundException($request, LogService::HTTP_404);        
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
       $institutionUsersDto = array_map(function(InstitutionUser $institutionUser) {
-        $user = $this->usersDao->getUserBydId($institutionUser->getUserId());
+        $user = $this->usersDao->getUserById($institutionUser->getUserId());
         $profilePicture = !empty($user->getProfilePictureId())
           ? $this->filesDao->getFileById($user->getProfilePictureId())
           : null;
@@ -112,7 +112,7 @@ readonly class InstitutionUsersController extends BaseController
       $invitesCount = count($invitations);
       LogService::info("/institutions/{$institution_id}/users/invite", "{$token['sub']} invited {$invitesCount} users to {$institution->getName()}");
       $response->getBody()->write(json_encode(array_filter($invitations)));
-      
+
       return $response;
     });
   }
@@ -120,10 +120,10 @@ readonly class InstitutionUsersController extends BaseController
   public function changeUserRole(Request $request, Response $response, string $institution_id, string $institution_user_id): Response {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
       $token = $request->getAttribute("token");
-      
+
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['new_role']);
-      
+
       $newRole = InstitutionUserType::tryFrom($body['new_role']);
       if(empty($newRole)) {
         throw new InvalidArgumentException("Only 'admin', 'teacher' and 'student' are allowed as roles");
@@ -137,13 +137,13 @@ readonly class InstitutionUsersController extends BaseController
         throw new HttpForbiddenException($request, LogService::HTTP_403);
       }
 
-      $institutionUser->setRole($newRole);      
+      $institutionUser->setRole($newRole);
       $institutionUser = $this->institutionUsersDao->updateInstitutionUserRole($institutionUser);
       if(empty($institutionUser)) {
         throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }
 
-      $user = $this->usersDao->getUserBydId($institutionUser->getUserId());
+      $user = $this->usersDao->getUserById($institutionUser->getUserId());
       $profilePicture = !empty($user->getProfilePictureId())
         ? $this->filesDao->getFileById($user->getProfilePictureId())
         : null;
@@ -156,7 +156,7 @@ readonly class InstitutionUsersController extends BaseController
       return $response;
     });
   }
-  
+
   public function removeUser(Request $request, Response $response, string $institution_id, string $institution_user_id): Response {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
       /** @var InstitutionUser $membership */
@@ -164,7 +164,7 @@ readonly class InstitutionUsersController extends BaseController
       $token = $request->getAttribute('token');
 
       $institutionUser = $this->institutionUsersDao->getInstitutionUserById($institution_user_id);
-      
+
       if(
         empty($institutionUser)
         || $institutionUser->getInstitutionId() !== $institution_id

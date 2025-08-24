@@ -40,4 +40,28 @@ class ForumMessage implements \JsonSerializable {
     public function getChangedAt(): string { return $this->changed_at; }
     public function getSentBy(): ?string { return $this->sent_by; }
     public function getSubjectId(): string { return $this->subject_id; }
+
+    public function setForumMessagesId(string $forum_messages_id): void {
+        $this->forum_messages_id = $forum_messages_id;
+    }
+
+    public function setContent(string $content): void {
+        $this->content = $content;
+    }
+
+    public function setCreatedAt(string $created_at): void {
+        $this->created_at = $created_at;
+    }
+
+    public function setChangedAt(string $changed_at): void {
+        $this->changed_at = $changed_at;
+    }
+
+    public function setSentBy(?string $sent_by): void {
+        $this->sent_by = $sent_by;
+    }
+
+    public function setSubjectId(string $subject_id): void {
+        $this->subject_id = $subject_id;
+    }
 }
