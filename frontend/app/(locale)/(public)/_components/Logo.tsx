@@ -14,8 +14,8 @@ export const Logo: React.FC<LogoProps> = ({ className = "" }) => {
         <Image
           src="/IntellectaLogo.png"
           alt="Intellecta Logo"
-          width={190}
-          height={190}
+          width={200}
+          height={200}
         />
       </div>
     </div>

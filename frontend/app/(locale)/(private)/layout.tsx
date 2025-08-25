@@ -8,18 +8,11 @@ import { Header } from "./components/Header"
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-br">
-      <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
-        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          {/* Header em full-width */}
-          <Header className="w-full" />
-
-          {/* Conteúdo central, agora restrito a container */}
-          <main className="container mx-auto max-w-7xl flex-1 px-6 py-8 font-sans">
-            {children}
-          </main>
-        </Providers>
-      </body>
-    </html>
+    <div className="min-h-[100svh] flex flex-col bg-background text-foreground">
+      <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+        <Header className="w-full" />
+        <main className="flex-1 border-none">{children}</main>
+      </Providers>
+    </div>
   )
 }

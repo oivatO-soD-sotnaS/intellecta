@@ -105,8 +105,8 @@ export const SignInForm: React.FC = () => {
   const hasPwErr = tried && !!errors.password?.length
 
   return (
-    <Card className="w-full max-w-md mx-auto rounded-lg shadow-xl">
-      <CardContent className="bg-white dark:bg-gray-800 p-8 space-y-6">
+    <Card className="w-full max-w-md mx-auto rounded-lg shadow-xl border-none">
+      <CardContent className=" 00 p-8 space-y-6">
         <Form className="space-y-5" onSubmit={handleSubmit}>
           {errors.api && (
             <div className="text-sm text-red-600">{errors.api}</div>
@@ -119,9 +119,9 @@ export const SignInForm: React.FC = () => {
               isInvalid={!!errors.email}
               label="Email"
               name="email"
-              placeholder="Digite seu email"
               type="email"
               value={email}
+              variant="bordered"
               onChange={setEmail}
             />
             <PasswordInput
@@ -139,10 +139,11 @@ export const SignInForm: React.FC = () => {
               name="password"
               value={password}
               onChange={setPassword}
+              variant="bordered"
             />
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm w-full">
+          <div className="p-4 rounded-lg w-full">
             <RecaptchaCheckbox isSelected={isHuman} onChange={setIsHuman} />
           </div>
           {errors.terms && (
@@ -155,14 +156,15 @@ export const SignInForm: React.FC = () => {
             }
             isLoading={isLoading}
             type="submit"
+            className="bg-primary"
           >
             Entrar
           </PrimaryButton>
         </Form>
 
-        <div className="text-xs text-center pt-6 tracking-wide">
+        <div className=" text-center pt-6 tracking-wide text-base">
           Não tem conta ainda?{" "}
-          <Link className="text-indigo-600" href="/sign-up">
+          <Link className="text-primary  font-bold" href="/sign-up">
             Inscreva-se
           </Link>
         </div>
