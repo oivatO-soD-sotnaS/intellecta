@@ -15,7 +15,8 @@ export default function SignInPage() {
   return (
     <main className="relative min-h-svh bg-background overflow-hidden">
       {/* BG animado */}
-      <Boxes className="inset-0" />
+      <Boxes/>
+
 
       {/* overlay p/ melhorar legibilidade sobre o bg */}
       <div

@@ -3,21 +3,21 @@
 import { cookies } from "next/headers"
 
 
-import { DashboardBanner } from "./components/DashboardBanner"
 import HomeClient from "./components/HomeClient"
+import DashboardBanner from "./components/DashboardBanner"
 
-// função simples de decode de JWT (server-side)
 function parseJwt(token: string): { [key: string]: any } {
   const base64Url = token.split(".")[1]
   const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
   const jsonPayload = Buffer.from(base64, "base64").toString("utf8")
 
+
   return JSON.parse(jsonPayload)
 }
 
 export default async function HomePage() {
-  // 1) pega token dos cookies (HttpOnly)
   const token = (await cookies()).get("token")?.value
+  const nowISO = new Date().toISOString(); 
 
   if (!token) {
     return (
@@ -75,12 +75,11 @@ export default async function HomePage() {
     )
   }
 
-  // 4) tudo ok → renderiza o banner e injeta o client
   const firstName = user.full_name.split(" ")[0]
 
   return (
     <>
-      <DashboardBanner date={new Date()} name={firstName} />
+      <DashboardBanner name="Ana" nowISO={nowISO} stats={{ activities: 12, events: 7, messages: 15 }} />
       <HomeClient user={user} />
       <hr />
       {/* <EventCalendarTest /> */}

@@ -1,138 +1,56 @@
-"use client"
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { Input } from "@heroui/input"
-import { Button } from "@heroui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover"
-import { Avatar } from "@heroui/avatar"
-import { Bell, ChevronDown } from "lucide-react"
-import { Badge } from "@heroui/badge"
-import clsx from "clsx"
+import * as React from "react";
+import Link from "next/link";
+import SearchBar from "./SearchBar";
+import UserMenu, { HeaderUser } from "./UserMenu";
+import NotificationsBell, { NotificationItem } from "./NotificationsBell";
+import Image from "next/image";
 
-import { ThemeSwitch } from "@/components/theme-switch"
 
-interface HeaderProps extends React.HTMLAttributes<HTMLElement> {}
-
-export const Header: React.FC<HeaderProps> = ({ className, ...htmlProps }) => {
+export default function Header({
+  user,
+  notifications = 0,
+  items = [],
+  onSignOut,
+}: {
+  user: HeaderUser;
+  notifications?: number;
+  items?: NotificationItem[];
+  onSignOut?: () => void;
+}) {
   return (
     <header
-      className={clsx(
-        "sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm w-full",
-        className
-      )}
-      {...htmlProps}
+      className="
+        sticky top-0 z-40 w-full
+        h-20 
+        border-b border-border
+        bg-background/70 backdrop-blur
+        supports-[backdrop-filter]:bg-background/50
+      "
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <Link className="flex items-center space-x-2" href="/home">
-          <span className="text-xl font-semibold text-gray-900 dark:text-white">
+      <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-3 px-3 sm:h-16 sm:gap-4 sm:px-4">
+        <Link
+          href="/home"
+          className="group flex shrink-0 items-center gap-2.5 rounded-lg px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <Image src="/IntellectaLogo.png" alt="Intellecta" width={70} height={70}/>
+          <span className="text-base font-semibold tracking-tight sm:text-lg">
             Intellecta
           </span>
         </Link>
 
         {/* Search */}
-        <div className="flex-1 mx-6 max-w-lg">
-          <Input
-            classNames={{
-              inputWrapper: "rounded-full px-4",
-            }}
-            label=""
-            placeholder="Buscar instituições, atividades..."
-            variant="faded"
-          />
+        <div className="flex-1">
+          <SearchBar placeholder="Buscar instituições, atividades..." />
         </div>
 
-        {/* Actions: notifications + user */}
-        <div className="flex items-center space-x-4">
-          {/* Notificações */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button className="relative p-2" variant="flat">
-                <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                <Badge
-                  className="absolute -top-1 -right-1"
-                  color="danger"
-                  size="sm"
-                >
-                  3
-                </Badge>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <h4 className="font-semibold mb-2">Notificações</h4>
-              <div className="space-y-1 max-h-60 overflow-y-auto">
-                {/* Mapeie aqui sua lista de notificações */}
-                <div className="flex items-start gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                  <Bell className="h-5 w-5 text-indigo-500 mt-1" />
-                  <div>
-                    <p className="text-sm">
-                      <strong>Prova de Física III</strong> - Amanhã às 14:00
-                    </p>
-                    <span className="text-xs text-gray-500">2 horas atrás</span>
-                  </div>
-                </div>
-                {/* ... */}
-              </div>
-              <div className="mt-3 text-right">
-                <Button size="sm" variant="flat">
-                  Marcar todas como lidas
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Menu do Usuário */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button className="flex items-center space-x-2" variant="flat">
-                <Avatar alt="Ana Silva" size="sm" src="#" />
-                <span className="text-sm text-gray-700 dark:text-gray-200">
-                  Ana Silva
-                </span>
-                <ChevronDown className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56">
-              <div className="flex items-center gap-2 mb-3">
-                <Avatar alt="Ana Silva" size="md" src="#" />
-                <div>
-                  <p className="font-medium">Ana Silva</p>
-                  <p className="text-xs text-gray-500">ana.silva@email.com</p>
-                </div>
-              </div>
-              <ul className="space-y-1">
-                <li>
-                  <Button className="w-full justify-start" variant="flat">
-                    Meu Perfil
-                  </Button>
-                </li>
-                <li>
-                  <Button className="w-full justify-start" variant="flat">
-                    Configurações
-                  </Button>
-                </li>
-                <li>
-                  <Button className="w-full justify-start" variant="flat">
-                    Ajuda
-                  </Button>
-                </li>
-                <li>
-                  <Button
-                    className="w-full justify-start text-danger"
-                    variant="flat"
-                  >
-                    Sair
-                  </Button>
-                </li>
-              </ul>
-            </PopoverContent>
-          </Popover>
+        {/* Ações */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <NotificationsBell count={notifications} items={items} />
+          <UserMenu user={user} onSignOut={onSignOut} />
         </div>
       </div>
-
-      {/* ThemeSwitch */}
-      <ThemeSwitch className="absolute top-4 right-4 z-50" />
     </header>
-  )
+  );
 }
