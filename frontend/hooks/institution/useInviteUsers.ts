@@ -1,12 +1,21 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { inviteUsers } from "../../app/(locale)/(private)/institutions/[id]/services/institutionUsersService"
+"use client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPost } from "@/lib/apiClient";
 
-export function useInviteUsers(id: string) {
-  const qc = useQueryClient()
-  return useMutation<void, Error, string[]>({
-    mutationFn: (invites) => inviteUsers(id, invites),
+type InvitePayload = {
+  emails: string[];      
+  role?: string;
+};
+
+type InviteResponse = { invited: number; failed?: string[] } | unknown;
+
+export function useInviteUsers(institutionId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: InvitePayload) =>
+      apiPost<InviteResponse>(`/api/institutions/${institutionId}/invites`, payload),
     onSuccess: () => {
-      // Mantido conforme original
+      qc.invalidateQueries({ queryKey: ["institution", institutionId, "users"] });
     },
-  })
+  });
 }

@@ -1,19 +1,17 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { changeUserRole } from "../../app/(locale)/(private)/institutions/[id]/services/institutionUsersService"
-import type { InstitutionUserDto } from "../../app/(locale)/(private)/institutions/[id]/schema/institutionUserSchema"
+"use client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiPut } from "@/lib/apiClient";
 
-export function useChangeUserRole(id: string) {
-  const qc = useQueryClient()
-  return useMutation<
-    InstitutionUserDto,
-    Error,
-    { userId: string; newRole: "admin" | "teacher" | "student" }
-  >({
-    mutationFn: ({ userId, newRole }) => changeUserRole(id, userId, newRole),
+type Payload = { role: string };
+type Resp = unknown;
+
+export function useChangeUserRole(institutionId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      apiPut<Resp>(`/api/institutions/${institutionId}/users/${userId}/role`, { role }),
     onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: ["institution", id, "users"],
-      })
+      qc.invalidateQueries({ queryKey: ["institution", institutionId, "users"] });
     },
-  })
+  });
 }

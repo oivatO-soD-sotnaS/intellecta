@@ -1,13 +1,15 @@
 // hooks/institution/useInstitution.ts
-import { useQuery } from "@tanstack/react-query"
-import type { InstitutionDto } from "@/app/(locale)/(private)/institutions/[id]/schema/institutionSchema"
-import { fetchInstitutionById } from "@/app/(locale)/(private)/institutions/[id]/services/institutionService"
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/apiClient";
+import { ApiInstitution, Institution } from "@/types/institution";
+import { mapApiInstitution } from "@/types/institution.mappers";
 
-export function useInstitution(id: string) {
-  return useQuery<InstitutionDto, Error>({
+export function useInstitution(id?: string) {
+  return useQuery({
+    enabled: !!id,
     queryKey: ["institution", id],
-    queryFn: () => fetchInstitutionById(id),
-    staleTime: 1000 * 60 * 5,
-    enabled: Boolean(id),
-  })
+    queryFn: async () => mapApiInstitution(await apiGet<ApiInstitution>(`/api/institutions/${id}`)),
+    staleTime: 60_000,
+  });
 }

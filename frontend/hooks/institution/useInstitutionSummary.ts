@@ -1,12 +1,18 @@
 // hooks/institution/useInstitutionSummary.ts
-import { useQuery } from "@tanstack/react-query"
-import { fetchInstitutionSummary } from "../../app/(locale)/(private)/institutions/[id]/services/institutionService"
-import type { InstitutionSummaryDto } from "../../app/(locale)/(private)/institutions/[id]/schema/institutionSchema"
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/apiClient";
+import type { ApiInstitutionSummary, InstitutionSummary } from "@/types/institution";
+import { mapApiInstitutionSummary } from "@/types/institution.mappers";
 
-export function useInstitutionSummary(id: string) {
-  return useQuery<InstitutionSummaryDto, Error>({
+export function useInstitutionSummary(id?: string) {
+  return useQuery({
+    enabled: !!id,
     queryKey: ["institution", id, "summary"],
-    queryFn: () => fetchInstitutionSummary(id),
-    staleTime: 1000 * 60 * 5,
-  })
+    queryFn: async () =>
+      mapApiInstitutionSummary(
+        await apiGet<ApiInstitutionSummary>(`/api/institutions/summaries/${id}`)
+      ),
+    staleTime: 60_000,
+  });
 }

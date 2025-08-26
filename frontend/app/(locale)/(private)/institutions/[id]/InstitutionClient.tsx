@@ -3,7 +3,7 @@
 
 import React from "react"
 import { useParams } from "next/navigation"
-import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
+import { useInstitutionSummary } from "@/hooks/institution/useInstitutionsSummaries"
 import Overview from "./components/Overview"
 import CoursesList from "./components/CoursesList"
 import { Separator } from "@radix-ui/react-select"
