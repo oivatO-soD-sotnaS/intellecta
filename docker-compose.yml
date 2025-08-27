@@ -10,7 +10,8 @@ services:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - intellecta-network
+      - intellecta-public-network
+
   backend:
     build:
       context: ./backend
@@ -25,10 +26,11 @@ services:
       - ./database/.env
       - ./backend/.env
     networks:
-      intellecta-network:
-        aliases:
-          - api.intellecta
-          - files.intellecta
+      intellecta-private-network: {}
+      intellecta-public-network:
+          aliases:
+            - api.intellecta
+            - files.intellecta
   email-worker:
     build:
       context: ./backend
@@ -39,15 +41,14 @@ services:
     depends_on:
       - redis
     networks:
-      - intellecta-network
+      - intellecta-private-network
 
   redis:
     image: redis:latest
     container_name: redis_container
-    ports:
-      - "6379:6379"
     networks:
-      - intellecta-network
+      - intellecta-private-network
+
   swagger:
     image: swaggerapi/swagger-ui
     container_name: swagger_container
@@ -58,7 +59,8 @@ services:
     environment:
       SWAGGER_JSON: /tmp/swagger.json
     networks:
-      - intellecta-network
+      - intellecta-public-network
+
   database:
     image: mysql:9.3.0
     container_name: database_container
@@ -68,13 +70,12 @@ services:
       - ./database/data.sql:/docker-entrypoint-initdb.d/2-data.sql
     env_file:
       - ./database/.env
-    ports:
-      - "3306:3306"
     networks:
-      - intellecta-network
+      - intellecta-private-network
+
 networks:
-  intellecta-network:
+  intellecta-public-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.255.0/24
+  intellecta-private-network:
+    driver: bridge
+    internal: true
