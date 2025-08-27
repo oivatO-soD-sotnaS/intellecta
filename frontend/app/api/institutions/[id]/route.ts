@@ -15,7 +15,6 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  // Envio de multipart/json é tratado no proxy (detecta content-type automaticamente)
   return proxyPut(req, `/institutions/${id}`);
 }
 

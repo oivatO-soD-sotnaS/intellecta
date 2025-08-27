@@ -24,13 +24,18 @@ export async function apiRequest<T>(input: RequestInfo, init?: RequestInit): Pro
     isJson ? (await res.json().catch(() => ({} as JsonLike))) : await res.text().catch(() => "");
 
   const payload = await parse();
-
+  
   if (!res.ok) {
-    const msg =
-      (typeof payload === "object" && payload && (payload.message || payload.error)) ||
-      (typeof payload === "string" ? payload : "") ||
-      `Erro ${res.status}`;
-    throw new Error(msg);
+    const payload = await parse().catch(() => undefined as any);
+    let msg = "";
+    if (typeof payload === "string") msg = payload;
+    else if (payload) {
+      if (typeof payload.message === "string") msg = payload.message;
+      else if (typeof payload.error === "string") msg = payload.error;
+      else if (payload.error && typeof payload.error.message === "string") msg = payload.error.message;
+      else msg = JSON.stringify(payload);
+    }
+    throw new Error(msg || `Erro ${res.status}`);
   }
 
   return payload as T;

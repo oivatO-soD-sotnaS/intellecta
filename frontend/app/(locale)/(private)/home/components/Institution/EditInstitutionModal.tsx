@@ -11,6 +11,7 @@ import { useInstitution } from "@/hooks/institution/useInstitution";
 import { useUpdateInstitution } from "@/hooks/institution/useUpdateInstitution";
 import type { UpdateInstitutionInput } from "@/types/institution";
 import FileUpload, { FileUploadHandle } from "@/components/comp-547";
+import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset";
 
 type Props = {
   institutionId: string;
@@ -21,7 +22,9 @@ type Props = {
 
 export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUpdated }: Props) {
   const { data, isLoading, isError, error } = useInstitution(institutionId, { enabled: isOpen });
-  const { mutateAsync, isPending } = useUpdateInstitution(institutionId);
+  const { mutateAsync: updateAsync, isPending: isUpdating } = useUpdateInstitution(institutionId);
+
+  const { mutateAsync: uploadAsset, isPending: isUploading } = useUploadProfileAsset();
 
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -29,7 +32,9 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
   const profileRef = React.useRef<FileUploadHandle>(null);
   const bannerRef = React.useRef<FileUploadHandle>(null);
 
-  // Inicializa campos quando abre e os dados chegam
+  const initialProfileId = React.useMemo(() => data?.profilePicture?.file_id ?? undefined, [data]);
+  const initialBannerId = React.useMemo(() => data?.banner?.file_id ?? undefined, [data]);
+
   React.useEffect(() => {
     if (isOpen && data) {
       setName(data.name || "");
@@ -81,51 +86,109 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
   );
 
   const handleSave = async () => {
-    if (!name.trim() && !description.trim() && !profileRef.current?.getRawFiles()?.length && !bannerRef.current?.getRawFiles()?.length) {
-      addToast({
-        title: "Nada para atualizar",
-        description: "Altere algum campo ou selecione uma imagem.",
-        color: "warning",
-        variant: "flat",
-      });
-      return;
-    }
+    const trimmedName = name.trim();
+    const trimmedDesc = description.trim();
 
+    // alterações textuais
+    const changedName = data && trimmedName !== data.name ? trimmedName : undefined;
+    const changedDesc = data && trimmedDesc !== (data.description ?? "") ? trimmedDesc : undefined;
+
+    // estado dos uploads
+    const profileRaw = profileRef.current?.getRawFiles?.() ?? [];
+    const bannerRaw = bannerRef.current?.getRawFiles?.() ?? [];
+    const profileFiles = profileRef.current?.getFiles?.() ?? [];
+    const bannerFiles = bannerRef.current?.getFiles?.() ?? [];
+
+    // remoções (limpou o slot)
+    const initialProfileId = data?.profilePicture?.file_id;
+    const initialBannerId = data?.banner?.file_id;
+    const profileCleared = !!initialProfileId && profileFiles.length === 0;
+    const bannerCleared = !!initialBannerId && bannerFiles.length === 0;
+
+    // payload base
     const payload: UpdateInstitutionInput = {};
-    if (name.trim() && name.trim() !== data?.name) payload.name = name.trim();
-    if (description.trim() && description.trim() !== data?.description) payload.description = description.trim();
-
-    const profileFile = profileRef.current?.getRawFiles()?.[0];
-    const bannerFile = bannerRef.current?.getRawFiles()?.[0];
-    if (profileFile) payload.profilePictureFile = profileFile;
-    if (bannerFile) payload.bannerFile = bannerFile;
+    if (changedName !== undefined) payload.name = changedName;
+    if (changedDesc !== undefined) payload.description = changedDesc;
+    if (profileCleared) payload.profilePictureId = null;
+    if (bannerCleared) payload.bannerId = null;
 
     try {
-      await mutateAsync(payload);
-      addToast({
-        title: "Instituição atualizada",
-        description: "Alterações salvas com sucesso.",
-        color: "success",
-        variant: "flat",
-      });
+      // 1) upload dos NOVOS arquivos (se houver)
+      const uploads: Promise<void>[] = [];
+      if (profileRaw[0]) {
+        uploads.push(
+          uploadAsset(profileRaw[0]).then((up) => {
+            payload.profilePictureId = up.file_id;
+          })
+        );
+      }
+      if (bannerRaw[0]) {
+        uploads.push(
+          uploadAsset(bannerRaw[0]).then((up) => {
+            payload.bannerId = up.file_id;
+          })
+        );
+      }
+      if (uploads.length) await Promise.all(uploads);
+
+      // 2) o backend exige SEMPRE "name"
+      //    – se o usuário não mudou o nome, mande o atual
+      const effectiveName = (payload.name ?? data?.name ?? "").trim();
+      if (!effectiveName) {
+        addToast({
+          title: "Nome obrigatório",
+          description: "Informe o nome da instituição para salvar.",
+          color: "warning",
+          variant: "flat",
+        });
+        return;
+      }
+      payload.name = effectiveName;
+
+      // (opcional) envie a descrição atual para manter simetria
+      if (payload.description === undefined && (data?.description ?? "") !== "") {
+        payload.description = data!.description!;
+      }
+
+      // nada mudou MESMO?
+      const nothingChanged =
+        (changedName === undefined && changedDesc === undefined) &&
+        !profileCleared && !bannerCleared &&
+        profileRaw.length === 0 && bannerRaw.length === 0;
+
+      if (nothingChanged) {
+        addToast({
+          title: "Nada para atualizar",
+          description: "Altere algum campo ou modifique as imagens para salvar.",
+          color: "warning",
+          variant: "flat",
+        });
+        return;
+      }
+
+      // 3) update JSON com os IDs resultantes
+      await updateAsync(payload);
+
+
       onUpdated?.();
       onOpenChange(false);
     } catch (e) {
-      addToast({
-        title: "Não foi possível salvar",
-        description: (e as Error)?.message ?? "Tente novamente.",
-        color: "danger",
-        variant: "flat",
-      });
+      console.error(e);
     }
   };
+
+  const isSaving = isUpdating || isUploading;
 
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       size="lg"
-      classNames={{ base: "border border-border bg-card text-foreground", header: "border-b border-border", footer: "border-t border-border" }}
+      classNames={{
+        base: "border border-border bg-card text-foreground",
+        header: "border-b border-border",
+        footer: "border-t border-border",
+      }}
       scrollBehavior="inside"
     >
       <ModalContent>
@@ -166,11 +229,25 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <div className="mb-1 text-sm font-medium">Imagem de perfil</div>
-                    <FileUpload ref={profileRef} accept="image/*" multiple={false} maxFiles={1} maxSizeMB={5} initialFiles={initialProfile} />
+                    <FileUpload
+                      ref={profileRef}
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      maxSizeMB={5}
+                      initialFiles={initialProfile}
+                    />
                   </div>
                   <div>
                     <div className="mb-1 text-sm font-medium">Banner</div>
-                    <FileUpload ref={bannerRef} accept="image/*" multiple={false} maxFiles={1} maxSizeMB={8} initialFiles={initialBanner} />
+                    <FileUpload
+                      ref={bannerRef}
+                      accept="image/*"
+                      multiple={false}
+                      maxFiles={1}
+                      maxSizeMB={8}
+                      initialFiles={initialBanner}
+                    />
                   </div>
                 </div>
               </div>
@@ -179,10 +256,10 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="flat" onPress={() => onOpenChange(false)} isDisabled={isPending}>
+          <Button variant="flat" onPress={() => onOpenChange(false)} isDisabled={isSaving}>
             Cancelar
           </Button>
-          <Button color="warning" onPress={handleSave} isLoading={isPending}>
+          <Button color="primary" onPress={handleSave} isLoading={isSaving}>
             Salvar alterações
           </Button>
         </ModalFooter>

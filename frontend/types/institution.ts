@@ -49,7 +49,6 @@ export type ApiInstitutionSummary = {
   progress_percent?: number;  // 0..100
 };
 
-
 export type InstitutionSummary = {
   id: string;
   name: string;
@@ -66,10 +65,10 @@ export type CreateInstitutionInput = {
   bannerFile?: File | null;
 };
 
-/** Payload para atualizar (PUT /institutions/{id}) — parcial */
+/** Payload para atualizar (PUT /institutions/{id}) — JSON */
 export type UpdateInstitutionInput = Partial<{
   name: string;
   description: string;
-  profilePictureFile: File | null; 
-  bannerFile: File | null;         
+  profilePictureId: string | null;
+  bannerId: string | null;
 }>;
