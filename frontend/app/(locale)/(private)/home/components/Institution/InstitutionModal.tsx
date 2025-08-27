@@ -1,176 +1,167 @@
-// components/ui/InstitutionModal.tsx
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { Form } from "@heroui/form"
-import { Input, Textarea } from "@heroui/input"
-import { Button } from "@heroui/button"
-import { addToast } from "@heroui/toast"
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal"
-import { Card, CardContent } from "@/components/ui/card"
+import * as React from "react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { Input } from "@heroui/input";
+import { Button } from "@heroui/button";
+import { addToast } from "@heroui/toast";
 
-interface InstitutionModalProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  onCreate: (data: {
-    name: string
-    email: string
-    description: string
-  }) => Promise<void> | void
-}
+import { useCreateInstitution } from "@/hooks/institution/useCreateInstitution";
+import type { CreateInstitutionInput } from "@/types/institution";
+import FileUpload, { FileUploadHandle } from "@/components/comp-547";
 
-export const InstitutionModal: React.FC<InstitutionModalProps> = ({
-  isOpen,
-  onOpenChange,
-  onCreate,
-}) => {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [description, setDescription] = useState("")
-  const [errors, setErrors] = useState<{
-    name?: string
-    email?: string
-    description?: string
-  }>({})
-  const [isLoading, setIsLoading] = useState(false)
+type Props = {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreate: () => void;
+};
 
-  const validate = () => {
-    const e: typeof errors = {}
+export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
+  const [name, setName] = React.useState("");
+  const [description, setDescription] = React.useState("");
 
-    if (!name.trim()) e.name = "Preencha o nome da instituição."
-    if (!email.trim()) e.email = "Preencha o e-mail da instituição."
-    else if (!/^[^@]+@[^.]+\..+$/.test(email)) e.email = "E-mail inválido."
-    if (!description.trim()) e.description = "Preencha a descrição."
-    setErrors(e)
+  // Refs para capturar arquivos dos 2 uploads
+  const profileRef = React.useRef<FileUploadHandle>(null);
+  const bannerRef = React.useRef<FileUploadHandle>(null);
 
-    return Object.keys(e).length === 0
-  }
+  const { mutateAsync, isPending } = useCreateInstitution();
 
-  const handleSubmit = async () => {
-    if (!validate()) return
+  const resetForm = React.useCallback(() => {
+    setName("");
+    setDescription("");
+    profileRef.current?.clear();
+    bannerRef.current?.clear();
+  }, []);
 
-    setIsLoading(true)
-    try {
-      await onCreate({
-        name: name.trim(),
-        email: email.trim(),
-        description: description.trim(),
-      })
-      addToast({ title: "Instituição criada!", color: "success" })
-      onOpenChange(false)
-      // limpa formulário
-      setName("")
-      setEmail("")
-      setDescription("")
-      setErrors({})
-    } catch (err: any) {
+  const handleSubmit = React.useCallback(async () => {
+    if (!name.trim() || !description.trim()) {
       addToast({
-        title: "Erro ao criar",
-        description: err.message || "Tente novamente.",
-        color: "danger",
-      })
-    } finally {
-      setIsLoading(false)
+        title: "Preencha os campos obrigatórios",
+        description: "Nome e descrição são obrigatórios.",
+        color: "warning",
+        variant: "flat",
+      });
+      return;
     }
-  }
+
+    const profileFile = profileRef.current?.getRawFiles()?.[0] ?? null;
+    const bannerFile = bannerRef.current?.getRawFiles()?.[0] ?? null;
+
+    const payload: CreateInstitutionInput = {
+      name: name.trim(),
+      description: description.trim(),
+      profilePictureFile: profileFile ?? undefined,
+      bannerFile: bannerFile ?? undefined,
+    };
+
+    try {
+      await mutateAsync(payload);
+      addToast({
+        title: "Instituição criada",
+        description: "Sua instituição foi criada com sucesso.",
+        color: "success",
+        variant: "flat",
+      });
+      onCreate?.();
+      resetForm();
+      onOpenChange(false);
+    } catch (err) {
+      const msg =
+        (err instanceof Error && err.message) ||
+        (typeof err === "string" ? err : "Ocorreu um erro ao criar a instituição.");
+      addToast({
+        title: "Não foi possível criar",
+        description: msg,
+        color: "danger",
+        variant: "flat",
+      });
+    }
+  }, [name, description, mutateAsync, onCreate, onOpenChange, resetForm]);
+
+  const canSubmit = name.trim().length > 0 && description.trim().length > 0 && !isPending;
 
   return (
     <Modal
       isOpen={isOpen}
-      placement="top-center"
-      onOpenChange={(open) => onOpenChange(open)}
+      onOpenChange={onOpenChange}
+      size="lg"
+      classNames={{
+        base: "border border-border bg-card text-foreground",
+        header: "border-b border-border",
+        footer: "border-t border-border",
+      }}
+      scrollBehavior="inside"
     >
       <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="text-lg font-semibold">
-              Criar Nova Instituição
-            </ModalHeader>
+        <ModalHeader className="text-base font-semibold">Criar nova instituição</ModalHeader>
 
-            <ModalBody>
-              <Card>
-                <CardContent className="p-0">
-                  <Form
-                    className="space-y-4 p-4"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      handleSubmit()
-                    }}
-                  >
-                    <Input
-                      isRequired
-                      label="Nome da Instituição"
-                      placeholder="Digite o nome"
-                      value={name}
-                      variant="bordered"
-                      onValueChange={setName}
-                    />
+        <ModalBody className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label="Nome da Instituição"
+              value={name}
+              onValueChange={setName}
+              isRequired
+              variant="bordered"
+              size="sm"
+              classNames={{ inputWrapper: "bg-background border-border" }}
+              placeholder="Ex.: Instituto Intellecta"
+            />
+            {/* Campo de e-mail removido (backend usa o e-mail do usuário autenticado) */}
+          </div>
 
-                    <Input
-                      isRequired
-                      label="Email da Instituição"
-                      placeholder="email@exemplo.com"
-                      type="email"
-                      value={email}
-                      variant="bordered"
-                      onValueChange={setEmail}
-                    />
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Descrição <span className="text-danger">*</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-primary"
+              placeholder="Conte rapidamente sobre a instituição…"
+            />
+          </div>
 
-                    <Textarea
-                      className={`
-                        w-full h-24 px-4 py-2
-                        bg-gray-50 dark:bg-gray-700
-                        border ${errors.description ? "border-danger" : "border-gray-300"}
-                        rounded-lg
-                        focus:outline-none focus:ring-2 focus:ring-indigo-400
-                        transition-colors
-                        text-base placeholder-gray-400 dark:placeholder-gray-500
-                      `}
-                      label="Descrição"
-                      placeholder="Descreva brevemente esta instituição"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    />
-                    {errors.description && (
-                      <p className="text-sm text-danger">
-                        {errors.description}
-                      </p>
-                    )}
+          {/* Uploads opcionais */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <div className="mb-1 text-sm font-medium">Imagem de perfil (opcional)</div>
+              <FileUpload
+                ref={profileRef}
+                accept="image/*"
+                multiple={false}
+                maxFiles={1}
+                maxSizeMB={5}
+                description="PNG, JPG até 5MB"
+                dropzoneLabel="Selecionar imagem"
+              />
+            </div>
 
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button
-                        isDisabled={isLoading}
-                        variant="bordered"
-                        onPress={() => {
-                          onClose()
-                          onOpenChange(false)
-                        }}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        color="primary"
-                        isLoading={isLoading}
-                        type="submit"
-                      >
-                        + Criar Instituição
-                      </Button>
-                    </div>
-                  </Form>
-                </CardContent>
-              </Card>
-            </ModalBody>
+            <div>
+              <div className="mb-1 text-sm font-medium">Banner (opcional)</div>
+              <FileUpload
+                ref={bannerRef}
+                accept="image/*"
+                multiple={false}
+                maxFiles={1}
+                maxSizeMB={8}
+                description="PNG, JPG até 8MB • proporção 16:9 recomendada"
+                dropzoneLabel="Selecionar banner"
+              />
+            </div>
+          </div>
+        </ModalBody>
 
-            <ModalFooter />
-          </>
-        )}
+        <ModalFooter>
+          <Button variant="flat" onPress={() => onOpenChange(false)} isDisabled={isPending}> 
+            Cancelar
+          </Button>
+          <Button color="primary" onPress={handleSubmit} isDisabled={!canSubmit} isLoading={isPending}>
+            Criar instituição
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
-  )
+  );
 }

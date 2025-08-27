@@ -1,33 +1,26 @@
-// components/ui/CreateInstitutionButton.tsx
-import React from "react"
-import { Button } from "@heroui/button"
-import { PlusIcon } from "lucide-react"
+"use client";
 
-interface CreateInstitutionButtonProps {
-  onClick: () => void
-}
+import * as React from "react";
+import Link from "next/link";
+import { Button } from "@heroui/button";
+import { Plus } from "lucide-react";
 
-export const CreateInstitutionButton: React.FC<
-  CreateInstitutionButtonProps
-> = ({ onClick }) => {
+type Props =
+  | { asLink?: false; onClick?: () => void }
+  | { asLink: true; href: string };
+
+export function CreateInstitutionButton(props: Props) {
+  if ("asLink" in props && props.asLink && props.href) {
+    return (
+      <Button as={Link} href={props.href} color="primary" startContent={<Plus className="h-4 w-4" />}>
+        Criar instituição
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      className={`
-        flex items-center gap-2
-        bg-gradient-to-r from-blue-500 to-purple-600
-        hover:from-blue-600 hover:to-purple-700
-        text-white font-semibold
-        px-4 py-2
-        rounded-full
-        shadow-lg
-        transition-all duration-200
-      `}
-      size="md"
-      variant="solid"
-      onClick={onClick}
-    >
-      <PlusIcon className="w-5 h-5" />
-      Criar Instituição
+    <Button onPress={("onClick" in props ? props.onClick : undefined)} color="primary" startContent={<Plus className="h-4 w-4" />}>
+      Criar instituição
     </Button>
-  )
+  );
 }

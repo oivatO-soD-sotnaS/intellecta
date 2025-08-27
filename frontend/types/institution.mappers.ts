@@ -1,5 +1,5 @@
 // types/institution.mappers.ts
-import type { ApiInstitution, Institution, CreateInstitutionInput, UpdateInstitutionInput, ApiInstitutionSummary, InstitutionSummary } from "./institution";
+import type { ApiInstitution, Institution, ApiInstitutionSummary, InstitutionSummary, UpdateInstitutionInput, CreateInstitutionInput } from "./institution";
 
 export function mapApiInstitution(i: ApiInstitution): Institution {
   return {
@@ -27,8 +27,17 @@ export function mapApiInstitutionSummary(i: ApiInstitutionSummary): InstitutionS
     id: i.institution_id,
     name: i.name,
     email: i.email,
-    profilePicture: i.profile_picture,
-    banner: i.banner,
+    profilePicture: i.profile_picture ?? null,
+    banner: i.banner ?? null,
+    city: i.city,
+    state: i.state,
+    membersCount: i.members_count,
+    subjectsCount: i.subjects_count,
+    createdAt: i.created_at,
+    lastActivityAt: i.last_activity_at,
+    status: i.status,
+    role: i.role,
+    progressPercent: i.progress_percent,
   };
 }
 

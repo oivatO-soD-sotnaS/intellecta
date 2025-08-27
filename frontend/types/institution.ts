@@ -36,8 +36,17 @@ export type ApiInstitutionSummary = {
   institution_id: string;
   name: string;
   email: string;
-  profile_picture: ApiFileMeta | null;
-  banner: ApiFileMeta | null;
+  profile_picture?: ApiFileMeta | null;
+  banner?: ApiFileMeta | null;
+  city?: string;
+  state?: string;
+  members_count?: number;
+  subjects_count?: number;
+  created_at?: string;        // ISO
+  last_activity_at?: string;  // ISO
+  status?: "active" | "inactive" | string;
+  role?: "admin" | "member" | string;
+  progress_percent?: number;  // 0..100
 };
 
 

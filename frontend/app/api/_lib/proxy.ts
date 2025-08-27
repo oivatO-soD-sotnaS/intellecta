@@ -35,6 +35,7 @@ async function buildBody(req: NextRequest, headers: Record<string, string>) {
   }
   if (ct.includes("multipart/form-data")) {
     const fd = await req.formData();
+    // NÃO setar Content-Type manualmente para FormData (o fetch define o boundary)
     return fd as unknown as BodyInit;
   }
   const text = await req.text();
@@ -57,14 +58,20 @@ export async function proxy(
     map404ToJSON,
   } = opts;
 
-  const headers: Record<string, string> = { Accept: "application/json", ...extraHeaders };
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...extraHeaders,
+  };
+
   if (addAuth) {
     const token = getTokenFromCookies(req, tokenCookieNames);
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
   let body: BodyInit | undefined;
-  if (includeBody) body = await buildBody(req, headers);
+  if (includeBody) {
+    body = await buildBody(req, headers);
+  }
 
   const upstream = await fetch(`${API}${upstreamPath}`, {
     method,
@@ -73,41 +80,50 @@ export async function proxy(
     cache: "no-store",
   });
 
+  let res: NextResponse;
+
+  // 404 -> mapear para JSON customizado (se configurado)
   if (upstream.status === 404 && map404ToJSON !== undefined) {
-    const res = NextResponse.json(map404ToJSON, { status: 200 });
+    res = NextResponse.json(map404ToJSON, { status: 200 });
+  } else {
+    const ct = upstream.headers.get("content-type") || "";
+
+    // Status sem corpo
+    if ([204, 205, 304].includes(upstream.status)) {
+      res = new NextResponse(null, { status: upstream.status });
+    } else if (ct.includes("application/json")) {
+      const data = await upstream.json().catch(() => ({}));
+      res = NextResponse.json(data, { status: upstream.status });
+    } else {
+      const text = await upstream.text().catch(() => "");
+      res = new NextResponse(text, {
+        status: upstream.status,
+        headers: { "Content-Type": ct || "text/plain" },
+      });
+    }
+  }
+
+  // limpar cookies se solicitado
+  if (clearCookies.length) {
     for (const c of clearCookies) {
       res.cookies.set(c, "", { expires: new Date(0), path: "/" });
     }
-    return res;
   }
 
-  const ct = upstream.headers.get("content-type") || "";
-  let res: NextResponse;
-
-  if (ct.includes("application/json")) {
-    const data = await upstream.json().catch(() => ({}));
-    res = NextResponse.json(data, { status: upstream.status });
-  } else {
-    const text = await upstream.text().catch(() => "");
-    res = new NextResponse(text, {
-      status: upstream.status,
-      headers: { "Content-Type": ct || "text/plain" },
-    });
-  }
-
-  for (const c of clearCookies) {
-    res.cookies.set(c, "", { expires: new Date(0), path: "/" });
-  }
   return res;
 }
 
 export const proxyGet = (req: NextRequest, path: string, opts?: ProxyOptions) =>
   proxy(req, "GET", path, { includeBody: false, ...opts });
+
 export const proxyPost = (req: NextRequest, path: string, opts?: ProxyOptions) =>
   proxy(req, "POST", path, { includeBody: true, ...opts });
+
 export const proxyPut = (req: NextRequest, path: string, opts?: ProxyOptions) =>
   proxy(req, "PUT", path, { includeBody: true, ...opts });
+
 export const proxyPatch = (req: NextRequest, path: string, opts?: ProxyOptions) =>
   proxy(req, "PATCH", path, { includeBody: true, ...opts });
+
 export const proxyDelete = (req: NextRequest, path: string, opts?: ProxyOptions) =>
   proxy(req, "DELETE", path, { includeBody: false, ...opts });
