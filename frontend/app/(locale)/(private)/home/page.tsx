@@ -5,6 +5,7 @@ import { cookies } from "next/headers"
 
 import HomeClient from "./components/HomeClient"
 import DashboardBanner from "./components/DashboardBanner"
+import { SessionGuard } from "@/components/SessionGuar"
 
 function parseJwt(token: string): { [key: string]: any } {
   const base64Url = token.split(".")[1]
@@ -21,11 +22,7 @@ export default async function HomePage() {
 
   if (!token) {
     return (
-      <div className="container mx-auto p-6">
-        <p className="text-center text-red-600">
-          Você não está autenticado. Faça login para continuar.
-        </p>
-      </div>
+      <SessionGuard/>
     )
   }
 

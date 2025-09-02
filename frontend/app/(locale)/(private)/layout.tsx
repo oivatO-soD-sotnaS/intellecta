@@ -6,6 +6,7 @@ import { ReactNode } from "react"
 import { Providers } from "../../providers"
 import { ThemeSwitch } from "@/components/theme-switch"
 import Header from "./components/Header"
+import { SessionGuard } from "@/components/SessionGuar"
 
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
@@ -18,6 +19,8 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
         onSignOut={() => {/* sua lógica de logout */}}
       />
         <main className="flex-1 border-none h-">{children}</main>
+        
+        <SessionGuard />
       </Providers>
     </div>
   )

@@ -1,49 +1,64 @@
 /* eslint-disable @next/next/no-img-element */
-// components/ProfileCard.tsx
-"use client"
+"use client";
 
-import React from "react"
-import Link from "next/link"
-import { Button } from "@heroui/button"
-import { User } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import React from "react";
+import Link from "next/link";
+import { Button } from "@heroui/button";
+import { User as UserIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar } from "@heroui/avatar";
+import { useProfileForm } from "@/hooks/useProfileForm";
 
 interface ProfileCardProps {
-  name: string
-  role?: string
-  institutionsCount?: number
-  disciplinesCount?: number
-  avatarUrl?: string
+  name: string;
+  role?: string;
+  institutionsCount?: number;
+  disciplinesCount?: number;
+
+  /** Fallbacks opcionais (caso queira manter compat). */
+  avatarUrl?: string;
+  avatarId?: string;
 }
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({
   name,
   role,
-  institutionsCount,
-  disciplinesCount,
+  institutionsCount = 0,
+  disciplinesCount = 0,
   avatarUrl,
+  avatarId,
 }) => {
+  // usa a MESMA fonte de dados do ProfileClient
+  const { profilePictureId, profilePictureUrl } = useProfileForm();
+
+  // prioridade: dados do hook -> props (fallback) -> vazio
+  const src =
+    profilePictureUrl ??
+    (profilePictureId ? `/api/files/${profilePictureId}` : undefined) ??
+    avatarUrl ??
+    (avatarId ? `/api/files/${avatarId}` : undefined);
+
   return (
     <Card className="rounded-2xl shadow-lg w-full">
       <CardContent className="p-6 space-y-6">
         {/* Cabeçalho */}
         <div className="flex items-center space-x-4">
-          {avatarUrl ? (
-            <img
-              alt={name}
-              className="w-14 h-14 rounded-full object-cover"
-              src={avatarUrl}
-            />
+          {src ? (
+            <Avatar className="w-14 h-14" size="lg" src={src} />
           ) : (
             <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-              <User className="h-7 w-7 text-gray-500 dark:text-gray-300" />
+              <UserIcon className="h-7 w-7 text-gray-500 dark:text-gray-300" />
             </div>
           )}
-          <div className="flex-1">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
               {name}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{role}</p>
+            {role ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                {role}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -75,5 +90,5 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
         </Link>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

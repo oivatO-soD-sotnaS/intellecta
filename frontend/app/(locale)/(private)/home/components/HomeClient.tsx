@@ -6,7 +6,7 @@ import React from "react"
 import { ProfileCard } from "./ProfileCard"
 import { Activity, RecentActivities } from "./RecentActivities"
 import { UpcomingEvents } from "./UpcomingEvents"
-import InstitutionsSection from "./Institution/InstitutionsSection"
+import  InstitutionsSection  from "./Institution/InstitutionsSection"
 
 export interface User {
   user_id: string
@@ -19,6 +19,10 @@ export interface User {
 interface HomeClientProps {
   user: User
 }
+
+
+
+
 
 export default function HomeClient({ user }: HomeClientProps) {
 
@@ -74,6 +78,9 @@ export default function HomeClient({ user }: HomeClientProps) {
     },
   ]
 
+  console.log(user.profile_picture_id);
+  console.log(user.profile_picture_url);
+
   return (
     <div className="container mx-auto px-6 py-8 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -85,13 +92,9 @@ export default function HomeClient({ user }: HomeClientProps) {
         {/* Sidebar */}
         <aside className="space-y-6">
           <ProfileCard
-            avatarUrl={
-              user.profile_picture_id
-                ? `/api/files/${user.profile_picture_id}`
-                : undefined
-            }
-            disciplinesCount={0}
             name={user.full_name}
+            disciplinesCount={0}
+            institutionsCount={0}
           />
 
           <RecentActivities activities={activities} />
