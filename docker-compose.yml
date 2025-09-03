@@ -41,6 +41,7 @@ services:
     depends_on:
       - redis
     networks:
+      - intellecta-public-network
       - intellecta-private-network
 
   redis:
