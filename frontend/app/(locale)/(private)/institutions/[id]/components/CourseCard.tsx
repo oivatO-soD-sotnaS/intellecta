@@ -1,24 +1,43 @@
-import { BookOpen, ClipboardPenLine } from "lucide-react"
-import type { SubjectDto } from "../schema/subjectSchema"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
+ //import { Progress } from "@/components/ui/progress" se não existir, use um <div className="h-2 rounded bg-muted"><div className="h-2 bg-primary w-[...]"/></div>
 
-interface CourseCardProps {
-  subject: SubjectDto
+type Props = {
+  title: string
+  teacher: string
+  activities: number
+  materials: number
+  color?: string
 }
 
-export default function CourseCard({ subject }: CourseCardProps) {
+export default function CourseCard({
+  title,
+  teacher,
+  activities,
+  materials,
+  color = "from-indigo-500 to-blue-500",
+}: Props) {
   return (
-    <Card className="rounded-2xl hover:shadow-lg transition-shadow">
-      <CardContent className="p-4">
-        <h2 className="text-lg font-semibold mb-1">{subject.name}</h2>
-        <p className="text-sm text-gray-600 mb-4">{subject.teacherName}</p>
-        <div className="flex items-center space-x-4 text-sm text-gray-500">
-          <ClipboardPenLine className="w-4 h-4" />
-          <span>{subject.activitiesCount} atividades</span>
-          <BookOpen className="w-4 h-4" />
-          <span>{subject.materialsCount} materiais</span>
+    <Card className="overflow-hidden hover:shadow-sm transition-shadow">
+      <div className={`h-20 bg-gradient-to-tr ${color}`} />
+      <div className="p-4 space-y-2">
+        <h3 className="font-semibold leading-tight">{title}</h3>
+        <p className="text-xs text-muted-foreground">{teacher}</p>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span>{activities} atividades</span>
+          <span>{materials} materiais</span>
         </div>
-      </CardContent>
+        <div className="pt-2">
+          {/* substitua por seu Progress se já existir */}
+          <div className="h-2 bg-muted rounded">
+            <div
+              className="h-2 bg-primary rounded"
+            />
+          </div>
+          <p className="mt-1 text-right text-xs text-muted-foreground">
+            Progresso
+          </p>
+        </div>
+      </div>
     </Card>
   )
 }

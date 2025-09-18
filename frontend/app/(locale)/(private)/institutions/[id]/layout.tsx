@@ -1,5 +1,13 @@
-// app/(locale)/(private)/institution/[id]/layout.tsx
-import Sidebar from "./components/Sidebar/Sidebar"
+// app/(locale)/(private)/institutions/[id]/layout.tsx
+import Header from "../../components/Header"
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import InstitutionSidebarContent from "./components/InstitutionSidebarContent"
+import { Menu } from "lucide-react"
 
 export default function InstitutionLayout({
   children,
@@ -7,14 +15,25 @@ export default function InstitutionLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className=" w-full h-screen ">
-      {/* Sidebar fixa à esquerda, acima de todo o conteúdo */}
-      {/* <aside className="fixed top-0 left-0 h-full w-64 bg-white z-10">
-        <Sidebar />
-      </aside> */}
+    <SidebarProvider>
+      <Header
+        leftSlot={
+          <SidebarTrigger>
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Abrir navegação</span>
+          </SidebarTrigger>
+        }
+      />
 
-      {/* Área principal full width */}
-      {children}
-    </div>
+      <div className="mx-auto max-w-7xl px-3 sm:px-4 py-6">
+        <div className="flex gap-6">
+          <Sidebar className="hidden md:flex md:flex-col w-[280px] shrink-0 border border-border rounded-xl bg-card">
+            <InstitutionSidebarContent />
+          </Sidebar>
+
+          <SidebarInset>{children}</SidebarInset>
+        </div>
+      </div>
+    </SidebarProvider>
   )
 }

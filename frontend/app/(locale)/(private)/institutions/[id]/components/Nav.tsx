@@ -1,35 +1,44 @@
-// app/(locale)/(private)/institution/[id]/components/Nav.tsx
 "use client"
 
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { InstitutionTab } from "@/store/institutionStore"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
-interface NavProps {
-  activeTab: InstitutionTab
-  onChange: (tab: InstitutionTab) => void
-}
+const items = [
+  { label: "Dashboard", href: "./dashboard" },
+  { label: "Disciplinas", href: "./subjects" },
+  { label: "Membros", href: "./members" },
+  { label: "Configurações", href: "./settings" },
+]
 
-export default function Nav({ activeTab, onChange }: NavProps) {
+export default function Nav() {
+  const pathname = usePathname()
+
   return (
-    <Tabs
-      value={activeTab}
-      onValueChange={(v) => onChange(v as InstitutionTab)}
-      className="w-full"
-    >
-      <TabsList className="border-b border-gray-200 bg-white">
-        <TabsTrigger value="overview" className="px-4 py-2 text-sm font-medium">
-          Visão Geral
-        </TabsTrigger>
-        <TabsTrigger value="courses" className="px-4 py-2 text-sm font-medium">
-          Disciplinas
-        </TabsTrigger>
-        <TabsTrigger value="members" className="px-4 py-2 text-sm font-medium">
-          Membros
-        </TabsTrigger>
-        <TabsTrigger value="settings" className="px-4 py-2 text-sm font-medium">
-          Configurações
-        </TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <div className="border-b border-border bg-background/60">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <ul className="flex items-center gap-2 h-12">
+          {items.map((it) => {
+            const active =
+              pathname.endsWith(it.href) || pathname.endsWith(`${it.href}/`)
+            return (
+              <li key={it.href}>
+                <Link
+                  href={it.href}
+                  className={cn(
+                    "inline-flex h-9 items-center rounded-md px-3 text-sm",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  )}
+                >
+                  {it.label}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </div>
   )
 }

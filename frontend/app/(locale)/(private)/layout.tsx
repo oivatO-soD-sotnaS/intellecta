@@ -13,13 +13,8 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100svh] flex flex-col bg-background text-foreground">
       <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-        <Header
-        user={{ name: "Ana Silva", email: "ana@ifpr.edu.br", avatarUrl: "" }}
-        notifications={3}
-        onSignOut={() => {/* sua lógica de logout */}}
-      />
+        <Header />
         <main className="flex-1 border-none h-">{children}</main>
-        
         <SessionGuard />
       </Providers>
     </div>

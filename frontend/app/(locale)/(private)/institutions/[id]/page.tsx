@@ -1,15 +1,22 @@
-// app/(locale)/(private)/institution/[id]/page.tsx
+import InstitutionClient from "./InstitutionClient"
+import CoursesList from "./components/CoursesList" // se existir; caso não, remova
 
-import InstitutionPageClient from "./InstitutionClient"
-
-export default async function InstitutionPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params 
+export default function InstitutionPage() {
   return (
-    <div className="p-6">
-      <h3>🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧</h3>
-      <h1>Esta página está em construção 🏗️</h1>
-      <h2>{id}</h2>
-      <h3>🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧</h3>
-    </div>
+    <InstitutionClient>
+      {/* Conteúdo inicial (pode ser Overview) até ligarmos o Dashboard definitivo */}
+      <section className="space-y-6">
+        <header>
+          <h1 className="text-xl font-semibold">Início</h1>
+          <p className="text-sm text-muted-foreground">
+            Bem-vindo à sua instituição.
+          </p>
+        </header>
+        e{/* Exemplo de uso do CourseCard grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Substitua por CoursesList quando estiver pronto */}
+        </div>
+      </section>
+    </InstitutionClient>
   )
 }
