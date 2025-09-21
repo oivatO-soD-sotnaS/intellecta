@@ -1,3 +1,4 @@
+// app/(locale)/(private)/components/Header.tsx
 "use client"
 
 import Link from "next/link"
@@ -15,7 +16,7 @@ type HeaderProps = {
 }
 
 export default function Header({ leftSlot, className }: HeaderProps) {
-  const { data: me } = useCurrentUser() // { name?, email?, image?/avatarUrl?, role? }
+  const { data: me } = useCurrentUser() 
 
   const user: HeaderUser = {
     name: me?.name ?? me?.email?.split("@")[0] ?? "Usuário",

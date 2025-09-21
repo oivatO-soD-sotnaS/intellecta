@@ -15,19 +15,10 @@ export default function InstitutionLayout({
   children: React.ReactNode
 }) {
   return (
-    <SidebarProvider>
-      <Header
-        leftSlot={
-          <SidebarTrigger>
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Abrir navegação</span>
-          </SidebarTrigger>
-        }
-      />
-
+    <SidebarProvider >
       <div className="mx-auto max-w-7xl px-3 sm:px-4 py-6">
         <div className="flex gap-6">
-          <Sidebar className="hidden md:flex md:flex-col w-[280px] shrink-0 border border-border rounded-xl bg-card">
+          <Sidebar className="hidden md:flex md:flex-col w-[280px] shrink-0 border border-border rounded-xl bg-card pt-16">
             <InstitutionSidebarContent />
           </Sidebar>
 

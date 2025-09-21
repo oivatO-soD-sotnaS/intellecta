@@ -1,5 +1,5 @@
 import InstitutionClient from "./InstitutionClient"
-import CoursesList from "./components/CoursesList" 
+import CoursesList from "./components/CoursesList"
 import { DashboardHeader, StatCards } from "./dashboard/components"
 import CalendarWidget from "./dashboard/components/CalendarWidget"
 import DisciplinesGrid from "./dashboard/components/DisciplinesGrid"
@@ -14,17 +14,22 @@ export default function InstitutionPage() {
         <StatCards />
       </section>
 
+      <section className="mt-6">
+        <DisciplinesGrid />
+      </section>
+
       <section className="mt-6 grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <DisciplinesGrid />
+        <div className="lg:col-span-2">
           <CalendarWidget />
         </div>
         <div className="lg:col-span-1">
           <UpcomingEvents />
         </div>
-        <RecentActivities/>
+      </section>
+
+      <section className="mt-6">
+        <RecentActivities />
       </section>
     </InstitutionClient>
   )
-
 }
