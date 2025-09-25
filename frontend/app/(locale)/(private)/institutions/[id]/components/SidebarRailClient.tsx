@@ -10,16 +10,17 @@ export default function SidebarRailClient({ children }: { children: ReactNode })
     <aside
       data-collapsed={isCollapsed ? "true" : "false"}
       className={[
-        "relative hidden md:block rounded-xl border border-border bg-card pt-16", 
+        "sticky top-16 self-start",
+        "h-[calc(100vh-4rem)]",
+        "relative hidden md:block rounded-xl border border-border bg-card",
         "transition-[width] duration-300 ease-out",
+        "overflow-hidden w-full p-3",
         isCollapsed ? "w-[72px]" : "w-[280px]",
       ].join(" ")}
     >
-      {isCollapsed && (
-        <div className="absolute right-0 top-0 h-full w-px bg-border/50" />
-      )}
+      {isCollapsed && <div className="absolute right-0 top-0 h-full w-px bg-border/50" />}
 
-      <div className="flex min-h-full flex-col">
+      <div className="flex h-full  flex-col overflow-hidden">
         {children}
       </div>
     </aside>

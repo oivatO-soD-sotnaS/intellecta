@@ -1,9 +1,21 @@
 "use client"
 
-
-
 import { Card } from "@/components/ui/card"
 import { useInstitutionEventsMock } from "@/hooks/institution-page/useInstitutionEventsMock"
+
+// Helper estável em SSR/Client
+const dtf = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "short",
+})
+
+function formatDayMonth(dateLike: string | number | Date) {
+  const parts = dtf.formatToParts(new Date(dateLike))
+  const day = parts.find(p => p.type === "day")?.value ?? ""
+  const month = (parts.find(p => p.type === "month")?.value ?? "").toUpperCase()
+  return { day, month }
+}
 
 function TypePill({ type }: { type: string }) {
   const map = {
@@ -13,9 +25,7 @@ function TypePill({ type }: { type: string }) {
   } as const
   const cls = (map as any)[type] ?? "bg-muted text-foreground"
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${cls}`}
-    >
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${cls}`}>
       {type}
     </span>
   )
@@ -32,17 +42,17 @@ export default function UpcomingEvents() {
 
       <Card className="divide-y">
         {data.map((ev) => {
-          const date = new Date(ev.date)
-          const day = String(date.getDate()).padStart(2, "0")
-          const month = date
-            .toLocaleDateString("pt-BR", { month: "short" })
-            .toUpperCase()
+          const { day, month } = formatDayMonth(ev.date)
 
           return (
             <div key={ev.id} className="flex items-center gap-3 p-3">
               <div className="w-12 shrink-0 text-center">
-                <div className="text-xs text-muted-foreground">{month}</div>
-                <div className="text-lg font-bold leading-none">{day}</div>
+                <div className="text-xs text-muted-foreground" suppressHydrationWarning>
+                  {month}
+                </div>
+                <div className="text-lg font-bold leading-none" suppressHydrationWarning>
+                  {day}
+                </div>
               </div>
 
               <div className="min-w-0 flex-1">
@@ -51,7 +61,7 @@ export default function UpcomingEvents() {
                   <p className="truncate text-sm font-medium">{ev.title}</p>
                 </div>
                 {ev.course && (
-                  <p className="truncate text-xs text-muted-foreground mt-0.5">
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {ev.course}
                   </p>
                 )}

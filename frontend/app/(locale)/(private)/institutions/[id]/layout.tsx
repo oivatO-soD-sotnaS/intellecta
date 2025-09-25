@@ -10,7 +10,9 @@ export default function InstitutionLayout({ children }: { children: React.ReactN
       <div className=" px-3 sm:px-4 py-6">
         <div className="grid gap-6 md:grid-cols-[auto_minmax(0,1fr)]">
           <SidebarProviderClient>
+            <SidebarRailClient>
               <InstitutionSidebarContent />
+            </SidebarRailClient>
           </SidebarProviderClient>
 
           {/* Conteúdo */}

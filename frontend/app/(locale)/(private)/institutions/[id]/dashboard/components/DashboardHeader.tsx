@@ -1,6 +1,7 @@
 "use client"
 
 import { formatDatePtBR } from "@/lib/format" // se já tiver util; senão, use Intl.DateTimeFormat
+import Today from "./Today";
 // fallback simples:
 const f = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 
@@ -29,10 +30,10 @@ export default function DashboardHeader({
         <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="shrink-0 text-right">
-        <p className="text-xs text-muted-foreground">Hoje é</p>
-        <p className="text-sm font-medium text-primary">{today}</p>
-      </div>
+    <div className="shrink-0 text-right">
+      <p className="text-xs text-muted-foreground">Hoje é</p>
+      <Today className="text-sm font-medium text-primary" />
+    </div>
     </div>
   )
 }
