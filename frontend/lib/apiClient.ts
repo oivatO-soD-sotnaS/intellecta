@@ -37,7 +37,8 @@ function handleUnauthorized(shouldRedirect: boolean) {
     if (shouldRedirect) {
       const next = window.location.pathname + window.location.search + window.location.hash;
       setTimeout(() => {
-        window.location.href = `/auth/login?expired=1&next=${encodeURIComponent(next)}`;
+        // window.location.href = `/auth/login?expired=1&next=${encodeURIComponent(next)}`;
+        window.location.href = `/sign-in`;
       }, 800);
     }
   } catch {

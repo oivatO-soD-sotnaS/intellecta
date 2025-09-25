@@ -19,11 +19,15 @@ export default function Header({ leftSlot, className }: HeaderProps) {
   const { data: me } = useCurrentUser() 
 
   const user: HeaderUser = {
-    name: me?.name ?? me?.email?.split("@")[0] ?? "Usuário",
+    name: me?.full_name ?? me?.email?.split("@")[0] ?? "Usuário",
     email: me?.email ?? "",
-    avatarUrl: (me as any)?.avatarUrl ?? (me as any)?.image ?? undefined,
-    role: (me as any)?.role ?? undefined,
+    // avatarUrl: (me as any)?.profile_picture_url ?? (me as any)?.image ?? undefined,
+    avatarUrl: me?.profile_picture ?? undefined,
   }
+
+  console.log("User avatar URL:", user.avatarUrl);
+
+  
 
   return (
     <header

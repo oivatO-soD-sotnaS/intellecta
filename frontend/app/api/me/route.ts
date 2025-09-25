@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
     })
     const data = await res.json()
 
+    // console.log(data);
+    
+
     return NextResponse.json(data, { status: res.status })
   } catch (err) {
     return NextResponse.json({ error: "Failed to load user" }, { status: 500 })

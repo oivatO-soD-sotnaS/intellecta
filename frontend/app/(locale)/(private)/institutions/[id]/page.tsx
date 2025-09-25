@@ -1,5 +1,4 @@
 import InstitutionClient from "./InstitutionClient"
-import CoursesList from "./components/CoursesList"
 import { DashboardHeader, StatCards } from "./dashboard/components"
 import CalendarWidget from "./dashboard/components/CalendarWidget"
 import DisciplinesGrid from "./dashboard/components/DisciplinesGrid"

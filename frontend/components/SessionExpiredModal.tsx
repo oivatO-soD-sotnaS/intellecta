@@ -13,7 +13,7 @@ type Props = {
 
 export default function SessionExpiredModal({
   defaultOpen = false,
-  nextUrl = "/",
+  nextUrl = "/sign-in",
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
 

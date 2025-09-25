@@ -18,6 +18,7 @@ function parseJwt(token: string): { [key: string]: any } {
 
 export default async function HomePage() {
   const token = (await cookies()).get("token")?.value
+  
   const nowISO = new Date().toISOString(); 
 
   if (!token) {
@@ -44,7 +45,6 @@ export default async function HomePage() {
     )
   }
 
-  // 3) busca o usuário no backend
   let user: {
     user_id: string
     full_name: string
@@ -76,7 +76,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <DashboardBanner name="Ana" nowISO={nowISO} stats={{ activities: 12, events: 7, messages: 15 }} />
+      <DashboardBanner name={firstName} nowISO={nowISO} stats={{ activities: 12, events: 7, messages: 15 }} />
       <HomeClient user={user} />
       <hr />
       {/* <EventCalendarTest /> */}

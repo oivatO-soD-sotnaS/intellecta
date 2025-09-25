@@ -12,7 +12,7 @@ export type HeaderUser = {
   name: string;
   email: string;
   avatarUrl?: string;
-  role?: string;
+  avatarId?: string;
 };
 
 
@@ -25,8 +25,10 @@ export default function UserMenu({
   onSignOut?: () => void;
 }) {
 
-const { mutate: signOut, isPending } = useSignOut();
+  const { mutate: signOut, isPending } = useSignOut();
 
+  // console.log(user?.avatarUrl);
+  
 
   return (
     <Popover placement="bottom-end">

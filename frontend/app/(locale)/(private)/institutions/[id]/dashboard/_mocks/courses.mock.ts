@@ -1,29 +1,54 @@
-export const coursesMock = [
+// app/(locale)/(private)/institutions/[id]/dashboard/_mocks/courses.mock.ts
+
+import { SubjectDTO } from "@/types/subject";
+
+export const subjectsMock: SubjectDTO[] = [
   {
-    id: "1",
-    title: "Matemática Avançada",
-    teacher: "Dr. Carlos Mendes",
-    activities: 3,
-    materials: 12,
-    progress: 68,
-    color: "from-indigo-500 to-blue-500",
+    subject_id: "subj-001",
+    institution_id: "inst-001",
+    name: "Matemática Avançada",
+    description:
+      "Tópicos selecionados de cálculo, álgebra linear e otimização aplicados a problemas reais.",
+    banner: { file_id: "f1", url: "https://images.unsplash.com/photo-1535930749574-1399327ce78f" },
+    teacher: {
+      full_name: "Dr. Carlos Mendes",
+      email: "carlos.mendes@example.com",
+      profile_picture: {
+        file_id: "t1",
+        url: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe",
+      },
+    },
   },
   {
-    id: "2",
-    title: "Programação Web",
-    teacher: "Profa. Juliana Costa",
-    activities: 2,
-    materials: 8,
-    progress: 75,
-    color: "from-purple-500 to-violet-500",
+    subject_id: "subj-002",
+    institution_id: "inst-001",
+    name: "Programação Web",
+    description:
+      "Fundamentos modernos de desenvolvimento web com foco em front-end e boas práticas.",
+    banner: { file_id: "f2", url: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f" },
+    teacher: {
+      full_name: "Profa. Juliana Costa",
+      email: "juliana.costa@example.com",
+      profile_picture: {
+        file_id: "t2",
+        url: "https://images.unsplash.com/photo-1554151228-14d9def656e4",
+      },
+    },
   },
   {
-    id: "3",
-    title: "Física III",
-    teacher: "Dr. Roberto Almeida",
-    activities: 4,
-    materials: 15,
-    progress: 42,
-    color: "from-rose-500 to-red-500",
+    subject_id: "subj-003",
+    institution_id: "inst-001",
+    name: "Física III",
+    description:
+      "Ondas, eletromagnetismo e aplicações. Ênfase em resolução de problemas e experimentação.",
+    banner: { file_id: "f3", url: "https://images.unsplash.com/photo-1517976487492-57688f1a1674" },
+    teacher: {
+      full_name: "Dr. Roberto Almeida",
+      email: "roberto.almeida@example.com",
+      profile_picture: {
+        file_id: "t3",
+        url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
+      },
+    },
   },
-]
+];

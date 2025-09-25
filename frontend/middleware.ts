@@ -27,7 +27,7 @@ export function middleware(req: NextRequest) {
 
   const goLogin = () => {
     const url = req.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/sign-in";
     url.searchParams.set("expired", "1");
     url.searchParams.set("next", pathname + search);
 

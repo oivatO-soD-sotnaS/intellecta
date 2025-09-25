@@ -8,15 +8,13 @@ export type ApiUser = {
   user_id: string;
   full_name: string;
   email: string;
-  role?: string;
-  profile_picture_id?: string;
-  profile_picture_url?: string; 
+  profile_picture?: string; 
 };
 
 /**
  * Busca o usuário autenticado.
  */
-const ME_ENDPOINT = "/api/v1/auth/me";
+const ME_ENDPOINT = "/api/me";
 
 export function useCurrentUser() {
   return useQuery({
