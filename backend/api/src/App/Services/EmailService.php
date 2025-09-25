@@ -61,13 +61,13 @@ class EmailService {
           background-color: #f5f5fa;
           padding: 40px 30px;
           border-radius: 12px;
-          box-shadow: 0px 8px 25px 0px rgba(126, 87, 194, 0.15);
-          border-top: 6px solid #7e57c2;
+          box-shadow: 0px 8px 25px 0px rgba(22, 163, 74, 0.15);
+          border-top: 6px solid #16a34a;
         }
         .logo {
           font-size: 24px;
           font-weight: bold;
-          color: #7e57c2;
+          color: #16a34a;
           margin-bottom: 20px;
         }
         .title {
@@ -85,8 +85,8 @@ class EmailService {
         .code {
           font-size: 36px;
           font-weight: bold;
-          color: #7e57c2;
-          background-color: #f3eefe;
+          color: #16a34a;
+          background-color: #e9f8ef;
           display: inline-block;
           padding: 16px 32px;
           border-radius: 8px;
@@ -147,14 +147,14 @@ class EmailService {
           background-color: #f5f5fa;
           padding: 40px 30px;
           border-radius: 12px;
-          box-shadow: 0px 8px 25px 0px rgba(126, 87, 194, 0.15);
-          border-top: 6px solid #7e57c2;
+          box-shadow: 0px 8px 25px 0px rgba(22, 163, 74, 0.15);
+          border-top: 6px solid #16a34a;
           text-align: center;
         }
         .logo {
           font-size: 24px;
           font-weight: bold;
-          color: #7e57c2;
+          color: #16a34a;
           margin-bottom: 20px;
         }
         .title {
@@ -172,7 +172,7 @@ class EmailService {
         .button {
           display: inline-block;
           padding: 14px 28px;
-          background-color: #7e57c2;
+          background-color: #16a34a;
           color: white;
           font-size: 16px;
           font-weight: bold;
@@ -200,7 +200,7 @@ class EmailService {
           Você foi convidado(a) para fazer parte da instituição <strong>$institutionName</strong> na plataforma Intellecta.<br>
           Para aceitar o convite e se juntar à instituição, clique no botão abaixo:
         </div>
-        <a class='button' href='$acceptLink' style='background-color: #fff; color: #7e57c2; text-decoration: none;'>Aceitar Convite</a>
+        <a class='button' href='$acceptLink'>Aceitar Convite</a>
         <div class='info'>
           Caso você não reconheça esta solicitação, basta ignorar este e-mail.
         </div>
