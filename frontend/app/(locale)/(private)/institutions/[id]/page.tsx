@@ -1,9 +1,11 @@
+import { useRouter } from "next/router"
 import InstitutionClient from "./InstitutionClient"
 import { DashboardHeader, StatCards } from "./dashboard/components"
 import CalendarWidget from "./dashboard/components/CalendarWidget"
-import DisciplinesGrid from "./dashboard/components/DisciplinesGrid"
 import RecentActivities from "./dashboard/components/RecentActivities"
 import UpcomingEvents from "./dashboard/components/UpcomingEvents"
+import { useClasses } from "@/hooks/classes/useClasses"
+import ClassesGrid from "./dashboard/components/ClassesGrid"
 
 interface InstitutionPage{
   params: {id: string}
@@ -11,7 +13,10 @@ interface InstitutionPage{
 
 export default function InstitutionPage({params}: InstitutionPage) {
 
-  const institutionId = params.id
+   const institutionId = params.id
+   const router = useRouter()
+
+   const { data, isLoading, isError } = useClasses(institutionId)
 
 
   return (
@@ -22,10 +27,14 @@ export default function InstitutionPage({params}: InstitutionPage) {
       </section>
 
       <section className="mt-6">
-        <DisciplinesGrid
-          institutionId={institutionId}
+        <ClassesGrid  
           title="Suas Turmas"
-
+          data={data}
+          isLoading={isLoading}
+          isError={isError}
+          onOpenClass={(class_id) =>
+            router.push(`/institutions/${institutionId}/classes/${class_id}`)
+          }
         />
       </section>
 

@@ -1,28 +1,41 @@
-// app/(locale)/(private)/institutions/[id]/dashboard/components/DisciplinesGrid.tsx
-"use client";
+"use client"
 
-import { useInstitutionCoursesMock } from "@/hooks/institution-page/useInstitutionCoursesMock";
-import { AnimatePresence, motion } from "framer-motion";
-import CourseCard from "../../components/CourseCard";
+import { AnimatePresence, motion } from "framer-motion"
+import type { ClassDTO } from "@/types/class"
+import CourseCard from "../../components/CourseCard"
 
 type Props = {
-  institutionId?: string;
-  title?: string;
-  onOpenClass?: (class_id: string) => void;
-};
+  title?: string
+  data?: ClassDTO[]
+  isLoading?: boolean
+  isError?: boolean
+  onOpenClass?: (class_id: string) => void
+}
 
-export default function DisciplinesGrid({
-  institutionId,
+export default function ClassesGrid({
   title = "Suas Turmas",
+  data,
+  isLoading,
+  isError,
   onOpenClass,
 }: Props) {
-  const { data, isLoading } = useInstitutionCoursesMock(institutionId);
+  if (isError) {
+    return (
+      <section className="w-full">
+        <header className="mb-3">
+          <h2 className="text-lg font-semibold">{title}</h2>
+        </header>
+        <div className="rounded-2xl border border-red-300/60 bg-red-50 p-4 text-red-700">
+          Ocorreu um erro ao carregar suas turmas. Tente novamente.
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="w-full">
       <header className="mb-3 flex items-end justify-between">
         <h2 className="text-lg font-semibold">{title}</h2>
-        {/* espaço reservado para filtros/ordenação futuramente */}
       </header>
 
       {isLoading ? (
@@ -31,7 +44,10 @@ export default function DisciplinesGrid({
         <EmptyState />
       ) : (
         <AnimatePresence mode="popLayout">
-          <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <motion.div
+            layout
+            className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+          >
             {data.map((klass) => (
               <CourseCard
                 key={klass.class_id}
@@ -43,7 +59,7 @@ export default function DisciplinesGrid({
         </AnimatePresence>
       )}
     </section>
-  );
+  )
 }
 
 function SkeletonGrid() {
@@ -66,7 +82,7 @@ function SkeletonGrid() {
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 function EmptyState() {
@@ -74,5 +90,5 @@ function EmptyState() {
     <div className="flex min-h-[140px] items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
       Nenhuma turma encontrada.
     </div>
-  );
+  )
 }
