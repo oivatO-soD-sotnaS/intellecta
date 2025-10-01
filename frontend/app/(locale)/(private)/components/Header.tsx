@@ -23,11 +23,11 @@ export default function Header({ leftSlot, className }: HeaderProps) {
     email: me?.email ?? "",
     // avatarUrl: (me as any)?.profile_picture_url ?? (me as any)?.image ?? undefined,
     avatarUrl: me?.profile_picture ?? undefined,
+    avatarId: me?.profile_picture ?? undefined,
   }
 
-  console.log("User avatar URL:", user.avatarUrl);
+  // console.log("User avatar URL:", user.avatarUrl);
 
-  
 
   return (
     <header

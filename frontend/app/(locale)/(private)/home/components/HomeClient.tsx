@@ -78,8 +78,6 @@ export default function HomeClient({ user }: HomeClientProps) {
     },
   ]
 
-  console.log(user.profile_picture_id);
-  console.log(user.profile_picture_url);
 
   return (
     <div className="container mx-auto px-6 py-8 space-y-8">

@@ -5,6 +5,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { CalendarDays, Mail, ClipboardList } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 
 type Stats = {
   activities: number;
@@ -78,11 +79,15 @@ export default function DashboardBanner({
           {/* Texto esquerdo */}
           <div className="lg:col-span-7">
             <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              Olá, {name}! <span role="img" aria-label="Aceno">👋</span>
+              <TypingAnimation>
+                {`Olá, ${String(name ?? "")} 👋`}
+              </TypingAnimation>
             </h2>
             <p className="mt-2 text-sm/6 text-white/85 flex flex-col gap-1">
               Bem-vinda de volta à sua plataforma educacional.
-              <span suppressHydrationWarning>Hoje é {formattedDate || "\u00A0"} .</span>
+              <span suppressHydrationWarning>
+                Hoje é {formattedDate || "\u00A0"} .
+              </span>
             </p>
           </div>
 
@@ -112,7 +117,7 @@ export default function DashboardBanner({
         </motion.div>
       </div>
     </section>
-  );
+  )
 }
 
 function StatCard({

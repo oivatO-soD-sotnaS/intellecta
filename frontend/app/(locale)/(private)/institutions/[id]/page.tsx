@@ -5,7 +5,15 @@ import DisciplinesGrid from "./dashboard/components/DisciplinesGrid"
 import RecentActivities from "./dashboard/components/RecentActivities"
 import UpcomingEvents from "./dashboard/components/UpcomingEvents"
 
-export default function InstitutionPage() {
+interface InstitutionPage{
+  params: {id: string}
+}
+
+export default function InstitutionPage({params}: InstitutionPage) {
+
+  const institutionId = params.id
+
+
   return (
     <InstitutionClient>
       <section className="space-y-5">
@@ -14,7 +22,11 @@ export default function InstitutionPage() {
       </section>
 
       <section className="mt-6">
-        <DisciplinesGrid />
+        <DisciplinesGrid
+          institutionId={institutionId}
+          title="Suas Turmas"
+
+        />
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-3">

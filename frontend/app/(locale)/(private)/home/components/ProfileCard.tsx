@@ -14,8 +14,6 @@ interface ProfileCardProps {
   role?: string;
   institutionsCount?: number;
   disciplinesCount?: number;
-
-  /** Fallbacks opcionais (caso queira manter compat). */
   avatarUrl?: string;
   avatarId?: string;
 }
@@ -28,10 +26,8 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
   avatarUrl,
   avatarId,
 }) => {
-  // usa a MESMA fonte de dados do ProfileClient
   const { profilePictureId, profilePictureUrl } = useProfileForm();
 
-  // prioridade: dados do hook -> props (fallback) -> vazio
   const src =
     profilePictureUrl ??
     (profilePictureId ? `/api/files/${profilePictureId}` : undefined) ??
