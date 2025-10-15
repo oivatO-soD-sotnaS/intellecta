@@ -14,25 +14,19 @@ import {
   startOfWeek,
 } from "date-fns"
 
-import {
-  DraggableEvent,
-  DroppableCell,
-  EventGap,
-  EventHeight,
-  EventItem,
-  getAllEventsForDay,
-  getEventsForDay,
-  getSpanningEventsForDay,
-  sortEvents,
-  useEventVisibility,
-  type CalendarEvent,
-} from "@/components/event-calendar/event-calendar"
-import { DefaultStartHour } from "@/components/event-calendar/constants"
+
+import { DefaultStartHour, EventGap, EventHeight } from "@/components/event-calendar/constants"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { useEventVisibility } from "./hooks/use-event-visibility"
+import { getAllEventsForDay, getEventsForDay, getSpanningEventsForDay, sortEvents } from "./utils"
+import { DroppableCell } from "./droppable-cell"
+import { EventItem } from "./event-item"
+import { DraggableEvent } from "./draggable-event"
 
 interface MonthViewProps {
   currentDate: Date

@@ -3,11 +3,9 @@
 import { useEffect, useMemo, useRef } from "react"
 import { format, isSameDay } from "date-fns"
 import { XIcon } from "lucide-react"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { EventItem } from "./event-item"
 
-import {
-  EventItem,
-  type CalendarEvent,
-} from "@/components/event-calendar/event-calendar"
 
 interface EventsPopupProps {
   date: Date

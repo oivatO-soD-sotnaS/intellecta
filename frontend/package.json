@@ -34,7 +34,7 @@
     "@heroui/switch": "2.2.22",
     "@heroui/system": "2.4.20",
     "@heroui/tabs": "^2.2.21",
-    "@heroui/theme": "2.4.20",
+    "@heroui/theme": "^2.4.22",
     "@heroui/toast": "^2.0.14",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-dialog": "^1.1.15",

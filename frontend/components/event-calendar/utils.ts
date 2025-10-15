@@ -1,9 +1,8 @@
 import { isSameDay } from "date-fns"
+import { EventColor } from "./types"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
 
-import type {
-  CalendarEvent,
-  EventColor,
-} from "@/components/event-calendar/event-calendar"
+
 
 /**
  * Get CSS classes for event colors

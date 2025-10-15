@@ -22,11 +22,10 @@ import {
   type UniqueIdentifier,
 } from "@dnd-kit/core"
 import { addMinutes, differenceInMinutes } from "date-fns"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { EventItem } from "./event-item"
 
-import {
-  EventItem,
-  type CalendarEvent,
-} from "@/components/event-calendar/event-calendar"
+
 
 // Define the context type
 type CalendarDndContextType = {

@@ -19,19 +19,17 @@ import {
 } from "date-fns"
 
 import {
-  DraggableEvent,
-  DroppableCell,
-  EventItem,
-  isMultiDayEvent,
-  useCurrentTimeIndicator,
-  WeekCellsHeight,
-  type CalendarEvent,
-} from "@/components/event-calendar/event-calendar"
-import {
   EndHour,
   StartHour,
+  WeekCellsHeight,
 } from "@/components/event-calendar/constants"
 import { cn } from "@/lib/utils"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { isMultiDayEvent } from "./utils"
+import { useCurrentTimeIndicator } from "./hooks/use-current-time-indicator"
+import { EventItem } from "./event-item"
+import { DraggableEvent } from "./draggable-event"
+import { DroppableCell } from "./droppable-cell"
 
 interface WeekViewProps {
   currentDate: Date

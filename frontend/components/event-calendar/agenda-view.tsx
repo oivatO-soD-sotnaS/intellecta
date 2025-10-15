@@ -3,13 +3,11 @@
 import { useMemo } from "react"
 import { RiCalendarEventLine } from "@remixicon/react"
 import { addDays, format, isToday } from "date-fns"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { AgendaDaysToShow } from "./constants"
+import { getAgendaEventsForDay } from "./utils"
+import { EventItem } from "./event-item"
 
-import {
-  AgendaDaysToShow,
-  CalendarEvent,
-  EventItem,
-  getAgendaEventsForDay,
-} from "@/components/event-calendar/event-calendar"
 
 interface AgendaViewProps {
   currentDate: Date

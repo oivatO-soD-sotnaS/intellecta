@@ -5,12 +5,9 @@ import type { DraggableAttributes } from "@dnd-kit/core"
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities"
 import { differenceInMinutes, format, getMinutes, isPast } from "date-fns"
 
-import {
-  getBorderRadiusClasses,
-  getEventColorClasses,
-  type CalendarEvent,
-} from "@/components/event-calendar/event-calendar"
 import { cn } from "@/lib/utils"
+import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { getBorderRadiusClasses, getEventColorClasses } from "./utils"
 
 // Using date-fns format with custom formatting:
 // 'h' - hours (1-12)
