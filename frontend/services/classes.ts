@@ -9,6 +9,7 @@ export async function getClasses(institutionId: string): Promise<ClassDTO[]> {
   const res = await fetch(`/api/v1/institutions/${institutionId}/classes`, {
     method: "GET",
   })
+  if (res.status === 404) return [] 
   if (!res.ok) throw new Error("Falha ao listar turmas")
   return res.json()
 }

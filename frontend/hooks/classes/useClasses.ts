@@ -1,13 +1,14 @@
 // hooks/classes/useClasses.ts
 import { useQuery } from "@tanstack/react-query"
+import { getClasses, getClass } from "@/services/classes"
 import type { ClassDTO } from "@/types/class"
-import { getClass, getClasses } from "@/services/classes"
 
 export function useClasses(institutionId: string) {
   return useQuery<ClassDTO[]>({
     queryKey: ["classes", institutionId],
     queryFn: () => getClasses(institutionId),
-    staleTime: 30_000, 
+    staleTime: 30_000,
+    retry: false, 
   })
 }
 

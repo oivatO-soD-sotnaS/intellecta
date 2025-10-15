@@ -4,14 +4,24 @@ import { backendFetch } from "@/lib/http"
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { institution_id: string; class_id: string } }
+  { params }: { params: { institution_id: string } }
 ) {
-  const { institution_id, class_id } = params
-  const data = await backendFetch(
-    `/institutions/${institution_id}/classes/${class_id}`,
-    { method: "GET" }
-  )
-  return NextResponse.json(data)
+  const { institution_id } = params
+
+  try {
+    const data = await backendFetch(`/institutions/${institution_id}/classes`, {
+      method: "GET",
+    })
+    return NextResponse.json(data)
+  } catch (err: any) {
+    if (err?.status === 404) {
+      return NextResponse.json([], { status: 200 })
+    }
+    return NextResponse.json(
+      { message: err?.message ?? "Erro ao listar turmas" },
+      { status: err?.status ?? 500 }
+    )
+  }
 }
 
 export async function PUT(
