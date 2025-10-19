@@ -93,7 +93,9 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="text-base font-semibold">Criar nova instituição</ModalHeader>
+        <ModalHeader className="text-base font-semibold">
+          ➕ Criar nova instituição
+        </ModalHeader>
 
         <ModalBody className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -126,7 +128,9 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
           {/* Uploads opcionais */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <div className="mb-1 text-sm font-medium">Imagem de perfil (opcional)</div>
+              <div className="mb-1 text-sm font-medium">
+                Imagem de perfil (opcional)
+              </div>
               <FileUpload
                 ref={profileRef}
                 accept="image/*"
@@ -154,14 +158,23 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="flat" onPress={() => onOpenChange(false)} isDisabled={isPending}> 
+          <Button
+            variant="flat"
+            onPress={() => onOpenChange(false)}
+            isDisabled={isPending}
+          >
             Cancelar
           </Button>
-          <Button color="primary" onPress={handleSubmit} isDisabled={!canSubmit} isLoading={isPending}>
+          <Button
+            color="primary"
+            onPress={handleSubmit}
+            isDisabled={!canSubmit}
+            isLoading={isPending}
+          >
             Criar instituição
           </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
-  );
+  )
 }

@@ -22,7 +22,6 @@ export function useInstitution(id?: string, options?: Options) {
       return res.json();
     },
     retry: (failureCount, err: any) => {
-      // não re-tentar 404; demais erros no máx 1 retry
       return err?.status === 404 ? false : failureCount < 1;
     },
     staleTime: 60_000,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation" // ✅ App Router
+import { useRouter } from "next/navigation" 
 import { useClasses } from "@/hooks/classes/useClasses"
 
 import { DashboardHeader, StatCards } from "./dashboard/components"
@@ -17,6 +17,8 @@ export default function InstitutionClient({
   const router = useRouter()
   const { data, isLoading, isError } = useClasses(institutionId)
 
+  
+
   return (
     <>
       <section className="space-y-5">
@@ -27,6 +29,7 @@ export default function InstitutionClient({
 
       <section className="mt-6">
         <ClassesGrid
+          institutionId={institutionId}
           title="Suas Turmas"
           data={data}
           isLoading={isLoading}

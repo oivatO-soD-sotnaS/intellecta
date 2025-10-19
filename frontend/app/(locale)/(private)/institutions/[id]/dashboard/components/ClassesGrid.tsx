@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import type { ClassDTO } from "@/types/class"
 import CourseCard from "../../components/CourseCard"
+import CreateClassButton from "../../components/classes/CreateClassButton"
 
 type Props = {
   title?: string
@@ -10,32 +11,39 @@ type Props = {
   isLoading?: boolean
   isError?: boolean
   onOpenClass?: (class_id: string) => void
+  institutionId: string
 }
 
 export default function ClassesGrid({
   title = "Suas Turmas",
   data,
   isLoading,
-  isError,
   onOpenClass,
+  institutionId,
 }: Props) {
-  if (isError) {
-    return (
-      <section className="w-full">
-        <header className="mb-3">
-          <h2 className="text-lg font-semibold">{title}</h2>
-        </header>
-        <div className="rounded-2xl border border-red-300/60 bg-red-50 p-4 text-red-700">
-          Ocorreu um erro ao carregar suas turmas. Tente novamente.
-        </div>
-      </section>
-    )
-  }
+  
+  // if (isError) {
+  //   return (
+  //     <section className="w-full">
+  //       <header className="mb-3">
+  //         <h2 className="text-lg font-semibold">{title}</h2>
+  //       </header>
+  //       <div className="rounded-2xl border border-red-300/60 bg-red-50 p-4 text-red-700">
+  //         Ocorreu um erro ao carregar suas turmas. Tente novamente.
+  //       </div>
+  //     </section>
+  //   )
+  // }
+
+  
 
   return (
     <section className="w-full">
       <header className="mb-3 flex items-end justify-between">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 className="text-lg font-semibold flex gap-4">
+          <div>{title}</div>
+          <CreateClassButton institutionId={institutionId} />
+        </h2>
       </header>
 
       {isLoading ? (

@@ -1,121 +1,110 @@
 // lib/apiClient.ts
+export type ApiClientOpts = RequestInit & {
+  json?: any
+  query?: Record<string, any>
+}
 
-type JsonLike = { [k: string]: any } | null;
+function buildUrl(path: string, query?: Record<string, any>) {
+  const url = path.startsWith("/") ? path : `/${path}`
+  if (!query || Object.keys(query).length === 0) return url
 
-const SESSION_COOKIE = "session_expired";
-
-// rotas de autenticação onde NÃO queremos disparar modal/redirect (ex.: erro de credenciais no próprio login)
-function isAuthRoute(input: RequestInfo): boolean {
-  const url = typeof input === "string" ? input : (input as Request).url;
-  try {
-    const u = new URL(url, typeof window !== "undefined" ? window.location.origin : "http://localhost");
-    return u.pathname.startsWith("/auth");
-  } catch {
-    // se não der pra parsear, assume que não é rota de auth
-    return false;
+  const u = new URL(
+    url,
+    typeof window !== "undefined" ? window.location.origin : "http://localhost"
+  )
+  const params = new URLSearchParams(u.search)
+  for (const [k, v] of Object.entries(query)) {
+    if (v === undefined || v === null) continue
+    if (Array.isArray(v)) v.forEach((item) => params.append(k, String(item)))
+    else params.set(k, String(v))
   }
+  u.search = params.toString()
+  return u.pathname + (u.search ? `?${u.search}` : "")
 }
 
-function isClient() {
-  return typeof window !== "undefined" && typeof document !== "undefined";
+function isFormData(x: any): x is FormData {
+  return typeof FormData !== "undefined" && x instanceof FormData
 }
 
-function handleUnauthorized(shouldRedirect: boolean) {
-  try {
-    // 1) cookie que o SessionGuard / LoginPage usam para abrir o modal
-    document.cookie = `${SESSION_COOKIE}=1; Path=/; Max-Age=120; SameSite=Lax`;
+async function handle<T = any>(path: string, opts?: ApiClientOpts): Promise<T> {
+  const url = buildUrl(path, opts?.query)
 
-    // 2) broadcast p/ outras abas/componentes
-    try {
-      const bc = new BroadcastChannel("auth");
-      bc.postMessage("expired");
-      // fecha logo para não vazar handle
-      setTimeout(() => bc.close(), 0);
-    } catch {}
+  const headers = new Headers(opts?.headers)
+  if (!headers.has("Accept")) headers.set("Accept", "application/json")
 
-    // 3) redireciona depois de um breve delay (deixa o modal aparecer)
-    if (shouldRedirect) {
-      const next = window.location.pathname + window.location.search + window.location.hash;
-      setTimeout(() => {
-        // window.location.href = `/auth/login?expired=1&next=${encodeURIComponent(next)}`;
-        window.location.href = `/sign-in`;
-      }, 800);
-    }
-  } catch {
-    /* ambiente SSR não tem window/document */
+  let body: BodyInit | undefined = opts?.body
+  if (opts?.json !== undefined) {
+    body = JSON.stringify(opts.json)
+    if (!headers.has("Content-Type"))
+      headers.set("Content-Type", "application/json")
   }
-}
 
-export async function apiRequest<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, {
-    credentials: "include",
+  // Se for FormData, NÃO setar Content-Type manualmente
+  if (isFormData(body)) headers.delete("Content-Type")
+
+  const init: RequestInit = {
+    method: opts?.method ?? (opts?.json || opts?.body ? "POST" : "GET"),
+    credentials: "include", 
     cache: "no-store",
-    ...init,
-    headers: {
-      ...(init?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...(init?.headers || {}),
-    },
-  });
-
-  // 401: sessão expirada/sem token → dispara modal + (opcional) redirect
-  if (res.status === 401) {
-    if (isClient() && !isAuthRoute(input)) {
-      handleUnauthorized(true);
-    }
-    // importante: não tentar ler body depois; só sinalizamos e falhamos
-    throw new Error("UNAUTHORIZED");
+    ...opts,
+    headers,
+    body,
   }
 
-  // Sucesso sem body
-  if ([204, 205, 304].includes(res.status)) {
-    return null as unknown as T;
-  }
+  const res = await fetch(url, init)
 
-  const contentType = res.headers.get("content-type") || "";
-  const isJson =
-    contentType.includes("application/json") || contentType.includes("application/problem+json");
+  
 
-  // lê o corpo UMA única vez
-  const payload: JsonLike | string = await (async () => {
-    try {
-      if (isJson) return (await res.json()) as JsonLike;
-      return (await res.text()) as string;
-    } catch {
-      return isJson ? ({} as JsonLike) : "";
-    }
-  })();
+  if (res.status === 204) return null as T
+
+  const contentType = res.headers.get("content-type") || ""
+  const isJson = contentType.includes("application/json")
 
   if (!res.ok) {
-    // mensagem de erro amigável (sem reler o body)
-    let msg = "";
-    if (typeof payload === "string") {
-      msg = payload;
-    } else if (payload) {
-      if (typeof payload.message === "string") msg = payload.message;
-      else if (typeof payload.error === "string") msg = payload.error;
-      else if (payload.error && typeof (payload.error as any).message === "string")
-        msg = (payload.error as any).message;
-      else msg = JSON.stringify(payload);
+    let data: any = undefined
+    try {
+      data = isJson ? await res.json() : await res.text()
+      if (!isJson && typeof data === "string") {
+        data = { message: data || res.statusText }
+      }
+    } catch {
+      data = { message: res.statusText }
     }
-    throw new Error(msg || `Erro ${res.status}`);
+    const err: any = new Error(data?.message || `HTTP ${res.status}`)
+    err.status = res.status
+    err.data = data
+    throw err
   }
 
-  return payload as T;
+  return (isJson ? res.json() : (res.text() as any)) as Promise<T>
 }
 
-export const apiGet = <T>(url: string) => apiRequest<T>(url);
+export const apiGet = <T = any>(
+  path: string,
+  opts?: Omit<ApiClientOpts, "method" | "json" | "body">
+) => handle<T>(path, { ...opts, method: "GET" })
 
-export const apiPost = <T>(url: string, body?: unknown) =>
-  apiRequest<T>(url, {
-    method: "POST",
-    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-  });
+export const apiPost = <T = any>(
+  path: string,
+  body?: any,
+  opts?: Omit<ApiClientOpts, "method">
+) => handle<T>(path, { ...opts, method: "POST", json: body, body: undefined })
 
-export const apiPut = <T>(url: string, body?: unknown) =>
-  apiRequest<T>(url, {
-    method: "PUT",
-    body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-  });
+export const apiPut = <T = any>(
+  path: string,
+  body?: any,
+  opts?: Omit<ApiClientOpts, "method">
+) => handle<T>(path, { ...opts, method: "PUT", json: body, body: undefined })
 
-export const apiDelete = <T>(url: string) =>
-  apiRequest<T>(url, { method: "DELETE" });
+export const apiPatch = <T = any>(
+  path: string,
+  body?: any,
+  opts?: Omit<ApiClientOpts, "method">
+) => handle<T>(path, { ...opts, method: "PATCH", json: body, body: undefined })
+
+export const apiDelete = <T = any>(
+  path: string,
+  opts?: Omit<ApiClientOpts, "method" | "json">
+) => handle<T>(path, { ...opts, method: "DELETE" })
+
+export const apiFetch = handle

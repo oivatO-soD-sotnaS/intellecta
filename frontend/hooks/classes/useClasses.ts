@@ -1,22 +1,45 @@
 // hooks/classes/useClasses.ts
+"use client"
+
 import { useQuery } from "@tanstack/react-query"
-import { getClasses, getClass } from "@/services/classes"
+import { apiGet } from "@/lib/apiClient"
 import type { ClassDTO } from "@/types/class"
 
+type ApiList = ClassDTO[] | { items: ClassDTO[]; total?: number }
+
+const norm = (data: ApiList): ClassDTO[] => {
+  const arr = Array.isArray(data) ? data : (data.items ?? [])
+  return arr
+}
+
 export function useClasses(institutionId: string) {
-  return useQuery<ClassDTO[]>({
+  return useQuery({
     queryKey: ["classes", institutionId],
-    queryFn: () => getClasses(institutionId),
-    staleTime: 30_000,
-    retry: false, 
+    enabled: Boolean(institutionId),
+    staleTime: 60_000,
+    queryFn: async () => {
+      try {
+        const data = await apiGet<ApiList>(
+          `/api/institutions/${institutionId}/classes`
+        )
+        return norm(data)
+      } catch (e: any) {
+        // compatível com seu comportamento anterior
+        if (e?.status === 404) return [] as ClassDTO[]
+        throw e
+      }
+    },
   })
 }
 
 export function useClass(institutionId: string, classId: string) {
-  return useQuery<ClassDTO>({
+  return useQuery({
     queryKey: ["class", institutionId, classId],
-    queryFn: () => getClass(institutionId, classId),
     enabled: Boolean(institutionId && classId),
-    staleTime: 30_000,
+    staleTime: 60_000,
+    queryFn: async () =>
+      apiGet<ClassDTO>(
+        `/api/institutions/${institutionId}/classes/${classId}`
+      ),
   })
 }

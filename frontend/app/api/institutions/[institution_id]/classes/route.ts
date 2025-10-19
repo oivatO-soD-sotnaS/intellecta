@@ -1,27 +1,34 @@
-// app/api/v1/institutions/[institution_id]/classes/route.ts
-import { NextRequest, NextResponse } from "next/server"
-import { backendFetch } from "@/lib/http"
+import { NextRequest } from "next/server"
+import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
+
+export const dynamic = "force-dynamic"
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: { institution_id: string } }
+  req: NextRequest,
+  ctx: { params: Promise<{ institution_id: string }> }
 ) {
-  const { institution_id } = params
-  const data = await backendFetch(`/institutions/${institution_id}/classes`, {
-    method: "GET",
-  })
-  return NextResponse.json(data)
+  const { institution_id } = await ctx.params
+  return proxyGet(req, `/institutions/${institution_id}/classes`)
 }
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { institution_id: string } }
+  ctx: { params: Promise<{ institution_id: string }> }
 ) {
-  const { institution_id } = params
-  const body = await req.json().catch(() => ({}))
-  const data = await backendFetch(`/institutions/${institution_id}/classes`, {
+  const { institution_id } = await ctx.params
+
+  const body = await req.json().catch(() => ({}) as any)
+  const newBody = JSON.stringify({ ...body, institution_id })
+
+  const headers = new Headers(req.headers)
+  if (!headers.has("content-type"))
+    headers.set("content-type", "application/json")
+
+  const forwarded = new NextRequest(req.url, {
     method: "POST",
-    body: JSON.stringify(body),
+    headers,
+    body: newBody,
   })
-  return NextResponse.json(data)
+
+  return proxyPost(forwarded, `/institutions/${institution_id}/classes`)
 }

@@ -20,12 +20,12 @@ export type ClassDTO = {
   banner?: FileDTO | null
 }
 
-// payloads para POST/PUT (ajuste campos obrigatórios conforme seu backend)
 export type CreateClassInput = {
   name: string
-  description?: string | null
+  description: string 
   profile_picture_id?: string | null
   banner_id?: string | null
+  institution_id: string 
 }
 
 export type UpdateClassInput = Partial<CreateClassInput>

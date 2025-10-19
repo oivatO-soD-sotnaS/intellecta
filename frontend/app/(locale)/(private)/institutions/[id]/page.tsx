@@ -1,12 +1,10 @@
-// NADA de "use client" aqui.
-// NADA de next/router / next/navigation aqui.
-
 import InstitutionClient from "./InstitutionClient"
 
 type PageProps = {
-  params: { id: string }
+  institutionId: string
 }
 
-export default function InstitutionPage({ params }: PageProps) {
-  return <InstitutionClient institutionId={params.id} />
+export default async function InstitutionPage({ params }: { params: Promise<{ id: string }> }) {
+  const {id} = await params;
+  return <InstitutionClient institutionId={id} />
 }
