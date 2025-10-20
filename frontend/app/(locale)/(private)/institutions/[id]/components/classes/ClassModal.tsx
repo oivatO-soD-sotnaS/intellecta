@@ -11,11 +11,18 @@ import {
 import { Button } from "@heroui/button"
 import { Input, Textarea } from "@heroui/input"
 import { addToast } from "@heroui/toast"
+
 import { useCreateClass } from "@/hooks/classes/useCreateClass"
 import type { CreateClassInput } from "@/types/class"
 
-// ajuste para o seu componente de upload real
+// seu componente de upload (mesmo usado em outros fluxos)
 import FileUpload, { type FileUploadHandle } from "@/components/comp-547"
+
+// hook que você anexou: usa o proxy /api/files/upload-profile-assets
+import {
+  UploadProfileAssetResponse,
+  useUploadProfileAsset,
+} from "@/hooks/files/useUploadProfileAsset"
 
 type Props = {
   isOpen: boolean
@@ -24,34 +31,22 @@ type Props = {
   onCreated?: () => void
 }
 
-function tryGetUploadedFileId(
-  ref: React.RefObject<FileUploadHandle | any>
-): string | null {
-  const inst = ref.current
-  if (!inst) return null
-  try {
-    if (typeof inst.getUploaded === "function") {
-      const up = inst.getUploaded()
-      if (Array.isArray(up)) return up[0]?.file_id ?? null
-      return up?.file_id ?? null
-    }
-    if (typeof inst.getUploadedFiles === "function") {
-      const arr = inst.getUploadedFiles()
-      return (Array.isArray(arr) ? arr[0]?.file_id : null) ?? null
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
 export function ClassModal({
   isOpen,
   onOpenChange,
   institutionId,
   onCreated,
 }: Props) {
-  const { mutateAsync, isPending } = useCreateClass(institutionId)
+
+    const { mutateAsync: createClass, isPending: isCreating } =
+      useCreateClass(institutionId)
+
+
+  // hook de upload (já existente no seu projeto)
+  const { mutateAsync: uploadAsset, isPending: isUploading } =
+    useUploadProfileAsset()
+  // Se seu hook tiver outro nome, troque a linha acima; ex:
+  // const { uploadAsync: uploadAsset, isPending: isUploading } = useUploadProfileAsset();
 
   const [name, setName] = React.useState("")
   const [description, setDescription] = React.useState("")
@@ -70,6 +65,15 @@ export function ClassModal({
     } catch {}
   }, [])
 
+  const getRawFile = (ref: React.RefObject<any>): File | null => {
+    try {
+      const raw = ref.current?.getRawFiles?.()
+      return Array.isArray(raw) ? (raw[0] ?? null) : null
+    } catch {
+      return null
+    }
+  }
+
   const handleSubmit = React.useCallback(async () => {
     if (!name.trim() || !description.trim()) {
       addToast({
@@ -81,25 +85,24 @@ export function ClassModal({
       return
     }
 
-    const profileId = tryGetUploadedFileId(profileRef)
-    const bannerId = tryGetUploadedFileId(bannerRef)
-
-    const payload: CreateClassInput = {
-      name: name.trim(),
-      description: description.trim(),
-      profile_picture_id: profileId ?? undefined,
-      banner_id: bannerId ?? undefined,
-      institution_id: institutionId,
-    }
-
     try {
-      await mutateAsync(payload)
+      const profileFile = getRawFile(profileRef)
+      const bannerFile = getRawFile(bannerRef)
+
+      await createClass({
+        name: name.trim(),
+        description: description.trim(),
+        profileFile,
+        bannerFile,
+      })
+
       addToast({
         title: "Turma criada",
         description: "A turma foi criada com sucesso.",
         color: "success",
         variant: "flat",
       })
+
       resetForm()
       onOpenChange(false)
       onCreated?.()
@@ -119,11 +122,13 @@ export function ClassModal({
     name,
     description,
     institutionId,
-    mutateAsync,
+    createClass,
     onOpenChange,
     onCreated,
     resetForm,
   ])
+
+  const isBusy = isCreating || isUploading
 
   return (
     <Modal
@@ -202,14 +207,11 @@ export function ClassModal({
                   resetForm()
                   close()
                 }}
+                isDisabled={isBusy}
               >
                 Cancelar
               </Button>
-              <Button
-                color="primary"
-                isLoading={isPending}
-                onPress={handleSubmit}
-              >
+              <Button color="primary" isLoading={isBusy} onPress={handleSubmit}>
                 Salvar
               </Button>
             </ModalFooter>

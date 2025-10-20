@@ -2,6 +2,7 @@ import { NextRequest } from "next/server"
 import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
 
 export const dynamic = "force-dynamic"
+export const runtime = "nodejs" // importante para streaming multipart
 
 export async function GET(
   req: NextRequest,
@@ -16,19 +17,6 @@ export async function POST(
   ctx: { params: Promise<{ institution_id: string }> }
 ) {
   const { institution_id } = await ctx.params
-
-  const body = await req.json().catch(() => ({}) as any)
-  const newBody = JSON.stringify({ ...body, institution_id })
-
-  const headers = new Headers(req.headers)
-  if (!headers.has("content-type"))
-    headers.set("content-type", "application/json")
-
-  const forwarded = new NextRequest(req.url, {
-    method: "POST",
-    headers,
-    body: newBody,
-  })
-
-  return proxyPost(forwarded, `/institutions/${institution_id}/classes`)
+  // ⚠️ NÃO leia o body aqui — precisamos repassar o stream multipart intacto
+  return proxyPost(req, `/institutions/${institution_id}/classes`)
 }

@@ -17,6 +17,7 @@ export default function InstitutionClient({
   const router = useRouter()
   const { data, isLoading, isError } = useClasses(institutionId)
 
+  console.log("Log do data -> ", data)
   
 
   return (
