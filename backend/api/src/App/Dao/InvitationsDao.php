@@ -64,11 +64,13 @@ readonly class InvitationsDao extends BaseDao {
 
   public function updateInvitation(Invitation $invitation): ?Invitation {
     $sql = "UPDATE invitations
-            SET accepted_at = :accepted_at";
+            SET accepted_at = :accepted_at
+            WHERE invitation_id = :invitation_id";
     
     $pdo = $this->database->getConnection();
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':accepted_at', $invitation->getAcceptedAt(), PDO::PARAM_STR);
+    $stmt->bindValue(':invitation_id', $invitation->getInvitationId(), PDO::PARAM_STR);
     $success = $stmt->execute();
 
     return $success ? $invitation : null;

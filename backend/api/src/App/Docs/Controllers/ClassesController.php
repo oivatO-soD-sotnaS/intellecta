@@ -4,16 +4,16 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: "Classes",
-    description: "Operations related to class management"
+    name: "Turmas",
+    description: "Operações relacionadas ao gerenciamento de turmas"
 )]
 class ClassesController
 {
     #[OA\Get(
         path: "/institutions/{institution_id}/classes",
-        tags: ["Classes"],
-        summary: "Get institution classes",
-        description: "Retrieve classes for an institution (all classes for admins, only participating classes for others)",
+        tags: ["Turmas"],
+        summary: "Obter turmas da instituição",
+        description: "Recupera turmas para uma instituição (todas as turmas para administradores, apenas turmas participantes para outros)",
         operationId: "getInstitutionClasses",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -21,14 +21,14 @@ class ClassesController
                 name: "institution_id",
                 in: "path",
                 required: true,
-                description: "ID of the institution",
+                description: "ID da instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "List of classes",
+                description: "Lista de turmas",
                 content: new OA\JsonContent(
                     type: "array",
                     items: new OA\Items(ref: "#/components/schemas/ClassModelDto")
@@ -36,7 +36,7 @@ class ClassesController
             ),
             new OA\Response(
                 response: 404,
-                description: "No classes found",
+                description: "Nenhuma turma encontrada",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
@@ -45,9 +45,9 @@ class ClassesController
 
     #[OA\Post(
         path: "/institutions/{institution_id}/classes",
-        tags: ["Classes"],
-        summary: "Create a new class",
-        description: "Create a new class in the specified institution",
+        tags: ["Turmas"],
+        summary: "Criar uma nova turma",
+        description: "Cria uma nova turma na instituição especificada",
         operationId: "createClass",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -55,12 +55,12 @@ class ClassesController
                 name: "institution_id",
                 in: "path",
                 required: true,
-                description: "ID of the institution",
+                description: "ID da instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         requestBody: new OA\RequestBody(
-            description: "Class creation data",
+            description: "Dados para criação da turma",
             required: true,
             content: new OA\MediaType(
                 mediaType: "multipart/form-data",
@@ -70,27 +70,27 @@ class ClassesController
                         new OA\Property(
                             property: "name",
                             type: "string",
-                            description: "Name of the class",
+                            description: "Nome da turma",
                             minLength: 3,
                             maxLength: 255
                         ),
                         new OA\Property(
                             property: "description",
                             type: "string",
-                            description: "Detailed description of the class"
+                            description: "Descrição detalhada da turma"
                         ),
                         new OA\Property(
                             property: "profile-picture",
                             type: "string",
                             format: "binary",
-                            description: "Profile picture file",
+                            description: "Arquivo de foto de perfil",
                             nullable: true
                         ),
                         new OA\Property(
                             property: "banner",
                             type: "string",
                             format: "binary",
-                            description: "Banner image file",
+                            description: "Arquivo de imagem do banner",
                             nullable: true
                         )
                     ]
@@ -100,12 +100,12 @@ class ClassesController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Created class details",
+                description: "Detalhes da turma criada",
                 content: new OA\JsonContent(ref: "#/components/schemas/ClassModelDto")
             ),
             new OA\Response(
                 response: 400,
-                description: "Invalid input",
+                description: "Entrada inválida",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
@@ -116,9 +116,9 @@ class ClassesController
 
     #[OA\Get(
         path: "/institutions/{institution_id}/classes/{class_id}",
-        tags: ["Classes"],
-        summary: "Get class details",
-        description: "Retrieve details of a specific class",
+        tags: ["Turmas"],
+        summary: "Obter detalhes da turma",
+        description: "Recupera os detalhes de uma turma específica",
         operationId: "getClassById",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -126,26 +126,26 @@ class ClassesController
                 name: "institution_id",
                 in: "path",
                 required: true,
-                description: "ID of the institution",
+                description: "ID da instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             ),
             new OA\Parameter(
                 name: "class_id",
                 in: "path",
                 required: true,
-                description: "ID of the class",
+                description: "ID da turma",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Class details",
+                description: "Detalhes da turma",
                 content: new OA\JsonContent(ref: "#/components/schemas/ClassModelDto")
             ),
             new OA\Response(
                 response: 404,
-                description: "Class not found",
+                description: "Turma não encontrada",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
@@ -156,9 +156,9 @@ class ClassesController
 
     #[OA\Put(
         path: "/institutions/{institution_id}/classes/{class_id}",
-        tags: ["Classes"],
-        summary: "Update a class",
-        description: "Update details of an existing class",
+        tags: ["Turmas"],
+        summary: "Atualizar uma turma",
+        description: "Atualiza os detalhes de uma turma existente",
         operationId: "updateClass",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -166,19 +166,19 @@ class ClassesController
                 name: "institution_id",
                 in: "path",
                 required: true,
-                description: "ID of the institution",
+                description: "ID da instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             ),
             new OA\Parameter(
                 name: "class_id",
                 in: "path",
                 required: true,
-                description: "ID of the class",
+                description: "ID da turma",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         requestBody: new OA\RequestBody(
-            description: "Class update data",
+            description: "Dados para atualização da turma",
             required: true,
             content: new OA\JsonContent(
                 required: ["name", "description"],
@@ -186,27 +186,27 @@ class ClassesController
                     new OA\Property(
                         property: "name",
                         type: "string",
-                        description: "Updated name of the class",
+                        description: "Nome atualizado da turma",
                         minLength: 3,
                         maxLength: 255
                     ),
                     new OA\Property(
                         property: "description",
                         type: "string",
-                        description: "Updated description of the class"
+                        description: "Descrição atualizada da turma"
                     ),
                     new OA\Property(
                         property: "profile_picture_id",
                         type: "string",
                         format: "uuid",
-                        description: "ID of the new profile picture",
+                        description: "ID da nova foto de perfil",
                         nullable: true
                     ),
                     new OA\Property(
                         property: "banner_id",
                         type: "string",
                         format: "uuid",
-                        description: "ID of the new banner image",
+                        description: "ID da nova imagem do banner",
                         nullable: true
                     )
                 ]
@@ -215,17 +215,17 @@ class ClassesController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Updated class details",
+                description: "Detalhes da turma atualizada",
                 content: new OA\JsonContent(ref: "#/components/schemas/ClassModelDto")
             ),
             new OA\Response(
                 response: 400,
-                description: "Invalid input",
+                description: "Entrada inválida",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 404,
-                description: "Class or file not found",
+                description: "Turma ou arquivo não encontrado",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
@@ -236,9 +236,9 @@ class ClassesController
 
     #[OA\Delete(
         path: "/institutions/{institution_id}/classes/{class_id}",
-        tags: ["Classes"],
-        summary: "Delete a class",
-        description: "Permanently delete a class",
+        tags: ["Turmas"],
+        summary: "Excluir uma turma",
+        description: "Exclui permanentemente uma turma",
         operationId: "deleteClass",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -246,27 +246,27 @@ class ClassesController
                 name: "institution_id",
                 in: "path",
                 required: true,
-                description: "ID of the institution",
+                description: "ID da instituição",
                 schema: new OA\Schema(type: "string", format: "uuid")
             ),
             new OA\Parameter(
                 name: "class_id",
                 in: "path",
                 required: true,
-                description: "ID of the class to delete",
+                description: "ID da turma a ser excluída",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Class deleted successfully",
+                description: "Turma excluída com sucesso",
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(
                             property: "message",
                             type: "string",
-                            description: "Confirmation message"
+                            description: "Mensagem de confirmação"
                         )
                     ],
                     type: "object"
@@ -274,12 +274,12 @@ class ClassesController
             ),
             new OA\Response(
                 response: 404,
-                description: "Class not found",
+                description: "Turma não encontrada",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 500,
-                description: "Internal server error",
+                description: "Erro interno do servidor",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]

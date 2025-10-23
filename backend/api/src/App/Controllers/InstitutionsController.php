@@ -14,6 +14,7 @@ use App\Models\File;
 use App\Models\Institution;
 use App\Models\InstitutionSummary;
 use App\Models\InstitutionUser;
+use App\Models\User;
 use App\Services\LogService;
 use App\Services\UploadService;
 use App\Services\ValidatorService;
@@ -42,8 +43,8 @@ readonly class InstitutionsController extends BaseController
 
   public function getUserInstitutions(Request $request, Response $response): Response {
     return $this->handleErrors($request, function() use ($request, $response) {
-      $token = $request->getAttribute('token');
-      $userOwnedInstitutions = $this->institutionsDao->getUserOwnedInstitutions($token['sub']);
+      $user = $request->getAttribute('user');
+      $userOwnedInstitutions = $this->institutionsDao->getUserOwnedInstitutions($user->getUserId());
       
       if(empty($userOwnedInstitutions) || count($userOwnedInstitutions) === 0) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -69,8 +70,8 @@ readonly class InstitutionsController extends BaseController
   public function getInstitutionsSummary(Request $request, Response $response): Response
   {
     return $this->handleErrors($request, function() use ($request, $response) {
-      $token = $request->getAttribute('token');
-      $summaries = $this->institutionsDao->getInstitutionsSummaryByUserId($token['sub']);
+      $user = $request->getAttribute('user');
+      $summaries = $this->institutionsDao->getInstitutionsSummaryByUserId($user->getUserId());
       
       if (empty($summaries)) {
         LogService::info("/institutions/summaries", "User does not participate in any institution");
@@ -97,8 +98,8 @@ readonly class InstitutionsController extends BaseController
   public function getInstitutionSummaryById(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-      $token = $request->getAttribute('token');
-      $summary = $this->institutionsDao->getInstitutionSummaryByUserIdAndInstitutionId($token['sub'], $institution_id);
+      $user = $request->getAttribute('user');
+      $summary = $this->institutionsDao->getInstitutionSummaryByUserIdAndInstitutionId($user->getUserId(), $institution_id);
       
       if (empty($summary)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -121,8 +122,8 @@ readonly class InstitutionsController extends BaseController
   public function getInstitutions(Request $request, Response $response): Response
   {
     return $this->handleErrors($request, function() use ($request, $response) {
-      $token = $request->getAttribute('token');
-      $institutions = $this->institutionsDao->getInstitutionsByUserId($token['sub']);
+      $user = $request->getAttribute('user');
+      $institutions = $this->institutionsDao->getInstitutionsByUserId($user->getUserId());
       
       if (empty($institutions)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -167,8 +168,9 @@ readonly class InstitutionsController extends BaseController
   public function createInstitution(Request $request, Response $response): Response
   {
     return $this->handleErrors($request, function() use ($request, $response) {
-      $token = $request->getAttribute('token');
-      $userOwnedInstitutions = $this->institutionsDao->getUserOwnedInstitutions($token['sub']);
+      /** @var User mixed $user */
+      $user = $request->getAttribute('user');
+      $userOwnedInstitutions = $this->institutionsDao->getUserOwnedInstitutions($user->getUserId());
       
       if (count($userOwnedInstitutions) >= 3) {
         throw new HttpForbiddenException($request, LogService::HTTP_403 . "User has reached the maximum number of owned institutions (3)");
@@ -229,9 +231,9 @@ readonly class InstitutionsController extends BaseController
 
       $institution = $this->institutionsDao->createInstitution(new Institution([
         "institution_id" => Uuid::uuid4()->toString(),
-        "user_id" => $token['sub'],
+        "user_id" => $user->getUserId(),
         "name" => $name->getValue(),
-        "email" => $token["email"],
+        "email" => $user->getEmail(),
         "description" => $description->getValue(),
         "profile_picture_id" => $profilePictureFile?->getFileId(),
         "banner_id" => $bannerFile?->getFileId(),
@@ -242,11 +244,11 @@ readonly class InstitutionsController extends BaseController
         "role" => InstitutionUserType::Admin->value ,
         "joined_at" => $timestamp,
         "institution_id" => $institution->getInstitutionId(),
-        "user_id" => $token['sub']
+        "user_id" => $user->getUserId()
       ]));
 
       $institutionDto = new InstitutionDto($institution, $bannerFile, $profilePictureFile);
-      LogService::info('/institutions', "Created institution {$institution->getInstitutionId()} for user {$token['email']}");
+      LogService::info('/institutions', "Created institution {$institution->getInstitutionId()} for user {$user->getUserId()}");
       $response->getBody()->write(json_encode($institutionDto));
       return $response;
     });
@@ -255,7 +257,7 @@ readonly class InstitutionsController extends BaseController
   public function updateInstitution(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-      $token= $request->getAttribute('token');
+      $user = $request->getAttribute('user');
 
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['name', 'description']);
@@ -313,7 +315,7 @@ readonly class InstitutionsController extends BaseController
       $institutionDto = new InstitutionDto($institution, $banner, $profilePicture);
       $response->getBody()->write(json_encode($institutionDto));
       
-      LogService::info("/institutions/{$institution_id}", "Institution updated by user {$token['email']}");
+      LogService::info("/institutions/{$institution_id}", "Institution updated by user {$user->getUserId()}");
       return $response;
     });
   }
@@ -321,7 +323,7 @@ readonly class InstitutionsController extends BaseController
   public function deleteInstitution(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-      $token = $request->getAttribute('token');
+      $user = $request->getAttribute('user');
 
       $institution = $this->institutionsDao->getInstitutionById($institution_id);
       if (empty($institution)) {
@@ -329,7 +331,7 @@ readonly class InstitutionsController extends BaseController
       }
 
       $this->institutionsDao->deleteInstitution($institution_id);
-      LogService::info("/institutions/$institution_id", "Institution deleted by user {$token['email']}");
+      LogService::info("/institutions/$institution_id", "Institution deleted by user {$user->getUserId()}");
       return $response->withStatus(204);
     });
   }

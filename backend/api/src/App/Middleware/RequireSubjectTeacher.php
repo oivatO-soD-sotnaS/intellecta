@@ -38,12 +38,12 @@ class RequireSubjectTeacher{
       throw new HttpBadRequestException($request, 'Missing subject ID or institution ID.');
     }
 
-    $token = $request->getAttribute('token');
+    $user = $request->getAttribute('user');
     
     try {
         $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
         
-        if($subject->getTeacherId() !== $token['sub']) {
+        if($subject->getTeacherId() !== $user->getUserId()) {
           throw new HttpForbiddenException($request, "Only the teacher of the subject can access this subject");
         }
 

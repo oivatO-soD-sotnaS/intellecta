@@ -38,16 +38,16 @@ class RequireClassMembership{
     }
     /** @var InstitutionUser $membership */
     $membership = $request->getAttribute('membership');
-    $token = $request->getAttribute('token');
+    $user = $request->getAttribute('user');
     
     try {
-      $isUserMemberOfClass = $this->classUsersDao->isUserMemberOfClass($token['sub'], $classId);
+      $isUserMemberOfClass = $this->classUsersDao->isUserMemberOfClass($user->getUserId(), $classId);
 
       if(
         $membership->getRole() !== InstitutionUserType::Admin->value
         && !$isUserMemberOfClass
       ) {
-        LogService::http403('RequireClassMembership', "User ".$token['email']. " is not a member of the class {$classId}");
+        LogService::http403('RequireClassMembership', "User ".$user->getUserId(). " is not a member of the class {$classId}");
         throw new HttpForbiddenException($request, 'User can not access this class');
       } 
 

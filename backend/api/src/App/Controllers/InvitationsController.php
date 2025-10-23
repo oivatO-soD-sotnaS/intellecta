@@ -39,8 +39,7 @@ readonly class InvitationsController extends BaseController {
             if(empty($invitation)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
-            $token = $request->getAttribute('token');
-            $user = $this->usersDao->getUserById($token['sub']);
+            $user = $request->getAttribute('user');
 
             if($invitation->getEmail() !== $user->getEmail()) {
                 LogService::http403("/invitation/{$invitation_id}/accept", "User {$user->getEmail()} tried using invitation for {$invitation->getEmail()}");
@@ -85,10 +84,10 @@ readonly class InvitationsController extends BaseController {
             if(empty($invitation)) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
-            if($invitation->getEmail() !== $token['email']) {
-                LogService::http403("/invitation/{$invitation_id}", "User {$token['email']} tried fetching invitation for {$invitation->getEmail()}");
+            if($invitation->getEmail() !== $user->getEmail()) {
+                LogService::http403("/invitation/{$invitation_id}", "User {$user->getEmail()} tried fetching invitation for {$invitation->getEmail()}");
                 throw new HttpForbiddenException($request, LogService::HTTP_403);
             }
 
@@ -118,8 +117,8 @@ readonly class InvitationsController extends BaseController {
 
     public function getAllInvitations(Request $request, Response $response): Response {
         return $this->handleErrors($request, function() use ($request, $response) {
-            $token = $request->getAttribute('token');
-            $invitations = $this->invitationsDao->getAllUserInvitations($token['email']);
+            $user = $request->getAttribute('user');
+            $invitations = $this->invitationsDao->getAllUserInvitations($user->getEmail());
 
             if(count($invitations) === 0){
                 throw new HttpNotFoundException($request, LogService::HTTP_404);

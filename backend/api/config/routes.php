@@ -11,6 +11,7 @@ use App\Controllers\InstitutionUsersController;
 use App\Controllers\InvitationsController;
 use App\Controllers\AssignmentsController;
 use App\Controllers\ForumMessagesController;
+use App\Controllers\NotificationsController;
 use App\Controllers\SubjectEventsController;
 use App\Controllers\SubjectMaterialsController;
 use App\Controllers\SubjectsController;
@@ -48,22 +49,28 @@ return function (App $app) {
     })->add(RequireAuth::class);
 
     $app->group('/users', function ($users) {
-        $users->group('/{user_id:'.UUIDv4_REGEX.'}', function($usersWithId) {
-            $usersWithId->get('', UsersController::class . ':getUser');
-            $usersWithId->put('', UsersController::class . ':updateUser');
-            $usersWithId->delete('', UsersController::class . ':deleteUser');
-        });
+        $users->group('/me', function($user) {
+            $user->get('', UsersController::class . ':getUser');
+            $user->put('', UsersController::class . ':updateUser');
+            $user->delete('', UsersController::class . ':deleteUser');
 
-        $users->group('/events', function($userEvents) {
-            $userEvents->post('', UserEventsController::class . ':createUserEvent');
-            $userEvents->get('', UserEventsController::class . ':getUserEvents');
-
-            $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
-                $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
-                $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');
-                $userEventsWithId->delete('', UserEventsController::class . ':deleteUserEvent');
+            $user->group('/events', function($userEvents) {
+                $userEvents->post('', UserEventsController::class . ':createUserEvent');
+                $userEvents->get('', UserEventsController::class . ':getUserEvents');
+    
+                $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
+                    $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
+                    $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');
+                    $userEventsWithId->delete('', UserEventsController::class . ':deleteUserEvent');
+                });
+            });
+    
+            $user->group('/notifications', function($userNotifications) {
+               $userNotifications->get('', NotificationsController::class . ':getUserNotifications');
+               $userNotifications->patch('/{event_id:'.UUIDv4_REGEX.'}/set-as-seen', NotificationsController::class . ':setNotificationAsSeen'); 
             });
         });
+
     })->add(RequireAuth::class);
 
     $app->group('/invitations', function ($group) {

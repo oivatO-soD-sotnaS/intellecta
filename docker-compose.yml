@@ -1,16 +1,18 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend_container
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    networks:
-      - intellecta-public-network
+  # frontend:
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
+    # container_name: frontend_container
+    # ports:
+    #   - "3000:3000"
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    # networks:
+    #   - intellecta-public-network
+      # depends_on:
+      # - backend
 
   backend:
     build:
@@ -25,6 +27,9 @@ services:
     env_file:
       - ./database/.env
       - ./backend/.env
+    depends_on:
+      - redis
+      - database
     networks:
       intellecta-private-network: {}
       intellecta-public-network:
@@ -33,11 +38,11 @@ services:
             - files.intellecta
   email-worker:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.worker
+      context: ./email_worker
+      dockerfile: Dockerfile
     container_name: email_worker_container
     env_file:
-      - ./backend/.env
+      - ./email_worker/.env
     depends_on:
       - redis
     networks:

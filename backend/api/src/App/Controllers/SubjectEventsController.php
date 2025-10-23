@@ -11,8 +11,10 @@ use App\Dto\SubjectEventDto;
 use App\Enums\EventType;
 use App\Models\Event;
 use App\Models\SubjectEvent;
+use App\Queue\RedisEmailQueue;
 use App\Services\LogService;
 use App\Services\ValidatorService;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\EventDateVo;
 use App\Vo\EventDescriptionVo;
 use App\Vo\EventTitleVo;
@@ -29,7 +31,9 @@ readonly class SubjectEventsController extends BaseController {
         private EventsDao $eventsDao,
         private SubjectsDao $subjectsDao,
         private ValidatorService $validatorService,
-        private UserEventsDao $userEventsDao
+        private UserEventsDao $userEventsDao,
+        private RedisEmailQueue $emailQueue,
+        private EmailTemplateProvider $emailTemplateProvider
     ) {}
 
     public function getSubjectEvents(Request $request, Response $response, string $institution_id, string $subject_id): Response {
@@ -53,7 +57,7 @@ readonly class SubjectEventsController extends BaseController {
 
     public function createSubjectEvent(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
-            $token = $request->getAttribute("token");
+            $user = $request->getAttribute("user");
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
 
@@ -80,16 +84,35 @@ readonly class SubjectEventsController extends BaseController {
                 'event_id' => $event->getEventId()
             ]));
 
+            $subjectStudents = $this->subjectsDao->getStudentsBySubjectId($subject_id);
+            $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
+
+            foreach ($subjectStudents as $student) {
+                $this->emailQueue->push([
+                'to' => $student->getEmail(),
+                'toName' => $student->getFullName(),
+                'subject' => "{$subject->getName()} - Novo evento de disciplina: {$event->getTitle()}",
+                'body' => $this->emailTemplateProvider->getSubjectNotificationEmailTemplate(
+                    $student->getFullName(),
+                    $event,
+                    $subject->getName(),
+                    $user->getFullName(),
+                    $user->getEmail()
+                ),
+                'altBody' => "Olá {$student->getFullName()},\n\nUm novo evento foi criado para a disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                ]);
+            }
+
             $subjectEventDto = new SubjectEventDto($subjectEvent, $event);
 
             $response->getBody()->write(json_encode([
-                "Message" => "User event created successfully",
+                "Message" => "Subject event created successfully",
                 "subject_event" => $subjectEventDto
             ]));
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/events", 
-                "{$token['email']} created a subject event with id '{$subjectEvent->getSubjectEventId()}'"
+                "{$user->getUserId()} created a subject event with id '{$subjectEvent->getSubjectEventId()}'"
             );
             return $response->withStatus(201);
         });
@@ -97,7 +120,7 @@ readonly class SubjectEventsController extends BaseController {
 
     public function updateSubjectEvent(Request $request, Response $response, string $institution_id, string $subject_id, string $subject_event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $subject_event_id) {
-            $token = $request->getAttribute("token");
+            $user = $request->getAttribute("user");
 
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
@@ -130,7 +153,26 @@ readonly class SubjectEventsController extends BaseController {
             $event->setEventDate($eventDate->toString());
             $event->setType($eventType->value);
 
-            $this->eventsDao->updateEvent($event);
+            $event = $this->eventsDao->updateEvent($event);
+
+            $subjectStudents = $this->subjectsDao->getStudentsBySubjectId($subject_id);
+            $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
+
+            foreach ($subjectStudents as $student) {
+                $this->emailQueue->push([
+                'to' => $student->getEmail(),
+                'toName' => $student->getFullName(),
+                'subject' => "{$subject->getName()} - Evento de disciplina atualizado: {$event->getTitle()}",
+                'body' => $this->emailTemplateProvider->getSubjectNotificationUpdatedEmailTemplate(
+                    $student->getFullName(),
+                    $event,
+                    $subject->getName(),
+                    $user->getFullName(),
+                    $user->getEmail()
+                ),
+                'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi atualizado na disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                ]);
+            }
 
             $subjectEventDto = new SubjectEventDto($subjectEvent, $event);
             $response->getBody()->write(json_encode([
@@ -140,7 +182,7 @@ readonly class SubjectEventsController extends BaseController {
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/events/{$subject_event_id}", 
-            "{$token['email']} update a subject event with ID '{$subjectEvent->getSubjectEventId()}'"
+            "{$user->getUserId()} updated a subject event with ID '{$subjectEvent->getSubjectEventId()}'"
             );
             return $response;
         });
@@ -148,7 +190,7 @@ readonly class SubjectEventsController extends BaseController {
 
     public function deleteSubjectEvent(Request $request, Response $response,string $institution_id, string $subject_id, string $subject_event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $subject_event_id) {
-            $token = $request->getAttribute("token");
+            $user = $request->getAttribute("user");
             
             $subjectEvent = $this->subjectEventsDao->getSubjectEventById($subject_event_id);
             
@@ -169,13 +211,32 @@ readonly class SubjectEventsController extends BaseController {
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
+            $subjectStudents = $this->subjectsDao->getStudentsBySubjectId($subject_id);
+            $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
+
+            foreach ($subjectStudents as $student) {
+                $this->emailQueue->push([
+                'to' => $student->getEmail(),
+                'toName' => $student->getFullName(),
+                'subject' => "{$subject->getName()} - Evento de disciplina removido: {$event->getTitle()}",
+                'body' => $this->emailTemplateProvider->getSubjectNotificationDeletedEmailTemplate(
+                    $student->getFullName(),
+                    $event,
+                    $subject->getName(),
+                    $user->getFullName(),
+                    $user->getEmail()
+                ),
+                'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi removido da disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                ]);
+            }
+
             $response->getBody()->write(json_encode([
                 "Message" => "Subject event deleted successfully"
             ]));
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/events/{$subject_event_id}",
-                "{$token['email']} deleted a subject event with id '{$subject_event_id}'"
+                "{$user->getUserId()} deleted a subject event with id '{$subject_event_id}'"
             );
             return $response;
         });

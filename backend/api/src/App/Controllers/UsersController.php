@@ -7,15 +7,14 @@ use App\Dao\FilesDao;
 use App\Dao\UsersDao;
 use App\Dto\UserDto;
 use App\Enums\FileType;
-use App\Services\EmailService;
 use App\Services\LogService;
 use App\Services\UploadService;
 use App\Services\ValidatorService;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\PasswordVo;
 use App\Vo\UsernameVo;
 use App\Vo\UuidV4Vo;
 use InvalidArgumentException;
-use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Psr7\Request;
@@ -28,24 +27,15 @@ readonly class UsersController extends BaseController
     private UsersDao $usersDao,
     private FilesDao $fileDao,
     private FilesDao $filesDao,
-    private EmailService $emailService,
+    private EmailTemplateProvider $emailTemplateProvider,
     private UploadService $uploadService,
     private ValidatorService $validatorService
   ) {}
 
-  public function getUser(Request $request, Response $response, string $user_id): Response
+  public function getUser(Request $request, Response $response): Response
   {
-    return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->usersDao->getUserById($user_id);
-
-      if (empty($user)) {
-        throw new HttpNotFoundException($request, LogService::HTTP_404);
-      }
-
-      $token = $request->getAttribute("token");
-      if ($token["sub"] !== $user->getUserId()) {
-        throw new HttpForbiddenException($request, LogService::HTTP_403);
-      }
+    return $this->handleErrors($request, function() use ($request, $response) {
+      $user = $request->getAttribute("user");
 
       $profilePicture = !empty($user->getProfilePictureId())
         ? $this->fileDao->getFileById($user->getProfilePictureId())
@@ -57,12 +47,14 @@ readonly class UsersController extends BaseController
     });
   }
 
-  public function updateUser(Request $request, Response $response, string $user_id): Response
+  public function updateUser(Request $request, Response $response): Response
   {
-    return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $body = $request->getParsedBody();
-      $fullName = $body['full_name'] ?? null;
-      $password = $body['password'] ?? null;
+    return $this->handleErrors($request, function() use ($request, $response) {
+      $user             = $request->getAttribute("user");
+
+      $body             = $request->getParsedBody();
+      $fullName         = $body['full_name'] ?? null;
+      $password         = $body['password'] ?? null;
       $profilePictureId = $body['profile_picture_id'] ?? null;
 
       if (empty($fullName) && empty($password) && empty($profilePictureId)) {
@@ -72,16 +64,6 @@ readonly class UsersController extends BaseController
       if (!empty($fullName)) $fullName = new UsernameVo($fullName);
       if (!empty($password)) $password = new PasswordVo($password);
       if (!empty($profilePictureId)) $profilePictureId = new UuidV4Vo($profilePictureId);
-
-      $user = $this->usersDao->getUserById($user_id);
-      if (empty($user)) {
-        throw new HttpNotFoundException($request, LogService::HTTP_404);
-      }
-
-      $token = $request->getAttribute('token');
-      if ($token['sub'] !== $user->getUserId()) {
-        throw new HttpForbiddenException($request, LogService::HTTP_403);
-      }
 
       if ($fullName) {
         $user->setFullName($fullName->getValue());
@@ -113,23 +95,15 @@ readonly class UsersController extends BaseController
         'message' => 'User updated successfully'
       ]));
 
-      LogService::info("/users/$user_id", "User updated successfully");
+      LogService::info("/users/me", "User updated successfully");
       return $response;
     });
   }
 
-  public function deleteUser(Request $request, Response $response, string $user_id): Response
+  public function deleteUser(Request $request, Response $response): Response
   {
-    return $this->handleErrors($request, function() use ($request, $response, $user_id) {
-      $user = $this->usersDao->getUserById($user_id);
-      if (empty($user)) {
-        throw new HttpNotFoundException($request, LogService::HTTP_404);
-      }
-
-      $token = $request->getAttribute("token");
-      if ($token["sub"] !== $user->getUserId()) {
-        throw new HttpForbiddenException($request, LogService::HTTP_403);
-      }
+    return $this->handleErrors($request, function() use ($request, $response) {
+      $user = $request->getAttribute("user");
 
       $success = $this->usersDao->deleteUser($user->getUserId());
       if (!$success) {
@@ -137,7 +111,7 @@ readonly class UsersController extends BaseController
       }
 
       $response->getBody()->write(json_encode(['message' => 'User deleted successfully']));
-      LogService::info("/users/$user_id", "User deleted successfully");
+      LogService::info("/users/me", "User deleted successfully");
       return $response;
     });
   }

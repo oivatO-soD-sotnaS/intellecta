@@ -50,7 +50,7 @@ readonly class SubjectMaterialsController extends BaseController {
 
     public function createSubjectMaterial(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
             $uploadedFiles = $request->getUploadedFiles();
@@ -91,7 +91,7 @@ readonly class SubjectMaterialsController extends BaseController {
 
             $response->getBody()->write(json_encode($subjectMaterialDto));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials", "{$token['email']} created a new '{$subjectMaterial->getTitle()}' material for the {$subject_id} subject");
+            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials", "{$user->getUserId()} created a new '{$subjectMaterial->getTitle()}' material for the {$subject_id} subject");
             return $response;
         });
     }
@@ -119,7 +119,7 @@ readonly class SubjectMaterialsController extends BaseController {
 
     public function updateMaterial(Request $request, Response $response, string $institution_id, string $subject_id, string $material_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $material_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $material = $this->subjectMaterialsDao->getMaterialById($material_id);
             
@@ -150,14 +150,14 @@ readonly class SubjectMaterialsController extends BaseController {
 
             $response->getBody()->write(json_encode($subjectMaterialDto));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials/{$material_id}", "{$token['email']} update the {$material->getTitle()} material");
+            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials/{$material_id}", "{$user->getUserId()} update the {$material->getTitle()} material");
             return $response;
         });
     }
 
     public function deleteMaterial(Request $request, Response $response, string $institution_id, string $subject_id, string $material_id): Response {
          return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $material_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $material = $this->subjectMaterialsDao->getMaterialById($material_id);
             
@@ -178,7 +178,7 @@ readonly class SubjectMaterialsController extends BaseController {
                 "message" => "Material '{$material->getTitle()}' deleted successfully!"
             ]));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials/{$material_id}", "{$token['email']} deleted the material '{$material->getTitle()}'");
+            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/materials/{$material_id}", "{$user->getUserId()} deleted the material '{$material->getTitle()}'");
             return $response;
         });
     }

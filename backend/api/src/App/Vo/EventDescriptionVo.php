@@ -13,13 +13,13 @@ final class EventDescriptionVo
   public function __construct(string $description)
   {
     $description = trim($description);
-    
+
     $length = strlen($description);
     if ($length > 256) {
       throw new InvalidArgumentException('Event description cannot have more than 256 characters.');
     }
 
-    $this->value = $description;
+    $this->value = htmlspecialchars($description, ENT_QUOTES | ENT_HTML5);
   }
 
   public function getValue(): string

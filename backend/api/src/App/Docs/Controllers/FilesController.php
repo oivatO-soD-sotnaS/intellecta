@@ -7,19 +7,19 @@ use OpenApi\Attributes as OA;
 
 #[OA\Tag(
     name: 'Files',
-    description: 'File upload and management operations'
+    description: 'Operações de upload e gerenciamento de arquivos'
 )]
 class FilesController
 {
     #[OA\Post(
         path: '/files/upload-profile-assets',
         operationId: 'uploadProfileAsset',
-        summary: 'Upload profile asset',
-        description: 'Upload an image file to be used as a profile picture or banner',
+        summary: 'Fazer upload de ativo de perfil',
+        description: 'Fazer upload de um arquivo de imagem para ser usado como foto do perfil ou banner',
         tags: ['Files'],
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
-            description: 'Profile image file',
+            description: 'Arquivo de imagem de perfil',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -30,7 +30,7 @@ class FilesController
                             property: 'profile-asset',
                             type: 'string',
                             format: 'binary',
-                            description: 'Image file for profile (avatar, banner, etc.)'
+                            description: 'Arquivo de imagem para o perfil (avatar, banner, etc.)'
                         )
                     ]
                 )
@@ -39,20 +39,20 @@ class FilesController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'File uploaded successfully',
+                description: 'Arquivo enviado com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/FileResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'No file provided or invalid file'
+                description: 'Nenhum arquivo fornecido ou arquivo inválido'
             ),
             new OA\Response(
                 response: 415,
-                description: 'Unsupported media type - must be an image'
+                description: 'Tipo de mídia não suportado - deve ser uma imagem'
             ),
             new OA\Response(
                 response: 500,
-                description: 'File upload failed'
+                description: 'Falha ao enviar o arquivo'
             )
         ]
     )]
@@ -63,12 +63,12 @@ class FilesController
     #[OA\Post(
         path: '/files/upload-file',
         operationId: 'uploadFile',
-        summary: 'Upload a generic file',
-        description: 'Upload any type of file with automatic type detection',
+        summary: 'Fazer upload de um arquivo genérico',
+        description: 'Enviar um arquivo de qualquer tipo com detecção automática de tipo',
         tags: ['Files'],
         security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody(
-            description: 'File to upload',
+            description: 'Arquivo a ser enviado',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -79,7 +79,7 @@ class FilesController
                             property: 'file',
                             type: 'string',
                             format: 'binary',
-                            description: 'File to upload'
+                            description: 'Arquivo a ser enviado'
                         )
                     ]
                 )
@@ -88,20 +88,20 @@ class FilesController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'File uploaded successfully',
+                description: 'Arquivo enviado com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/FileResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'No file provided'
+                description: 'Nenhum arquivo fornecido'
             ),
             new OA\Response(
                 response: 413,
-                description: 'File too large'
+                description: 'Arquivo muito grande'
             ),
             new OA\Response(
                 response: 500,
-                description: 'File upload failed'
+                description: 'Falha ao enviar o arquivo'
             )
         ]
     )]

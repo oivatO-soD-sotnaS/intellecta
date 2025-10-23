@@ -82,13 +82,13 @@ readonly class SubjectsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
             /** @var InstitutionUser $membership */
             $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             if (
                 $membership->getRole() !== InstitutionUserType::Admin->value &&
                 $membership->getRole() !== InstitutionUserType::Teacher->value
             ) {
-                LogService::warn("/institutions/{$institution_id}/subjects", "{$token['email']} tried to create a class");
+                LogService::warn("/institutions/{$institution_id}/subjects", "{$user->getUserId()} tried to create a class");
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and teachers can create subjects");
             }
 
@@ -182,10 +182,10 @@ readonly class SubjectsController extends BaseController {
                 "profile_picture_id" => $profilePictureFile?->getFileId(),
                 "banner_id" => $bannerFile?->getFileId(),
                 "institution_id" => $institution_id,
-                "teacher_id" => $teacher ? $teacher->getUserId() : $token["sub"],
+                "teacher_id" => $teacher ? $teacher->getUserId() : $user->getUserId(),
             ]));
 
-            $teacherUser = $this->usersDao->getUserById($teacher ? $teacher->getUserId() : $token['sub']);
+            $teacherUser = $this->usersDao->getUserById($teacher ? $teacher->getUserId() : $user->getUserId());
             $teacherProfilePicture = $teacherUser->getProfilePictureId()
                 ? $this->filesDao->getFileById($teacherUser->getProfilePictureId())
                 : null;
@@ -204,7 +204,7 @@ readonly class SubjectsController extends BaseController {
                 "subject" => $subjectDto
             ]));
 
-            LogService::info("/institutions/{$institution_id}/subjects", "{$token["email"]} created the {$subject->getName()} subject");
+            LogService::info("/institutions/{$institution_id}/subjects", "{$user->getUserId()} created the {$subject->getName()} subject");
             return $response;
         });
     }
@@ -247,7 +247,7 @@ readonly class SubjectsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
             /** @var InstitutionUser $membership */
             $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
@@ -257,7 +257,7 @@ readonly class SubjectsController extends BaseController {
 
             if(
                 $membership->getRole() !== InstitutionUserType::Admin->value
-                && $subject->getTeacherId() !== $token['sub']
+                && $subject->getTeacherId() !== $user->getUserId()
             ) {
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }
@@ -343,7 +343,7 @@ readonly class SubjectsController extends BaseController {
 
             $response->getBody()->write(json_encode($subjectDto));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}", "{$token["email"]} has updated the {$subject->getName()} subject");
+            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}", "{$user->getUserId()} has updated the {$subject->getName()} subject");
             return $response;
         });
     }
@@ -352,7 +352,7 @@ readonly class SubjectsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
             /** @var InstitutionUser $membership */
             $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
@@ -362,7 +362,7 @@ readonly class SubjectsController extends BaseController {
 
             if(
                 $membership->getRole() !== InstitutionUserType::Admin->value
-                && $subject->getTeacherId() !== $token['sub']
+                && $subject->getTeacherId() !== $user->getUserId()
             ) {
                 throw new HttpForbiddenException($request, LogService::HTTP_403 . "Only admins and the subject teacher can access this endpoint");
             }
@@ -377,7 +377,7 @@ readonly class SubjectsController extends BaseController {
                 "message" => "Subject {$subject->getName()} deleted successfully!"
             ]));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}", "{$token['email']} deleted the subject {$subject->getName()}");
+            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}", "{$user->getUserId()} deleted the subject {$subject->getName()}");
             return $response;
         });
     }

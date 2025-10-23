@@ -4,7 +4,6 @@ declare(strict_types= 1);
 namespace App\Middleware;
 
 use App\Dao\InstitutionUsersDao;
-use App\Services\JwtService;
 use App\Services\LogService;
 use Exception;
 use PDOException;
@@ -38,12 +37,12 @@ class RequireInstitutionMembership{
       throw new HttpBadRequestException($request, 'Missing institution ID.');
     }
     
-    $token = $request->getAttribute("token");
+    $user = $request->getAttribute("user");
     
     try {
-      $institutionUser = $this->institutionUsersDao->getInstitutionUserByInstitutionIdAndUserId($institutionId, $token['sub']);
+      $institutionUser = $this->institutionUsersDao->getInstitutionUserByInstitutionIdAndUserId($institutionId, $user->getUserId());
       if(empty($institutionUser)) {
-        LogService::http403('RequireInstitutionMembership', "User ".$token['email']. " is not a member of the institution $institutionId");
+        LogService::http403('RequireInstitutionMembership', "User {$user->getUserId()} is not a member of the institution $institutionId");
         throw new HttpForbiddenException($request, 'User is not a member of the institution');
       }
 

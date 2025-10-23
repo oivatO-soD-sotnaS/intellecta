@@ -6,52 +6,51 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: "Forum Messages",
-    description: "Endpoints for managing forum messages related to a subject."
+    name: "Mensagens do Fórum",
+    description: "Endpoints para gerenciar mensagens do fórum relacionadas a um assunto."
 )]
 readonly class ForumMessagesController {
 
     #[OA\Get(
         path: "/institutions/{institution_id}/subjects/{subject_id}/forum/messages",
-        summary: "Get forum messages for a subject",
-        description: "Retrieve forum messages for a subject, optionally filtered and paginated.",
-        tags: ["Forum Messages"],
+        summary: "Obter mensagens do fórum para um assunto",
+        description: "Recupera mensagens do fórum para um assunto, opcionalmente filtradas e paginadas.",
+        tags: ["Mensagens do Fórum"],
         parameters: [
-            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Institution UUID"),
-            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Subject UUID"),
-            new OA\Parameter(name: "content", in: "query", required: false, schema: new OA\Schema(type: "string"), description: "Filter by content substring"),
-            new OA\Parameter(name: "created_at_from", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filter by creation date (from)"),
-            new OA\Parameter(name: "created_at_to", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filter by creation date (to)"),
-            new OA\Parameter(name: "limit", in: "query", required: false, schema: new OA\Schema(type: "integer", enum: [10, 15, 20, 25, 30, 35, 40, 45, 50]), description: "Number of results per page"),
-            new OA\Parameter(name: "offset", in: "query", required: false, schema: new OA\Schema(type: "integer", minimum: 0), description: "Offset for pagination")
+            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID da Instituição"),
+            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID do Assunto"),
+            new OA\Parameter(name: "content", in: "query", required: false, schema: new OA\Schema(type: "string"), description: "Filtrar por substring do conteúdo"),
+            new OA\Parameter(name: "created_at_from", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filtrar pela data de criação (início)"),
+            new OA\Parameter(name: "created_at_to", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filtrar pela data de criação (fim)"),
+            new OA\Parameter(name: "limit", in: "query", required: false, schema: new OA\Schema(type: "integer", enum: [10, 15, 20, 25, 30, 35, 40, 45, 50]), description: "Número de resultados por página"),
+            new OA\Parameter(name: "offset", in: "query", required: false, schema: new OA\Schema(type: "integer", minimum: 0), description: "Deslocamento para paginação")
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Paginated list of forum messages",
+                description: "Lista paginada de mensagens do fórum",
                 content: new OA\JsonContent(ref: "#/components/schemas/PaginationDto_ForumMessageDto")
             ),
-            new OA\Response(response: 404, description: "No forum messages found"),
-            new OA\Response(response: 400, description: "Invalid parameters")
+            new OA\Response(response: 404, description: "Nenhuma mensagem do fórum encontrada"),
+            new OA\Response(response: 400, description: "Parâmetros inválidos")
         ]
     )]
-    
     public function getSubjectForumMessages() { /* ... */ }
 
     #[OA\Get(
         path: "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/count",
-        summary: "Count forum messages for a subject",
-        description: "Returns the total number of forum messages for a subject, optionally filtered.",
-        tags: ["Forum Messages"],
+        summary: "Contar mensagens do fórum para um assunto",
+        description: "Retorna o número total de mensagens do fórum para um assunto, opcionalmente filtrado.",
+        tags: ["Mensagens do Fórum"],
         parameters: [
-            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Institution UUID"),
-            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Subject UUID"),
-            new OA\Parameter(name: "content", in: "query", required: false, schema: new OA\Schema(type: "string"), description: "Filter by content substring"),
-            new OA\Parameter(name: "created_at_from", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filter by creation date (from)"),
-            new OA\Parameter(name: "created_at_to", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filter by creation date (to)")
+            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID da Instituição"),
+            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID do Assunto"),
+            new OA\Parameter(name: "content", in: "query", required: false, schema: new OA\Schema(type: "string"), description: "Filtrar por substring do conteúdo"),
+            new OA\Parameter(name: "created_at_from", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filtrar pela data de criação (início)"),
+            new OA\Parameter(name: "created_at_to", in: "query", required: false, schema: new OA\Schema(type: "string", format: "date"), description: "Filtrar pela data de criação (fim)")
         ],
         responses: [
-            new OA\Response(response: 200, description: "Count of forum messages", content: new OA\JsonContent(
+            new OA\Response(response: 200, description: "Contagem de mensagens do fórum", content: new OA\JsonContent(
                 type: "object",
                 properties: [
                     new OA\Property(property: "count", type: "integer", example: 5)
@@ -63,53 +62,53 @@ readonly class ForumMessagesController {
 
     #[OA\Post(
         path: "/institutions/{institution_id}/subjects/{subject_id}/forum/messages",
-        summary: "Create a forum message",
-        description: "Creates a new forum message for a subject.",
-        tags: ["Forum Messages"],
+        summary: "Criar uma mensagem do fórum",
+        description: "Cria uma nova mensagem do fórum para um assunto.",
+        tags: ["Mensagens do Fórum"],
         parameters: [
-            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Institution UUID"),
-            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Subject UUID")
+            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID da Instituição"),
+            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID do Assunto")
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 required: ["content"],
                 properties: [
-                    new OA\Property(property: "content", type: "string", example: "This is a forum message content")
+                    new OA\Property(property: "content", type: "string", example: "Este é o conteúdo da mensagem do fórum")
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Forum message created", content: new OA\JsonContent(ref: "#/components/schemas/ForumMessageDto")),
-            new OA\Response(response: 500, description: "Failed to create forum message")
+            new OA\Response(response: 200, description: "Mensagem do fórum criada", content: new OA\JsonContent(ref: "#/components/schemas/ForumMessageDto")),
+            new OA\Response(response: 500, description: "Falha ao criar a mensagem do fórum")
         ]
     )]
     public function createSubjectForumMessage() { /* ... */ }
 
     #[OA\Put(
         path: "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/{forum_message_id}",
-        summary: "Update a forum message",
-        description: "Updates a forum message if it is less than 15 minutes old.",
-        tags: ["Forum Messages"],
+        summary: "Atualizar uma mensagem do fórum",
+        description: "Atualiza uma mensagem do fórum se tiver menos de 15 minutos.",
+        tags: ["Mensagens do Fórum"],
         parameters: [
-            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Institution UUID"),
-            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Subject UUID"),
-            new OA\Parameter(name: "forum_message_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "Forum message UUID")
+            new OA\Parameter(name: "institution_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID da Instituição"),
+            new OA\Parameter(name: "subject_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID do Assunto"),
+            new OA\Parameter(name: "forum_message_id", in: "path", required: true, schema: new OA\Schema(type: "string", format: "uuid"), description: "UUID da mensagem do fórum")
         ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 required: ["content"],
                 properties: [
-                    new OA\Property(property: "content", type: "string", example: "Updated forum message content")
+                    new OA\Property(property: "content", type: "string", example: "Conteúdo atualizado da mensagem do fórum")
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Forum message updated", content: new OA\JsonContent(ref: "#/components/schemas/ForumMessageDto")),
-            new OA\Response(response: 403, description: "Forum message cannot be updated after 15 minutes"),
-            new OA\Response(response: 404, description: "Forum message not found"),
-            new OA\Response(response: 500, description: "Failed to update forum message")
+            new OA\Response(response: 200, description: "Mensagem do fórum atualizada", content: new OA\JsonContent(ref: "#/components/schemas/ForumMessageDto")),
+            new OA\Response(response: 403, description: "A mensagem do fórum não pode ser atualizada após 15 minutos"),
+            new OA\Response(response: 404, description: "Mensagem do fórum não encontrada"),
+            new OA\Response(response: 500, description: "Falha ao atualizar a mensagem do fórum")
         ]
     )]
     public function updateForumMessage() { /* ... */ }

@@ -7,12 +7,12 @@ use InvalidArgumentException;
 
 class PaginationVo {
     private array $possibleLimits = [10, 15, 20, 25, 30, 35, 40, 45, 50];
-    private ?int $limit;
-    private ?int $offset;
+    private int $limit;
+    private int $offset;
 
     public function __construct(array $queryParameters) {
-        $limit = $queryParameters['limit'] ?? null;
-        $offset = $queryParameters['offset'] ?? null;
+        $limit = $queryParameters['limit'] ?? throw new InvalidArgumentException('Pagination limit is required.');
+        $offset = $queryParameters['offset'] ?? throw new InvalidArgumentException('Pagination offset is required.');
 
         if ($limit !== null) {
             $limit = (int) $limit;
@@ -42,9 +42,5 @@ class PaginationVo {
         }
 
         return (int) ceil($rows / $this->limit);
-    }
-
-    public function hasPagination(): bool {
-        return $this->limit !== null && $this->offset !== null;
     }
 }

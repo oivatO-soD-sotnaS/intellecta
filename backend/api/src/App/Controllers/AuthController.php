@@ -9,6 +9,7 @@ use App\Dao\VerificationCodesDao;
 use App\Dto\UserDto;
 use App\Models\User;
 use App\Models\VerificationCode;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\EmailAddressVo;
 use App\Vo\PasswordVo;
 use App\Vo\UsernameVo;
@@ -18,7 +19,6 @@ use Slim\Exception\HttpUnauthorizedException;
 use Slim\Psr7\Response;
 use Slim\Psr7\Request;
 use App\Queue\RedisEmailQueue;
-use App\Services\EmailService;
 use App\Services\JwtService;
 use App\Services\LogService;
 use App\Services\ValidatorService;
@@ -32,7 +32,7 @@ readonly class AuthController extends BaseController {
     private VerificationCodesDao $verificationCodesDao,
     private FilesDao $filesDao,
     private JwtService $jwtService,
-    private EmailService $emailService,
+    private EmailTemplateProvider $emailTemplateProvider,
     private ValidatorService $validatorService,
     private RedisEmailQueue $emailQueue
   ){}
@@ -76,7 +76,7 @@ readonly class AuthController extends BaseController {
         'to' => $email->getValue(),
         'toName' => $fullName->getValue(),
         'subject' => "$code - Seu código de sign-in da Intellecta",
-        'body' => $this->emailService->getVerificationEmailTemplate(
+        'body' => $this->emailTemplateProvider->getVerificationEmailTemplate(
           userName: $fullName->getValue(),
           code: $code
         ),

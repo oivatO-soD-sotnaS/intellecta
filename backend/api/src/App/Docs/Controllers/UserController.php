@@ -6,21 +6,12 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: "Usuários", description: "Operações relacionadas a gestão de usuários")]
 class UserController { 
   #[OA\Get(
-        path: "/users/{user_id}",
+        path: "/users/me",
         tags: ["Usuários"],
         summary: "Obter dados do usuário",
         description: "Retorna os dados completos de um usuário específico (requer autenticação do próprio usuário)",
         operationId: "getUser",
         security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "user_id",
-                in: "path",
-                required: true,
-                description: "ID do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -47,21 +38,12 @@ class UserController {
   public function getUser() {}
 
   #[OA\Put(
-        path: "/users/{user_id}",
+        path: "/users/me",
         tags: ["Usuários"],
         summary: "Atualizar usuário",
         description: "Atualiza os dados de um usuário (requer autenticação do próprio usuário)",
         operationId: "updateUser",
         security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "user_id",
-                in: "path",
-                required: true,
-                description: "ID do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             description: "Dados do usuário para atualização",
@@ -109,21 +91,12 @@ class UserController {
   public function updateUser() {}
 
   #[OA\Delete(
-        path: "/users/{user_id}",
+        path: "/users/me",
         tags: ["Usuários"],
         summary: "Excluir usuário",
         description: "Remove permanentemente um usuário (requer autenticação do próprio usuário)",
         operationId: "deleteUser",
         security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "user_id",
-                in: "path",
-                required: true,
-                description: "ID do usuário",
-                schema: new OA\Schema(type: "string", format: "uuid")
-            )
-        ],
         responses: [
             new OA\Response(
                 response: 200,

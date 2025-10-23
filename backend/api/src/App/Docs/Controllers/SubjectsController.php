@@ -6,8 +6,8 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: 'Subjects',
-    description: 'Operations related to subject management'
+    name: 'Disciplinas',
+    description: 'Operações relacionadas à gestão de disciplinas'
 )]
 #[OA\Schema(
     schema: 'SubjectResponse',
@@ -37,32 +37,32 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Name of the subject'
+            description: 'Nome da disciplina'
         ),
         new OA\Property(
             property: 'description',
             type: 'string',
-            description: 'Detailed description of the subject'
+            description: 'Descrição detalhada da disciplina'
         ),
         new OA\Property(
             property: 'teacher_id',
             type: 'string',
             format: 'uuid',
             nullable: true,
-            description: 'ID of the teacher (required if admin, optional for teachers)'
+            description: 'ID do professor (necessário se for admin, opcional para professores)'
         ),
         new OA\Property(
             property: 'profile-picture',
             type: 'string',
             format: 'binary',
-            description: 'Profile picture file',
+            description: 'Arquivo da foto de perfil',
             nullable: true
         ),
         new OA\Property(
             property: 'banner',
             type: 'string',
             format: 'binary',
-            description: 'Banner image file',
+            description: 'Arquivo da imagem de banner',
             nullable: true
         )
     ],
@@ -77,33 +77,33 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Updated name of the subject'
+            description: 'Nome atualizado da disciplina'
         ),
         new OA\Property(
             property: 'description',
             type: 'string',
-            description: 'Updated description of the subject'
+            description: 'Descrição atualizada da disciplina'
         ),
         new OA\Property(
             property: 'teacher_id',
             type: 'string',
             format: 'uuid',
             nullable: true,
-            description: 'Updated teacher ID (admin only)'
+            description: 'ID do professor atualizado (apenas para administradores)'
         ),
         new OA\Property(
             property: 'profile_picture_id',
             type: 'string',
             format: 'uuid',
             nullable: true,
-            description: 'ID of the new profile picture'
+            description: 'ID da nova foto de perfil'
         ),
         new OA\Property(
             property: 'banner_id',
             type: 'string',
             format: 'uuid',
             nullable: true,
-            description: 'ID of the new banner image'
+            description: 'ID da nova imagem de banner'
         )
     ],
     type: 'object'
@@ -112,8 +112,8 @@ class SubjectsController {
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects',
         operationId: 'getInstitutionSubjects',
-        summary: 'Get all subjects for an institution',
-        tags: ['Subjects'],
+        summary: 'Obter todas as disciplinas de uma instituição',
+        tags: ['Disciplinas'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -125,7 +125,7 @@ class SubjectsController {
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of subjects',
+                description: 'Lista de disciplinas',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/SubjectResponse')
@@ -133,7 +133,7 @@ class SubjectsController {
             ),
             new OA\Response(
                 response: 404,
-                description: 'Institution not found'
+                description: 'Instituição não encontrada'
             )
         ]
     )]
@@ -143,9 +143,9 @@ class SubjectsController {
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects',
         operationId: 'createSubject',
-        summary: 'Create a new subject',
-        description: 'Create a new subject in the specified institution. Admins can create subjects for any teacher, teachers can only create subjects for themselves.',
-        tags: ['Subjects'],
+        summary: 'Criar uma nova disciplina',
+        description: 'Crie uma nova disciplina na instituição especificada. Administradores podem criar disciplinas para qualquer professor; professores podem criar somente para si mesmos.',
+        tags: ['Disciplinas'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -156,7 +156,7 @@ class SubjectsController {
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Subject creation data',
+            description: 'Dados para criação da disciplina',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -166,7 +166,7 @@ class SubjectsController {
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Subject created successfully',
+                description: 'Disciplina criada com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string'),
@@ -180,11 +180,11 @@ class SubjectsController {
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - only admins and teachers can create subjects'
+                description: 'Proibido - apenas administradores e professores podem criar disciplinas'
             )
         ]
     )]
@@ -194,9 +194,9 @@ class SubjectsController {
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}',
         operationId: 'getSubjectById',
-        summary: 'Get subject details',
-        description: 'Retrieve details of a specific subject. Only accessible by admins and the subject teacher.',
-        tags: ['Subjects'],
+        summary: 'Obter detalhes da disciplina',
+        description: 'Recupere os detalhes de uma disciplina específica. Acessível apenas por administradores e pelo professor da disciplina.',
+        tags: ['Disciplinas'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -215,16 +215,16 @@ class SubjectsController {
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Subject details',
+                description: 'Detalhes da disciplina',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubjectResponse')
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not admin or subject teacher'
+                description: 'Proibido - não é administrador ou professor da disciplina'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Disciplina não encontrada'
             )
         ]
     )]
@@ -234,9 +234,9 @@ class SubjectsController {
     #[OA\Put(
         path: '/institutions/{institution_id}/subjects/{subject_id}',
         operationId: 'updateSubjectById',
-        summary: 'Update a subject',
-        description: 'Update details of an existing subject. Only admins can change the teacher.',
-        tags: ['Subjects'],
+        summary: 'Atualizar uma disciplina',
+        description: 'Atualize os detalhes de uma disciplina existente. Apenas administradores podem alterar o professor.',
+        tags: ['Disciplinas'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -253,31 +253,31 @@ class SubjectsController {
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Subject update data',
+            description: 'Dados para atualização da disciplina',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/UpdateSubjectRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Updated subject details',
+                description: 'Detalhes da disciplina atualizados',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubjectResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not admin or subject teacher'
+                description: 'Proibido - não é administrador ou professor da disciplina'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject or file not found'
+                description: 'Disciplina ou arquivo não encontrado'
             ),
             new OA\Response(
                 response: 422,
-                description: 'Invalid file type (must be image)'
+                description: 'Tipo de arquivo inválido (deve ser imagem)'
             )
         ]
     )]
@@ -287,9 +287,9 @@ class SubjectsController {
     #[OA\Delete(
         path: '/institutions/{institution_id}/subjects/{subject_id}',
         operationId: 'deleteSubjectById',
-        summary: 'Delete a subject',
-        description: 'Permanently delete a subject. Only accessible by admins and the subject teacher.',
-        tags: ['Subjects'],
+        summary: 'Excluir uma disciplina',
+        description: 'Exclua permanentemente uma disciplina. Acessível apenas por administradores e pelo professor da disciplina.',
+        tags: ['Disciplinas'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -308,7 +308,7 @@ class SubjectsController {
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Subject deleted successfully',
+                description: 'Disciplina excluída com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string')
@@ -318,15 +318,15 @@ class SubjectsController {
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not admin or subject teacher'
+                description: 'Proibido - não é administrador ou professor da disciplina'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Disciplina não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]

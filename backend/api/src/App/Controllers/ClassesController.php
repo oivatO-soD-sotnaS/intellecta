@@ -39,12 +39,12 @@ readonly class ClassesController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
             /** @var InstitutionUser $membership */
             $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             // If admin: fetches all classes, else; only the ones the user participates. 
             $classes = $membership->getRole() === InstitutionUserType::Admin->value
                 ? $this->classesDao->getClassesByInstitutionId($institution_id)
-                : $this->classesDao->getClassesByUserIdAndInstitutionId($token['sub'], $institution_id);
+                : $this->classesDao->getClassesByUserIdAndInstitutionId($user->getUserId(), $institution_id);
 
             if(count($classes) === 0) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -69,7 +69,7 @@ readonly class ClassesController extends BaseController {
 
     public function createClass(Request $request, Response $response, string $institution_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
             $uploadedFiles = $request->getUploadedFiles();
@@ -136,7 +136,10 @@ readonly class ClassesController extends BaseController {
             $classDto = new ClassModelDto($class, $profilePictureFile, $bannerFile);
             $response->getBody()->write(json_encode($classDto, JSON_PRETTY_PRINT));
 
-            LogService::info("/institutions/{$institution_id}/classes", "User {$token['email']} create the {$class->getName()} class");
+            LogService::info(
+                "/institutions/{$institution_id}/classes", 
+                "User {$user->getUserId()} create the {$class->getName()} class"
+            );
             return $response;
         });
     }
@@ -145,10 +148,10 @@ readonly class ClassesController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
              /** @var InstitutionUser $membership */
             $membership = $request->getAttribute('membership');
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
             
             $class = $membership->getRole() !== InstitutionUserType::Admin->value
-                ? $this->classesDao->getClassByUserIdAndClassId($token['sub'], $class_id)
+                ? $this->classesDao->getClassByUserIdAndClassId($user->getUserId(), $class_id)
                 : $this->classesDao->getClassById($class_id);
 
             if(empty($class)) {
@@ -156,7 +159,7 @@ readonly class ClassesController extends BaseController {
             }
             
             if($class->getInstitutionId() !== $institution_id) {
-                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to fetch a class of another institution.");
+                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$user->getUserId()} tried to fetch a class of another institution.");
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -175,7 +178,7 @@ readonly class ClassesController extends BaseController {
     }
     public function updateClass(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
-            $token= $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ['name', 'description']);
@@ -200,7 +203,7 @@ readonly class ClassesController extends BaseController {
             }
 
             if($class->getInstitutionId() !== $institution_id) {
-                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to update a class of another institution.");
+                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$user->getUserId()} tried to update a class of another institution.");
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -245,7 +248,7 @@ readonly class ClassesController extends BaseController {
             $classDto = new ClassModelDto($class, $classProfilePicture, $classBanner);
             $response->getBody()->write(json_encode($classDto));
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}","{$token['email']} altered the {$class->getName()} class");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}","{$user->getUserId()} altered the {$class->getName()} class");
             return $response;
         });
 
@@ -253,7 +256,7 @@ readonly class ClassesController extends BaseController {
 
     public function deleteClass(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
             
             $class = $this->classesDao->getClassById($class_id);
             if (empty($class)) {
@@ -261,7 +264,7 @@ readonly class ClassesController extends BaseController {
             }
 
             if($class->getInstitutionId() !== $institution_id) {
-                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} tried to delete a class of another institution.");
+                LogService::warn("/institutions/{$institution_id}/classes/{$class_id}", "{$user->getUserId()} tried to delete a class of another institution.");
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -275,7 +278,7 @@ readonly class ClassesController extends BaseController {
                 "message" => "Class {$class->getName()} deleted successfully!"
             ]));
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}", "{$token['email']} deleted the class {$class->getName()}");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}", "{$user->getUserId()} deleted the class {$class->getName()}");
             return $response;
         });
     }

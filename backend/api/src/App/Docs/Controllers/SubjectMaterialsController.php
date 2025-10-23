@@ -6,8 +6,8 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: 'Subject Materials',
-    description: 'Manage learning materials for subjects'
+    name: 'Materiais da Disciplina',
+    description: 'Gerenciar materiais de aprendizagem para disciplinas'
 )]
 #[OA\Schema(
     schema: 'MaterialResponse',
@@ -34,13 +34,13 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Title of the material'
+            description: 'Título do material'
         ),
         new OA\Property(
             property: 'material_file',
             type: 'string',
             format: 'binary',
-            description: 'Material file to upload'
+            description: 'Arquivo do material para envio'
         )
     ]
 )]
@@ -53,7 +53,7 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Updated title of the material'
+            description: 'Título atualizado do material'
         )
     ]
 )]
@@ -62,8 +62,8 @@ class SubjectMaterialsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/materials',
         operationId: 'getSubjectMaterials',
-        summary: 'Get all materials for a subject',
-        tags: ['Subject Materials'],
+        summary: 'Obter todos os materiais de uma disciplina',
+        tags: ['Materiais da Disciplina'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -81,7 +81,7 @@ class SubjectMaterialsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of subject materials',
+                description: 'Lista de materiais da disciplina',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/MaterialResponse')
@@ -89,7 +89,7 @@ class SubjectMaterialsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'No materials found for this subject'
+                description: 'Nenhum material encontrado para esta disciplina'
             )
         ]
     )]
@@ -100,9 +100,9 @@ class SubjectMaterialsController
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects/{subject_id}/materials',
         operationId: 'createSubjectMaterial',
-        summary: 'Create a new material for a subject',
-        description: 'Upload a new learning material for the specified subject',
-        tags: ['Subject Materials'],
+        summary: 'Criar um novo material para uma disciplina',
+        description: 'Enviar um novo material de aprendizagem para a disciplina especificada',
+        tags: ['Materiais da Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -119,7 +119,7 @@ class SubjectMaterialsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Material creation data',
+            description: 'Dados para criação do material',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -129,16 +129,16 @@ class SubjectMaterialsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Material created successfully',
+                description: 'Material criado com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/MaterialResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Disciplina não encontrada'
             )
         ]
     )]
@@ -149,9 +149,9 @@ class SubjectMaterialsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/materials/{material_id}',
         operationId: 'getMaterialById',
-        summary: 'Get material details',
-        description: 'Retrieve details of a specific learning material',
-        tags: ['Subject Materials'],
+        summary: 'Obter detalhes do material',
+        description: 'Recuperar detalhes de um material de aprendizagem específico',
+        tags: ['Materiais da Disciplina'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -175,12 +175,12 @@ class SubjectMaterialsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Material details',
+                description: 'Detalhes do material',
                 content: new OA\JsonContent(ref: '#/components/schemas/MaterialResponse')
             ),
             new OA\Response(
                 response: 404,
-                description: 'Material not found'
+                description: 'Material não encontrado'
             )
         ]
     )]
@@ -191,9 +191,9 @@ class SubjectMaterialsController
     #[OA\Put(
         path: '/institutions/{institution_id}/subjects/{subject_id}/materials/{material_id}',
         operationId: 'updateMaterial',
-        summary: 'Update material details',
-        description: 'Update the title of a learning material',
-        tags: ['Subject Materials'],
+        summary: 'Atualizar detalhes do material',
+        description: 'Atualizar o título de um material de aprendizagem',
+        tags: ['Materiais da Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -216,27 +216,27 @@ class SubjectMaterialsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Material update data',
+            description: 'Dados para atualização do material',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/UpdateMaterialRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Material updated successfully',
+                description: 'Material atualizado com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/MaterialResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Material not found'
+                description: 'Material não encontrado'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]
@@ -247,9 +247,9 @@ class SubjectMaterialsController
     #[OA\Delete(
         path: '/institutions/{institution_id}/subjects/{subject_id}/materials/{material_id}',
         operationId: 'deleteMaterial',
-        summary: 'Delete a material',
-        description: 'Permanently remove a learning material',
-        tags: ['Subject Materials'],
+        summary: 'Excluir um material',
+        description: 'Remover permanentemente um material de aprendizagem',
+        tags: ['Materiais da Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -274,7 +274,7 @@ class SubjectMaterialsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Material deleted successfully',
+                description: 'Material excluído com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string')
@@ -284,11 +284,11 @@ class SubjectMaterialsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'Material not found'
+                description: 'Material não encontrado'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]

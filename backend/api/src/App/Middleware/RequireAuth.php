@@ -48,11 +48,12 @@ class RequireAuth{
       }
 
       $user = $this->usersDao->getUserById($decoded["sub"]);
+      
       if(empty($user) || !$user->isEmailVerified()){
         throw new HttpUnauthorizedException($request, 'User not found');
       }
 
-      $request = $request->withAttribute('token', $decoded);
+      $request = $request->withAttribute('user', $user);
 
       return $handler->handle($request);
     }catch (PDOException $e) {

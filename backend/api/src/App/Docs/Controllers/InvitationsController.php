@@ -4,16 +4,16 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: "Invitations",
-    description: "Operations related to institution invitations"
+    name: "Convites",
+    description: "Operações relacionadas aos convites de instituição"
 )]
 class InvitationsController
 {
     #[OA\Post(
         path: "/invitations/{invitation_id}/accept",
-        tags: ["Invitations"],
-        summary: "Accept an invitation",
-        description: "Accept an invitation to join an institution",
+        tags: ["Convites"],
+        summary: "Aceitar um convite",
+        description: "Aceitar um convite para ingressar em uma instituição",
         operationId: "acceptInvitation",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -21,43 +21,43 @@ class InvitationsController
                 name: "invitation_id",
                 in: "path",
                 required: true,
-                description: "ID of the invitation to accept",
+                description: "ID do convite a ser aceito",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Invitation accepted successfully",
+                description: "Convite aceito com sucesso",
                 content: new OA\JsonContent(ref: "#/components/schemas/InstitutionUserDto")
             ),
             new OA\Response(
                 response: 403,
-                description: "Forbidden (invitation expired, already accepted, or email mismatch)",
+                description: "Proibido (convite expirado, já aceito ou email não correspondente)",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 404,
-                description: "Invitation not found",
+                description: "Convite não encontrado",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 500,
-                description: "Internal server error",
+                description: "Erro interno do servidor",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
     )]
     public function acceptInvitation()
     {
-        // ... implementation remains the same ...
+        // ... a implementação permanece igual ...
     }
 
     #[OA\Get(
         path: "/invitations/{invitation_id}",
-        tags: ["Invitations"],
-        summary: "Get invitation details",
-        description: "Retrieve details of a specific invitation",
+        tags: ["Convites"],
+        summary: "Obter detalhes do convite",
+        description: "Recuperar detalhes de um convite específico",
         operationId: "getInvitation",
         security: [["bearerAuth" => []]],
         parameters: [
@@ -65,49 +65,49 @@ class InvitationsController
                 name: "invitation_id",
                 in: "path",
                 required: true,
-                description: "ID of the invitation",
+                description: "ID do convite",
                 schema: new OA\Schema(type: "string", format: "uuid")
             )
         ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Invitation details",
+                description: "Detalhes do convite",
                 content: new OA\JsonContent(ref: "#/components/schemas/InvitationDto")
             ),
             new OA\Response(
                 response: 403,
-                description: "Forbidden (email mismatch)",
+                description: "Proibido (email não correspondente)",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 404,
-                description: "Invitation not found",
+                description: "Convite não encontrado",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             ),
             new OA\Response(
                 response: 500,
-                description: "Internal server error",
+                description: "Erro interno do servidor",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
     )]
     public function getInvitation()
     {
-        // ... implementation remains the same ...
+        // ... a implementação permanece igual ...
     }
 
     #[OA\Get(
         path: "/invitations",
-        tags: ["Invitations"],
-        summary: "Get all invitations",
-        description: "Retrieve all invitations for the authenticated user",
+        tags: ["Convites"],
+        summary: "Obter todos os convites",
+        description: "Recuperar todos os convites para o usuário autenticado",
         operationId: "getAllInvitations",
         security: [["bearerAuth" => []]],
         responses: [
             new OA\Response(
                 response: 200,
-                description: "List of invitations",
+                description: "Lista de convites",
                 content: new OA\JsonContent(
                     type: "array",
                     items: new OA\Items(ref: "#/components/schemas/InvitationDto")
@@ -115,18 +115,18 @@ class InvitationsController
             ),
             new OA\Response(
                 response: 500,
-                description: "Internal server error",
+                description: "Erro interno do servidor",
                 content: new OA\JsonContent(ref: "#/components/schemas/ErrorResponse")
             )
         ]
     )]
     public function getAllInvitations()
     {
-        // ... implementation remains the same ...
+        // ... a implementação permanece igual ...
     }
 }
 
-// Schema definitions (would typically be in a separate file)
+// Definições de esquema (geralmente em um arquivo separado)
 #[OA\Schema(
     schema: "InvitationDto",
     properties: [
@@ -148,5 +148,4 @@ class InvitationsController
         )
     ]
 )]
-
 class InvitationsSchemas {}

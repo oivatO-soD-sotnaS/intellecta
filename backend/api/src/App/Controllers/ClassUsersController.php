@@ -58,7 +58,7 @@ readonly class ClassUsersController extends BaseController {
 
     public function createClassUsers(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($response, $request, $institution_id, $class_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
             $body = $request->getParsedBody();
 
             $this->validatorService->validateRequired($body, ['user_ids']);
@@ -103,7 +103,7 @@ readonly class ClassUsersController extends BaseController {
 
             $userList = implode(",", $added);
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/users", "{$token['email']} added {$userList} to the class {$class_id}");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/users", "{$user->getUserId()} added {$userList} to the class {$class_id}");
             return $response;
         });
     }
@@ -132,7 +132,7 @@ readonly class ClassUsersController extends BaseController {
     }
     public function removeClassUser(Request $request, Response $response, string $institution_id, string $class_id, string $class_user_id): Response {
         return $this->handleErrors($request, function() use ($response, $request, $institution_id, $class_id, $class_user_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $classUser = $this->classUsersDao->getClassUserByClassUserIdAndClassId($class_user_id, $class_id);
 
@@ -149,7 +149,7 @@ readonly class ClassUsersController extends BaseController {
                 "message" => "User deleted successfully!"
             ]));
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/users/{$class_user_id}", message: "{$token['email']} removed the user {$class_user_id} from the class {$class_id}");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/users/{$class_user_id}", message: "{$user->getUserId()} removed the user {$class_user_id} from the class {$class_id}");
             return $response;
         });
     }
