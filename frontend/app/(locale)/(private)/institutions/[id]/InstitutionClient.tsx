@@ -7,7 +7,8 @@ import { DashboardHeader, StatCards } from "./dashboard/components"
 import CalendarWidget from "./dashboard/components/CalendarWidget"
 import RecentActivities from "./dashboard/components/RecentActivities"
 import UpcomingEvents from "./dashboard/components/UpcomingEvents"
-import ClassesGrid from "./dashboard/components/ClassesGrid"
+import ClassesGrid from "./dashboard/components/ClassesCarousel"
+import ClassesCarousel from "./dashboard/components/ClassesCarousel"
 
 export default function InstitutionClient({
   institutionId,
@@ -29,15 +30,16 @@ export default function InstitutionClient({
       </section>
 
       <section className="mt-6">
-        <ClassesGrid
-          institutionId={institutionId}
+        <ClassesCarousel
           title="Suas Turmas"
+          institutionId={institutionId}
           data={data}
           isLoading={isLoading}
           isError={isError}
-          onOpenClass={(class_id) =>
-            router.push(`/institutions/${institutionId}/classes/${class_id}`)
-          }
+          onOpenClass={(classId) => {
+            // navegação/ação ao abrir turma
+            // router.push(`/institutions/${institutionId}/classes/${classId}`)
+          }}
         />
       </section>
 

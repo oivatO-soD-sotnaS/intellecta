@@ -227,7 +227,6 @@ export function InstitutionCard({ institution, className }: Props) {
   );
 }
 
-/* sub */
 function Info({
   icon,
   text,

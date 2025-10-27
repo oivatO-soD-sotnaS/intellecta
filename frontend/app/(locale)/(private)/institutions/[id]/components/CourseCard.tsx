@@ -1,18 +1,39 @@
-// app/(locale)/(private)/institutions/[id]/components/CourseCard.tsx
-"use client";
+"use client"
 
-import { ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
-import { ClassDTO } from "@/types/subject";
+import * as React from "react"
+import { ChevronRight } from "lucide-react"
+import { motion } from "framer-motion"
+import type { ClassDTO } from "@/types/class"
+import ClassCardActions from "./classes/ClassCardActions"
 
 type Props = {
-  klass: ClassDTO;
-  onOpen?: (klass: ClassDTO) => void;
-};
+  klass: ClassDTO
+  onOpen?: (klass: ClassDTO) => void
 
-export default function CourseCard({ klass, onOpen }: Props) {
-  const bannerUrl = klass.banner?.url ?? null;
-  const avatarUrl = klass.profile_picture?.url ?? null;
+  /** mostra o menu só para administradores */
+  canManage?: boolean
+  /** necessário para excluir via hook */
+  institutionId: string
+  /** abre o modal de edição no pai */
+  onEditClass?: (klass: ClassDTO) => void
+  /** refetch no pai após excluir */
+  onDeleted?: () => void
+}
+
+export default function CourseCard({
+  klass,
+  onOpen,
+  canManage = true,
+  institutionId,
+  onEditClass,
+  onDeleted,
+}: Props) {
+  const bannerUrl = klass.banner?.url ?? null
+  const avatarUrl = klass.profile_picture?.url ?? null
+
+  console.log("log do onEditClass -> ", onEditClass)
+  
+  
 
   return (
     <motion.article
@@ -37,14 +58,29 @@ export default function CourseCard({ klass, onOpen }: Props) {
         aria-hidden
       />
 
+      {/* 3 pontinhos */}
+      {canManage && (
+        <div className="absolute right-2 top-2 z-20">
+          <ClassCardActions
+            institutionId={institutionId}
+            klass={klass}
+            onEdit={onEditClass} // <- repassa para o pai
+            onDeleted={onDeleted}
+          />
+        </div>
+      )}
+
       {/* Corpo */}
       <div className="p-5">
         {/* Header com avatar + nome da classe */}
         <div className="flex items-center gap-3">
           <div className="inline-flex h-10 w-10 shrink-0 select-none items-center justify-center overflow-hidden rounded-xl bg-muted ring-1 ring-border">
             {avatarUrl ? (
-              // usar <img> para não depender de next/image nos mocks
-              <img src={avatarUrl} alt={klass.name} className="h-full w-full object-cover" />
+              <img
+                src={avatarUrl}
+                alt={klass.name}
+                className="h-full w-full object-cover"
+              />
             ) : (
               <span className="text-xs font-semibold text-foreground/80">
                 {getInitials(klass.name)}
@@ -59,7 +95,9 @@ export default function CourseCard({ klass, onOpen }: Props) {
 
         {/* Descrição curta */}
         {klass.description && (
-          <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{klass.description}</p>
+          <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
+            {klass.description}
+          </p>
         )}
 
         {/* Ações */}
@@ -67,7 +105,7 @@ export default function CourseCard({ klass, onOpen }: Props) {
           <button
             type="button"
             onClick={() => onOpen?.(klass)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition hover:shadow-sm active:scale-[0.99]"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition hover:shadow-sm active:scale-[0.99] cursor-pointer"
           >
             Abrir turma
             <ChevronRight className="h-4 w-4" />
@@ -80,7 +118,7 @@ export default function CourseCard({ klass, onOpen }: Props) {
         <div className="absolute -inset-20 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.12),transparent_60%)]" />
       </div>
     </motion.article>
-  );
+  )
 }
 
 function getInitials(text: string) {
@@ -89,5 +127,5 @@ function getInitials(text: string) {
     .filter(Boolean)
     .slice(0, 2)
     .map((t) => t[0]?.toUpperCase())
-    .join("");
+    .join("")
 }
