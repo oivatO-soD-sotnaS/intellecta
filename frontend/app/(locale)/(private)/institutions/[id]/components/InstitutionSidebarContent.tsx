@@ -1,17 +1,26 @@
-"use client";
+// app/(locale)/(private)/institutions/[id]/components/InstitutionSidebarContent.tsx
+"use client"
 
-import { SidebarProvider, SidebarContent } from "@/components/ui/sidebar";
-import { useSidebarStore } from "@/store/sidebarStore";
-import { MENU, CLASSES, SETTINGS } from "./sidebar/constants";
-import { useActivePath } from "./sidebar/use-active-path";
-import SidebarHeaderCard from "./sidebar/SidebarHeaderCard";
-import Section from "./sidebar/Section";
-import ListExpanded from "./sidebar/ListExpanded";
-import ListCollapsed from "./sidebar/ListCollapsed";
+import { useParams } from "next/navigation"
+import { SidebarProvider, SidebarContent } from "@/components/ui/sidebar"
+import { useSidebarStore } from "@/store/sidebarStore"
+import { makeNav } from "./sidebar/constants"
+import { useActivePath } from "./sidebar/use-active-path"
+import SidebarHeaderCard from "./sidebar/SidebarHeaderCard"
+import Section from "./sidebar/Section"
+import ListExpanded from "./sidebar/ListExpanded"
+import ListCollapsed from "./sidebar/ListCollapsed"
 
 export default function InstitutionSidebarContent() {
-  const { isCollapsed } = useSidebarStore();
-  const { isActive } = useActivePath();
+  const { isCollapsed } = useSidebarStore()
+  const { isActive } = useActivePath()
+
+  const params = useParams<{ id: string }>()
+  const institutionId = Array.isArray(params?.id) ? params.id[0] : params?.id
+
+  if (!institutionId) return null
+
+  const { MENU, CLASSES, SETTINGS } = makeNav(institutionId)
 
   return (
     <SidebarProvider>
@@ -51,5 +60,5 @@ export default function InstitutionSidebarContent() {
         </SidebarContent>
       </div>
     </SidebarProvider>
-  );
+  )
 }

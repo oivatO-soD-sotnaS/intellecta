@@ -8,8 +8,10 @@ const nextConfig = {
         port: "8080",
         pathname: "/**",
       },
+      { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
+      { protocol: "https", hostname: "storage.example.com", pathname: "/**" },
     ],
   },
 }
 
-module.exports = nextConfig;
+module.exports = nextConfig
