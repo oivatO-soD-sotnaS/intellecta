@@ -87,7 +87,7 @@ export default function BentoManageGrid({
           description="Remova membros da instituição ou altere seus papéis (aluno, professor, admin)."
           Icon={UserCog}
           cta="Expandir"
-          onExpand={() => router.push(`${base}/invite`)}
+          onExpand={() => router.push(`${base}/people`)}
           className="col-span-1 md:col-span-2 xl:col-span-4"
           background={
             <img
