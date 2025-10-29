@@ -71,7 +71,7 @@ export default function BentoManageGrid({
           description="Crie, edite e duplique turmas e disciplinas."
           Icon={GraduationCap}
           cta="Expandir"
-          onExpand={() => router.push(`${base}/classes`)}
+          onExpand={() => router.push(`${base}/classes-subjects`)}
           className="col-span-1 md:col-span-3 xl:col-span-5"
           background={
             <img
