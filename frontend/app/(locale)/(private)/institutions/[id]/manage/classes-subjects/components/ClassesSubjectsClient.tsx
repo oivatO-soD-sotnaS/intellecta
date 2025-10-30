@@ -20,6 +20,7 @@ import {
 } from "./mocks"
 import SubjectsCatalog from "./SubjectsCatalog"
 import ClassLinks from "./ClassLinks"
+import Back from "../../_components/Back"
 
 export default function ClassesSubjectsClient({
   institutionId,
@@ -86,6 +87,9 @@ export default function ClassesSubjectsClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="space-x-4">
+        <Back hrefFallback={`/institutions/${institutionId}/manage`} />
+      </div>
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">

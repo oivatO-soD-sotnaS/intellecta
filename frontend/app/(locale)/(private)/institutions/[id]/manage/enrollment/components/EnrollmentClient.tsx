@@ -13,11 +13,16 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Users2, UserPlus, GraduationCap } from "lucide-react"
 import { ClassSummary, ClassUser, InstitutionUser } from "./types"
-import { MOCK_CLASS_USERS_BY_CLASS, MOCK_CLASSES, MOCK_INSTITUTION_USERS } from "./mocks"
+import {
+  MOCK_CLASS_USERS_BY_CLASS,
+  MOCK_CLASSES,
+  MOCK_INSTITUTION_USERS,
+} from "./mocks"
 import ClassSelect from "./ClassSelect"
 import AddUsersPanel from "./AddUsersPanel"
 import RosterTable from "./RosterTable"
 import UserDetailsSheet from "./UserDetailsSheet"
+import Back from "../../_components/Back"
 
 export default function EnrollmentClient({
   institutionId,
@@ -68,7 +73,7 @@ export default function EnrollmentClient({
       joined_at: now,
       class_id: classId,
       user_id: iu.user.user_id,
-      role: iu.role, 
+      role: iu.role,
       user: iu.user,
     }))
     setRosters((prev) => ({
@@ -91,6 +96,9 @@ export default function EnrollmentClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="space-x-4">
+        <Back hrefFallback={`/institutions/${institutionId}/manage`} />
+      </div>
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="rounded-2xl">

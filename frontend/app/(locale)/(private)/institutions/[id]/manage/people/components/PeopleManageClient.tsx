@@ -40,6 +40,7 @@ import type { InstitutionUser, InstitutionUserRole } from "./types"
 import { MOCK_INSTITUTION_USERS } from "./mocks"
 import AppAvatar from "@/app/(locale)/(private)/components/AppAvatar"
 import { Badge } from "@heroui/badge"
+import Back from "../../_components/Back"
 
 const ROLE_LABEL: Record<InstitutionUserRole, string> = {
   admin: "Admin",
@@ -132,6 +133,9 @@ export default function PeopleManageClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="space-x-4">
+        <Back hrefFallback={`/institutions/${institutionId}/manage`} />
+      </div>
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">

@@ -13,6 +13,7 @@ import { MOCK_INVITATIONS } from "./mocks"
 import InviteForm from "./InviteForm"
 import InvitesTable from "./InvitesTable"
 import InviteDetailsSheet from "./InviteDetailsSheet"
+import Back from "../../_components/Back"
 
 
 export default function InviteManageClient({
@@ -90,6 +91,10 @@ export default function InviteManageClient({
  
    return (
      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+       <div className="space-x-4">
+         <Back
+           hrefFallback={`/institutions/${institutionId}/manage`}/>
+       </div>
        {/* KPIs */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
          <Card className="rounded-2xl">
@@ -137,14 +142,14 @@ export default function InviteManageClient({
            </CardContent>
          </Card>
        </div>
- 
+
        {/* Grid principal: Form à esquerda | Lista à direita */}
        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
          <InviteForm
            institutionId={institutionId}
            onCreated={(newOnes) => setInvites((prev) => [...newOnes, ...prev])}
          />
- 
+
          <Card className="rounded-2xl">
            <CardHeader className="pb-3">
              <div className="flex flex-wrap items-center justify-between gap-3">
@@ -166,7 +171,7 @@ export default function InviteManageClient({
              </div>
              <Separator className="mt-3" />
            </CardHeader>
- 
+
            <CardContent>
              <Tabs
                value={active}
@@ -179,7 +184,7 @@ export default function InviteManageClient({
                  <TabsTrigger value="expired">Expirados</TabsTrigger>
                  <TabsTrigger value="all">Todos</TabsTrigger>
                </TabsList>
- 
+
                <TabsContent value="pending" className="mt-0">
                  <InvitesTable
                    data={filtered}
@@ -220,7 +225,7 @@ export default function InviteManageClient({
            </CardContent>
          </Card>
        </div>
- 
+
        <InviteDetailsSheet
          open={!!details}
          invitation={details}

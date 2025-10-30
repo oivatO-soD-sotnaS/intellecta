@@ -26,8 +26,6 @@ import {
   Pencil,
 } from "lucide-react"
 
-
-
 import type { InstitutionalEvent } from "./types"
 import { MOCK_INSTITUTIONAL_EVENTS } from "./mocks"
 import { institutionalToCalendar, colorByType } from "./adapters"
@@ -35,6 +33,7 @@ import EventFormDialog from "./EventFormDialog"
 import Legend from "./Legend"
 import { CalendarEvent, EventCalendar } from "@/components/event-calendar"
 import { Badge } from "@heroui/badge"
+import Back from "../../_components/Back"
 
 type Scope = "all" | "institutional" | "subjects" // subjects opcional para futuro
 
@@ -195,6 +194,11 @@ export default function EventsClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="space-x-4">
+        <Back
+          hrefFallback={`/institutions/${institutionId}/manage`}
+        />
+      </div>
       {/* Header */}
       <Card className="rounded-2xl">
         <CardHeader className="pb-3">

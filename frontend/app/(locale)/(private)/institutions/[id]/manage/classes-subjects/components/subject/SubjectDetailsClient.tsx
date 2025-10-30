@@ -20,6 +20,7 @@ import SubjectOverview from "./SubjectOverview"
 import SubjectAssignments from "./SubjectAssignments"
 import SubjectMaterials from "./SubjectMaterials"
 import { Badge } from "@heroui/badge"
+import Back from "../../../_components/Back"
 
 
 
@@ -65,14 +66,10 @@ export default function SubjectDetailsClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href={`/institutions/${institutionId}/manage/classes-subjects`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Voltar
-        </Link>
-        <Badge variant="flat">ID: {subject.subject_id}</Badge>
+      <div className="space-x-4">
+        <Back
+          hrefFallback={`/institutions/${institutionId}/manage/classes-subjects`}
+        />
       </div>
 
       <Card className="rounded-2xl overflow-hidden">

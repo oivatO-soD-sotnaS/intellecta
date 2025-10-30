@@ -1,4 +1,4 @@
-// app/(locale)/(private)/institutions/[id]/manage/components/BentoCard.tsx
+// app/(locale)/(private)/institutions/[id]/manage/_components/BentoCard.tsx
 "use client"
 
 import { motion } from "framer-motion"

@@ -36,6 +36,7 @@ import {
 import type { InstitutionDetails, FileRef } from "./types"
 import { mockInstitution } from "./mocks"
 import { Badge } from "@heroui/badge"
+import Back from "../../_components/Back"
 
 export default function InstitutionOwenClient({
   institutionId,
@@ -152,6 +153,11 @@ export default function InstitutionOwenClient({
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="space-x-4">
+        <Back
+          hrefFallback={`/institutions/${institutionId}/manage/classes-subjects`}
+        />
+      </div>
       {/* HERO (banner + logo + título) */}
       <div className="relative rounded-2xl overflow-hidden">
         <div className="h-48 md:h-56 w-full bg-muted/40">
