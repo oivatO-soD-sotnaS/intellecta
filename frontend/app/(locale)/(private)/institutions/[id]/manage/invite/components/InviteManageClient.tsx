@@ -92,8 +92,7 @@ export default function InviteManageClient({
    return (
      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
        <div className="space-x-4">
-         <Back
-           hrefFallback={`/institutions/${institutionId}/manage`}/>
+         <Back hrefFallback={`/institutions/${institutionId}/manage`} />
        </div>
        {/* KPIs */}
        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -145,10 +144,7 @@ export default function InviteManageClient({
 
        {/* Grid principal: Form à esquerda | Lista à direita */}
        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-         <InviteForm
-           institutionId={institutionId}
-           onCreated={(newOnes) => setInvites((prev) => [...newOnes, ...prev])}
-         />
+         <InviteForm institutionId={institutionId} />
 
          <Card className="rounded-2xl">
            <CardHeader className="pb-3">

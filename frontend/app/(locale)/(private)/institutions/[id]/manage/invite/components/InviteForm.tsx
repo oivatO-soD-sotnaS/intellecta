@@ -1,134 +1,144 @@
-// app/(locale)/(private)/institutions/[id]/manage/people/components/InviteForm.tsx
 "use client"
 
-import { useState } from "react"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { addDays } from "date-fns"
-import type { Invitation } from "./types"
+import { useMemo, useState } from "react"
+import { z } from "zod"
+import { Send, Loader2, MailPlus } from "lucide-react"
+import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+import { useInviteUsersRaw } from "@/hooks/invitations/useInviteUsersRaw"
 
-type Props = {
-  institutionId: string
-  onCreated: (newInvites: Invitation[]) => void
+const emailSchema = z.string().email()
+
+function parseEmails(raw: string) {
+  return Array.from(
+    new Set(
+      raw
+        .split(/[\s,;]+/g)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((e) => e.toLowerCase())
+    )
+  )
 }
 
-export default function InviteForm({ institutionId, onCreated }: Props) {
-  const [emails, setEmails] = useState("")
-  const [role, setRole] = useState<"admin" | "professor" | "aluno">("aluno")
-  const [days, setDays] = useState<number>(7)
+export default function InviteForm({
+  institutionId,
+}: {
+  institutionId: string
+}) {
+  const [input, setInput] = useState("")
+  const emails = useMemo(() => parseEmails(input), [input])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { mutateAsync: invite, isPending } = useInviteUsersRaw(institutionId)
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const parsed = emails
-      .split(/[\n,; ]+/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-    if (!parsed.length) return
 
-    const expires_at = addDays(new Date(), days).toISOString()
-    const newInvites: Invitation[] = parsed.map((email, idx) => ({
-      invitation_id: `mock-${Date.now()}-${idx}`,
-      email,
-      role,
-      created_at: new Date().toISOString(),
-      expires_at,
-      accepted_at: null,
-      institution_id: institutionId,
-      invited_by: "current-user",
-    }))
+    if (emails.length === 0) {
+      toast.error("Adicione ao menos um e-mail.")
+      return
+    }
 
-    onCreated(newInvites)
-    setEmails("")
+    const invalids = emails.filter((em) => !emailSchema.safeParse(em).success)
+    if (invalids.length) {
+      toast.error(
+        `E-mails inválidos: ${invalids.slice(0, 5).join(", ")}${
+          invalids.length > 5 ? "..." : ""
+        }`
+      )
+      return
+    }
+
+    try {
+      const created = await invite(emails)
+      toast.success(`Convites enviados: ${created.length}`)
+      setInput("")
+    } catch (err: any) {
+      let msg = "Falha ao enviar convites."
+      // apiClient lança { status, data } quando não-2xx
+      if (err?.data) {
+        // tente mensagens comuns
+        msg =
+          err.data?.message ||
+          err.data?.error ||
+          (typeof err.data === "string" ? err.data : JSON.stringify(err.data))
+      } else if (err?.message) {
+        msg = err.message
+      }
+      // Se for 401, ajuda a identificar sessão
+      if (err?.status === 401) msg = "Sessão expirada. Faça login novamente."
+      // Exibe status junto:
+      toast.error(`[${err?.status ?? 500}] ${msg}`)
+    }
   }
 
   return (
-    <Card className="rounded-2xl">
-      <CardHeader>
-        <CardTitle className="text-base">Convidar pessoas</CardTitle>
-        <CardDescription>
-          Envie múltiplos e-mails de uma vez. Você pode ajustar o papel padrão e
-          a validade.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>
-              E-mails (separe por vírgula, espaço ou quebra de linha)
-            </Label>
-            <Textarea
-              value={emails}
-              onChange={(e) => setEmails(e.target.value)}
-              placeholder="maria@exemplo.com, joao@exemplo.com"
-              className="resize-y min-h-[84px]"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div
+        className={cn(
+          "rounded-xl border border-border/60 bg-background p-4 shadow-sm"
+        )}
+      >
+        <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+          <MailPlus className="h-4 w-4" />
+          Cole ou digite e-mails (vírgula, espaço ou quebra de linha)
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Papel padrão</Label>
-              <Select value={role} onValueChange={(v: any) => setRole(v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um papel" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aluno">Aluno</SelectItem>
-                  <SelectItem value="professor">Professor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="ex.: ana@exemplo.com, joao@exemplo.com"
+          rows={4}
+          className={cn(
+            "w-full resize-y rounded-lg border border-input bg-transparent p-3",
+            "text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+          )}
+        />
 
-            <div className="space-y-2">
-              <Label>Validade (dias)</Label>
-              <Select
-                value={String(days)}
-                onValueChange={(v) => setDays(Number(v))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="7" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 3, 7, 14, 30].map((d) => (
-                    <SelectItem key={d} value={String(d)}>
-                      {d}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button type="submit" className="rounded-xl">
-              Enviar convites
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => setEmails("")}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {emails.slice(0, 12).map((em) => (
+            <span
+              key={em}
+              className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground"
             >
-              Limpar
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+              {em}
+            </span>
+          ))}
+          {emails.length > 12 && (
+            <span className="text-xs text-muted-foreground">
+              +{emails.length - 12}…
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
+          {emails.length} e-mail(s) pronto(s) para enviar
+        </span>
+
+        <button
+          type="submit"
+          disabled={isPending || emails.length === 0}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium",
+            "bg-foreground text-background hover:opacity-95 active:opacity-90",
+            "disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          )}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Enviando…
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4" />
+              Enviar convites
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   )
 }

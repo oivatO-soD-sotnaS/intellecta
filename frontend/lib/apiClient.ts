@@ -33,6 +33,7 @@ async function handle<T = any>(path: string, opts?: ApiClientOpts): Promise<T> {
   if (!headers.has("Accept")) headers.set("Accept", "application/json")
 
   let body: BodyInit | undefined = opts?.body
+  
   if (opts?.json !== undefined) {
     body = JSON.stringify(opts.json)
     if (!headers.has("Content-Type"))
@@ -89,6 +90,36 @@ export const apiPost = <T = any>(
   body?: any,
   opts?: Omit<ApiClientOpts, "method">
 ) => handle<T>(path, { ...opts, method: "POST", json: body, body: undefined })
+
+
+export async function apiPostForm<T>(path: string, form: Record<string, string | string[]>) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(form)) {
+    if (Array.isArray(value)) value.forEach((v) => params.append(`${key}[]`, v))
+    else params.append(key, value)
+  }
+
+  const res = await fetch(path, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded",
+      accept: "application/json",
+    },
+    body: params.toString(),
+    cache: "no-store",
+  })
+
+  const text = await res.text()
+  const data = text ? JSON.parse(text) : null
+  if (!res.ok) {
+    const err: any = new Error(data?.message || data?.error || text || "Request failed")
+    err.status = res.status
+    err.data = data ?? text
+    throw err
+  }
+  return data as T
+}
+
 
 export const apiPut = <T = any>(
   path: string,
