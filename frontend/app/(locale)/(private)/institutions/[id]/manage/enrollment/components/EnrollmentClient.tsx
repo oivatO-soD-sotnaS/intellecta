@@ -1,196 +1,171 @@
-// app/(locale)/(private)/institutions/[id]/manage/enrollment/components/EnrollmentClient.tsx
-
 "use client"
 
 import { useMemo, useState } from "react"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Users2, UserPlus, GraduationCap } from "lucide-react"
-import { ClassSummary, ClassUser, InstitutionUser } from "./types"
-import {
-  MOCK_CLASS_USERS_BY_CLASS,
-  MOCK_CLASSES,
-  MOCK_INSTITUTION_USERS,
-} from "./mocks"
+import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+import { useInstitutionClasses } from "@/hooks/classes/useInstitutionClasses"
+import { useClassUsers } from "@/hooks/classes/useClassUsers"
+import { useAddUsersToClass } from "@/hooks/classes/useAddUsersToClass"
+import { useRemoveClassUser } from "@/hooks/classes/useRemoveClassUser"
+
 import ClassSelect from "./ClassSelect"
-import AddUsersPanel from "./AddUsersPanel"
 import RosterTable from "./RosterTable"
+import AddUsersPanel from "./AddUsersPanel"
 import UserDetailsSheet from "./UserDetailsSheet"
-import Back from "../../_components/Back"
+import { useInstitutionUsers } from "@/hooks/institution/useInstitutionUsers"
 
-export default function EnrollmentClient({
-  institutionId,
-}: {
-  institutionId: string
-}) {
-  // Mocks
-  const classes: ClassSummary[] = MOCK_CLASSES
-  const allInstitutionUsers: InstitutionUser[] = MOCK_INSTITUTION_USERS
+type Props = { institutionId: string }
 
-  const [classId, setClassId] = useState<string>(classes[0]?.class_id ?? "")
-  const [rosters, setRosters] = useState<Record<string, ClassUser[]>>(
-    MOCK_CLASS_USERS_BY_CLASS
+export default function EnrollmentManageClient({ institutionId }: Props) {
+  // Turmas da instituição
+  const { data: classes, isLoading: loadingClasses } =
+    useInstitutionClasses(institutionId)
+  const [classId, setClassId] = useState<string | undefined>(undefined)
+
+  // Usuários da turma selecionada
+  const {
+    data: classUsers,
+    isLoading: loadingClassUsers,
+    isFetching: fetchingClassUsers,
+  } = useClassUsers(institutionId, classId)
+
+  // Usuários da instituição (para matrículas)
+  const { data: instUsers, isLoading: loadingInstUsers } =
+    useInstitutionUsers(institutionId)
+
+  // Ações (add/remove)
+  const { mutateAsync: addUsers, isPending: adding } = useAddUsersToClass(
+    institutionId,
+    classId
   )
-  const [details, setDetails] = useState<ClassUser | null>(null)
-
-  const currentRoster = rosters[classId] ?? []
-
-  const currentUserIds = useMemo(
-    () => new Set(currentRoster.map((cu) => cu.user.user_id)),
-    [currentRoster]
+  const { mutateAsync: removeUser, isPending: removing } = useRemoveClassUser(
+    institutionId,
+    classId
   )
 
-  const availableInstitutionUsers = useMemo(
+  // Seleções/estados da UI
+  const [selectedForAdd, setSelectedForAdd] = useState<string[]>([])
+  const [inspectUserId, setInspectUserId] = useState<string | null>(null)
+
+  // Opções do select de turmas
+  const classOptions = useMemo(
     () =>
-      allInstitutionUsers.filter((iu) => !currentUserIds.has(iu.user.user_id)),
-    [allInstitutionUsers, currentUserIds]
+      (classes ?? []).map((c) => ({
+        value: c.class_id,
+        label: c.name || c.class_id,
+      })),
+    [classes]
   )
 
-  // KPIs
-  const kpis = useMemo(() => {
-    const total = currentRoster.length
-    const admins = currentRoster.filter((cu) => cu.role === "admin").length
-    const profs = currentRoster.filter((cu) => cu.role === "professor").length
-    const alunos = currentRoster.filter((cu) => cu.role === "aluno").length
-    return { total, admins, profs, alunos }
-  }, [currentRoster])
+  // Mapeia usuários disponíveis (instUsers \ classUsers)
+  const availableUsers = useMemo(() => {
+    if (!instUsers) return []
+    const already = new Set((classUsers ?? []).map((r) => r.user_id))
+    return instUsers
+      .filter((iu) => !already.has(iu.user_id))
+      .map((iu) => ({
+        user_id: iu.user_id,
+        name: iu.user?.full_name || iu.user_id,
+        email: iu.user?.email ?? "",
+        avatar: iu.user?.profile_picture?.url ?? "",
+      }))
+  }, [instUsers, classUsers])
 
-  // Handlers (mock)
-  const addUsersToClass = (userIds: string[]) => {
-    if (!classId || !userIds.length) return
-    const now = new Date().toISOString()
-    const selected = allInstitutionUsers.filter((iu) =>
-      userIds.includes(iu.user.user_id)
-    )
-    const toAppend: ClassUser[] = selected.map((iu) => ({
-      class_users_id: `mock-${classId}-${iu.user.user_id}-${Date.now()}`,
-      joined_at: now,
-      class_id: classId,
-      user_id: iu.user.user_id,
-      role: iu.role,
-      user: iu.user,
-    }))
-    setRosters((prev) => ({
-      ...prev,
-      [classId]: [...(prev[classId] ?? []), ...toAppend],
-    }))
+  async function handleAdd() {
+    if (!classId) return toast.error("Selecione uma turma.")
+    if (selectedForAdd.length === 0)
+      return toast.error("Selecione ao menos um usuário.")
+    try {
+      await addUsers(selectedForAdd)
+      setSelectedForAdd([])
+      toast.success("Usuários adicionados com sucesso.")
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || err?.message || "Falha ao adicionar usuários."
+      )
+    }
   }
 
-  const removeFromClass = (class_users_id: string) => {
-    setRosters((prev) => ({
-      ...prev,
-      [classId]: (prev[classId] ?? []).filter(
-        (cu) => cu.class_users_id !== class_users_id
-      ),
-    }))
+  async function handleRemove(class_users_id: string) {
+    try {
+      await removeUser(class_users_id)
+      toast.success("Usuário removido da turma.")
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || err?.message || "Falha ao remover usuário."
+      )
+    }
   }
-
-  const openDetails = (row: ClassUser) => setDetails(row)
-  const closeDetails = () => setDetails(null)
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
-      <div className="space-x-4">
-        <Back hrefFallback={`/institutions/${institutionId}/manage`} />
-      </div>
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users2 className="h-4 w-4" /> Membros
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{kpis.total}</p>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <UserPlus className="h-4 w-4" /> Professores
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{kpis.profs}</p>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" /> Alunos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{kpis.alunos}</p>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Admins</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold">{kpis.admins}</p>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="space-y-6">
+      {/* Header + seletor de turma */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold">Matrículas</h1>
+          <p className="text-sm text-muted-foreground">
+            Adicione usuários da instituição às turmas e gerencie a lista.
+          </p>
+        </div>
 
-      {/* Seleção de turma */}
-      <Card className="rounded-2xl">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Selecionar Turma</CardTitle>
-          <CardDescription>
-            Escolha a turma para gerenciar matrículas
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ClassSelect
-            classes={classes}
-            value={classId}
-            onChange={setClassId}
-          />
-        </CardContent>
-      </Card>
+        <ClassSelect
+          loading={loadingClasses}
+          options={classOptions}
+          value={classId ?? ""}
+          onChange={(val) => setClassId(val || undefined)}
+        />
+      </div>
 
       {/* Grid principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
-        <AddUsersPanel
-          institutionUsers={availableInstitutionUsers}
-          onAdd={addUsersToClass}
-        />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Lista da turma */}
+        <div className="xl:col-span-2 rounded-xl border border-border/60 bg-background p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium">
+              {classId ? "Usuários da turma" : "Selecione uma turma"}
+            </h2>
+            {fetchingClassUsers && (
+              <span className="text-xs text-muted-foreground">
+                Atualizando…
+              </span>
+            )}
+          </div>
 
-        <Card className="rounded-2xl">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Membros da turma</CardTitle>
-                <CardDescription>
-                  Gerencie a lista de usuários da turma selecionada
-                </CardDescription>
-              </div>
-            </div>
-            <Separator className="mt-3" />
-          </CardHeader>
-          <CardContent>
-            <RosterTable
-              data={currentRoster}
-              onRemove={removeFromClass}
-              onOpen={openDetails}
-            />
-          </CardContent>
-        </Card>
+          <RosterTable
+            loading={loadingClassUsers}
+            rows={classUsers ?? []}
+            onRemove={handleRemove}
+            removing={removing}
+            onInspect={(userId) => setInspectUserId(userId)}
+          />
+        </div>
+
+        {/* Painel de adicionar usuários */}
+        <AddUsersPanel
+          disabled={!classId}
+          loading={loadingInstUsers}
+          users={availableUsers}
+          selected={selectedForAdd}
+          onToggle={(id, checked) =>
+            setSelectedForAdd((prev) =>
+              checked ? [...prev, id] : prev.filter((x) => x !== id)
+            )
+          }
+          onAdd={handleAdd}
+          adding={adding}
+        />
       </div>
 
+      {/* Sheet com detalhes do usuário (clique em uma linha) */}
       <UserDetailsSheet
-        open={!!details}
-        onOpenChange={(o) => !o && closeDetails()}
-        classUser={details}
+        open={!!inspectUserId}
+        onOpenChange={(o) => !o && setInspectUserId(null)}
+        user={
+          inspectUserId
+            ? (classUsers?.find((r) => r.user_id === inspectUserId)?.user ??
+              null)
+            : null
+        }
       />
     </div>
   )

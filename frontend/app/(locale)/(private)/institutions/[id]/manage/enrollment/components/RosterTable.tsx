@@ -1,109 +1,92 @@
 "use client"
 
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { UserMinus2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { ClassUserRow } from "@/hooks/classes/useClassUsers"
+import { Avatar } from "@heroui/avatar"
 
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
-import { Info, Trash2 } from "lucide-react"
-import type { ClassUser } from "./types"
-import { Badge } from "@heroui/badge"
-import AppAvatar from "@/app/(locale)/(private)/components/AppAvatar"
+function initials(name?: string) {
+  if (!name) return "U"
+  return name
+    .split(" ")
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
+}
 
 export default function RosterTable({
-  data,
+  loading,
+  rows,
   onRemove,
-  onOpen,
+  removing,
+  onInspect,
 }: {
-  data: ClassUser[]
+  loading?: boolean
+  rows: ClassUserRow[]
   onRemove: (class_users_id: string) => void
-  onOpen: (row: ClassUser) => void
+  removing?: boolean
+  onInspect?: (userId: string) => void
 }) {
-  if (!data.length) {
+  if (loading)
+    return <div className="text-sm text-muted-foreground">Carregando…</div>
+  if (!rows.length)
     return (
-      <div className="text-sm text-muted-foreground py-10 text-center">
-        Nenhum membro nesta turma.
+      <div className="text-sm text-muted-foreground">
+        Nenhum usuário nesta turma.
       </div>
     )
-  }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Usuário</TableHead>
-            <TableHead>Papel</TableHead>
-            <TableHead>Entrou em</TableHead>
-            <TableHead className="w-24" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row) => {
-            const initials = row.user.full_name
-              .split(" ")
-              .map((p) => p[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase()
-            return (
-              <TableRow key={row.class_users_id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <AppAvatar
-                      src={row.user.profile_picture?.url}
-                      name={row.user.full_name}
-                      size="sm"
-                    />
+    <ul className="divide-y divide-border/60">
+      {rows.map((row) => {
+        const user = row.user
+        const label = user?.full_name || row.user_id
+        const email = user?.email ?? ""
+        const ava = user?.profile_picture?.url
 
-                    <div className="leading-tight">
-                      <div className="font-medium">{row.user.full_name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {row.user.email}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="flat" className="capitalize">
-                    {row.role}
-                  </Badge>
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {format(new Date(row.joined_at), "dd/MM/yyyy HH:mm", {
-                    locale: ptBR,
-                  })}
-                </TableCell>
-                <TableCell className="flex gap-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full"
-                    onClick={() => onOpen(row)}
-                  >
-                    <Info className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="rounded-full text-destructive hover:text-destructive"
-                    onClick={() => onRemove(row.class_users_id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </div>
+        return (
+          <li
+            key={row.class_users_id}
+            className={cn(
+              "flex items-center justify-between py-3",
+              "hover:bg-muted/40 rounded-md px-2 transition-colors"
+            )}
+          >
+            <button
+              type="button"
+              className="flex flex-1 items-center gap-3 text-left"
+              onClick={() => onInspect?.(row.user_id)}
+              aria-label={`Ver detalhes de ${label}`}
+            >
+              {ava ? (
+                <Avatar src={ava} className="h-10 w-10" />
+              ) : (
+                <Avatar className="h-10 w-10">{initials(label)}</Avatar>
+              )}
+
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-sm font-medium">{label}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {email}
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => onRemove(row.class_users_id)}
+              disabled={removing}
+              className={cn(
+                "ml-3 inline-flex items-center gap-1 rounded-md border border-destructive/40 px-2.5 py-1.5 text-xs",
+                "text-destructive hover:bg-destructive/5 disabled:cursor-not-allowed disabled:opacity-50"
+              )}
+            >
+              <UserMinus2 className="h-3.5 w-3.5" />
+              Remover
+            </button>
+          </li>
+        )
+      })}
+    </ul>
   )
 }

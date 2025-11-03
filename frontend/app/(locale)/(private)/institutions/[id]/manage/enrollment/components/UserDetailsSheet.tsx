@@ -5,70 +5,60 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet"
-import type { ClassUser } from "./types"
-import { Badge } from "@heroui/badge"
-import AppAvatar from "@/app/(locale)/(private)/components/AppAvatar"
+} from "@/components/ui/sheet" // ajuste se seu Sheet for de outra lib
+import { Avatar } from "@heroui/avatar"
 
+type UserLite = {
+  user_id: string
+  full_name?: string
+  email?: string
+  profile_picture?: { url?: string } | null
+}
 
 export default function UserDetailsSheet({
   open,
   onOpenChange,
-  classUser,
+  user,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  classUser: ClassUser | null
+  user: UserLite | null
 }) {
-  if (!classUser) return null
-  const initials = classUser.user.full_name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase()
+  const name = user?.full_name || user?.user_id || "Usuário"
+  const email = user?.email ?? ""
+  const ava = user?.profile_picture?.url
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[460px]">
+      <SheetContent side="right" className="w-full max-w-md">
         <SheetHeader>
-          <SheetTitle>Detalhes do membro</SheetTitle>
-          <SheetDescription>
-            Informações básicas do usuário na turma
-          </SheetDescription>
+          <SheetTitle>Detalhes do usuário</SheetTitle>
         </SheetHeader>
 
-        <div className="mt-4 space-y-4">
-          <div className="flex items-center gap-3">
-            <AppAvatar
-              src={classUser.user.profile_picture?.url}
-              name={classUser.user.full_name}
-              size="lg" 
-              radius="full" 
-            />
-            <div>
-              <div className="font-medium">{classUser.user.full_name}</div>
-              <div className="text-xs text-muted-foreground">
-                {classUser.user.email}
-              </div>
-            </div>
+        <div className="mt-6 flex items-center gap-3">
+          {ava ? (
+            <Avatar src={ava} className="h-12 w-12" />
+          ) : (
+            <Avatar className="h-12 w-12">
+              {(name || "U")
+                .split(" ")
+                .map((s) => s[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
+            </Avatar>
+          )}
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-sm font-medium">{name}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {email}
+            </span>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="space-y-1">
-              <div className="text-muted-foreground">Papel</div>
-              <Badge variant="flat" className="capitalize">
-                {classUser.role}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <div className="text-muted-foreground">ID associação</div>
-              <div className="font-mono text-xs">
-                {classUser.class_users_id}
-              </div>
-            </div>
-          </div>
+        {/* Espaço para futuros detalhes (ex.: data de entrada na turma, papeis, etc.) */}
+        <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+          <p>ID do usuário: {user?.user_id ?? "-"}</p>
         </div>
       </SheetContent>
     </Sheet>

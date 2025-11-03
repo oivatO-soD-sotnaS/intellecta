@@ -1,37 +1,39 @@
 "use client"
 
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
-import type { ClassSummary } from "./types"
+import { cn } from "@/lib/utils"
+
+type Option = { value: string; label: string }
 
 export default function ClassSelect({
-  classes,
+  loading,
+  options,
   value,
   onChange,
 }: {
-  classes: ClassSummary[]
+  loading?: boolean
+  options: Option[]
   value: string
   onChange: (v: string) => void
 }) {
   return (
-    <div className="max-w-sm">
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="rounded-xl">
-          <SelectValue placeholder="Selecione uma turma" />
-        </SelectTrigger>
-        <SelectContent>
-          {classes.map((c) => (
-            <SelectItem key={c.class_id} value={c.class_id}>
-              {c.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={cn(
+        "h-10 min-w-[240px] rounded-md border border-input bg-background px-3 text-sm",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+        "disabled:opacity-50"
+      )}
+      disabled={loading}
+    >
+      <option value="" disabled>
+        {loading ? "Carregando turmas..." : "Selecione uma turma"}
+      </option>
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
   )
 }

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
 
 export const dynamic = "force-dynamic"
-export const runtime = "nodejs" // importante para streaming multipart
+export const runtime = "nodejs"
 
 export async function GET(
   req: NextRequest,
@@ -17,6 +17,5 @@ export async function POST(
   ctx: { params: Promise<{ institution_id: string }> }
 ) {
   const { institution_id } = await ctx.params
-  // ⚠️ NÃO leia o body aqui — precisamos repassar o stream multipart intacto
   return proxyPost(req, `/institutions/${institution_id}/classes`)
 }

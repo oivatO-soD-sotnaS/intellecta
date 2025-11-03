@@ -1,6 +1,10 @@
-// app/(locale)/(private)/institutions/[id]/manage/enrollment/page.tsx
-import EnrollmentClient from "./components/EnrollmentClient"
+import EnrollmentManageClient from "./components/EnrollmentClient"
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <EnrollmentClient institutionId={params.id} />
+export default async function EnrollmentPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  return <EnrollmentManageClient institutionId={id} />
 }
