@@ -1,147 +1,104 @@
-// "use client"
+"use client"
 
-// import { useMemo, useState } from "react"
-// import Link from "next/link"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-//   CardDescription,
-// } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Separator } from "@/components/ui/separator"
-// import { ArrowLeft, BookOpen, CalendarDays, Files } from "lucide-react"
-// import { Assignment, Material, Subject } from "../types"
-// import { MOCK_SUBJECTS } from "../mocks"
-// import { MOCK_ASSIGNMENTS_BY_SUBJECT, MOCK_MATERIALS_BY_SUBJECT } from "../mocks.details"
-// import SubjectOverview from "./SubjectOverview"
-// import SubjectAssignments from "./SubjectAssignments"
-// import SubjectMaterials from "./SubjectMaterials"
-// import { Badge } from "@heroui/badge"
-// import Back from "../../../_components/Back"
+import * as React from "react"
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { useRouter, useSearchParams } from "next/navigation"
+import SubjectHeader from "./SubjectHeader"
+import OverviewPanel from "./SubjectOverview"
+import SubjectEditSheet from "./SubjectEditSheet"
+import SubjectUnlinkDialog from "./SubjectUnlinkDialog"
 
+type Props = {
+  institutionId: string
+  subjectId: string
+  classId?: string // quando vier de /subjects da turma
+}
 
-// export default function SubjectDetailsClient({
-//   institutionId,
-//   subjectId,
-// }: {
-//   institutionId: string
-//   subjectId: string
-// }) {
-//   const initial = useMemo<Subject | undefined>(
-//     () => MOCK_SUBJECTS.find((s) => s.subject_id === subjectId),
-//     [subjectId]
-//   )
+export default function SubjectDetailsClient({
+  institutionId,
+  subjectId,
+  classId,
+}: Props) {
+  const [editOpen, setEditOpen] = React.useState(false)
+  const [unlinkOpen, setUnlinkOpen] = React.useState(false)
+  const params = useSearchParams()
+  const router = useRouter()
 
-//   const [subject, setSubject] = useState<Subject | undefined>(initial)
-//   const [assignments, setAssignments] = useState<Assignment[]>(
-//     MOCK_ASSIGNMENTS_BY_SUBJECT[subjectId] ?? []
-//   )
-//   const [materials, setMaterials] = useState<Material[]>(
-//     MOCK_MATERIALS_BY_SUBJECT[subjectId] ?? []
-//   )
+  const currentTab = params.get("view") ?? "overview"
 
-//   if (!subject) {
-//     return (
-//       <div className="max-w-[1100px] mx-auto px-4 md:px-6 py-10">
-//         <Card className="rounded-2xl">
-//           <CardContent className="p-8">
-//             <div className="text-sm text-muted-foreground">
-//               Disciplina não encontrada (mock).{" "}
-//               <Link
-//                 href={`/institutions/${institutionId}/manage/classes-subjects`}
-//                 className="underline"
-//               >
-//                 Voltar
-//               </Link>
-//             </div>
-//           </CardContent>
-//         </Card>
-//       </div>
-//     )
-//   }
+  const setTab = (view: string) => {
+    const sp = new URLSearchParams(params.toString())
+    sp.set("view", view)
+    router.replace(`?${sp.toString()}`, { scroll: false })
+  }
 
-//   return (
-//     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
-//       <div className="space-x-4">
-//         <Back
-//           hrefFallback={`/institutions/${institutionId}/manage/classes-subjects`}
-//         />
-//       </div>
+  return (
+    <div className="space-y-4">
+      <SubjectHeader
+        institutionId={institutionId}
+        subjectId={subjectId}
+        classId={classId}
+        onEdit={() => setEditOpen(true)}
+        onUnlink={() => setUnlinkOpen(true)}
+        onBack={
+          classId
+            ? () =>
+                router.push(
+                  `/institutions/${institutionId}/manage/classes-subjects?classId=${classId}#subjects`
+                )
+            : undefined
+        }
+      />
 
-//       <Card className="rounded-2xl overflow-hidden">
-//         {subject.banner ? (
-//           <div className="h-36 w-full bg-muted/40">
-//             <img
-//               src={subject.banner}
-//               alt=""
-//               className="h-full w-full object-cover"
-//             />
-//           </div>
-//         ) : null}
-//         <CardHeader className="pb-3">
-//           <CardTitle className="text-lg flex items-center gap-2">
-//             <BookOpen className="h-5 w-5" />
-//             {subject.name}
-//           </CardTitle>
-//           <CardDescription>{subject.description}</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <Separator />
-//           <Tabs defaultValue="overview" className="mt-4">
-//             <TabsList className="rounded-xl">
-//               <TabsTrigger value="overview" className="gap-2">
-//                 <BookOpen className="h-4 w-4" /> Visão Geral
-//               </TabsTrigger>
-//               <TabsTrigger value="assignments" className="gap-2">
-//                 <CalendarDays className="h-4 w-4" /> Atividades
-//               </TabsTrigger>
-//               <TabsTrigger value="materials" className="gap-2">
-//                 <Files className="h-4 w-4" /> Materiais
-//               </TabsTrigger>
-//             </TabsList>
+      <Tabs value={currentTab} onValueChange={setTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview">Visão geral</TabsTrigger>
+          <TabsTrigger value="assignments">Atividades</TabsTrigger>
+          <TabsTrigger value="materials">Materiais</TabsTrigger>
+        </TabsList>
 
-//             <TabsContent value="overview" className="pt-4">
-//               <SubjectOverview subject={subject} onUpdate={setSubject} />
-//             </TabsContent>
+        <TabsContent value="overview" className="mt-4">
+          <OverviewPanel institutionId={institutionId} subjectId={subjectId} />
+        </TabsContent>
 
-//             <TabsContent value="assignments" className="pt-4">
-//               <SubjectAssignments
-//                 subjectId={subject.subject_id}
-//                 items={assignments}
-//                 onCreate={(a) => setAssignments((p) => [a, ...p])}
-//                 onUpdate={(a) =>
-//                   setAssignments((p) =>
-//                     p.map((x) => (x.assignment_id === a.assignment_id ? a : x))
-//                   )
-//                 }
-//                 onDelete={(id) =>
-//                   setAssignments((p) => p.filter((x) => x.assignment_id !== id))
-//                 }
-//               />
-//             </TabsContent>
+        <TabsContent value="assignments" className="mt-4">
+          {/* TODO: ligar AssignmentsView quando implementarmos os hooks/rotas */}
+          <div className="text-sm text-muted-foreground">
+            Em breve: gerenciamento de atividades da disciplina.
+          </div>
+        </TabsContent>
 
-//             <TabsContent value="materials" className="pt-4">
-//               <SubjectMaterials
-//                 subjectId={subject.subject_id}
-//                 items={materials}
-//                 onCreate={(m) => setMaterials((p) => [m, ...p])}
-//                 onUpdate={(m) =>
-//                   setMaterials((p) =>
-//                     p.map((x) => (x.material_id === m.material_id ? m : x))
-//                   )
-//                 }
-//                 onDelete={(id) =>
-//                   setMaterials((p) => p.filter((x) => x.material_id !== id))
-//                 }
-//               />
-//             </TabsContent>
-//           </Tabs>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
+        <TabsContent value="materials" className="mt-4">
+          {/* TODO: ligar MaterialsView quando implementarmos os hooks/rotas */}
+          <div className="text-sm text-muted-foreground">
+            Em breve: materiais didáticos da disciplina.
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <SubjectEditSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        institutionId={institutionId}
+        subjectId={subjectId}
+      />
+
+      {classId && (
+        <SubjectUnlinkDialog
+          open={unlinkOpen}
+          onOpenChange={setUnlinkOpen}
+          institutionId={institutionId}
+          classId={classId}
+          subjectId={subjectId}
+          onUnlinked={() => {
+            // volta para a lista de subjects da turma
+            router.push(
+              `/institutions/${institutionId}/manage/classes-subjects?classId=${classId}#subjects`
+            )
+          }}
+        />
+      )}
+    </div>
+  )
+}

@@ -3,9 +3,7 @@
 // mas agora ele retorna CLASSES (não mais subjects).
 
 import { classesMock } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/courses.mock"
-import { ClassDTO } from "@/types/subject"
-
-
+import { ClassDTO } from "@/types/subjects"
 
 type UseInstitutionClassesResult = {
   data: ClassDTO[]

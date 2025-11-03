@@ -1,12 +1,10 @@
+// app/api/institutions/[institution_id]/classes/[class_id]/subjects/route.ts
 import { NextRequest } from "next/server"
 import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
 
-export const dynamic = "force-dynamic"
+type Ctx = { params: Promise<{ institution_id: string; class_id: string }> }
 
-export async function GET(
-  req: NextRequest,
-  ctx: { params: Promise<{ institution_id: string; class_id: string }> }
-) {
+export async function GET(req: NextRequest, ctx: Ctx) {
   const { institution_id, class_id } = await ctx.params
   return proxyGet(
     req,
@@ -14,10 +12,7 @@ export async function GET(
   )
 }
 
-export async function POST(
-  req: NextRequest,
-  ctx: { params: Promise<{ institution_id: string; class_id: string }> }
-) {
+export async function POST(req: NextRequest, ctx: Ctx) {
   const { institution_id, class_id } = await ctx.params
   return proxyPost(
     req,

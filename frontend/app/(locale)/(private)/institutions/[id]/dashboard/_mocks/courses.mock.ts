@@ -1,8 +1,7 @@
 // courses.mock.ts
 // Mock de classes, fiel ao contrato de "Classes".
 
-import { ClassDTO } from "@/types/subject";
-
+import { ClassDTO } from "@/types/subjects"
 
 export const classesMock: ClassDTO[] = [
   {
