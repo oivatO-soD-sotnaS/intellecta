@@ -1,6 +1,10 @@
 // app/(locale)/(private)/institutions/[id]/manage/classes-subjects/page.tsx
-import ClassesSubjectsClient from "./components/ClassesSubjectsClient"
+"use client"
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <ClassesSubjectsClient institutionId={params.id} />
+import { use } from "react"
+import ClassesSubjectsClient from "./components/classes/ClassesSubjectsClient"
+
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
+  return <ClassesSubjectsClient institutionId={id} />
 }
