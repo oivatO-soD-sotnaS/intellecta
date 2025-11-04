@@ -1,25 +1,15 @@
-// app/api/institutions/[id]/users/[userId]/change-role/route.ts
-import { Params } from "next/dist/server/request/params"
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+// app/api/institutions/[institution_id]/users/[institution_user_id]/change-role/route.ts
+import { proxyPatch } from "@/app/api/_lib/proxy";
+import { NextRequest } from "next/server"
 
-const API = process.env.API_BASE_URL!
+type Ctx = {
+  params: Promise<{ institution_id: string; institution_user_id: string }>
+}
 
-if (!API) throw new Error("API_BASE_URL não definida")
-
-export async function PATCH(req: NextRequest, { params }: { params: Params }) {
-  const { new_role } = await req.json() // { new_role: "teacher" }
-  const res = await fetch(
-    `${API}/institutions/${params.id}/users/${params.userId}/change-role`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: req.headers.get("Authorization")!,
-      },
-      body: JSON.stringify({ new_role }),
-    }
+export async function PATCH(req: NextRequest, context: Ctx) {
+  const { institution_id, institution_user_id } = await context.params
+  return proxyPatch(
+    req,
+    `/institutions/${institution_id}/users/${institution_user_id}/change-role`
   )
-  const body = await res.json()
-  return NextResponse.json(body, { status: res.status })
 }

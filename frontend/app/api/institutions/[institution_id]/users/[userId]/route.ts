@@ -1,22 +1,15 @@
-import { NextRequest, NextResponse } from "next/server"
+// app/api/institutions/[institution_id]/users/[institution_user_id]/route.ts
+import { proxyDelete } from "@/app/api/_lib/proxy";
+import { NextRequest } from "next/server"
 
-const API_BASE_URL = process.env.API_BASE_URL!
-if (!API_BASE_URL) throw new Error("API_BASE_URL não definida")
-
-interface Params {
-  params: Promise<{ id: string; userId: string }>
+type Ctx = {
+  params: Promise<{ institution_id: string; institution_user_id: string }>
 }
 
-export async function DELETE(req: NextRequest, { params }: Params) {
-  const { id, userId } = await params // aguarda o params com os dois IDs
-  const res = await fetch(
-    `${API_BASE_URL}/institutions/${id}/users/${userId}`,
-    {
-      method: "DELETE",
-      headers: { Authorization: req.headers.get("Authorization")! },
-    }
+export async function DELETE(req: NextRequest, context: Ctx) {
+  const { institution_id, institution_user_id } = await context.params
+  return proxyDelete(
+    req,
+    `/institutions/${institution_id}/users/${institution_user_id}`
   )
-
-  const body = await res.json()
-  return NextResponse.json(body, { status: res.status })
 }
