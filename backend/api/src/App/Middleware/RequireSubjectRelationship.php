@@ -38,16 +38,16 @@ class RequireSubjectRelationship{
     }
     /** @var InstitutionUser $membership */
     $membership = $request->getAttribute('membership');
-    $token = $request->getAttribute('token');
+    $user = $request->getAttribute('user');
     
     try {
-      $isRelatedToSubject = $this->subjectsDao->isUserRelatedToSubject($token['sub'], $subjectId);
+      $isRelatedToSubject = $this->subjectsDao->isUserRelatedToSubject($user->getUserId(), $subjectId);
 
       if(
         $membership->getRole() !== InstitutionUserType::Admin->value
         && !$isRelatedToSubject
       ) {
-        LogService::http403('RequireSubjectRelationship', "User ".$token['email']. " is not related to the subject with id {$subjectId}");
+        LogService::http403('RequireSubjectRelationship', "User ".$user->getUserId(). " is not related to the subject with id {$subjectId}");
         throw new HttpForbiddenException($request, 'User can not access this subject');
       } 
 

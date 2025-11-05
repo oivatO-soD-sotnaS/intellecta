@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Dao;
 
+use App\Dto\InstitutionUserDto;
+use App\Dto\UserDto;
+use App\Models\File;
 use App\Models\InstitutionUser;
+use App\Models\User;
 use PDO;
 
 readonly class InstitutionUsersDao extends BaseDao {
@@ -132,4 +136,92 @@ readonly class InstitutionUsersDao extends BaseDao {
 
     return $stmt->execute();
   }
+
+  /**
+   * Summary of mapToInstitutionUserDtos
+   * Converts a list of InstitutionUser[] into InstitutionUserDto[] with a single SQL query (no N+1).
+   *
+   * @param InstitutionUser[] $institutionUsers
+   * @return InstitutionUserDto[]
+   */
+  public function mapInstitutionUsersToUsers(array $institutionUsers): array {
+    if (empty($institutionUsers)) {
+      return [];
+    }
+
+    // Extract IDs for the WHERE clause
+    $institutionUserIds = array_map(fn($iu) => $iu->getInstitutionUsersId(), $institutionUsers);
+
+    // Prepare placeholders for the IN (...) clause
+    $placeholders = implode(',', array_fill(0, count($institutionUserIds), '?'));
+
+    $sql = "
+      SELECT 
+        iu.institution_user_id,
+        iu.role,
+        iu.joined_at,
+        iu.institution_id,
+        u.user_id,
+        u.full_name,
+        u.email,
+        u.created_at AS user_created_at,
+        u.changed_at AS user_changed_at,
+        f.file_id AS profile_picture_id,
+        f.url AS profile_picture_url,
+        f.filename AS profile_picture_filename,
+        f.mime_type AS profile_picture_mime_type
+      FROM institution_users iu
+      JOIN users u ON u.user_id = iu.user_id
+      LEFT JOIN files f ON f.file_id = u.profile_picture_id
+      WHERE iu.institution_user_id IN ($placeholders)
+    ";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($institutionUserIds);
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $dtos = [];
+
+    foreach ($rows as $row) {
+      // Build File model (if any)
+      $profilePicture = null;
+      if (!empty($row['profile_picture_id'])) {
+        $profilePicture = new File([
+          'file_id' => $row['profile_picture_id'],
+          'url' => $row['profile_picture_url'],
+          'filename' => $row['profile_picture_filename'],
+          'mime_type' => $row['profile_picture_mime_type'],
+        ]);
+      }
+
+      // Build User model
+      $user = new User([
+        'user_id' => $row['user_id'],
+        'full_name' => $row['full_name'],
+        'email' => $row['email'],
+        'created_at' => $row['user_created_at'],
+        'changed_at' => $row['user_changed_at'],
+        'profile_picture_id' => $row['profile_picture_id'],
+      ]);
+
+      // Build InstitutionUser model
+      $institutionUser = new InstitutionUser([
+        'institution_user_id' => $row['institution_user_id'],
+        'role' => $row['role'],
+        'joined_at' => $row['joined_at'],
+        'institution_id' => $row['institution_id'],
+        'user_id' => $row['user_id'],
+      ]);
+
+      // Compose DTOs
+      $userDto = new UserDto($user, $profilePicture);
+      $institutionUserDto = new InstitutionUserDto($institutionUser, $userDto);
+
+      $dtos[] = $institutionUserDto;
+    }
+
+    return $dtos;
+  }
+
 }

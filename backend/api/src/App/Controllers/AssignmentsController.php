@@ -54,7 +54,7 @@ readonly class AssignmentsController extends BaseController {
 
     public function createSubjectAssignment(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
             $uploadedFiles = $request->getUploadedFiles();
@@ -99,7 +99,10 @@ readonly class AssignmentsController extends BaseController {
             $assignmentDto = new AssignmentDto($assignment, $attachmentFile);
             $response->getBody()->write(json_encode($assignmentDto));
 
-            LogService::info("/institutions/{$institution_id}/subjects/{$subject_id}/assignments", "{$token['email']} created an assignment for the $subject_id subject");
+            LogService::info(
+                "/institutions/{$institution_id}/subjects/{$subject_id}/assignments", 
+                "{$user->getUserId()} created an assignment for the $subject_id subject"
+            );
             return $response;
         });
     }
@@ -125,7 +128,7 @@ readonly class AssignmentsController extends BaseController {
 
     public function patchSubjectAssignmentById(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $assignment_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
 
@@ -165,7 +168,7 @@ readonly class AssignmentsController extends BaseController {
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/assignments/{$assignment_id}",
-                "{$token['email']} updated the {$assignment->getTitle()} assignment"
+                "{$user->getUserId()} updated the {$assignment->getTitle()} assignment"
             );
             return $response;
         });
@@ -173,7 +176,7 @@ readonly class AssignmentsController extends BaseController {
 
     public function deleteSubjectAssignmentById(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $assignment_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $assignment = $this->assignmentsDao->getAssignmentByAssignmentIdAndSubjectId($assignment_id, $subject_id);
 
@@ -193,7 +196,7 @@ readonly class AssignmentsController extends BaseController {
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/assignments/{$assignment_id}",
-                "{$token['email']} deleted the {$assignment->getTitle()} assignment"
+                "{$user->getUserId()} deleted the {$assignment->getTitle()} assignment"
             );
             return $response;
         });

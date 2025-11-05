@@ -4,15 +4,19 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\EventsDao;
+use App\Dao\FilesDao;
 use App\Dao\InstitutionalEventsDao;
 use App\Dao\InstitutionsDao;
+use App\Dao\InstitutionUsersDao;
+use App\Dao\NotificationsDao;
 use App\Dao\UsersDao;
 use App\Dto\InstitutionalEventDto;
 use App\Models\Event;
 use App\Models\InstitutionalEvent;
-use App\Services\EmailService;
+use App\Queue\RedisEmailQueue;
 use App\Services\LogService;
 use App\Services\ValidatorService;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\EventDateVo;
 use App\Vo\EventDescriptionVo;
 use App\Vo\EventTitleVo;
@@ -25,11 +29,15 @@ readonly class InstitutionalEventsController extends BaseController
 {
   public function __construct(
     private InstitutionalEventsDao $institutionalEventsDao,
+    private InstitutionsDao $institutionsDao,
+    private InstitutionUsersDao $institutionUsersDao,
     private EventsDao $eventsDao,
     private UsersDao $usersDao,
-    private InstitutionsDao $institutionsDao,
-    private EmailService $emailService,
-    private ValidatorService $validatorService
+    private EmailTemplateProvider $emailTemplateProvider,
+    private ValidatorService $validatorService,
+    private RedisEmailQueue $emailQueue,
+    private NotificationsDao $notificationsDao,
+    private FilesDao $filesDao
   ) {}
 
   public function getInstitutionalEvents(Request $request, Response $response, string $institution_id): Response
@@ -83,11 +91,36 @@ readonly class InstitutionalEventsController extends BaseController
         "event_id" => $event->getEventId()
       ]));
 
+      $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
+      $institutionUserDtos = $this->institutionUsersDao->mapInstitutionUsersToUsers($institutionUsers);
+      $this->notificationsDao->createNotificationsForUsers(
+        array_map(fn($dto) => $dto->getUserDto()->getUser()->getUserId(), $institutionUserDtos),
+        $event->getEventId()
+      );
+
+      foreach ($institutionUserDtos as $institutionUserDto) {
+        $user = $institutionUserDto->getUserDto()->getUser();
+
+        $this->emailQueue->push([
+          'to' => $user->getEmail(),
+          'toName' => $user->getFullName(),
+          'subject' => "{$institution->getName()} - Novo evento institucional: {$event->getTitle()}",
+          'body' => $this->emailTemplateProvider->getInstitutionalNotificationEmailTemplate(
+            $user->getFullName(),
+            $event,
+            $institution->getName(),
+            $institution->getEmail()
+          ),
+          'altBody' => "Olá {$user->getFullName()},\n\nUm novo evento institucional foi criado na instituição {$institution->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+        ]);
+      }
+
       $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
       
       $response->getBody()->write(json_encode([
         "Message" => "Institutional event created successfully",
-        "institutional_event" => $institutionalEventDto
+        "institutional_event" => $institutionalEventDto,
+        "notified_users" => $institutionUserDtos
       ]));
 
       return $response;
@@ -99,7 +132,7 @@ readonly class InstitutionalEventsController extends BaseController
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $event_id) {
       $body = $request->getParsedBody();
 
-      $this->validatorService->validateRequired($body, ['title', 'description', 'event_data', 'event_type']);
+      $this->validatorService->validateRequired($body, ['title', 'description', 'event_date', 'event_type']);
       
       $title = new EventTitleVo($body['title']);
       $description = new EventDescriptionVo($body['description']);
@@ -120,6 +153,8 @@ readonly class InstitutionalEventsController extends BaseController
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
       
+      $institution = $this->institutionsDao->getInstitutionById($institution_id);
+
       if (!empty($title)) {
         $event->setTitle($title->getValue());
       }
@@ -134,8 +169,28 @@ readonly class InstitutionalEventsController extends BaseController
 
       $event = $this->eventsDao->updateEvent($event);
 
+      $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
+      $institutionUserDtos = $this->institutionUsersDao->mapInstitutionUsersToUsers($institutionUsers);
+
+      foreach ($institutionUserDtos as $institutionUserDto) {
+        $user = $institutionUserDto->getUserDto()->getUser();
+
+        $this->emailQueue->push([
+          'to' => $user->getEmail(),
+          'toName' => $user->getFullName(),
+          'subject' => "{$institution->getName()} - Atualização de evento institucional: {$event->getTitle()}",
+          'body' => $this->emailTemplateProvider->getInstitutionalNotificationUpdatedEmailTemplate(
+            $user->getFullName(),
+            $event,
+            $institution->getName(),
+            $institution->getEmail()
+          ),
+          'altBody' => "Olá {$user->getFullName()},\n\nO evento institucional na instituição {$institution->getName()} foi atualizado.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+        ]);
+      }
+
       $institutionalEventDto = new InstitutionalEventDto($institutionalEvent, $event);
-      
+
       $response->getBody()->write(json_encode([
         "Message" => "User event updated successfully",
         "user_event" => $institutionalEventDto
@@ -149,6 +204,7 @@ readonly class InstitutionalEventsController extends BaseController
   public function deleteInstitutionalEvent(Request $request, Response $response, string $institution_id, string $event_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $event_id) {
+      $institution = $this->institutionsDao->getInstitutionById($institution_id);
       $institutionalEvent = $this->institutionalEventsDao->getInstitutionalEventById($event_id);
       if (empty($institutionalEvent)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -164,7 +220,28 @@ readonly class InstitutionalEventsController extends BaseController
       }
 
       $this->eventsDao->deleteEventById($event->getEventId());
-      
+
+      $institutionUsers = $this->institutionUsersDao->getInstitutionUsersByInstitutionId($institution_id);
+      $institutionUserDtos = $this->institutionUsersDao->mapInstitutionUsersToUsers($institutionUsers);
+
+      foreach ($institutionUserDtos as $institutionUserDto) {
+        $user = $institutionUserDto->getUserDto()->getUser();
+
+        $this->emailQueue->push([
+          'to' => $user->getEmail(),
+          'toName' => $user->getFullName(),
+          'subject' => "{$institution->getName()} - Evento institucional removido: {$event->getTitle()}",
+          'body' => $this->emailTemplateProvider->getInstitutionalNotificationDeletedEmailTemplate(
+            $user->getFullName(),
+            $event,
+            $institution->getName(),
+            $institution->getEmail()
+          ),
+          'altBody' => "Olá {$user->getFullName()},\n\nO evento institucional na instituição {$institution->getName()} foi removido.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+        ]);
+      }
+
+
       LogService::info("/institutions/$institution_id/events/$event_id", "Institutional event deleted: $institutionalEvent");
       $response->getBody()->write(json_encode(["Message" => "Institutional event deleted successfully"]));
       return $response;

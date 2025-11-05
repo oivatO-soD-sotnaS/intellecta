@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Vo;
 
 use DateTimeImmutable;
-use App\Vo\UuidV4Vo;
 use App\Vo\ForumMessageContentVo;
 use InvalidArgumentException;
 
@@ -33,7 +32,6 @@ final class ForumMessagesFiltersVo {
         } catch (\Exception $e) {
             throw new InvalidArgumentException("Invalid 'created_at_to': " . $e->getMessage());
         }
-
     }
 
     public function getDaoFilters(): array {
@@ -47,18 +45,5 @@ final class ForumMessagesFiltersVo {
             $filters['created_at_to']      = $this->createdAtTo->format('Y-m-d');
 
         return $filters;
-    }
-
-
-    public function getContent(): ?ForumMessageContentVo {
-        return $this->content;
-    }
-
-    public function getCreatedAtFrom(): ?DateTimeImmutable {
-        return $this->createdAtFrom;
-    }
-
-    public function getCreatedAtTo(): ?DateTimeImmutable {
-        return $this->createdAtTo;
     }
 }

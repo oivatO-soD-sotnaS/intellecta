@@ -9,34 +9,30 @@ use App\Models\User;
 
 readonly class UserDto implements \JsonSerializable {
   
-  private string $user_id;
-  private string $full_name;
-  private string $email;
-  private string $created_at;
-  private string $changed_at;
+  private User $user;
   private ?File $profile_picture;
 
   public function __construct(User $user, ?File $profilePicture){
-    $this->user_id = $user->getUserId();
-    $this->full_name = $user->getFullName();
-    $this->email = $user->getEmail();
-    $this->created_at = $user->getCreatedAt();
-    $this->changed_at = $user->getChangedAt();
+    $this->user = $user;
     $this->profile_picture = $profilePicture;
   }
 
   private function toArray() {
     return [
-      'user_id' => $this->user_id,
-      'full_name' => $this->full_name,
-      'email' => $this->email,
-      'created_at' => $this->created_at,
-      'changed_at' => $this->changed_at,
+      'user_id' => $this->user->getUserId(),
+      'full_name' => $this->user->getFullName(),
+      'email' => $this->user->getEmail(),
+      'created_at' => $this->user->getCreatedAt(),
+      'changed_at' => $this->user->getChangedAt(),
       'profile_picture' => $this->profile_picture
     ];
   }
 
   public function jsonSerialize(): mixed {
     return $this->toArray();
+  }
+
+  public function getUser(): User {
+    return $this->user;
   }
 }

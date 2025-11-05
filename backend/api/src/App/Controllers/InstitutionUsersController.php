@@ -14,13 +14,12 @@ use App\Enums\InstitutionUserType;
 use App\Models\InstitutionUser;
 use App\Models\Invitation;
 use App\Queue\RedisEmailQueue;
-use App\Services\EmailService;
 use App\Services\LogService;
 use App\Services\ValidatorService;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\InvitationVo;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use Slim\Exception\HttpException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
@@ -36,7 +35,7 @@ readonly class InstitutionUsersController extends BaseController
     private InvitationsDao $invitationsDao,
     private UsersDao $usersDao,
     private FilesDao $filesDao,
-    private EmailService $emailService,
+    private EmailTemplateProvider $emailTemplateProvider,
     private ValidatorService $validatorService,
     private RedisEmailQueue $emailQueue
   ) {}
@@ -68,6 +67,8 @@ readonly class InstitutionUsersController extends BaseController
   public function inviteUsers(Request $request, Response $response, string $institution_id): Response
   {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
+      $user = $request->getAttribute('user');
+
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['invites']);
 
@@ -78,10 +79,9 @@ readonly class InstitutionUsersController extends BaseController
       }
 
       $invitesVo = array_map(fn($inviteEmail) => new InvitationVo($inviteEmail), $invites);
-      $token = $request->getAttribute('token');
       $institution = $this->institutionsDao->getInstitutionById($institution_id);
 
-      $invitations = array_map(function(InvitationVo $invite) use ($institution, $token) {
+      $invitations = array_map(function(InvitationVo $invite) use ($institution, $user) {
         $invitation = $this->invitationsDao->createInvitation(new Invitation([
           'invitation_id' => Uuid::uuid4()->toString(),
           'email' => $invite->getEmail(),
@@ -90,16 +90,19 @@ readonly class InstitutionUsersController extends BaseController
           'accepted_at' => null,
           'created_at' => date('Y-m-d H:i:s'),
           'institution_id' => $institution->getInstitutionId(),
-          'invited_by' => $token['sub']
+          'invited_by' => $user->getUserId()
         ]));
-        LogService::info("/institutions/{$institution->getInstitutionId()}/users/invite", "{$token['sub']} invited {$invite->getEmail()} to {$institution->getName()}");
+        LogService::info(
+          "/institutions/{$institution->getInstitutionId()}/users/invite", 
+          "{$user->getUserId()} invited {$invite->getEmail()} to {$institution->getName()}"
+        );
 
         if ($invitation) {
           $this->emailQueue->push([
             'to' => $invite->getEmail(),
             'toName' => $invite->getEmail(),
             'subject' => 'Você foi convidado para se juntar a uma instituição no Intellecta',
-            'body' => $this->emailService->getInstitutionInvitationEmailTemplate(
+            'body' => $this->emailTemplateProvider->getInstitutionInvitationEmailTemplate(
               institutionName: $institution->getName(),
               acceptLink: "http://localhost:3000/invitation/accept?token={$invitation->getInvitationId()}",
             ),
@@ -110,7 +113,7 @@ readonly class InstitutionUsersController extends BaseController
       }, $invitesVo);
 
       $invitesCount = count($invitations);
-      LogService::info("/institutions/{$institution_id}/users/invite", "{$token['sub']} invited {$invitesCount} users to {$institution->getName()}");
+      LogService::info("/institutions/{$institution_id}/users/invite", "{$user->getUserId()} invited {$invitesCount} users to {$institution->getName()}");
       $response->getBody()->write(json_encode(array_filter($invitations)));
 
       return $response;
@@ -119,7 +122,7 @@ readonly class InstitutionUsersController extends BaseController
 
   public function changeUserRole(Request $request, Response $response, string $institution_id, string $institution_user_id): Response {
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
-      $token = $request->getAttribute("token");
+      $admin = $request->getAttribute('user');
 
       $body = $request->getParsedBody();
       $this->validatorService->validateRequired($body, ['new_role']);
@@ -130,6 +133,7 @@ readonly class InstitutionUsersController extends BaseController
       }
 
       $institutionUser = $this->institutionUsersDao->getInstitutionUserById($institution_user_id);
+      
       if(empty($institutionUser)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
@@ -139,6 +143,7 @@ readonly class InstitutionUsersController extends BaseController
 
       $institutionUser->setRole($newRole);
       $institutionUser = $this->institutionUsersDao->updateInstitutionUserRole($institutionUser);
+      
       if(empty($institutionUser)) {
         throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
       }
@@ -152,7 +157,10 @@ readonly class InstitutionUsersController extends BaseController
       $institutionUserDto = new InstitutionUserDto($institutionUser, $userDto);
       $response->getBody()->write(json_encode($institutionUserDto));
 
-      LogService::info("/institutions/{$institution_id}/users/{$institution_user_id}/change-role", "{$token["email"]} changed {$user->getFullName()} role to {$newRole->value}");
+      LogService::info(
+        "/institutions/{$institution_id}/users/{$institution_user_id}/change-role", 
+        "{$admin->getUserId()} changed {$user->getUserId()} role to {$newRole->value}"
+      );
       return $response;
     });
   }
@@ -161,7 +169,7 @@ readonly class InstitutionUsersController extends BaseController
     return $this->handleErrors($request, function() use ($request, $response, $institution_id, $institution_user_id) {
       /** @var InstitutionUser $membership */
       $membership = $request->getAttribute('membership');
-      $token = $request->getAttribute('token');
+      $user = $request->getAttribute('user');
 
       $institutionUser = $this->institutionUsersDao->getInstitutionUserById($institution_user_id);
 
@@ -174,7 +182,7 @@ readonly class InstitutionUsersController extends BaseController
 
       if(
         $membership->getRole() !== InstitutionUserType::Admin->value
-        && $institutionUser->getUserId() !== $token['sub']
+        && $institutionUser->getUserId() !== $user->getUserId()
       ) {
         throw new HttpForbiddenException($request, LogService::HTTP_403 . 'Only admins and the user itself can access this endpoint');
       }
@@ -182,7 +190,7 @@ readonly class InstitutionUsersController extends BaseController
       $this->institutionUsersDao->deleteInstitutionUser($institutionUser);
 
       $response->getBody()->write(json_encode([
-        "message" => "User removed from institution successfully"
+        "message" => "{$user->getUserId()} removed {$institutionUser->getUserId()} from {$institution_id} institutions"
       ]));
 
       return $response;

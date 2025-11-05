@@ -6,31 +6,33 @@ namespace App\Dto;
 use App\Models\InstitutionUser;
 
 readonly class InstitutionUserDto implements \JsonSerializable {
-  private string $institution_user_id;
-  private string $role;
-  private string $joined_at;
-  private string $institution_id;
-  private UserDto $user;
+  private InstitutionUser $institutionUser;
+  private UserDto $userDto;
 
   public function __construct(InstitutionUser $institutionUser, UserDto $user) {
-    $this->institution_user_id = $institutionUser->getInstitutionUsersId();
-    $this->role = $institutionUser->getRole();
-    $this->joined_at = $institutionUser->getJoinedAt();
-    $this->institution_id = $institutionUser->getInstitutionId();
-    $this->user = $user;
+    $this->institutionUser = $institutionUser;
+    $this->userDto = $user;
   }
 
   public function toArray(): array {
     return [
-      'institution_user_id' => $this->institution_user_id,
-      'role' => $this->role,
-      'joined_at' => $this->joined_at,
-      'institution_id' => $this->institution_id,
-      'user' => $this->user
+      'institution_user_id' => $this->institutionUser->getInstitutionUsersId(),
+      'role' => $this->institutionUser->getRole(),
+      'joined_at' => $this->institutionUser->getJoinedAt(),
+      'institution_id' => $this->institutionUser->getInstitutionId(),
+      'user' => $this->userDto
     ];
   }
 
   public function jsonSerialize(): mixed {
     return $this->toArray();
+  }
+
+  public function getInstitutionUser(): InstitutionUser {
+    return $this->institutionUser;
+  }
+
+  public function getUserDto(): UserDto {
+    return $this->userDto;
   }
 }

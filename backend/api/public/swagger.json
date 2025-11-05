@@ -254,9 +254,9 @@
         "/institutions/{institution_id}/classes/{class_id}/subjects": {
             "get": {
                 "tags": [
-                    "Class Subjects"
+                    "Disciplinas da Classe"
                 ],
-                "summary": "Get all subjects for a class",
+                "summary": "Obter todas as disciplinas de uma classe",
                 "operationId": "getClassSubjects",
                 "parameters": [
                     {
@@ -280,7 +280,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of class subjects",
+                        "description": "Lista de disciplinas da classe",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -293,16 +293,16 @@
                         }
                     },
                     "404": {
-                        "description": "Class not found"
+                        "description": "Classe não encontrada"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Class Subjects"
+                    "Disciplinas da Classe"
                 ],
-                "summary": "Add a subject to a class",
-                "description": "Links a subject to a specific class",
+                "summary": "Adicionar uma disciplina a uma classe",
+                "description": "Vincula uma disciplina a uma classe específica",
                 "operationId": "addSubjectToClass",
                 "parameters": [
                     {
@@ -325,7 +325,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Subject to add to class",
+                    "description": "Disciplina a ser adicionada à classe",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -337,7 +337,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Subject linked successfully",
+                        "description": "Disciplina vinculada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -355,10 +355,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Disciplina não encontrada"
                     }
                 },
                 "security": [
@@ -371,10 +371,10 @@
         "/institutions/{institution_id}/classes/{class_id}/subjects/{class_subject_id}": {
             "get": {
                 "tags": [
-                    "Class Subjects"
+                    "Disciplinas da Classe"
                 ],
-                "summary": "Get a specific class subject",
-                "description": "Retrieve details of a specific subject-class relationship",
+                "summary": "Obter uma disciplina específica da classe",
+                "description": "Recuperar detalhes de um relacionamento específico entre disciplina e classe",
                 "operationId": "getClassSubjectById",
                 "parameters": [
                     {
@@ -407,7 +407,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class subject details",
+                        "description": "Detalhes da disciplina da classe",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -417,16 +417,16 @@
                         }
                     },
                     "404": {
-                        "description": "Class subject not found"
+                        "description": "Disciplina da classe não encontrada"
                     }
                 }
             },
             "delete": {
                 "tags": [
-                    "Class Subjects"
+                    "Disciplinas da Classe"
                 ],
-                "summary": "Remove a subject from a class",
-                "description": "Unlinks a subject from a specific class",
+                "summary": "Remover uma disciplina de uma classe",
+                "description": "Desvincula uma disciplina de uma classe específica",
                 "operationId": "removeSubjectFromClass",
                 "parameters": [
                     {
@@ -459,7 +459,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Subject removed successfully",
+                        "description": "Disciplina removida com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -474,10 +474,10 @@
                         }
                     },
                     "404": {
-                        "description": "Class subject not found"
+                        "description": "Disciplina da classe não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -490,9 +490,9 @@
         "/institutions/{institution_id}/classes/{class_id}/users": {
             "get": {
                 "tags": [
-                    "Class Users"
+                    "Usuários da Turma"
                 ],
-                "summary": "Get all users in a class",
+                "summary": "Obter todos os usuários em uma turma",
                 "operationId": "getClassUsers",
                 "parameters": [
                     {
@@ -516,7 +516,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of class users",
+                        "description": "Lista de usuários da turma",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -529,18 +529,18 @@
                         }
                     },
                     "404": {
-                        "description": "Institution or class not found"
+                        "description": "Instituição ou turma não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno no servidor"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Class Users"
+                    "Usuários da Turma"
                 ],
-                "summary": "Add users to a class",
+                "summary": "Adicionar usuários em uma turma",
                 "operationId": "createClassUsers",
                 "parameters": [
                     {
@@ -563,7 +563,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "User IDs to add to the class",
+                    "description": "IDs dos usuários a serem adicionados na turma",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -587,12 +587,12 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Users added successfully",
+                        "description": "Usuários adicionados com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
+                                        "mensagem": {
                                             "type": "string"
                                         }
                                     },
@@ -602,13 +602,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Institution or class not found"
+                        "description": "Instituição ou turma não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno no servidor"
                     }
                 },
                 "security": [
@@ -621,9 +621,9 @@
         "/institutions/{institution_id}/classes/{class_id}/users/{class_users_id}": {
             "get": {
                 "tags": [
-                    "Class Users"
+                    "Usuários da Turma"
                 ],
-                "summary": "Get a specific user in a class",
+                "summary": "Obter detalhes de um usuário específico em uma turma",
                 "operationId": "getClassUserById",
                 "parameters": [
                     {
@@ -656,7 +656,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class user details",
+                        "description": "Detalhes do usuário na turma",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -666,18 +666,18 @@
                         }
                     },
                     "404": {
-                        "description": "User not found in class"
+                        "description": "Usuário não encontrado na turma"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno no servidor"
                     }
                 }
             },
             "delete": {
                 "tags": [
-                    "Class Users"
+                    "Usuários da Turma"
                 ],
-                "summary": "Remove a user from a class",
+                "summary": "Remover um usuário de uma turma",
                 "operationId": "removeClassUser",
                 "parameters": [
                     {
@@ -710,12 +710,12 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "User removed successfully",
+                        "description": "Usuário removido com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "message": {
+                                        "mensagem": {
                                             "type": "string"
                                         }
                                     },
@@ -725,10 +725,10 @@
                         }
                     },
                     "404": {
-                        "description": "User not found in class"
+                        "description": "Usuário não encontrado na turma"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno no servidor"
                     }
                 },
                 "security": [
@@ -741,16 +741,16 @@
         "/institutions/{institution_id}/classes": {
             "get": {
                 "tags": [
-                    "Classes"
+                    "Turmas"
                 ],
-                "summary": "Get institution classes",
-                "description": "Retrieve classes for an institution (all classes for admins, only participating classes for others)",
+                "summary": "Obter turmas da instituição",
+                "description": "Recupera turmas para uma instituição (todas as turmas para administradores, apenas turmas participantes para outros)",
                 "operationId": "getInstitutionClasses",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "ID of the institution",
+                        "description": "ID da instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -760,7 +760,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of classes",
+                        "description": "Lista de turmas",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -773,7 +773,7 @@
                         }
                     },
                     "404": {
-                        "description": "No classes found",
+                        "description": "Nenhuma turma encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -791,16 +791,16 @@
             },
             "post": {
                 "tags": [
-                    "Classes"
+                    "Turmas"
                 ],
-                "summary": "Create a new class",
-                "description": "Create a new class in the specified institution",
+                "summary": "Criar uma nova turma",
+                "description": "Cria uma nova turma na instituição especificada",
                 "operationId": "createClass",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "ID of the institution",
+                        "description": "ID da instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -809,7 +809,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Class creation data",
+                    "description": "Dados para criação da turma",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -820,23 +820,23 @@
                                 ],
                                 "properties": {
                                     "name": {
-                                        "description": "Name of the class",
+                                        "description": "Nome da turma",
                                         "type": "string",
                                         "maxLength": 255,
                                         "minLength": 3
                                     },
                                     "description": {
-                                        "description": "Detailed description of the class",
+                                        "description": "Descrição detalhada da turma",
                                         "type": "string"
                                     },
                                     "profile-picture": {
-                                        "description": "Profile picture file",
+                                        "description": "Arquivo de foto de perfil",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
                                     },
                                     "banner": {
-                                        "description": "Banner image file",
+                                        "description": "Arquivo de imagem do banner",
                                         "type": "string",
                                         "format": "binary",
                                         "nullable": true
@@ -849,7 +849,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Created class details",
+                        "description": "Detalhes da turma criada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -859,7 +859,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input",
+                        "description": "Entrada inválida",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -879,16 +879,16 @@
         "/institutions/{institution_id}/classes/{class_id}": {
             "get": {
                 "tags": [
-                    "Classes"
+                    "Turmas"
                 ],
-                "summary": "Get class details",
-                "description": "Retrieve details of a specific class",
+                "summary": "Obter detalhes da turma",
+                "description": "Recupera os detalhes de uma turma específica",
                 "operationId": "getClassById",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "ID of the institution",
+                        "description": "ID da instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -898,7 +898,7 @@
                     {
                         "name": "class_id",
                         "in": "path",
-                        "description": "ID of the class",
+                        "description": "ID da turma",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -908,7 +908,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class details",
+                        "description": "Detalhes da turma",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -918,7 +918,7 @@
                         }
                     },
                     "404": {
-                        "description": "Class not found",
+                        "description": "Turma não encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -936,16 +936,16 @@
             },
             "put": {
                 "tags": [
-                    "Classes"
+                    "Turmas"
                 ],
-                "summary": "Update a class",
-                "description": "Update details of an existing class",
+                "summary": "Atualizar uma turma",
+                "description": "Atualiza os detalhes de uma turma existente",
                 "operationId": "updateClass",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "ID of the institution",
+                        "description": "ID da instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -955,7 +955,7 @@
                     {
                         "name": "class_id",
                         "in": "path",
-                        "description": "ID of the class",
+                        "description": "ID da turma",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -964,7 +964,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Class update data",
+                    "description": "Dados para atualização da turma",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -975,23 +975,23 @@
                                 ],
                                 "properties": {
                                     "name": {
-                                        "description": "Updated name of the class",
+                                        "description": "Nome atualizado da turma",
                                         "type": "string",
                                         "maxLength": 255,
                                         "minLength": 3
                                     },
                                     "description": {
-                                        "description": "Updated description of the class",
+                                        "description": "Descrição atualizada da turma",
                                         "type": "string"
                                     },
                                     "profile_picture_id": {
-                                        "description": "ID of the new profile picture",
+                                        "description": "ID da nova foto de perfil",
                                         "type": "string",
                                         "format": "uuid",
                                         "nullable": true
                                     },
                                     "banner_id": {
-                                        "description": "ID of the new banner image",
+                                        "description": "ID da nova imagem do banner",
                                         "type": "string",
                                         "format": "uuid",
                                         "nullable": true
@@ -1004,7 +1004,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated class details",
+                        "description": "Detalhes da turma atualizada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1014,7 +1014,7 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input",
+                        "description": "Entrada inválida",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1024,7 +1024,7 @@
                         }
                     },
                     "404": {
-                        "description": "Class or file not found",
+                        "description": "Turma ou arquivo não encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1042,16 +1042,16 @@
             },
             "delete": {
                 "tags": [
-                    "Classes"
+                    "Turmas"
                 ],
-                "summary": "Delete a class",
-                "description": "Permanently delete a class",
+                "summary": "Excluir uma turma",
+                "description": "Exclui permanentemente uma turma",
                 "operationId": "deleteClass",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "ID of the institution",
+                        "description": "ID da instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1061,7 +1061,7 @@
                     {
                         "name": "class_id",
                         "in": "path",
-                        "description": "ID of the class to delete",
+                        "description": "ID da turma a ser excluída",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1071,13 +1071,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Class deleted successfully",
+                        "description": "Turma excluída com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
-                                            "description": "Confirmation message",
+                                            "description": "Mensagem de confirmação",
                                             "type": "string"
                                         }
                                     },
@@ -1087,7 +1087,7 @@
                         }
                     },
                     "404": {
-                        "description": "Class not found",
+                        "description": "Turma não encontrada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1097,7 +1097,7 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Erro interno do servidor",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1119,11 +1119,11 @@
                 "tags": [
                     "Files"
                 ],
-                "summary": "Upload profile asset",
-                "description": "Upload an image file to be used as a profile picture or banner",
+                "summary": "Fazer upload de ativo de perfil",
+                "description": "Fazer upload de um arquivo de imagem para ser usado como foto do perfil ou banner",
                 "operationId": "uploadProfileAsset",
                 "requestBody": {
-                    "description": "Profile image file",
+                    "description": "Arquivo de imagem de perfil",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -1133,7 +1133,7 @@
                                 ],
                                 "properties": {
                                     "profile-asset": {
-                                        "description": "Image file for profile (avatar, banner, etc.)",
+                                        "description": "Arquivo de imagem para o perfil (avatar, banner, etc.)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -1145,7 +1145,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "File uploaded successfully",
+                        "description": "Arquivo enviado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1155,13 +1155,13 @@
                         }
                     },
                     "400": {
-                        "description": "No file provided or invalid file"
+                        "description": "Nenhum arquivo fornecido ou arquivo inválido"
                     },
                     "415": {
-                        "description": "Unsupported media type - must be an image"
+                        "description": "Tipo de mídia não suportado - deve ser uma imagem"
                     },
                     "500": {
-                        "description": "File upload failed"
+                        "description": "Falha ao enviar o arquivo"
                     }
                 },
                 "security": [
@@ -1176,11 +1176,11 @@
                 "tags": [
                     "Files"
                 ],
-                "summary": "Upload a generic file",
-                "description": "Upload any type of file with automatic type detection",
+                "summary": "Fazer upload de um arquivo genérico",
+                "description": "Enviar um arquivo de qualquer tipo com detecção automática de tipo",
                 "operationId": "uploadFile",
                 "requestBody": {
-                    "description": "File to upload",
+                    "description": "Arquivo a ser enviado",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -1190,7 +1190,7 @@
                                 ],
                                 "properties": {
                                     "file": {
-                                        "description": "File to upload",
+                                        "description": "Arquivo a ser enviado",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -1202,7 +1202,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "File uploaded successfully",
+                        "description": "Arquivo enviado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1212,13 +1212,13 @@
                         }
                     },
                     "400": {
-                        "description": "No file provided"
+                        "description": "Nenhum arquivo fornecido"
                     },
                     "413": {
-                        "description": "File too large"
+                        "description": "Arquivo muito grande"
                     },
                     "500": {
-                        "description": "File upload failed"
+                        "description": "Falha ao enviar o arquivo"
                     }
                 },
                 "security": [
@@ -1231,16 +1231,16 @@
         "/institutions/{institution_id}/subjects/{subject_id}/forum/messages": {
             "get": {
                 "tags": [
-                    "Forum Messages"
+                    "Mensagens do Fórum"
                 ],
-                "summary": "Get forum messages for a subject",
-                "description": "Retrieve forum messages for a subject, optionally filtered and paginated.",
+                "summary": "Obter mensagens do fórum para um assunto",
+                "description": "Recupera mensagens do fórum para um assunto, opcionalmente filtradas e paginadas.",
                 "operationId": "569161df9e540eba6b0c69d47a6b7af0",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "Institution UUID",
+                        "description": "UUID da Instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1250,7 +1250,7 @@
                     {
                         "name": "subject_id",
                         "in": "path",
-                        "description": "Subject UUID",
+                        "description": "UUID do Assunto",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1260,7 +1260,7 @@
                     {
                         "name": "content",
                         "in": "query",
-                        "description": "Filter by content substring",
+                        "description": "Filtrar por substring do conteúdo",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -1269,7 +1269,7 @@
                     {
                         "name": "created_at_from",
                         "in": "query",
-                        "description": "Filter by creation date (from)",
+                        "description": "Filtrar pela data de criação (início)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1279,7 +1279,7 @@
                     {
                         "name": "created_at_to",
                         "in": "query",
-                        "description": "Filter by creation date (to)",
+                        "description": "Filtrar pela data de criação (fim)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1289,7 +1289,7 @@
                     {
                         "name": "limit",
                         "in": "query",
-                        "description": "Number of results per page",
+                        "description": "Número de resultados por página",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1309,7 +1309,7 @@
                     {
                         "name": "offset",
                         "in": "query",
-                        "description": "Offset for pagination",
+                        "description": "Deslocamento para paginação",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -1319,7 +1319,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginated list of forum messages",
+                        "description": "Lista paginada de mensagens do fórum",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1329,25 +1329,25 @@
                         }
                     },
                     "404": {
-                        "description": "No forum messages found"
+                        "description": "Nenhuma mensagem do fórum encontrada"
                     },
                     "400": {
-                        "description": "Invalid parameters"
+                        "description": "Parâmetros inválidos"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Forum Messages"
+                    "Mensagens do Fórum"
                 ],
-                "summary": "Create a forum message",
-                "description": "Creates a new forum message for a subject.",
+                "summary": "Criar uma mensagem do fórum",
+                "description": "Cria uma nova mensagem do fórum para um assunto.",
                 "operationId": "0ef85c498ef7b5ad55ecab327e3bb8af",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "Institution UUID",
+                        "description": "UUID da Instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1357,7 +1357,7 @@
                     {
                         "name": "subject_id",
                         "in": "path",
-                        "description": "Subject UUID",
+                        "description": "UUID do Assunto",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1376,7 +1376,7 @@
                                 "properties": {
                                     "content": {
                                         "type": "string",
-                                        "example": "This is a forum message content"
+                                        "example": "Este é o conteúdo da mensagem do fórum"
                                     }
                                 },
                                 "type": "object"
@@ -1386,7 +1386,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Forum message created",
+                        "description": "Mensagem do fórum criada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1396,7 +1396,7 @@
                         }
                     },
                     "500": {
-                        "description": "Failed to create forum message"
+                        "description": "Falha ao criar a mensagem do fórum"
                     }
                 }
             }
@@ -1404,16 +1404,16 @@
         "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/count": {
             "get": {
                 "tags": [
-                    "Forum Messages"
+                    "Mensagens do Fórum"
                 ],
-                "summary": "Count forum messages for a subject",
-                "description": "Returns the total number of forum messages for a subject, optionally filtered.",
+                "summary": "Contar mensagens do fórum para um assunto",
+                "description": "Retorna o número total de mensagens do fórum para um assunto, opcionalmente filtrado.",
                 "operationId": "3a522eb2a6317540c25b45e7338ad17a",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "Institution UUID",
+                        "description": "UUID da Instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1423,7 +1423,7 @@
                     {
                         "name": "subject_id",
                         "in": "path",
-                        "description": "Subject UUID",
+                        "description": "UUID do Assunto",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1433,7 +1433,7 @@
                     {
                         "name": "content",
                         "in": "query",
-                        "description": "Filter by content substring",
+                        "description": "Filtrar por substring do conteúdo",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -1442,7 +1442,7 @@
                     {
                         "name": "created_at_from",
                         "in": "query",
-                        "description": "Filter by creation date (from)",
+                        "description": "Filtrar pela data de criação (início)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1452,7 +1452,7 @@
                     {
                         "name": "created_at_to",
                         "in": "query",
-                        "description": "Filter by creation date (to)",
+                        "description": "Filtrar pela data de criação (fim)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1462,7 +1462,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Count of forum messages",
+                        "description": "Contagem de mensagens do fórum",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1483,16 +1483,16 @@
         "/institutions/{institution_id}/subjects/{subject_id}/forum/messages/{forum_message_id}": {
             "put": {
                 "tags": [
-                    "Forum Messages"
+                    "Mensagens do Fórum"
                 ],
-                "summary": "Update a forum message",
-                "description": "Updates a forum message if it is less than 15 minutes old.",
+                "summary": "Atualizar uma mensagem do fórum",
+                "description": "Atualiza uma mensagem do fórum se tiver menos de 15 minutos.",
                 "operationId": "bf64d99a454738b2657515c768424183",
                 "parameters": [
                     {
                         "name": "institution_id",
                         "in": "path",
-                        "description": "Institution UUID",
+                        "description": "UUID da Instituição",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1502,7 +1502,7 @@
                     {
                         "name": "subject_id",
                         "in": "path",
-                        "description": "Subject UUID",
+                        "description": "UUID do Assunto",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1512,7 +1512,7 @@
                     {
                         "name": "forum_message_id",
                         "in": "path",
-                        "description": "Forum message UUID",
+                        "description": "UUID da mensagem do fórum",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -1531,7 +1531,7 @@
                                 "properties": {
                                     "content": {
                                         "type": "string",
-                                        "example": "Updated forum message content"
+                                        "example": "Conteúdo atualizado da mensagem do fórum"
                                     }
                                 },
                                 "type": "object"
@@ -1541,7 +1541,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Forum message updated",
+                        "description": "Mensagem do fórum atualizada",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1551,13 +1551,13 @@
                         }
                     },
                     "403": {
-                        "description": "Forum message cannot be updated after 15 minutes"
+                        "description": "A mensagem do fórum não pode ser atualizada após 15 minutos"
                     },
                     "404": {
-                        "description": "Forum message not found"
+                        "description": "Mensagem do fórum não encontrada"
                     },
                     "500": {
-                        "description": "Failed to update forum message"
+                        "description": "Falha ao atualizar a mensagem do fórum"
                     }
                 }
             }
@@ -2885,16 +2885,16 @@
         "/invitations/{invitation_id}/accept": {
             "post": {
                 "tags": [
-                    "Invitations"
+                    "Convites"
                 ],
-                "summary": "Accept an invitation",
-                "description": "Accept an invitation to join an institution",
+                "summary": "Aceitar um convite",
+                "description": "Aceitar um convite para ingressar em uma instituição",
                 "operationId": "acceptInvitation",
                 "parameters": [
                     {
                         "name": "invitation_id",
                         "in": "path",
-                        "description": "ID of the invitation to accept",
+                        "description": "ID do convite a ser aceito",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -2904,7 +2904,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invitation accepted successfully",
+                        "description": "Convite aceito com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2914,7 +2914,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden (invitation expired, already accepted, or email mismatch)",
+                        "description": "Proibido (convite expirado, já aceito ou email não correspondente)",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2924,7 +2924,7 @@
                         }
                     },
                     "404": {
-                        "description": "Invitation not found",
+                        "description": "Convite não encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2934,7 +2934,7 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Erro interno do servidor",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2954,16 +2954,16 @@
         "/invitations/{invitation_id}": {
             "get": {
                 "tags": [
-                    "Invitations"
+                    "Convites"
                 ],
-                "summary": "Get invitation details",
-                "description": "Retrieve details of a specific invitation",
+                "summary": "Obter detalhes do convite",
+                "description": "Recuperar detalhes de um convite específico",
                 "operationId": "getInvitation",
                 "parameters": [
                     {
                         "name": "invitation_id",
                         "in": "path",
-                        "description": "ID of the invitation",
+                        "description": "ID do convite",
                         "required": true,
                         "schema": {
                             "type": "string",
@@ -2973,7 +2973,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Invitation details",
+                        "description": "Detalhes do convite",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2983,7 +2983,7 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden (email mismatch)",
+                        "description": "Proibido (email não correspondente)",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2993,7 +2993,7 @@
                         }
                     },
                     "404": {
-                        "description": "Invitation not found",
+                        "description": "Convite não encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3003,7 +3003,7 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Erro interno do servidor",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3023,14 +3023,14 @@
         "/invitations": {
             "get": {
                 "tags": [
-                    "Invitations"
+                    "Convites"
                 ],
-                "summary": "Get all invitations",
-                "description": "Retrieve all invitations for the authenticated user",
+                "summary": "Obter todos os convites",
+                "description": "Recuperar todos os convites para o usuário autenticado",
                 "operationId": "getAllInvitations",
                 "responses": {
                     "200": {
-                        "description": "List of invitations",
+                        "description": "Lista de convites",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3043,7 +3043,7 @@
                         }
                     },
                     "500": {
-                        "description": "Internal server error",
+                        "description": "Erro interno do servidor",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3060,12 +3060,229 @@
                 ]
             }
         },
+        "/users/me/notifications": {
+            "get": {
+                "tags": [
+                    "Notificações"
+                ],
+                "summary": "Obter notificações do usuário",
+                "description": "Recupera as notificações para o usuário autenticado, opcionalmente filtradas e paginadas.",
+                "operationId": "d96d1d6a7ccaad42d8ce0c8a75b9d260",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Número de resultados por página",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                10,
+                                15,
+                                20,
+                                25,
+                                30,
+                                35,
+                                40,
+                                45,
+                                50
+                            ]
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Deslocamento para paginação",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "event_description",
+                        "in": "query",
+                        "description": "Filtrar pela substring de descrição do evento",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "seen",
+                        "in": "query",
+                        "description": "Filtrar pelo status de visualização",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Filtrar pela substring do título",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "event_type",
+                        "in": "query",
+                        "description": "Filtrar por tipo de evento",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "event_date",
+                        "in": "query",
+                        "description": "Filtrar por data do evento",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_at_from",
+                        "in": "query",
+                        "description": "Filtrar pela data de criação (a partir de)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "created_at_to",
+                        "in": "query",
+                        "description": "Filtrar pela data de criação (até)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista paginada de notificações",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "total_pages": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "total_records": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid",
+                                                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Nova mensagem recebida"
+                                                    },
+                                                    "content": {
+                                                        "type": "string",
+                                                        "example": "Você tem uma nova mensagem no fórum"
+                                                    },
+                                                    "seen": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2024-01-15T10:30:00Z"
+                                                    },
+                                                    "event_type": {
+                                                        "type": "string",
+                                                        "example": "FORUM_MESSAGE"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Nenhuma notificação encontrada"
+                    },
+                    "400": {
+                        "description": "Parâmetros inválidos"
+                    }
+                }
+            }
+        },
+        "/users/me/notifications/{notification_id}/set-as-seen": {
+            "patch": {
+                "tags": [
+                    "Notificações"
+                ],
+                "summary": "Marcar notificação como vista",
+                "description": "Marcar uma notificação específica como vista para o usuário autenticado.",
+                "operationId": "39698c7abd6d11641aa0faf5f4829b5e",
+                "parameters": [
+                    {
+                        "name": "notification_id",
+                        "in": "path",
+                        "description": "UUID da notificação",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notificação marcada como vista",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notificação marcada como vista."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Notificação não encontrada"
+                    }
+                }
+            }
+        },
         "/institutions/{institution_id}/subjects/{subject_id}/assignments": {
             "get": {
                 "tags": [
-                    "Subject Assignments"
+                    "Atribuições de Matéria"
                 ],
-                "summary": "Get all assignments for a subject",
+                "summary": "Obter todas as atribuições de uma matéria",
                 "operationId": "getSubjectAssignments",
                 "parameters": [
                     {
@@ -3089,7 +3306,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of subject assignments",
+                        "description": "Lista de atribuições da matéria",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3102,16 +3319,16 @@
                         }
                     },
                     "404": {
-                        "description": "No assignments found for this subject"
+                        "description": "Nenhuma atribuição encontrada para esta matéria"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Subject Assignments"
+                    "Atribuições de Matéria"
                 ],
-                "summary": "Create a new assignment",
-                "description": "Create a new assignment for the specified subject with optional attachment",
+                "summary": "Criar uma nova atribuição",
+                "description": "Cria uma nova atribuição para a matéria especificada com arquivo anexo opcional",
                 "operationId": "createSubjectAssignment",
                 "parameters": [
                     {
@@ -3134,7 +3351,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Assignment creation data",
+                    "description": "Dados para criação da atribuição",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -3146,7 +3363,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Assignment created successfully",
+                        "description": "Atribuição criada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3156,10 +3373,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Matéria não encontrada"
                     }
                 },
                 "security": [
@@ -3172,10 +3389,10 @@
         "/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}": {
             "get": {
                 "tags": [
-                    "Subject Assignments"
+                    "Atribuições de Matéria"
                 ],
-                "summary": "Get assignment details",
-                "description": "Retrieve details of a specific assignment",
+                "summary": "Obter detalhes da atribuição",
+                "description": "Recupera os detalhes de uma atribuição específica",
                 "operationId": "getSubjectAssignmentById",
                 "parameters": [
                     {
@@ -3208,7 +3425,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Assignment details",
+                        "description": "Detalhes da atribuição",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3218,16 +3435,16 @@
                         }
                     },
                     "404": {
-                        "description": "Assignment not found"
+                        "description": "Atribuição não encontrada"
                     }
                 }
             },
             "delete": {
                 "tags": [
-                    "Subject Assignments"
+                    "Atribuições de Matéria"
                 ],
-                "summary": "Delete an assignment",
-                "description": "Permanently remove an assignment",
+                "summary": "Excluir uma atribuição",
+                "description": "Remove permanentemente uma atribuição",
                 "operationId": "deleteSubjectAssignment",
                 "parameters": [
                     {
@@ -3260,12 +3477,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Assignment deleted successfully",
+                        "description": "Atribuição excluída com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
+                                            "description": "Mensagem de confirmação",
                                             "type": "string"
                                         }
                                     },
@@ -3275,10 +3493,10 @@
                         }
                     },
                     "404": {
-                        "description": "Assignment not found"
+                        "description": "Atribuição não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -3289,10 +3507,10 @@
             },
             "patch": {
                 "tags": [
-                    "Subject Assignments"
+                    "Atribuições de Matéria"
                 ],
-                "summary": "Update an assignment",
-                "description": "Update details of an existing assignment",
+                "summary": "Atualizar uma atribuição",
+                "description": "Atualiza os detalhes de uma atribuição existente",
                 "operationId": "updateSubjectAssignment",
                 "parameters": [
                     {
@@ -3324,7 +3542,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Assignment update data",
+                    "description": "Dados para atualização da atribuição",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -3336,12 +3554,13 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Assignment updated successfully",
+                        "description": "Atribuição atualizada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
                                         "message": {
+                                            "description": "Mensagem de sucesso",
                                             "type": "string"
                                         },
                                         "assignment": {
@@ -3354,13 +3573,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Assignment not found"
+                        "description": "Atribuição não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -3373,9 +3592,9 @@
         "/institutions/{institution_id}/subjects/{subject_id}/events": {
             "get": {
                 "tags": [
-                    "Subject Events"
+                    "Eventos de Disciplina"
                 ],
-                "summary": "Get all events for a subject",
+                "summary": "Obter todos os eventos de uma disciplina",
                 "operationId": "getSubjectEvents",
                 "parameters": [
                     {
@@ -3399,7 +3618,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of subject events",
+                        "description": "Lista de eventos de disciplina",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3412,16 +3631,16 @@
                         }
                     },
                     "404": {
-                        "description": "No events found for this subject"
+                        "description": "Nenhum evento encontrado para esta disciplina"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Subject Events"
+                    "Eventos de Disciplina"
                 ],
-                "summary": "Create a new subject event",
-                "description": "Create a new event associated with a subject",
+                "summary": "Criar um novo evento de disciplina",
+                "description": "Cria um novo evento associado a uma disciplina",
                 "operationId": "createSubjectEvent",
                 "parameters": [
                     {
@@ -3444,7 +3663,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Event creation data",
+                    "description": "Dados para criação do evento",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -3456,7 +3675,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Event created successfully",
+                        "description": "Evento criado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3474,13 +3693,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Disciplina não encontrada"
                     },
                     "422": {
-                        "description": "Invalid event type"
+                        "description": "Tipo do evento inválido"
                     }
                 },
                 "security": [
@@ -3493,10 +3712,10 @@
         "/institutions/{institution_id}/subjects/{subject_id}/events/{subject_event_id}": {
             "get": {
                 "tags": [
-                    "Subject Events"
+                    "Eventos de Disciplina"
                 ],
-                "summary": "Get a specific subject event",
-                "description": "Retrieve details of a specific subject event",
+                "summary": "Obter um evento de disciplina específico",
+                "description": "Recupera os detalhes de um evento de disciplina específico",
                 "operationId": "getSubjectEvent",
                 "parameters": [
                     {
@@ -3529,7 +3748,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Event details",
+                        "description": "Detalhes do evento",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3539,16 +3758,16 @@
                         }
                     },
                     "404": {
-                        "description": "Event not found"
+                        "description": "Evento não encontrado"
                     }
                 }
             },
             "put": {
                 "tags": [
-                    "Subject Events"
+                    "Eventos de Disciplina"
                 ],
-                "summary": "Update a subject event",
-                "description": "Update details of an existing subject event",
+                "summary": "Atualizar um evento de disciplina",
+                "description": "Atualiza os detalhes de um evento de disciplina existente",
                 "operationId": "updateSubjectEvent",
                 "parameters": [
                     {
@@ -3580,7 +3799,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Event update data",
+                    "description": "Dados para atualização do evento",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -3592,7 +3811,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Event updated successfully",
+                        "description": "Evento atualizado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3610,13 +3829,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Event not found"
+                        "description": "Evento não encontrado"
                     },
                     "422": {
-                        "description": "Invalid event type"
+                        "description": "Tipo do evento inválido"
                     }
                 },
                 "security": [
@@ -3627,10 +3846,10 @@
             },
             "delete": {
                 "tags": [
-                    "Subject Events"
+                    "Eventos de Disciplina"
                 ],
-                "summary": "Delete a subject event",
-                "description": "Permanently remove a subject event",
+                "summary": "Excluir um evento de disciplina",
+                "description": "Remove permanentemente um evento de disciplina",
                 "operationId": "deleteSubjectEvent",
                 "parameters": [
                     {
@@ -3663,7 +3882,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Event deleted successfully",
+                        "description": "Evento excluído com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3678,10 +3897,10 @@
                         }
                     },
                     "404": {
-                        "description": "Event not found"
+                        "description": "Evento não encontrado"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -3694,9 +3913,9 @@
         "/institutions/{institution_id}/subjects/{subject_id}/materials": {
             "get": {
                 "tags": [
-                    "Subject Materials"
+                    "Materiais da Disciplina"
                 ],
-                "summary": "Get all materials for a subject",
+                "summary": "Obter todos os materiais de uma disciplina",
                 "operationId": "getSubjectMaterials",
                 "parameters": [
                     {
@@ -3720,7 +3939,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of subject materials",
+                        "description": "Lista de materiais da disciplina",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3733,16 +3952,16 @@
                         }
                     },
                     "404": {
-                        "description": "No materials found for this subject"
+                        "description": "Nenhum material encontrado para esta disciplina"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Subject Materials"
+                    "Materiais da Disciplina"
                 ],
-                "summary": "Create a new material for a subject",
-                "description": "Upload a new learning material for the specified subject",
+                "summary": "Criar um novo material para uma disciplina",
+                "description": "Enviar um novo material de aprendizagem para a disciplina especificada",
                 "operationId": "createSubjectMaterial",
                 "parameters": [
                     {
@@ -3765,7 +3984,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Material creation data",
+                    "description": "Dados para criação do material",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -3777,7 +3996,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Material created successfully",
+                        "description": "Material criado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3787,10 +4006,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Disciplina não encontrada"
                     }
                 },
                 "security": [
@@ -3803,10 +4022,10 @@
         "/institutions/{institution_id}/subjects/{subject_id}/materials/{material_id}": {
             "get": {
                 "tags": [
-                    "Subject Materials"
+                    "Materiais da Disciplina"
                 ],
-                "summary": "Get material details",
-                "description": "Retrieve details of a specific learning material",
+                "summary": "Obter detalhes do material",
+                "description": "Recuperar detalhes de um material de aprendizagem específico",
                 "operationId": "getMaterialById",
                 "parameters": [
                     {
@@ -3839,7 +4058,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Material details",
+                        "description": "Detalhes do material",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3849,16 +4068,16 @@
                         }
                     },
                     "404": {
-                        "description": "Material not found"
+                        "description": "Material não encontrado"
                     }
                 }
             },
             "put": {
                 "tags": [
-                    "Subject Materials"
+                    "Materiais da Disciplina"
                 ],
-                "summary": "Update material details",
-                "description": "Update the title of a learning material",
+                "summary": "Atualizar detalhes do material",
+                "description": "Atualizar o título de um material de aprendizagem",
                 "operationId": "updateMaterial",
                 "parameters": [
                     {
@@ -3890,7 +4109,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Material update data",
+                    "description": "Dados para atualização do material",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -3902,7 +4121,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Material updated successfully",
+                        "description": "Material atualizado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3912,13 +4131,13 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "404": {
-                        "description": "Material not found"
+                        "description": "Material não encontrado"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -3929,10 +4148,10 @@
             },
             "delete": {
                 "tags": [
-                    "Subject Materials"
+                    "Materiais da Disciplina"
                 ],
-                "summary": "Delete a material",
-                "description": "Permanently remove a learning material",
+                "summary": "Excluir um material",
+                "description": "Remover permanentemente um material de aprendizagem",
                 "operationId": "deleteMaterial",
                 "parameters": [
                     {
@@ -3965,7 +4184,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Material deleted successfully",
+                        "description": "Material excluído com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3980,10 +4199,10 @@
                         }
                     },
                     "404": {
-                        "description": "Material not found"
+                        "description": "Material não encontrado"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -3996,9 +4215,9 @@
         "/institutions/{institution_id}/subjects": {
             "get": {
                 "tags": [
-                    "Subjects"
+                    "Disciplinas"
                 ],
-                "summary": "Get all subjects for an institution",
+                "summary": "Obter todas as disciplinas de uma instituição",
                 "operationId": "getInstitutionSubjects",
                 "parameters": [
                     {
@@ -4013,7 +4232,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of subjects",
+                        "description": "Lista de disciplinas",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4026,16 +4245,16 @@
                         }
                     },
                     "404": {
-                        "description": "Institution not found"
+                        "description": "Instituição não encontrada"
                     }
                 }
             },
             "post": {
                 "tags": [
-                    "Subjects"
+                    "Disciplinas"
                 ],
-                "summary": "Create a new subject",
-                "description": "Create a new subject in the specified institution. Admins can create subjects for any teacher, teachers can only create subjects for themselves.",
+                "summary": "Criar uma nova disciplina",
+                "description": "Crie uma nova disciplina na instituição especificada. Administradores podem criar disciplinas para qualquer professor; professores podem criar somente para si mesmos.",
                 "operationId": "createSubject",
                 "parameters": [
                     {
@@ -4049,7 +4268,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Subject creation data",
+                    "description": "Dados para criação da disciplina",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -4061,7 +4280,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Subject created successfully",
+                        "description": "Disciplina criada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4079,10 +4298,10 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "403": {
-                        "description": "Forbidden - only admins and teachers can create subjects"
+                        "description": "Proibido - apenas administradores e professores podem criar disciplinas"
                     }
                 },
                 "security": [
@@ -4095,10 +4314,10 @@
         "/institutions/{institution_id}/subjects/{subject_id}": {
             "get": {
                 "tags": [
-                    "Subjects"
+                    "Disciplinas"
                 ],
-                "summary": "Get subject details",
-                "description": "Retrieve details of a specific subject. Only accessible by admins and the subject teacher.",
+                "summary": "Obter detalhes da disciplina",
+                "description": "Recupere os detalhes de uma disciplina específica. Acessível apenas por administradores e pelo professor da disciplina.",
                 "operationId": "getSubjectById",
                 "parameters": [
                     {
@@ -4122,7 +4341,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Subject details",
+                        "description": "Detalhes da disciplina",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4132,10 +4351,10 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - not admin or subject teacher"
+                        "description": "Proibido - não é administrador ou professor da disciplina"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Disciplina não encontrada"
                     }
                 },
                 "security": [
@@ -4146,10 +4365,10 @@
             },
             "put": {
                 "tags": [
-                    "Subjects"
+                    "Disciplinas"
                 ],
-                "summary": "Update a subject",
-                "description": "Update details of an existing subject. Only admins can change the teacher.",
+                "summary": "Atualizar uma disciplina",
+                "description": "Atualize os detalhes de uma disciplina existente. Apenas administradores podem alterar o professor.",
                 "operationId": "updateSubjectById",
                 "parameters": [
                     {
@@ -4172,7 +4391,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Subject update data",
+                    "description": "Dados para atualização da disciplina",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -4184,7 +4403,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Updated subject details",
+                        "description": "Detalhes da disciplina atualizados",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4194,16 +4413,16 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "403": {
-                        "description": "Forbidden - not admin or subject teacher"
+                        "description": "Proibido - não é administrador ou professor da disciplina"
                     },
                     "404": {
-                        "description": "Subject or file not found"
+                        "description": "Disciplina ou arquivo não encontrado"
                     },
                     "422": {
-                        "description": "Invalid file type (must be image)"
+                        "description": "Tipo de arquivo inválido (deve ser imagem)"
                     }
                 },
                 "security": [
@@ -4214,10 +4433,10 @@
             },
             "delete": {
                 "tags": [
-                    "Subjects"
+                    "Disciplinas"
                 ],
-                "summary": "Delete a subject",
-                "description": "Permanently delete a subject. Only accessible by admins and the subject teacher.",
+                "summary": "Excluir uma disciplina",
+                "description": "Exclua permanentemente uma disciplina. Acessível apenas por administradores e pelo professor da disciplina.",
                 "operationId": "deleteSubjectById",
                 "parameters": [
                     {
@@ -4241,7 +4460,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Subject deleted successfully",
+                        "description": "Disciplina excluída com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4256,13 +4475,13 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - not admin or subject teacher"
+                        "description": "Proibido - não é administrador ou professor da disciplina"
                     },
                     "404": {
-                        "description": "Subject not found"
+                        "description": "Disciplina não encontrada"
                     },
                     "500": {
-                        "description": "Internal server error"
+                        "description": "Erro interno do servidor"
                     }
                 },
                 "security": [
@@ -4277,8 +4496,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Get all submissions for an assignment",
-                "description": "Retrieve all submissions for a specific assignment (visible to teachers and the submitting student)",
+                "summary": "Obter todas as submissões para uma tarefa",
+                "description": "Recupera todas as submissões para uma tarefa específica (visível para professores e o estudante que submeteu)",
                 "operationId": "getAssignmentSubmissions",
                 "parameters": [
                     {
@@ -4311,7 +4530,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of submissions",
+                        "description": "Lista de submissões",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4324,7 +4543,7 @@
                         }
                     },
                     "404": {
-                        "description": "No submissions found"
+                        "description": "Nenhuma submissão encontrada"
                     }
                 },
                 "security": [
@@ -4337,8 +4556,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Submit an assignment",
-                "description": "Create a new assignment submission with an attached file",
+                "summary": "Enviar uma tarefa",
+                "description": "Criar uma nova submissão da tarefa com um arquivo anexado",
                 "operationId": "createSubmission",
                 "parameters": [
                     {
@@ -4370,7 +4589,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Submission file",
+                    "description": "Arquivo de submissão",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -4382,7 +4601,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Submission created successfully",
+                        "description": "Submissão criada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4392,13 +4611,13 @@
                         }
                     },
                     "400": {
-                        "description": "No file provided"
+                        "description": "Nenhum arquivo fornecido"
                     },
                     "404": {
-                        "description": "Assignment not found"
+                        "description": "Tarefa não encontrada"
                     },
                     "500": {
-                        "description": "Failed to create submission"
+                        "description": "Falha ao criar submissão"
                     }
                 },
                 "security": [
@@ -4413,8 +4632,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Get submission details",
-                "description": "Retrieve details of a specific submission (visible to teachers and the submitting student)",
+                "summary": "Obter detalhes da submissão",
+                "description": "Recupera os detalhes de uma submissão específica (visível para professores e o estudante que submeteu)",
                 "operationId": "getSubmission",
                 "parameters": [
                     {
@@ -4456,7 +4675,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Submission details",
+                        "description": "Detalhes da submissão",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4466,10 +4685,10 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - not owner or teacher"
+                        "description": "Proibido - não é o proprietário ou professor"
                     },
                     "404": {
-                        "description": "Submission not found"
+                        "description": "Submissão não encontrada"
                     }
                 },
                 "security": [
@@ -4482,8 +4701,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Delete a submission",
-                "description": "Delete a submission (only allowed before assignment deadline)",
+                "summary": "Excluir uma submissão",
+                "description": "Excluir uma submissão (permitido somente antes do prazo da tarefa)",
                 "operationId": "deleteSubmission",
                 "parameters": [
                     {
@@ -4525,7 +4744,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Submission deleted successfully",
+                        "description": "Submissão excluída com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4540,13 +4759,13 @@
                         }
                     },
                     "403": {
-                        "description": "Forbidden - not owner or after deadline"
+                        "description": "Proibido - não é o proprietário ou após o prazo"
                     },
                     "404": {
-                        "description": "Submission not found"
+                        "description": "Submissão não encontrada"
                     },
                     "500": {
-                        "description": "Failed to delete submission"
+                        "description": "Falha ao excluir a submissão"
                     }
                 },
                 "security": [
@@ -4561,8 +4780,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Update submission attachment",
-                "description": "Replace the attachment file for a submission (only before deadline)",
+                "summary": "Atualizar anexo da submissão",
+                "description": "Substituir o arquivo de anexo de uma submissão (somente antes do prazo)",
                 "operationId": "updateSubmissionAttachment",
                 "parameters": [
                     {
@@ -4603,7 +4822,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "New attachment ID",
+                    "description": "Novo ID do anexo",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -4615,7 +4834,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Attachment updated successfully",
+                        "description": "Anexo atualizado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4633,16 +4852,16 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "403": {
-                        "description": "Forbidden - not owner or after deadline"
+                        "description": "Proibido - não é o proprietário ou após o prazo"
                     },
                     "404": {
-                        "description": "Submission or file not found"
+                        "description": "Submissão ou arquivo não encontrado"
                     },
                     "500": {
-                        "description": "Failed to update attachment"
+                        "description": "Falha ao atualizar o anexo"
                     }
                 },
                 "security": [
@@ -4657,8 +4876,8 @@
                 "tags": [
                     "Submissions"
                 ],
-                "summary": "Evaluate a submission",
-                "description": "Provide feedback and evaluation for a submission (teacher only)",
+                "summary": "Avaliar uma submissão",
+                "description": "Fornecer feedback e avaliação para uma submissão (somente para professores)",
                 "operationId": "evaluateSubmission",
                 "parameters": [
                     {
@@ -4699,7 +4918,7 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Evaluation data",
+                    "description": "Dados da avaliação",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -4711,7 +4930,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Submission evaluated successfully",
+                        "description": "Submissão avaliada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -4721,16 +4940,16 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid input"
+                        "description": "Entrada inválida"
                     },
                     "403": {
-                        "description": "Forbidden - not teacher"
+                        "description": "Proibido - não é professor"
                     },
                     "404": {
-                        "description": "Submission not found"
+                        "description": "Submissão não encontrada"
                     },
                     "500": {
-                        "description": "Failed to evaluate submission"
+                        "description": "Falha ao avaliar a submissão"
                     }
                 },
                 "security": [
@@ -4740,7 +4959,7 @@
                 ]
             }
         },
-        "/users/{user_id}": {
+        "/users/me": {
             "get": {
                 "tags": [
                     "Usuários"
@@ -4748,18 +4967,6 @@
                 "summary": "Obter dados do usuário",
                 "description": "Retorna os dados completos de um usuário específico (requer autenticação do próprio usuário)",
                 "operationId": "getUser",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "ID do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Dados do usuário",
@@ -4815,18 +5022,6 @@
                 "summary": "Atualizar usuário",
                 "description": "Atualiza os dados de um usuário (requer autenticação do próprio usuário)",
                 "operationId": "updateUser",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "ID do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
                 "requestBody": {
                     "description": "Dados do usuário para atualização",
                     "required": true,
@@ -4931,18 +5126,6 @@
                 "summary": "Excluir usuário",
                 "description": "Remove permanentemente um usuário (requer autenticação do próprio usuário)",
                 "operationId": "deleteUser",
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "ID do usuário",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Usuário excluído com sucesso",
@@ -4998,7 +5181,7 @@
                 ]
             }
         },
-        "/users/events": {
+        "/users/me/events": {
             "get": {
                 "tags": [
                     "Eventos de Usuário"
@@ -5134,7 +5317,7 @@
                 ]
             }
         },
-        "/users/events/{event_id}": {
+        "/users/me/events/{event_id}": {
             "get": {
                 "tags": [
                     "Eventos de Usuário"
@@ -5399,7 +5582,7 @@
                 ],
                 "properties": {
                     "subject_id": {
-                        "description": "ID of the subject to add to the class",
+                        "description": "ID da disciplina a ser adicionada à classe",
                         "type": "string",
                         "format": "uuid"
                     }
@@ -5567,20 +5750,25 @@
                         "format": "uuid"
                     },
                     "title": {
+                        "description": "Título da atribuição",
                         "type": "string"
                     },
                     "description": {
+                        "description": "Descrição da atribuição",
                         "type": "string"
                     },
                     "deadline": {
+                        "description": "Data de vencimento da atribuição",
                         "type": "string",
                         "format": "date-time"
                     },
                     "subject_id": {
+                        "description": "ID da matéria",
                         "type": "string",
                         "format": "uuid"
                     },
                     "attachment_id": {
+                        "description": "ID do arquivo anexo, se houver",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
@@ -5591,7 +5779,8 @@
                                 "$ref": "#/components/schemas/FileResponse"
                             }
                         ],
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Dados do arquivo anexo, se houver"
                     }
                 },
                 "type": "object"
@@ -5604,22 +5793,22 @@
                 ],
                 "properties": {
                     "title": {
-                        "description": "Title of the assignment",
+                        "description": "Título da atribuição",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "description": {
-                        "description": "Detailed description of the assignment",
+                        "description": "Descrição detalhada da atribuição",
                         "type": "string"
                     },
                     "deadline": {
-                        "description": "Due date for the assignment",
+                        "description": "Data de vencimento da atribuição",
                         "type": "string",
                         "format": "date-time"
                     },
                     "attachment": {
-                        "description": "Optional attachment file",
+                        "description": "Arquivo anexo opcional",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
@@ -5635,22 +5824,22 @@
                 ],
                 "properties": {
                     "title": {
-                        "description": "Updated title of the assignment",
+                        "description": "Título atualizado da atribuição",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "description": {
-                        "description": "Updated description of the assignment",
+                        "description": "Descrição atualizada da atribuição",
                         "type": "string"
                     },
                     "deadline": {
-                        "description": "Updated due date for the assignment",
+                        "description": "Data de vencimento atualizada da atribuição",
                         "type": "string",
                         "format": "date-time"
                     },
                     "attachment_id": {
-                        "description": "ID of the new attachment file",
+                        "description": "ID do novo arquivo anexo, se houver",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
@@ -5716,22 +5905,22 @@
                 ],
                 "properties": {
                     "title": {
-                        "description": "Title of the event",
+                        "description": "Título do evento",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "description": {
-                        "description": "Detailed description of the event",
+                        "description": "Descrição detalhada do evento",
                         "type": "string"
                     },
                     "event_date": {
-                        "description": "Date and time of the event",
+                        "description": "Data e hora do evento",
                         "type": "string",
                         "format": "date-time"
                     },
                     "event_type": {
-                        "description": "Type of the event",
+                        "description": "Tipo do evento",
                         "type": "string",
                         "enum": [
                             "class",
@@ -5781,13 +5970,13 @@
                 ],
                 "properties": {
                     "title": {
-                        "description": "Title of the material",
+                        "description": "Título do material",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "material_file": {
-                        "description": "Material file to upload",
+                        "description": "Arquivo do material para envio",
                         "type": "string",
                         "format": "binary"
                     }
@@ -5800,7 +5989,7 @@
                 ],
                 "properties": {
                     "title": {
-                        "description": "Updated title of the material",
+                        "description": "Título atualizado do material",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
@@ -5859,29 +6048,29 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Name of the subject",
+                        "description": "Nome da disciplina",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "description": {
-                        "description": "Detailed description of the subject",
+                        "description": "Descrição detalhada da disciplina",
                         "type": "string"
                     },
                     "teacher_id": {
-                        "description": "ID of the teacher (required if admin, optional for teachers)",
+                        "description": "ID do professor (necessário se for admin, opcional para professores)",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
                     },
                     "profile-picture": {
-                        "description": "Profile picture file",
+                        "description": "Arquivo da foto de perfil",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
                     },
                     "banner": {
-                        "description": "Banner image file",
+                        "description": "Arquivo da imagem de banner",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
@@ -5896,29 +6085,29 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Updated name of the subject",
+                        "description": "Nome atualizado da disciplina",
                         "type": "string",
                         "maxLength": 255,
                         "minLength": 3
                     },
                     "description": {
-                        "description": "Updated description of the subject",
+                        "description": "Descrição atualizada da disciplina",
                         "type": "string"
                     },
                     "teacher_id": {
-                        "description": "Updated teacher ID (admin only)",
+                        "description": "ID do professor atualizado (apenas para administradores)",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
                     },
                     "profile_picture_id": {
-                        "description": "ID of the new profile picture",
+                        "description": "ID da nova foto de perfil",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
                     },
                     "banner_id": {
-                        "description": "ID of the new banner image",
+                        "description": "ID da nova imagem de banner",
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
@@ -5977,7 +6166,7 @@
                 ],
                 "properties": {
                     "attachment": {
-                        "description": "Submission file attachment",
+                        "description": "Arquivo de submissão da tarefa",
                         "type": "string",
                         "format": "binary"
                     }
@@ -5990,7 +6179,7 @@
                 ],
                 "properties": {
                     "attachment_id": {
-                        "description": "ID of the new attachment file",
+                        "description": "ID do novo arquivo de anexo",
                         "type": "string",
                         "format": "uuid"
                     }
@@ -6004,11 +6193,11 @@
                 ],
                 "properties": {
                     "concept": {
-                        "description": "Evaluation concept (e.g., \"approved\", \"rejected\")",
+                        "description": "Conceito da avaliação (ex.: \"aprovado\", \"rejeitado\")",
                         "type": "string"
                     },
                     "feedback": {
-                        "description": "Detailed feedback for the submission",
+                        "description": "Feedback detalhado para a submissão",
                         "type": "string"
                     }
                 },
@@ -6834,24 +7023,24 @@
             "description": "Operações relacionadas a autenticação de usuários"
         },
         {
-            "name": "Class Subjects",
-            "description": "Manage subjects within a class"
+            "name": "Disciplinas da Classe",
+            "description": "Gerenciar disciplinas dentro de uma classe"
         },
         {
-            "name": "Class Users",
-            "description": "Manage users within a class in an institution"
+            "name": "Usuários da Turma",
+            "description": "Gerencia usuários dentro de uma turma em uma instituição"
         },
         {
-            "name": "Classes",
-            "description": "Operations related to class management"
+            "name": "Turmas",
+            "description": "Operações relacionadas ao gerenciamento de turmas"
         },
         {
             "name": "Files",
-            "description": "File upload and management operations"
+            "description": "Operações de upload e gerenciamento de arquivos"
         },
         {
-            "name": "Forum Messages",
-            "description": "Endpoints for managing forum messages related to a subject."
+            "name": "Mensagens do Fórum",
+            "description": "Endpoints para gerenciar mensagens do fórum relacionadas a um assunto."
         },
         {
             "name": "Usuários da Instituição",
@@ -6866,28 +7055,32 @@
             "description": "Operações relacionadas a instituições"
         },
         {
-            "name": "Invitations",
-            "description": "Operations related to institution invitations"
+            "name": "Convites",
+            "description": "Operações relacionadas aos convites de instituição"
         },
         {
-            "name": "Subject Assignments",
-            "description": "Manage assignments for subjects"
+            "name": "Notificações",
+            "description": "Endpoints para gerenciar notificações do usuário."
         },
         {
-            "name": "Subject Events",
-            "description": "Manage events related to subjects"
+            "name": "Atribuições de Matéria",
+            "description": "Gerencia as atribuições das matérias"
         },
         {
-            "name": "Subject Materials",
-            "description": "Manage learning materials for subjects"
+            "name": "Eventos de Disciplina",
+            "description": "Gerencia eventos relacionados às disciplinas"
         },
         {
-            "name": "Subjects",
-            "description": "Operations related to subject management"
+            "name": "Materiais da Disciplina",
+            "description": "Gerenciar materiais de aprendizagem para disciplinas"
+        },
+        {
+            "name": "Disciplinas",
+            "description": "Operações relacionadas à gestão de disciplinas"
         },
         {
             "name": "Submissions",
-            "description": "Manage assignment submissions and evaluations"
+            "description": "Gerenciar submissões de tarefas e avaliações"
         },
         {
             "name": "Usuários",

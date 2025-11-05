@@ -1,7 +1,7 @@
 # Como gerar DOCS do swagger?
 
 ```bash
-sudo docker exec -it backend_container
+sudo docker exec -it backend_container bash
 ```
 ```bash
 root@a481d18b79ec:/var/www/api.intellecta# ./vendor/bin/openapi src/App/Docs -o public/swagger.json

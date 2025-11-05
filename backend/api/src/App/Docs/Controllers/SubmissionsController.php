@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Tag(
     name: 'Submissions',
-    description: 'Manage assignment submissions and evaluations'
+    description: 'Gerenciar submissões de tarefas e avaliações'
 )]
 #[OA\Schema(
     schema: 'SubmissionResponse',
@@ -38,7 +38,7 @@ use OpenApi\Attributes as OA;
             property: 'attachment',
             type: 'string',
             format: 'binary',
-            description: 'Submission file attachment'
+            description: 'Arquivo de submissão da tarefa'
         )
     ]
 )]
@@ -50,7 +50,7 @@ use OpenApi\Attributes as OA;
             property: 'attachment_id',
             type: 'string',
             format: 'uuid',
-            description: 'ID of the new attachment file'
+            description: 'ID do novo arquivo de anexo'
         )
     ]
 )]
@@ -61,12 +61,12 @@ use OpenApi\Attributes as OA;
         new OA\Property(
             property: 'concept',
             type: 'string',
-            description: 'Evaluation concept (e.g., "approved", "rejected")'
+            description: 'Conceito da avaliação (ex.: "aprovado", "rejeitado")'
         ),
         new OA\Property(
             property: 'feedback',
             type: 'string',
-            description: 'Detailed feedback for the submission'
+            description: 'Feedback detalhado para a submissão'
         )
     ]
 )]
@@ -75,8 +75,8 @@ class SubmissionsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions',
         operationId: 'getAssignmentSubmissions',
-        summary: 'Get all submissions for an assignment',
-        description: 'Retrieve all submissions for a specific assignment (visible to teachers and the submitting student)',
+        summary: 'Obter todas as submissões para uma tarefa',
+        description: 'Recupera todas as submissões para uma tarefa específica (visível para professores e o estudante que submeteu)',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -102,7 +102,7 @@ class SubmissionsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of submissions',
+                description: 'Lista de submissões',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/SubmissionResponse')
@@ -110,7 +110,7 @@ class SubmissionsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'No submissions found'
+                description: 'Nenhuma submissão encontrada'
             )
         ]
     )]
@@ -121,8 +121,8 @@ class SubmissionsController
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions',
         operationId: 'createSubmission',
-        summary: 'Submit an assignment',
-        description: 'Create a new assignment submission with an attached file',
+        summary: 'Enviar uma tarefa',
+        description: 'Criar uma nova submissão da tarefa com um arquivo anexado',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -146,7 +146,7 @@ class SubmissionsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Submission file',
+            description: 'Arquivo de submissão',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -156,20 +156,20 @@ class SubmissionsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Submission created successfully',
+                description: 'Submissão criada com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubmissionResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'No file provided'
+                description: 'Nenhum arquivo fornecido'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Assignment not found'
+                description: 'Tarefa não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Failed to create submission'
+                description: 'Falha ao criar submissão'
             )
         ]
     )]
@@ -180,8 +180,8 @@ class SubmissionsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}',
         operationId: 'getSubmission',
-        summary: 'Get submission details',
-        description: 'Retrieve details of a specific submission (visible to teachers and the submitting student)',
+        summary: 'Obter detalhes da submissão',
+        description: 'Recupera os detalhes de uma submissão específica (visível para professores e o estudante que submeteu)',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -213,16 +213,16 @@ class SubmissionsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Submission details',
+                description: 'Detalhes da submissão',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubmissionResponse')
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not owner or teacher'
+                description: 'Proibido - não é o proprietário ou professor'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Submission not found'
+                description: 'Submissão não encontrada'
             )
         ]
     )]
@@ -233,8 +233,8 @@ class SubmissionsController
     #[OA\Patch(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}/attachment',
         operationId: 'updateSubmissionAttachment',
-        summary: 'Update submission attachment',
-        description: 'Replace the attachment file for a submission (only before deadline)',
+        summary: 'Atualizar anexo da submissão',
+        description: 'Substituir o arquivo de anexo de uma submissão (somente antes do prazo)',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -264,14 +264,14 @@ class SubmissionsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'New attachment ID',
+            description: 'Novo ID do anexo',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/UpdateAttachmentRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Attachment updated successfully',
+                description: 'Anexo atualizado com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string'),
@@ -285,19 +285,19 @@ class SubmissionsController
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not owner or after deadline'
+                description: 'Proibido - não é o proprietário ou após o prazo'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Submission or file not found'
+                description: 'Submissão ou arquivo não encontrado'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Failed to update attachment'
+                description: 'Falha ao atualizar o anexo'
             )
         ]
     )]
@@ -308,8 +308,8 @@ class SubmissionsController
     #[OA\Delete(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}',
         operationId: 'deleteSubmission',
-        summary: 'Delete a submission',
-        description: 'Delete a submission (only allowed before assignment deadline)',
+        summary: 'Excluir uma submissão',
+        description: 'Excluir uma submissão (permitido somente antes do prazo da tarefa)',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -341,7 +341,7 @@ class SubmissionsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Submission deleted successfully',
+                description: 'Submissão excluída com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string')
@@ -351,15 +351,15 @@ class SubmissionsController
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not owner or after deadline'
+                description: 'Proibido - não é o proprietário ou após o prazo'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Submission not found'
+                description: 'Submissão não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Failed to delete submission'
+                description: 'Falha ao excluir a submissão'
             )
         ]
     )]
@@ -370,8 +370,8 @@ class SubmissionsController
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}/submissions/{submission_id}/evaluate',
         operationId: 'evaluateSubmission',
-        summary: 'Evaluate a submission',
-        description: 'Provide feedback and evaluation for a submission (teacher only)',
+        summary: 'Avaliar uma submissão',
+        description: 'Fornecer feedback e avaliação para uma submissão (somente para professores)',
         tags: ['Submissions'],
         security: [['bearerAuth' => []]],
         parameters: [
@@ -401,31 +401,31 @@ class SubmissionsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Evaluation data',
+            description: 'Dados da avaliação',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/EvaluateSubmissionRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Submission evaluated successfully',
+                description: 'Submissão avaliada com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubmissionResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 403,
-                description: 'Forbidden - not teacher'
+                description: 'Proibido - não é professor'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Submission not found'
+                description: 'Submissão não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Failed to evaluate submission'
+                description: 'Falha ao avaliar a submissão'
             )
         ]
     )]

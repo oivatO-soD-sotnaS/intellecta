@@ -6,8 +6,8 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: 'Class Subjects',
-    description: 'Manage subjects within a class'
+    name: 'Disciplinas da Classe',
+    description: 'Gerenciar disciplinas dentro de uma classe'
 )]
 #[OA\Schema(
     schema: 'ClassSubjectResponse',
@@ -29,7 +29,7 @@ use OpenApi\Attributes as OA;
             property: 'subject_id',
             type: 'string',
             format: 'uuid',
-            description: 'ID of the subject to add to the class'
+            description: 'ID da disciplina a ser adicionada à classe'
         )
     ],
     type: 'object'
@@ -39,8 +39,8 @@ class ClassSubjectsController
     #[OA\Get(
         path: '/institutions/{institution_id}/classes/{class_id}/subjects',
         operationId: 'getClassSubjects',
-        summary: 'Get all subjects for a class',
-        tags: ['Class Subjects'],
+        summary: 'Obter todas as disciplinas de uma classe',
+        tags: ['Disciplinas da Classe'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -58,7 +58,7 @@ class ClassSubjectsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of class subjects',
+                description: 'Lista de disciplinas da classe',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/ClassSubjectResponse')
@@ -66,7 +66,7 @@ class ClassSubjectsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'Class not found'
+                description: 'Classe não encontrada'
             )
         ]
     )]
@@ -77,9 +77,9 @@ class ClassSubjectsController
     #[OA\Post(
         path: '/institutions/{institution_id}/classes/{class_id}/subjects',
         operationId: 'addSubjectToClass',
-        summary: 'Add a subject to a class',
-        description: 'Links a subject to a specific class',
-        tags: ['Class Subjects'],
+        summary: 'Adicionar uma disciplina a uma classe',
+        description: 'Vincula uma disciplina a uma classe específica',
+        tags: ['Disciplinas da Classe'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -96,14 +96,14 @@ class ClassSubjectsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Subject to add to class',
+            description: 'Disciplina a ser adicionada à classe',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/AddSubjectToClassRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Subject linked successfully',
+                description: 'Disciplina vinculada com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string'),
@@ -117,11 +117,11 @@ class ClassSubjectsController
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Disciplina não encontrada'
             )
         ]
     )]
@@ -132,9 +132,9 @@ class ClassSubjectsController
     #[OA\Get(
         path: '/institutions/{institution_id}/classes/{class_id}/subjects/{class_subject_id}',
         operationId: 'getClassSubjectById',
-        summary: 'Get a specific class subject',
-        description: 'Retrieve details of a specific subject-class relationship',
-        tags: ['Class Subjects'],
+        summary: 'Obter uma disciplina específica da classe',
+        description: 'Recuperar detalhes de um relacionamento específico entre disciplina e classe',
+        tags: ['Disciplinas da Classe'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -158,12 +158,12 @@ class ClassSubjectsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Class subject details',
+                description: 'Detalhes da disciplina da classe',
                 content: new OA\JsonContent(ref: '#/components/schemas/ClassSubjectResponse')
             ),
             new OA\Response(
                 response: 404,
-                description: 'Class subject not found'
+                description: 'Disciplina da classe não encontrada'
             )
         ]
     )]
@@ -174,9 +174,9 @@ class ClassSubjectsController
     #[OA\Delete(
         path: '/institutions/{institution_id}/classes/{class_id}/subjects/{class_subject_id}',
         operationId: 'removeSubjectFromClass',
-        summary: 'Remove a subject from a class',
-        description: 'Unlinks a subject from a specific class',
-        tags: ['Class Subjects'],
+        summary: 'Remover uma disciplina de uma classe',
+        description: 'Desvincula uma disciplina de uma classe específica',
+        tags: ['Disciplinas da Classe'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -201,7 +201,7 @@ class ClassSubjectsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Subject removed successfully',
+                description: 'Disciplina removida com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string')
@@ -211,16 +211,15 @@ class ClassSubjectsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'Class subject not found'
+                description: 'Disciplina da classe não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]
     public function removeSubjectFromClass()
     {
-
     }
 }

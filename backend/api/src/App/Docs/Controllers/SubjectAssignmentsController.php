@@ -6,22 +6,23 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: 'Subject Assignments',
-    description: 'Manage assignments for subjects'
+    name: 'Atribuições de Matéria',
+    description: 'Gerencia as atribuições das matérias'
 )]
 #[OA\Schema(
     schema: 'AssignmentResponse',
     properties: [
         new OA\Property(property: 'assignment_id', type: 'string', format: 'uuid'),
-        new OA\Property(property: 'title', type: 'string'),
-        new OA\Property(property: 'description', type: 'string'),
-        new OA\Property(property: 'deadline', type: 'string', format: 'date-time'),
-        new OA\Property(property: 'subject_id', type: 'string', format: 'uuid'),
-        new OA\Property(property: 'attachment_id', type: 'string', format: 'uuid', nullable: true),
+        new OA\Property(property: 'title', type: 'string', description: 'Título da atribuição'),
+        new OA\Property(property: 'description', type: 'string', description: 'Descrição da atribuição'),
+        new OA\Property(property: 'deadline', type: 'string', format: 'date-time', description: 'Data de vencimento da atribuição'),
+        new OA\Property(property: 'subject_id', type: 'string', format: 'uuid', description: 'ID da matéria'),
+        new OA\Property(property: 'attachment_id', type: 'string', format: 'uuid', nullable: true, description: 'ID do arquivo anexo, se houver'),
         new OA\Property(
             property: 'attachment',
             ref: '#/components/schemas/FileResponse',
-            nullable: true
+            nullable: true,
+            description: 'Dados do arquivo anexo, se houver'
         )
     ],
     type: 'object'
@@ -35,24 +36,24 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Title of the assignment'
+            description: 'Título da atribuição'
         ),
         new OA\Property(
             property: 'description',
             type: 'string',
-            description: 'Detailed description of the assignment'
+            description: 'Descrição detalhada da atribuição'
         ),
         new OA\Property(
             property: 'deadline',
             type: 'string',
             format: 'date-time',
-            description: 'Due date for the assignment'
+            description: 'Data de vencimento da atribuição'
         ),
         new OA\Property(
             property: 'attachment',
             type: 'string',
             format: 'binary',
-            description: 'Optional attachment file',
+            description: 'Arquivo anexo opcional',
             nullable: true
         )
     ]
@@ -66,24 +67,24 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Updated title of the assignment'
+            description: 'Título atualizado da atribuição'
         ),
         new OA\Property(
             property: 'description',
             type: 'string',
-            description: 'Updated description of the assignment'
+            description: 'Descrição atualizada da atribuição'
         ),
         new OA\Property(
             property: 'deadline',
             type: 'string',
             format: 'date-time',
-            description: 'Updated due date for the assignment'
+            description: 'Data de vencimento atualizada da atribuição'
         ),
         new OA\Property(
             property: 'attachment_id',
             type: 'string',
             format: 'uuid',
-            description: 'ID of the new attachment file',
+            description: 'ID do novo arquivo anexo, se houver',
             nullable: true
         )
     ]
@@ -93,8 +94,8 @@ class SubjectAssignmentsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments',
         operationId: 'getSubjectAssignments',
-        summary: 'Get all assignments for a subject',
-        tags: ['Subject Assignments'],
+        summary: 'Obter todas as atribuições de uma matéria',
+        tags: ['Atribuições de Matéria'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -112,7 +113,7 @@ class SubjectAssignmentsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of subject assignments',
+                description: 'Lista de atribuições da matéria',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/AssignmentResponse')
@@ -120,7 +121,7 @@ class SubjectAssignmentsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'No assignments found for this subject'
+                description: 'Nenhuma atribuição encontrada para esta matéria'
             )
         ]
     )]
@@ -131,9 +132,9 @@ class SubjectAssignmentsController
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments',
         operationId: 'createSubjectAssignment',
-        summary: 'Create a new assignment',
-        description: 'Create a new assignment for the specified subject with optional attachment',
-        tags: ['Subject Assignments'],
+        summary: 'Criar uma nova atribuição',
+        description: 'Cria uma nova atribuição para a matéria especificada com arquivo anexo opcional',
+        tags: ['Atribuições de Matéria'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -150,7 +151,7 @@ class SubjectAssignmentsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Assignment creation data',
+            description: 'Dados para criação da atribuição',
             required: true,
             content: new OA\MediaType(
                 mediaType: 'multipart/form-data',
@@ -160,16 +161,16 @@ class SubjectAssignmentsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Assignment created successfully',
+                description: 'Atribuição criada com sucesso',
                 content: new OA\JsonContent(ref: '#/components/schemas/AssignmentResponse')
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Matéria não encontrada'
             )
         ]
     )]
@@ -180,9 +181,9 @@ class SubjectAssignmentsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}',
         operationId: 'getSubjectAssignmentById',
-        summary: 'Get assignment details',
-        description: 'Retrieve details of a specific assignment',
-        tags: ['Subject Assignments'],
+        summary: 'Obter detalhes da atribuição',
+        description: 'Recupera os detalhes de uma atribuição específica',
+        tags: ['Atribuições de Matéria'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -206,12 +207,12 @@ class SubjectAssignmentsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Assignment details',
+                description: 'Detalhes da atribuição',
                 content: new OA\JsonContent(ref: '#/components/schemas/AssignmentResponse')
             ),
             new OA\Response(
                 response: 404,
-                description: 'Assignment not found'
+                description: 'Atribuição não encontrada'
             )
         ]
     )]
@@ -222,9 +223,9 @@ class SubjectAssignmentsController
     #[OA\Patch(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}',
         operationId: 'updateSubjectAssignment',
-        summary: 'Update an assignment',
-        description: 'Update details of an existing assignment',
-        tags: ['Subject Assignments'],
+        summary: 'Atualizar uma atribuição',
+        description: 'Atualiza os detalhes de uma atribuição existente',
+        tags: ['Atribuições de Matéria'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -247,20 +248,21 @@ class SubjectAssignmentsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Assignment update data',
+            description: 'Dados para atualização da atribuição',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/UpdateAssignmentRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Assignment updated successfully',
+                description: 'Atribuição atualizada com sucesso',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'message', type: 'string'),
+                        new OA\Property(property: 'message', type: 'string', description: 'Mensagem de sucesso'),
                         new OA\Property(
                             property: 'assignment',
-                            ref: '#/components/schemas/AssignmentResponse'
+                            ref: '#/components/schemas/AssignmentResponse',
+                            description: 'Dados atualizados da atribuição'
                         )
                     ],
                     type: 'object'
@@ -268,15 +270,15 @@ class SubjectAssignmentsController
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Assignment not found'
+                description: 'Atribuição não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]
@@ -287,9 +289,9 @@ class SubjectAssignmentsController
     #[OA\Delete(
         path: '/institutions/{institution_id}/subjects/{subject_id}/assignments/{assignment_id}',
         operationId: 'deleteSubjectAssignment',
-        summary: 'Delete an assignment',
-        description: 'Permanently remove an assignment',
-        tags: ['Subject Assignments'],
+        summary: 'Excluir uma atribuição',
+        description: 'Remove permanentemente uma atribuição',
+        tags: ['Atribuições de Matéria'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -314,21 +316,21 @@ class SubjectAssignmentsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Assignment deleted successfully',
+                description: 'Atribuição excluída com sucesso',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'message', type: 'string')
+                        new OA\Property(property: 'message', type: 'string', description: 'Mensagem de confirmação')
                     ],
                     type: 'object'
                 )
             ),
             new OA\Response(
                 response: 404,
-                description: 'Assignment not found'
+                description: 'Atribuição não encontrada'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]

@@ -69,7 +69,7 @@ readonly class ClassSubjectsController extends BaseController {
 
     public function addSubjectToClass(Request $request, Response $response, string $institution_id, string $class_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ["subject_id"]);
@@ -116,7 +116,7 @@ readonly class ClassSubjectsController extends BaseController {
                 "class_subject" => $classSubjectDto
             ]));
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/subjects", "{$token['email']} linked the {$subject->getName()} subject to the {$class_id} class");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/subjects", "{$user->getUserId()} linked the {$subject->getName()} subject to the {$class_id} class");
             return $response;
         });
     }
@@ -161,7 +161,7 @@ readonly class ClassSubjectsController extends BaseController {
 
     public function removeSubjectFromClass(Request $request, Response $response, string $institution_id, string $class_id, string $class_subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $class_id, $class_subject_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $classSubject = $this->classSubjectsDao->getClassSubjectByClassSubjectIdAndClassId($class_subject_id, $class_id);
 
@@ -179,7 +179,7 @@ readonly class ClassSubjectsController extends BaseController {
                 "message" => "Subject with Id {$classSubject->getClassId()} was removed from the class successfully!"
             ]));
 
-            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/subjects/{$class_subject_id}", "{$token['email']} removed the subject with id {$classSubject->getClassId()} from the class with id {$class_id}");
+            LogService::info("/institutions/{$institution_id}/classes/{$class_id}/subjects/{$class_subject_id}", "{$user->getUserId()} removed the subject with id {$classSubject->getClassId()} from the class with id {$class_id}");
             return $response;
         });
     }

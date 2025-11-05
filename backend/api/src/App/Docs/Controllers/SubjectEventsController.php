@@ -6,8 +6,8 @@ namespace App\Docs\Controllers;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(
-    name: 'Subject Events',
-    description: 'Manage events related to subjects'
+    name: 'Eventos de Disciplina',
+    description: 'Gerencia eventos relacionados às disciplinas'
 )]
 #[OA\Schema(
     schema: 'SubjectEventResponse',
@@ -46,24 +46,24 @@ use OpenApi\Attributes as OA;
             type: 'string',
             minLength: 3,
             maxLength: 255,
-            description: 'Title of the event'
+            description: 'Título do evento'
         ),
         new OA\Property(
             property: 'description',
             type: 'string',
-            description: 'Detailed description of the event'
+            description: 'Descrição detalhada do evento'
         ),
         new OA\Property(
             property: 'event_date',
             type: 'string',
             format: 'date-time',
-            description: 'Date and time of the event'
+            description: 'Data e hora do evento'
         ),
         new OA\Property(
             property: 'event_type',
             type: 'string',
             enum: ['class', 'exam', 'assignment', 'holiday', 'other'],
-            description: 'Type of the event'
+            description: 'Tipo do evento'
         )
     ],
     type: 'object'
@@ -73,8 +73,8 @@ class SubjectEventsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/events',
         operationId: 'getSubjectEvents',
-        summary: 'Get all events for a subject',
-        tags: ['Subject Events'],
+        summary: 'Obter todos os eventos de uma disciplina',
+        tags: ['Eventos de Disciplina'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -92,7 +92,7 @@ class SubjectEventsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'List of subject events',
+                description: 'Lista de eventos de disciplina',
                 content: new OA\JsonContent(
                     type: 'array',
                     items: new OA\Items(ref: '#/components/schemas/SubjectEventResponse')
@@ -100,7 +100,7 @@ class SubjectEventsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'No events found for this subject'
+                description: 'Nenhum evento encontrado para esta disciplina'
             )
         ]
     )]
@@ -111,9 +111,9 @@ class SubjectEventsController
     #[OA\Post(
         path: '/institutions/{institution_id}/subjects/{subject_id}/events',
         operationId: 'createSubjectEvent',
-        summary: 'Create a new subject event',
-        description: 'Create a new event associated with a subject',
-        tags: ['Subject Events'],
+        summary: 'Criar um novo evento de disciplina',
+        description: 'Cria um novo evento associado a uma disciplina',
+        tags: ['Eventos de Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -130,14 +130,14 @@ class SubjectEventsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Event creation data',
+            description: 'Dados para criação do evento',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/CreateSubjectEventRequest')
         ),
         responses: [
             new OA\Response(
                 response: 201,
-                description: 'Event created successfully',
+                description: 'Evento criado com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'Message', type: 'string'),
@@ -151,15 +151,15 @@ class SubjectEventsController
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Subject not found'
+                description: 'Disciplina não encontrada'
             ),
             new OA\Response(
                 response: 422,
-                description: 'Invalid event type'
+                description: 'Tipo do evento inválido'
             )
         ]
     )]
@@ -170,9 +170,9 @@ class SubjectEventsController
     #[OA\Put(
         path: '/institutions/{institution_id}/subjects/{subject_id}/events/{subject_event_id}',
         operationId: 'updateSubjectEvent',
-        summary: 'Update a subject event',
-        description: 'Update details of an existing subject event',
-        tags: ['Subject Events'],
+        summary: 'Atualizar um evento de disciplina',
+        description: 'Atualiza os detalhes de um evento de disciplina existente',
+        tags: ['Eventos de Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -195,14 +195,14 @@ class SubjectEventsController
             )
         ],
         requestBody: new OA\RequestBody(
-            description: 'Event update data',
+            description: 'Dados para atualização do evento',
             required: true,
             content: new OA\JsonContent(ref: '#/components/schemas/CreateSubjectEventRequest')
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Event updated successfully',
+                description: 'Evento atualizado com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'Message', type: 'string'),
@@ -216,15 +216,15 @@ class SubjectEventsController
             ),
             new OA\Response(
                 response: 400,
-                description: 'Invalid input'
+                description: 'Entrada inválida'
             ),
             new OA\Response(
                 response: 404,
-                description: 'Event not found'
+                description: 'Evento não encontrado'
             ),
             new OA\Response(
                 response: 422,
-                description: 'Invalid event type'
+                description: 'Tipo do evento inválido'
             )
         ]
     )]
@@ -235,9 +235,9 @@ class SubjectEventsController
     #[OA\Delete(
         path: '/institutions/{institution_id}/subjects/{subject_id}/events/{subject_event_id}',
         operationId: 'deleteSubjectEvent',
-        summary: 'Delete a subject event',
-        description: 'Permanently remove a subject event',
-        tags: ['Subject Events'],
+        summary: 'Excluir um evento de disciplina',
+        description: 'Remove permanentemente um evento de disciplina',
+        tags: ['Eventos de Disciplina'],
         security: [['bearerAuth' => []]],
         parameters: [
             new OA\Parameter(
@@ -262,7 +262,7 @@ class SubjectEventsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Event deleted successfully',
+                description: 'Evento excluído com sucesso',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'Message', type: 'string')
@@ -272,11 +272,11 @@ class SubjectEventsController
             ),
             new OA\Response(
                 response: 404,
-                description: 'Event not found'
+                description: 'Evento não encontrado'
             ),
             new OA\Response(
                 response: 500,
-                description: 'Internal server error'
+                description: 'Erro interno do servidor'
             )
         ]
     )]
@@ -287,9 +287,9 @@ class SubjectEventsController
     #[OA\Get(
         path: '/institutions/{institution_id}/subjects/{subject_id}/events/{subject_event_id}',
         operationId: 'getSubjectEvent',
-        summary: 'Get a specific subject event',
-        description: 'Retrieve details of a specific subject event',
-        tags: ['Subject Events'],
+        summary: 'Obter um evento de disciplina específico',
+        description: 'Recupera os detalhes de um evento de disciplina específico',
+        tags: ['Eventos de Disciplina'],
         parameters: [
             new OA\Parameter(
                 name: 'institution_id',
@@ -313,12 +313,12 @@ class SubjectEventsController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Event details',
+                description: 'Detalhes do evento',
                 content: new OA\JsonContent(ref: '#/components/schemas/SubjectEventResponse')
             ),
             new OA\Response(
                 response: 404,
-                description: 'Event not found'
+                description: 'Evento não encontrado'
             )
         ]
     )]

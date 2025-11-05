@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Dao;
 
 use App\Models\Subject;
+use App\Models\User;
 use PDO;
 
 readonly class SubjectsDao extends BaseDao {
@@ -139,5 +140,30 @@ readonly class SubjectsDao extends BaseDao {
         $stmt->bindValue(":subject_id", $subject_id, PDO::PARAM_STR);
         
         return $stmt->execute();
+    }
+
+    /**
+     * Summary of getStudentsBySubjectId
+     * @param string $subject_id
+     * @return User[]
+     */
+    public function getStudentsBySubjectId(string $subject_id): array {
+        $sql = "
+            SELECT DISTINCT u.*
+            FROM users u
+            JOIN class_users cu ON cu.user_id = u.user_id
+            JOIN class_subjects cs ON cs.class_id = cu.class_id
+            JOIN subjects s ON s.subject_id = cs.subject_id
+            WHERE s.subject_id = :subject_id
+        ";
+
+        $pdo = $this->database->getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':subject_id', $subject_id, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn(array $row) => new User($row), $data);
     }
 }

@@ -51,40 +51,6 @@ readonly class ForumMessagesDao extends BaseDao {
     }
 
     /**
-     * Summary of getForumMessagesBySubjectId
-     * @param string $subject_id
-     * @return ForumMessage[]
-     */
-    public function getForumMessagesBySubjectId(
-        string $subject_id,
-        array $filters
-    ) {
-        $sql = "SELECT * FROM forum_messages WHERE subject_id = :subject_id";
-        $params = [
-            ':subject_id' => $subject_id
-        ];
-
-        $this->setFilters($filters, $sql, $params);
-
-        $sql .= " ORDER BY created_at DESC";
-
-        $pdo = $this->database->getConnection();
-        $stmt = $pdo->prepare($sql);
-        
-        foreach($params as $key => $value) {
-            $stmt->bindValue($key, $value, PDO::PARAM_STR);
-        }
-
-        $stmt->execute();
-        
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $forumMessages = array_map(fn(array $row) => new ForumMessage($row), $data);
-
-        return $forumMessages;
-    }
-
-    /**
      * Summary of countForumMessagesBySubjectId
      * @param string $subject_id
      * @return int

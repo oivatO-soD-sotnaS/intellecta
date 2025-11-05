@@ -5,13 +5,16 @@ namespace App\Controllers;
 
 use App\Dao\FilesDao;
 use App\Dao\ForumMessagesDao;
+use App\Dao\SubjectsDao;
 use App\Dao\UsersDao;
 use App\Dto\ForumMessageDto;
 use App\Dto\PaginationDto;
 use App\Dto\UserDto;
 use App\Models\ForumMessage;
+use App\Queue\RedisEmailQueue;
 use App\Services\LogService;
 use App\Services\ValidatorService;
+use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\ForumMessageContentVo;
 use App\Vo\ForumMessagesFiltersVo;
 use App\Vo\PaginationVo;
@@ -28,7 +31,10 @@ readonly class ForumMessagesController extends BaseController {
         private ForumMessagesDao $forumMessagesDao,
         private UsersDao $usersDao,
         private FilesDao $filesDao,
-        private ValidatorService $validatorService
+        private ValidatorService $validatorService,
+        private SubjectsDao $subjectsDao,
+        private EmailTemplateProvider $emailTemplateProvider,
+        private RedisEmailQueue $emailQueue
     ) {}
 
     public function getSubjectForumMessages(Request $request, Response $response, string $institution_id, string $subject_id): Response {
@@ -38,16 +44,11 @@ readonly class ForumMessagesController extends BaseController {
             $pagination = new PaginationVo($queryParameters);
             $forumMessagesFilters = new ForumMessagesFiltersVo($queryParameters);
 
-            $forumMessages = $pagination->hasPagination()
-                ? $forumMessages = $this->forumMessagesDao->getForumMessagesBySubjectIdPaginated(
-                    $subject_id, 
-                    $pagination, 
-                    $forumMessagesFilters->getDaoFilters()
-                )
-                : $forumMessages = $this->forumMessagesDao->getForumMessagesBySubjectId(
-                    $subject_id,
-                    $forumMessagesFilters->getDaoFilters()
-                );
+            $forumMessages = $this->forumMessagesDao->getForumMessagesBySubjectIdPaginated(
+                $subject_id,
+                $pagination,
+                $forumMessagesFilters->getDaoFilters()
+            );
 
             if(count($forumMessages) === 0) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -75,13 +76,9 @@ readonly class ForumMessagesController extends BaseController {
                 $forumMessagesFilters->getDaoFilters()
             );
             
-            $total_pages = $pagination->hasPagination()
-                ? (int) ceil($total_records / $pagination->getLimit())
-                : 1;
+            $total_pages = (int) ceil($total_records / $pagination->getLimit());
 
-            $page = $pagination->hasPagination()
-                ? $page = intdiv($pagination->getOffset(), $pagination->getLimit()) + 1
-                : 1;
+            $page = intdiv($pagination->getOffset(), $pagination->getLimit()) + 1;
 
             $paginationDto = new PaginationDto(
                 $page,
@@ -112,7 +109,7 @@ readonly class ForumMessagesController extends BaseController {
 
     public function createSubjectForumMessage(Request $request, Response $response, string $institution_id, string $subject_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
             $body = $request->getParsedBody();
             $this->validatorService->validateRequired($body, ["content"]);
 
@@ -125,7 +122,7 @@ readonly class ForumMessagesController extends BaseController {
                     'content' => $content->getValue(),
                     'created_at' => $timestamp,
                     'changed_at' => $timestamp,
-                    'sent_by' => $token['sub'],
+                    'sent_by' => $user->getUserId(),
                     'subject_id' => $subject_id
                 ])
             );
@@ -134,15 +131,29 @@ readonly class ForumMessagesController extends BaseController {
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
-            $sentBy = !empty($forumMessage->getSentBy())
-                ? $this->usersDao->getUserById($forumMessage->getSentBy())
+            $subjectStudents = $this->subjectsDao->getStudentsBySubjectId($subject_id);
+            $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
+
+            foreach ($subjectStudents as $student) {
+                $this->emailQueue->push([
+                'to' => $student->getEmail(),
+                'toName' => $student->getFullName(),
+                'subject' => "{$subject->getName()} - Nova publicação no fórum da disciplina",
+                'body' => $this->emailTemplateProvider->getProfessorForumPostCreatedEmailTemplate(
+                    $student->getFullName(),
+                    $forumMessage,
+                    $subject->getName(),
+                    $user->getFullName(),
+                    $user->getEmail()
+                ),
+                'altBody' => "{$student->getFullName()},\n\nUma nova publicação foi feita no fórum da disciplina {$subject->getName()}.\n\nAtenciosamente,\nEquipe Intellecta"
+                ]);
+            }
+
+            $sentByProfilePicture = !empty($user->getProfilePictureId())
+                ? $this->filesDao->getFileById($user->getProfilePictureId())
                 : null;
-            $sentByProfilePicture = $sentBy !== null && !empty($sentBy->getProfilePictureId())
-                ? $this->filesDao->getFileById($sentBy->getProfilePictureId())
-                : null;
-            $sentByDto = $sentBy !== null
-                ? new UserDto($sentBy, $sentByProfilePicture)
-                : null;
+            $sentByDto = new UserDto($user, $sentByProfilePicture);
 
             $forumMessageDto = new ForumMessageDto($forumMessage, $sentByDto);
 
@@ -150,7 +161,7 @@ readonly class ForumMessagesController extends BaseController {
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/forum/messages",
-                "{$token['email']} created a new forum message to subject '{$subject_id}'",
+                "{$user->getUserId()} created a new forum message to subject '{$subject_id}'",
             );
             return $response;
         });
@@ -158,18 +169,18 @@ readonly class ForumMessagesController extends BaseController {
 
     public function updateForumMessage(Request $request, Response $response, string $institution_id, string $subject_id, string $forum_message_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $forum_message_id) {
-            $token = $request->getAttribute('token');
-            $forum_message = $this->forumMessagesDao->getForumMessageByForumMessageId($forum_message_id);
+            $user = $request->getAttribute('user');
+            $forumMessage = $this->forumMessagesDao->getForumMessageByForumMessageId($forum_message_id);
 
             if (
-                $forum_message === null ||
-                $forum_message->getSubjectId() !== $subject_id
+                $forumMessage === null ||
+                $forumMessage->getSubjectId() !== $subject_id
             ) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
             $now = new DateTime();
-            $createdAt = new DateTime($forum_message->getCreatedAt());
+            $createdAt = new DateTime($forumMessage->getCreatedAt());
             $createdAtPlus15 = (clone $createdAt)->modify('+15 minutes');
             if ($now > $createdAtPlus15) {
                 throw new HttpForbiddenException($request, LogService::HTTP_403.'Forum message cannot be updated after 15 minutes');
@@ -181,32 +192,46 @@ readonly class ForumMessagesController extends BaseController {
             $content = new ForumMessageContentVo($body['content']);
             $timestamp = $now->format('Y-m-d H:i:s');
 
-            $forum_message->setContent($content->getValue());
-            $forum_message->setChangedAt($timestamp);
+            $forumMessage->setContent($content->getValue());
+            $forumMessage->setChangedAt($timestamp);
 
-            $forum_message = $this->forumMessagesDao->updateForumMessage($forum_message);
+            $forumMessage = $this->forumMessagesDao->updateForumMessage($forumMessage);
             
-            if ($forum_message === null) {
+            if ($forumMessage === null) {
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500);
             }
 
-            $sentBy = !empty($forum_message->getSentBy())
-                ? $this->usersDao->getUserById($forum_message->getSentBy())
-                : null;
-            $sentByProfilePicture = $sentBy !== null && !empty($sentBy->getProfilePictureId())
-                ? $this->filesDao->getFileById($sentBy->getProfilePictureId())
-                : null;
-            $sentByDto = $sentBy !== null
-                ? new UserDto($sentBy, $sentByProfilePicture)
-                : null;
+            $subjectStudents = $this->subjectsDao->getStudentsBySubjectId($subject_id);
+            $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
 
-            $forumMessageDto = new ForumMessageDto($forum_message, $sentByDto);
+            foreach ($subjectStudents as $student) {
+                $this->emailQueue->push([
+                'to' => $student->getEmail(),
+                'toName' => $student->getFullName(),
+                'subject' => "{$subject->getName()} - Publicação alterada no fórum da disciplina",
+                'body' => $this->emailTemplateProvider->getProfessorForumPostUpdatedEmailTemplate(
+                    $student->getFullName(),
+                    $forumMessage,
+                    $subject->getName(),
+                    $user->getFullName(),
+                    $user->getEmail()
+                ),
+                'altBody' => "{$student->getFullName()},\n\nUma publicação foi alterada no fórum da disciplina {$subject->getName()}.\n\nAtenciosamente,\nEquipe Intellecta"
+                ]);
+            }
+
+            $sentByProfilePicture = !empty($user->getProfilePictureId())
+                ? $this->filesDao->getFileById($user->getProfilePictureId())
+                : null;
+            $sentByDto = new UserDto($user, $sentByProfilePicture);
+
+            $forumMessageDto = new ForumMessageDto($forumMessage, $sentByDto);
 
             $response->getBody()->write(json_encode($forumMessageDto));
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/forum/messages/{$forum_message_id}",
-                "{$token['email']} updated the forum message '{$forum_message_id}'",
+                "{$user->getUserId()} updated the forum message '{$forum_message_id}'",
             );
             return $response;
         });

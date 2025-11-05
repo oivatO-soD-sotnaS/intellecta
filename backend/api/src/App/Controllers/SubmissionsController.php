@@ -63,7 +63,7 @@ readonly class SubmissionsController extends BaseController
     public function createAssignmentSubmission(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id): Response
     {
         return $this->handleErrors($request, function () use ($request, $response, $institution_id, $subject_id, $assignment_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $uploadedFiles = $request->getUploadedFiles();
             $this->validatorService->validateRequired($uploadedFiles, ["attachment"]);
@@ -96,7 +96,7 @@ readonly class SubmissionsController extends BaseController
                 "concept" => null,
                 "feedback" => null,
                 "assignment_id" => $assignment_id,
-                "user_id" => $token['sub'],
+                "user_id" => $user->getUserId(),
                 "attachment_id" => $attachment->getFileId()
             ]));
 
@@ -104,15 +104,13 @@ readonly class SubmissionsController extends BaseController
                 throw new HttpInternalServerErrorException($request, LogService::HTTP_500 . ' Failed to create submission');
             }
 
-            $user = $this->usersDao->getUserById($token['sub']);
-
             $submissionDto = new SubmissionsDto($submission, $user, $attachment);
 
             $response->getBody()->write(json_encode($submissionDto));
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/assignments/{$assignment_id}/submissions",
-                "{$token['email']} has made a submission to the assignment with ID: {$assignment_id}"
+                "{$user->getUserId()} has made a submission to the assignment with ID: {$assignment_id}"
             );
             return $response;
         });
@@ -120,7 +118,7 @@ readonly class SubmissionsController extends BaseController
 
     public function getSubmissionById(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id, string $submission_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $assignment_id, $submission_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $subject = $this->subjectsDao->getSubjectBySubjectIdAndInstitutionId($subject_id, $institution_id);
             $submission = $this->submissionsDao->getSubmissionBySubmissionIdAndAssignmentId($submission_id, $assignment_id);
@@ -129,8 +127,8 @@ readonly class SubmissionsController extends BaseController
                 empty($submission) || 
                 empty($subject) || 
                 (
-                    $submission->getUserId() !== $token['sub'] && 
-                    $subject->getTeacherId() !== $token['sub']
+                    $submission->getUserId() !== $user->getUserId() && 
+                    $subject->getTeacherId() !== $user->getUserId()
                 )
             ) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
@@ -151,13 +149,13 @@ readonly class SubmissionsController extends BaseController
 
     public function updateSubmissionAttachment(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id, string $submission_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $assignment_id, $submission_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $submission = $this->submissionsDao->getSubmissionBySubmissionIdAndAssignmentId($submission_id, $assignment_id);
 
             if(
                 empty($submission) || 
-                $submission->getUserId() !== $token['sub'] 
+                $submission->getUserId() !== $user->getUserId() 
             ) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
@@ -195,7 +193,7 @@ readonly class SubmissionsController extends BaseController
 
             LogService::info(
                 "/institutions/{$institution_id}/subjects/{$subject_id}/assignments/{$assignment_id}/submissions/{$submission_id}",
-                "{$token['email']} has updated a submission with ID: {$submission_id}"
+                "{$user->getUserId()} has updated a submission with ID: {$submission_id}"
             );
             return $response; 
         });
@@ -203,13 +201,13 @@ readonly class SubmissionsController extends BaseController
 
     public function deleteSubmissionById(Request $request, Response $response, string $institution_id, string $subject_id, string $assignment_id, string $submission_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $assignment_id, $submission_id) {
-            $token = $request->getAttribute('token');
+            $user = $request->getAttribute('user');
 
             $submission = $this->submissionsDao->getSubmissionBySubmissionIdAndAssignmentId($submission_id, $assignment_id);
 
             if(
                 empty($submission) || 
-                $submission->getUserId() !== $token['sub'] 
+                $submission->getUserId() !== $user->getUserId() 
             ) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }

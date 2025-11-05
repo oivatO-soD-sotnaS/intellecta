@@ -6,7 +6,7 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: "Eventos de Usuário", description: "Operações relacionadas a eventos de usuários")]
 class UserEventController {
     #[OA\Get(
-        path: "/users/events",
+        path: "/users/me/events",
         tags: ["Eventos de Usuário"],
         summary: "Listar eventos do usuário",
         description: "Retorna todos os eventos associados ao usuário autenticado",
@@ -41,7 +41,7 @@ class UserEventController {
     public function getUserEvents() {}
 
     #[OA\Post(
-        path: "/users/events",
+        path: "/users/me/events",
         tags: ["Eventos de Usuário"],
         summary: "Criar novo evento",
         description: "Cria um novo evento associado ao usuário autenticado",
@@ -83,7 +83,7 @@ class UserEventController {
     public function createUserEvent() {}
 
     #[OA\Put(
-        path: "/users/events/{event_id}",
+        path: "/users/me/events/{event_id}",
         tags: ["Eventos de Usuário"],
         summary: "Atualizar evento",
         description: "Atualiza um evento existente do usuário autenticado",
@@ -139,7 +139,7 @@ class UserEventController {
     public function updateUserEvent() {}
 
     #[OA\Delete(
-        path: "/users/events/{event_id}",
+        path: "/users/me/events/{event_id}",
         tags: ["Eventos de Usuário"],
         summary: "Excluir evento",
         description: "Remove um evento do usuário autenticado",
@@ -184,7 +184,7 @@ class UserEventController {
     public function deleteUserEvent() {}
 
     #[OA\Get(
-        path: "/users/events/{event_id}",
+        path: "/users/me/events/{event_id}",
         tags: ["Eventos de Usuário"],
         summary: "Obter detalhes de um evento",
         description: "Retorna os detalhes de um evento específico do usuário autenticado",
