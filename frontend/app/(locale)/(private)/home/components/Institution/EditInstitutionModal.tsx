@@ -1,46 +1,115 @@
-"use client";
+// app/(locale)/(private)/institutions/[id]/manage/institution/components/EditInstitutionModal.tsx
+"use client"
 
-import * as React from "react";
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
-import { motion } from "framer-motion";
+import * as React from "react"
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@heroui/modal"
+import { Input } from "@heroui/input"
+import { Button } from "@heroui/button"
+import { addToast } from "@heroui/toast"
+import { motion } from "framer-motion"
 
-import { useInstitution } from "@/hooks/institution/useInstitution";
-import { useUpdateInstitution } from "@/hooks/institution/useUpdateInstitution";
-import type { UpdateInstitutionInput } from "@/types/institution";
-import FileUpload, { FileUploadHandle } from "@/components/comp-547";
-import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset";
+import { useInstitution } from "@/hooks/institution/useInstitution"
+import { useUpdateInstitution } from "@/hooks/institution/useUpdateInstitution"
+import type { UpdateInstitutionInput } from "@/types/institution"
+import FileUpload, { FileUploadHandle } from "@/components/comp-547"
+import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset"
 
 type Props = {
-  institutionId: string;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onUpdated: () => void;
-};
+  institutionId: string
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  onUpdated?: () => void
+  // Novas props opcionais para compatibilidade
+  defaultValues?: { name: string; email: string; description: string }
+  initialValues?: { name?: string; email?: string; description?: string }
+  initialName?: string
+  initialEmail?: string
+  initialDescription?: string
+  onSubmit?: (values: {
+    name?: string
+    email?: string
+    description?: string
+  }) => void | Promise<void>
+  onSave?: (values: {
+    name?: string
+    email?: string
+    description?: string
+  }) => void | Promise<void>
+}
 
-export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUpdated }: Props) {
-  const { data, isLoading, isError, error } = useInstitution(institutionId, { enabled: isOpen });
-  const { mutateAsync: updateAsync, isPending: isUpdating } = useUpdateInstitution(institutionId);
+export function EditInstitutionModal({
+  institutionId,
+  isOpen,
+  onOpenChange,
+  onUpdated,
+  // Novas props
+  defaultValues,
+  initialValues,
+  initialName,
+  initialEmail,
+  initialDescription,
+  onSubmit,
+  onSave,
+}: Props) {
+  const { data, isLoading, isError, error } = useInstitution(institutionId, {
+    enabled: isOpen,
+  })
+  const { mutateAsync: updateAsync, isPending: isUpdating } =
+    useUpdateInstitution(institutionId)
 
-  const { mutateAsync: uploadAsset, isPending: isUploading } = useUploadProfileAsset();
+  const { mutateAsync: uploadAsset, isPending: isUploading } =
+    useUploadProfileAsset()
 
-  const [name, setName] = React.useState("");
-  const [description, setDescription] = React.useState("");
+  const [name, setName] = React.useState("")
+  const [description, setDescription] = React.useState("")
 
-  const profileRef = React.useRef<FileUploadHandle>(null);
-  const bannerRef = React.useRef<FileUploadHandle>(null);
+  const profileRef = React.useRef<FileUploadHandle>(null)
+  const bannerRef = React.useRef<FileUploadHandle>(null)
 
-  const initialProfileId = React.useMemo(() => data?.profilePicture?.file_id ?? undefined, [data]);
-  const initialBannerId = React.useMemo(() => data?.banner?.file_id ?? undefined, [data]);
+  const initialProfileId = React.useMemo(
+    () => data?.profilePicture?.file_id ?? undefined,
+    [data]
+  )
+  const initialBannerId = React.useMemo(
+    () => data?.banner?.file_id ?? undefined,
+    [data]
+  )
 
+  // Lógica de inicialização com ordem de preferência
   React.useEffect(() => {
-    if (isOpen && data) {
-      setName(data.name || "");
-      setDescription(data.description || "");
+    if (isOpen) {
+      // Ordem de preferência: defaultValues > initialValues > initialName/initialDescription > data
+      const initialNameValue =
+        defaultValues?.name ??
+        initialValues?.name ??
+        initialName ??
+        data?.name ??
+        ""
+
+      const initialDescriptionValue =
+        defaultValues?.description ??
+        initialValues?.description ??
+        initialDescription ??
+        data?.description ??
+        ""
+
+      setName(initialNameValue)
+      setDescription(initialDescriptionValue)
     }
-  }, [isOpen, data]);
+  }, [
+    isOpen,
+    data,
+    defaultValues,
+    initialValues,
+    initialName,
+    initialDescription,
+  ])
 
   React.useEffect(() => {
     if (isError) {
@@ -49,9 +118,9 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
         description: (error as Error)?.message ?? "Tente novamente mais tarde.",
         color: "danger",
         variant: "flat",
-      });
+      })
     }
-  }, [isError]); // eslint-disable-line
+  }, [isError]) // eslint-disable-line
 
   const initialProfile = React.useMemo(
     () =>
@@ -67,7 +136,7 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
           ]
         : undefined,
     [data]
-  );
+  )
 
   const initialBanner = React.useMemo(
     () =>
@@ -83,101 +152,131 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
           ]
         : undefined,
     [data]
-  );
+  )
 
   const handleSave = async () => {
-    const trimmedName = name.trim();
-    const trimmedDesc = description.trim();
+    const trimmedName = name.trim()
+    const trimmedDesc = description.trim()
+
+    // Determinar email para callback (não editável no form)
+    const email =
+      defaultValues?.email ??
+      initialValues?.email ??
+      initialEmail ??
+      data?.email ??
+      ""
 
     // alterações textuais
-    const changedName = data && trimmedName !== data.name ? trimmedName : undefined;
-    const changedDesc = data && trimmedDesc !== (data.description ?? "") ? trimmedDesc : undefined;
+    const changedName =
+      data && trimmedName !== data.name ? trimmedName : undefined
+    const changedDesc =
+      data && trimmedDesc !== (data.description ?? "") ? trimmedDesc : undefined
 
     // estado dos uploads
-    const profileRaw = profileRef.current?.getRawFiles?.() ?? [];
-    const bannerRaw = bannerRef.current?.getRawFiles?.() ?? [];
-    const profileFiles = profileRef.current?.getFiles?.() ?? [];
-    const bannerFiles = bannerRef.current?.getFiles?.() ?? [];
+    const profileRaw = profileRef.current?.getRawFiles?.() ?? []
+    const bannerRaw = bannerRef.current?.getRawFiles?.() ?? []
+    const profileFiles = profileRef.current?.getFiles?.() ?? []
+    const bannerFiles = bannerRef.current?.getFiles?.() ?? []
 
     // remoções (limpou o slot)
-    const initialProfileId = data?.profilePicture?.file_id;
-    const initialBannerId = data?.banner?.file_id;
-    const profileCleared = !!initialProfileId && profileFiles.length === 0;
-    const bannerCleared = !!initialBannerId && bannerFiles.length === 0;
+    const initialProfileId = data?.profilePicture?.file_id
+    const initialBannerId = data?.banner?.file_id
+    const profileCleared = !!initialProfileId && profileFiles.length === 0
+    const bannerCleared = !!initialBannerId && bannerFiles.length === 0
 
     // payload base
-    const payload: UpdateInstitutionInput = {};
-    if (changedName !== undefined) payload.name = changedName;
-    if (changedDesc !== undefined) payload.description = changedDesc;
-    if (profileCleared) payload.profilePictureId = null;
-    if (bannerCleared) payload.bannerId = null;
+    const payload: UpdateInstitutionInput = {}
+    if (changedName !== undefined) payload.name = changedName
+    if (changedDesc !== undefined) payload.description = changedDesc
+    if (profileCleared) payload.profilePictureId = null
+    if (bannerCleared) payload.bannerId = null
 
     try {
       // 1) upload dos NOVOS arquivos (se houver)
-      const uploads: Promise<void>[] = [];
+      const uploads: Promise<void>[] = []
       if (profileRaw[0]) {
         uploads.push(
           uploadAsset(profileRaw[0]).then((up) => {
-            payload.profilePictureId = up.file_id;
+            payload.profilePictureId = up.file_id
           })
-        );
+        )
       }
       if (bannerRaw[0]) {
         uploads.push(
           uploadAsset(bannerRaw[0]).then((up) => {
-            payload.bannerId = up.file_id;
+            payload.bannerId = up.file_id
           })
-        );
+        )
       }
-      if (uploads.length) await Promise.all(uploads);
+      if (uploads.length) await Promise.all(uploads)
 
       // 2) o backend exige SEMPRE "name"
       //    – se o usuário não mudou o nome, mande o atual
-      const effectiveName = (payload.name ?? data?.name ?? "").trim();
+      const effectiveName = (payload.name ?? data?.name ?? "").trim()
       if (!effectiveName) {
         addToast({
           title: "Nome obrigatório",
           description: "Informe o nome da instituição para salvar.",
           color: "warning",
           variant: "flat",
-        });
-        return;
+        })
+        return
       }
-      payload.name = effectiveName;
+      payload.name = effectiveName
 
       // (opcional) envie a descrição atual para manter simetria
-      if (payload.description === undefined && (data?.description ?? "") !== "") {
-        payload.description = data!.description!;
+      if (
+        payload.description === undefined &&
+        (data?.description ?? "") !== ""
+      ) {
+        payload.description = data!.description!
       }
 
       // nada mudou MESMO?
       const nothingChanged =
-        (changedName === undefined && changedDesc === undefined) &&
-        !profileCleared && !bannerCleared &&
-        profileRaw.length === 0 && bannerRaw.length === 0;
+        changedName === undefined &&
+        changedDesc === undefined &&
+        !profileCleared &&
+        !bannerCleared &&
+        profileRaw.length === 0 &&
+        bannerRaw.length === 0
 
       if (nothingChanged) {
         addToast({
           title: "Nada para atualizar",
-          description: "Altere algum campo ou modifique as imagens para salvar.",
+          description:
+            "Altere algum campo ou modifique as imagens para salvar.",
           color: "warning",
           variant: "flat",
-        });
-        return;
+        })
+        return
       }
 
       // 3) update JSON com os IDs resultantes
-      await updateAsync(payload);
+      await updateAsync(payload)
 
+      // Executar callback apropriado
+      const callbackValues = {
+        name: effectiveName,
+        email,
+        description: trimmedDesc,
+      }
 
-      onUpdated?.();
-      onOpenChange(false);
+      if (onSubmit) {
+        await onSubmit(callbackValues)
+      } else if (onSave) {
+        await onSave(callbackValues)
+      } else {
+        onUpdated?.()
+      }
+
+      onOpenChange(false)
     } catch (e) {
-      console.error(e);
+      console.error(e)
     }
-  };
+  }
 
-  const isSaving = isUpdating || isUploading;
+  const isSaving = isUpdating || isUploading
 
   return (
     <Modal
@@ -192,7 +291,9 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader className="text-base font-semibold">Editar instituição</ModalHeader>
+        <ModalHeader className="text-base font-semibold">
+          Editar instituição
+        </ModalHeader>
 
         <ModalBody>
           {isLoading ? (
@@ -205,7 +306,11 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
               </div>
             </div>
           ) : (
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18 }}
+            >
               <div className="grid gap-4">
                 <Input
                   label="Nome da Instituição"
@@ -217,7 +322,9 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
                 />
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Descrição</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    Descrição
+                  </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
@@ -228,7 +335,9 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <div className="mb-1 text-sm font-medium">Imagem de perfil</div>
+                    <div className="mb-1 text-sm font-medium">
+                      Imagem de perfil
+                    </div>
                     <FileUpload
                       ref={profileRef}
                       accept="image/*"
@@ -256,7 +365,11 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
         </ModalBody>
 
         <ModalFooter>
-          <Button variant="flat" onPress={() => onOpenChange(false)} isDisabled={isSaving}>
+          <Button
+            variant="flat"
+            onPress={() => onOpenChange(false)}
+            isDisabled={isSaving}
+          >
             Cancelar
           </Button>
           <Button color="primary" onPress={handleSave} isLoading={isSaving}>
@@ -265,5 +378,5 @@ export function EditInstitutionModal({ institutionId, isOpen, onOpenChange, onUp
         </ModalFooter>
       </ModalContent>
     </Modal>
-  );
+  )
 }
