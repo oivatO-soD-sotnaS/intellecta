@@ -21,9 +21,6 @@ interface HomeClientProps {
 }
 
 
-
-
-
 export default function HomeClient({ user }: HomeClientProps) {
 
   const activities: Activity[] = [

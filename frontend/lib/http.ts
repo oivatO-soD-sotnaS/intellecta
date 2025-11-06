@@ -1,67 +1,87 @@
 // lib/http.ts
-import { cookies } from "next/headers"
+export type Problem = {
+  type?: string
+  title?: string
+  status?: number
+  detail?: string
+  instance?: string
+  code?: string // app-specific
+  issues?: Array<{ path?: string; message: string }>
+}
 
-const BASE = process.env.API_BASE_URL
+export class AppError extends Error {
+  status?: number
+  code?: string
+  detail?: string
+  problem?: Problem
+  constructor(problem: Problem, fallbackMsg = "Ocorreu um erro") {
+    super(problem.title || fallbackMsg)
+    this.name = "AppError"
+    this.status = problem.status
+    this.code = problem.code
+    this.detail = problem.detail
+    this.problem = problem
+  }
+}
 
-if (!BASE) {
-  console.warn(
-    "API_BASE_URL/BACKEND_API_BASE_URL não definida. Defina no .env.local"
+export type HttpOptions = RequestInit & {
+  onError?: (err: AppError) => void // para toasts globais
+}
+
+function mapFriendlyMessage(p?: Problem): string {
+  switch (p?.code) {
+    case "AUTH_TOKEN_MISSING":
+    case "AUTH_INVALID":
+      return "Sua sessão expirou. Faça login novamente."
+    case "USER_NOT_FOUND":
+      return "Não encontramos seu perfil."
+    default:
+      // fallback por status
+      if (p?.status === 404) return "Recurso não encontrado."
+      if (p?.status === 500) return "Erro interno do servidor."
+      return p?.detail || p?.title || "Falha ao processar sua solicitação."
+  }
+}
+
+export async function apiFetch<T = unknown>(
+  input: RequestInfo | URL,
+  init?: HttpOptions
+): Promise<T> {
+  const res = await fetch(input, { cache: "no-store", ...init })
+
+  // OK → devolve JSON ou vazio
+  if (res.ok) {
+    const ct = res.headers.get("content-type") || ""
+    return ct.includes("application/json")
+      ? ((await res.json()) as T)
+      : (undefined as T)
+  }
+
+  // Erro → tenta ler Problem Details; se não vier, cria um
+  let problem: Problem | undefined
+  try {
+    if (res.headers.get("content-type")?.includes("application/problem+json")) {
+      problem = await res.json()
+    } else if (res.headers.get("content-type")?.includes("application/json")) {
+      // Back pode não usar RFC 7807 sempre; ainda assim tentamos aproveitar
+      problem = await res.json()
+    }
+  } catch {
+    // ignore
+  }
+  problem = {
+    status: res.status,
+    title: res.statusText || "Erro",
+    detail: problem?.detail || (await res.text().catch(() => "")) || undefined,
+    code: problem?.code,
+    ...problem,
+  }
+
+  const err = new AppError(problem)
+  // dispara feedback global amigável:
+  init?.onError?.(
+    new AppError({ ...problem, title: mapFriendlyMessage(problem) })
   )
-}
 
-function isFormData(x: any): x is FormData {
-  return typeof FormData !== "undefined" && x instanceof FormData
-}
-
-export async function backendFetch(input: string, init?: RequestInit) {
-  const jar = await cookies()
-
-
-  const token =
-    jar.get("token")?.value ?? jar.get("access_token")?.value ?? null
-
-  console.log("Token Log -> ", token)
-
-
-  const headers = new Headers(init?.headers)
-  // Aceita JSON por padrão
-  if (!headers.has("Accept")) headers.set("Accept", "application/json")
-
-  // Define Content-Type só se houver body e NÃO for FormData
-  const hasBody = typeof init?.body !== "undefined" && init?.body !== null
-  if (hasBody && !headers.has("Content-Type") && !isFormData(init?.body)) {
-    headers.set("Content-Type", "application/json")
-  }
-
-  // Injeta Authorization se ainda não veio e existir token
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`)
-  }
-
-  const res = await fetch(`${BASE}${input}`, {
-    ...init,
-    headers,
-    cache: "no-store",
-  })
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "")
-    let data: any
-    try {
-      data = text ? JSON.parse(text) : undefined
-    } catch {
-      data = { message: text || res.statusText }
-    }
-    const err = new Error(data?.message || `HTTP ${res.status}`) as Error & {
-      status?: number
-      data?: any
-    }
-    err.status = res.status
-    err.data = data
-    throw err
-  }
-
-  if (res.status === 204) return null
-
-  return res.json()
+  throw err
 }

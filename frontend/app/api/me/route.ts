@@ -1,36 +1,64 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { NextResponse, type NextRequest } from "next/server"
+// app/api/me/route.ts
+import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 
-const API = process.env.API_BASE_URL
+const API_BASE = process.env.API_BASE_URL 
+
+async function buildAuthHeader() {
+  const jar = await cookies()
+  // Ajuste o(s) nome(s) abaixo para o seu cookie real
+  const raw =
+    jar.get("token")?.value
+
+  if (!raw) return undefined
+  return raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`
+}
+
+async function proxyToMe(req: NextRequest, method: "GET" | "PUT" | "DELETE") {
+  if (!API_BASE) {
+    return NextResponse.json(
+      { error: "API_BASE_URL não configurada" },
+      { status: 500 }
+    )
+  }
+
+  const url = `${API_BASE}/users/me`
+  const headers: HeadersInit = {
+    "content-type": "application/json",
+  }
+
+  const auth = await buildAuthHeader()
+  if (auth) headers["authorization"] = auth
+
+  const init: RequestInit = {
+    method,
+    headers,
+    cache: "no-store",
+  }
+
+  if (method === "PUT") {
+    // repassa o corpo como está (JSON)
+    const body = await req.text()
+    init.body = body
+  }
+
+  const upstream = await fetch(url, init)
+
+  const contentType = upstream.headers.get("content-type") ?? "application/json"
+  const text = await upstream.text()
+
+  return new NextResponse(text, {
+    status: upstream.status,
+    headers: { "content-type": contentType },
+  })
+}
 
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get("token")?.value
-
-  if (!token) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
-  }
-
-  // decode sub from JWT or call /auth/me if exists
-  // here we proxy to /users/:id
-  try {
-    // parse JWT to extract user_id
-    const base64Url = token.split(".")[1]
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
-    const { sub } = JSON.parse(Buffer.from(base64, "base64").toString())
-
-    const res = await fetch(`${API}/users/${sub}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    const data = await res.json()
-
-    // console.log(data);
-    
-
-    return NextResponse.json(data, { status: res.status })
-  } catch (err) {
-    return NextResponse.json({ error: "Failed to load user" }, { status: 500 })
-  }
+  return proxyToMe(req, "GET")
+}
+export async function PUT(req: NextRequest) {
+  return proxyToMe(req, "PUT")
+}
+export async function DELETE(req: NextRequest) {
+  return proxyToMe(req, "DELETE")
 }

@@ -53,7 +53,7 @@ export default async function HomePage() {
   }
 
   try {
-    const res = await fetch(`${process.env.API_BASE_URL}/users/${userId}`, {
+    const res = await fetch(`${process.env.API_BASE_URL}/users/me`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     })
@@ -62,7 +62,6 @@ export default async function HomePage() {
     user = await res.json()
   } catch (e) {
     console.error("Erro ao buscar usuário:", e)
-
     return (
       <div className="container mx-auto p-6">
         <p className="text-center text-red-600">
@@ -71,6 +70,7 @@ export default async function HomePage() {
       </div>
     )
   }
+
 
   const firstName = user.full_name.split(" ")[0]
 
