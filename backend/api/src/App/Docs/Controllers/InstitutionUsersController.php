@@ -78,10 +78,10 @@ class InstitutionUsersController
             required: true,
             description: "Detalhes do convite",
             content: new OA\JsonContent(
-                required: ["convites"],
+                required: ["invites"],
                 properties: [
                     new OA\Property(
-                        property: "convites",
+                        property: "invites",
                         type: "array",
                         description: "Lista de e-mails para convidar",
                         items: new OA\Items(

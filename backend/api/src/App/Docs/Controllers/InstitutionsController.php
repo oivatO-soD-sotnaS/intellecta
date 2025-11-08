@@ -72,7 +72,7 @@ class InstitutionsController {
   public function getInstitutionsSummary() {}
 
   #[OA\Get(
-        path: "/institutions/summaries/{institution_id}",
+        path: "/institutions/{institution_id}/summary",
         tags: ["Instituições"],
         summary: "Obter resumo de uma instituição",
         description: "Retorna o resumo de uma instituição específica do usuário autenticado",
