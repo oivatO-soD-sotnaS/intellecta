@@ -94,53 +94,6 @@ export default function InviteManageClient({
        <div className="space-x-4">
          <Back hrefFallback={`/institutions/${institutionId}/manage`} />
        </div>
-       {/* KPIs */}
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-         <Card className="rounded-2xl">
-           <CardHeader className="pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
-               <Users2 className="h-4 w-4" />
-               Pendentes
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-semibold">{kpis.pend}</p>
-           </CardContent>
-         </Card>
-         <Card className="rounded-2xl">
-           <CardHeader className="pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
-               <Clock className="h-4 w-4" />
-               Expiram ≤ 3 dias
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-semibold">{kpis.expSoon}</p>
-           </CardContent>
-         </Card>
-         <Card className="rounded-2xl">
-           <CardHeader className="pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
-               <CheckCircle2 className="h-4 w-4" />
-               Aceitos (7d)
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-semibold">{kpis.accepted7d}</p>
-           </CardContent>
-         </Card>
-         <Card className="rounded-2xl">
-           <CardHeader className="pb-2">
-             <CardTitle className="text-sm font-medium flex items-center gap-2">
-               <ListChecks className="h-4 w-4" />
-               Total
-             </CardTitle>
-           </CardHeader>
-           <CardContent>
-             <p className="text-2xl font-semibold">{kpis.total}</p>
-           </CardContent>
-         </Card>
-       </div>
 
        {/* Grid principal: Form à esquerda | Lista à direita */}
        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">

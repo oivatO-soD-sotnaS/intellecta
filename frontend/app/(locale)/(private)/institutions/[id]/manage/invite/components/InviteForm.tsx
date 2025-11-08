@@ -55,9 +55,7 @@ export default function InviteForm({
       setInput("")
     } catch (err: any) {
       let msg = "Falha ao enviar convites."
-      // apiClient lança { status, data } quando não-2xx
       if (err?.data) {
-        // tente mensagens comuns
         msg =
           err.data?.message ||
           err.data?.error ||
@@ -65,9 +63,7 @@ export default function InviteForm({
       } else if (err?.message) {
         msg = err.message
       }
-      // Se for 401, ajuda a identificar sessão
       if (err?.status === 401) msg = "Sessão expirada. Faça login novamente."
-      // Exibe status junto:
       toast.error(`[${err?.status ?? 500}] ${msg}`)
     }
   }

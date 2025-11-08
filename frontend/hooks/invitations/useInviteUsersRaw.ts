@@ -19,7 +19,6 @@ export function useInviteUsersRaw(institutionId: string) {
     mutationKey: ["invite-users", institutionId],
     mutationFn: async (emails: string[]) => {
       const params = new URLSearchParams()
-      // Formato PHP: invites[]=a&invites[]=b&...
       emails.forEach((e) => params.append("invites[]", e))
 
       const res = await fetch(
@@ -40,7 +39,6 @@ export function useInviteUsersRaw(institutionId: string) {
       try {
         data = text ? JSON.parse(text) : null
       } catch {
-        // mantém text se não for JSON
       }
 
       if (!res.ok) {

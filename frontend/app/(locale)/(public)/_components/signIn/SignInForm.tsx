@@ -12,6 +12,17 @@ import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
 import { PrimaryButton } from "../PrimaryButton"
 import { Card, CardContent } from "@/components/ui/card"
 
+import { assertOkOrThrow, friendlyMessage, HttpError } from "@/lib/http-errors"
+import { useErrorFeedback } from "@/hooks/useErrorFeedback"
+import { addToast } from "@heroui/toast"
+
+
+type SignInValues = {
+  email: string
+  password: string
+}
+
+
 export const SignInForm: React.FC = () => {
   const router = useRouter()
 
@@ -28,6 +39,9 @@ export const SignInForm: React.FC = () => {
 
   const [tried, setTried] = useState(false)
 
+  const { notifyError, notifySuccess } = useErrorFeedback<SignInValues>()
+
+
   const validatePassword = (pw: string) => {
     const err: string[] = []
 
@@ -40,7 +54,6 @@ export const SignInForm: React.FC = () => {
     return err
   }
 
-  // revalida enquanto digita após primeira tentativa
   useEffect(() => {
     if (!tried) return
     const pwErr = validatePassword(password)
@@ -59,48 +72,50 @@ export const SignInForm: React.FC = () => {
     e.preventDefault()
     setTried(true)
 
-    // validações locais
     const locErr: typeof errors = {}
 
     if (!email) locErr.email = "Digite seu email."
     const pwErr = validatePassword(password)
-
     if (pwErr.length) locErr.password = pwErr
     if (!isHuman) locErr.terms = "Marque que você é humano."
 
     if (Object.keys(locErr).length) {
       setErrors(locErr)
-
       return
     }
 
-    // chama API
     setErrors({})
     setIsLoading(true)
+
     try {
       const res = await fetch("/api/sign-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       })
-      const payload = await res.json()
 
-      if (!res.ok) {
-        const msg =
-          payload.error?.message ||
-          payload.message ||
-          "Erro desconhecido no login."
+      await assertOkOrThrow(res)
 
-        setErrors({ api: msg })
+      router.push("/home")
+    } catch (err) {
+      const { title, description } = friendlyMessage(err, "signin")
+
+      addToast({ title, description, color: "danger", variant: "flat" })
+
+      if (err instanceof HttpError && err.status === 422) {
+        setErrors({ password: ["Senha incorreta."] })
+      } else if (err instanceof HttpError && err.status >= 500) {
+        setErrors({ api: "Erro no servidor. Tente novamente em instantes." })
+      } else if (err instanceof TypeError) {
+        setErrors({ api: "Falha na conexão. Tente novamente." })
       } else {
-        router.push("/home") // pagina após login
+        setErrors({ api: title || "Não foi possível efetuar login." })
       }
-    } catch {
-      setErrors({ api: "Falha na conexão. Tente novamente." })
     } finally {
       setIsLoading(false)
     }
   }
+
 
   const hasPwErr = tried && !!errors.password?.length
 

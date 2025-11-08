@@ -2,7 +2,7 @@
 "use client"
 import { useEffect } from "react"
 import { toast } from "sonner" // ou seu sistema de toasts
-import type { AppError } from "@/lib/http"
+import type { AppError } from "@/lib/http-errors"
 
 export function presentErrorToast(err: AppError) {
   const title = err.message || "Erro"
