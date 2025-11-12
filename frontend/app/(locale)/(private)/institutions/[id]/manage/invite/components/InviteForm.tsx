@@ -3,9 +3,12 @@
 import { useMemo, useState } from "react"
 import { z } from "zod"
 import { Send, Loader2, MailPlus } from "lucide-react"
-import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { useInviteUsersRaw } from "@/hooks/invitations/useInviteUsersRaw"
+import {
+  useInviteUsersRaw,
+  type Role,
+} from "@/hooks/invitations/useInviteUsersRaw"
+import { toast } from "@heroui/theme"
 
 const emailSchema = z.string().email()
 
@@ -27,6 +30,7 @@ export default function InviteForm({
   institutionId: string
 }) {
   const [input, setInput] = useState("")
+  const [role, setRole] = useState<Role>("student")
   const emails = useMemo(() => parseEmails(input), [input])
 
   const { mutateAsync: invite, isPending } = useInviteUsersRaw(institutionId)
@@ -35,23 +39,23 @@ export default function InviteForm({
     e.preventDefault()
 
     if (emails.length === 0) {
-      toast.error("Adicione ao menos um e-mail.")
+      toast({ title: "Adicione ao menos um e-mail." })
       return
     }
 
     const invalids = emails.filter((em) => !emailSchema.safeParse(em).success)
     if (invalids.length) {
-      toast.error(
-        `E-mails inválidos: ${invalids.slice(0, 5).join(", ")}${
-          invalids.length > 5 ? "..." : ""
-        }`
-      )
+      toast({
+        title: "E-mails inválidos",
+        description: `${invalids.slice(0, 5).join(", ")}${invalids.length > 5 ? "..." : ""}`,
+      })
       return
     }
 
     try {
-      const created = await invite(emails)
-      toast.success(`Convites enviados: ${created.length}`)
+      const invites = emails.map((email) => ({ email, role }))
+      const created = await invite(invites)
+      toast({ title: `Convites enviados: ${created.length}` })
       setInput("")
     } catch (err: any) {
       let msg = "Falha ao enviar convites."
@@ -64,7 +68,7 @@ export default function InviteForm({
         msg = err.message
       }
       if (err?.status === 401) msg = "Sessão expirada. Faça login novamente."
-      toast.error(`[${err?.status ?? 500}] ${msg}`)
+      toast({ title: `[${err?.status ?? 500}] ${msg}` })
     }
   }
 
@@ -108,10 +112,27 @@ export default function InviteForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs text-muted-foreground">
           {emails.length} e-mail(s) pronto(s) para enviar
         </span>
+
+        {/* Seletor de papel */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-muted-foreground">Papel:</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+            className={cn(
+              "rounded-md border border-input bg-transparent px-2 py-1 text-sm",
+              "outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            )}
+          >
+            <option value="student">student</option>
+            <option value="teacher">teacher</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
 
         <button
           type="submit"

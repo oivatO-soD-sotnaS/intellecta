@@ -1,5 +1,7 @@
 // types/institution.ts
 
+import { AppUserDto, Role } from "./user";
+
 /** Arquivo vindo do backend */
 export type ApiFileMeta = {
   file_id: string;
@@ -72,3 +74,13 @@ export type UpdateInstitutionInput = Partial<{
   profilePictureId: string | null;
   bannerId: string | null;
 }>;
+
+
+export type InstitutionUserDto = {
+  institutionUserId: string
+  userId: string
+  institutionId: string
+  role: Role
+  joinedAt?: string | null
+  user: AppUserDto
+}

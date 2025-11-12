@@ -1,185 +1,108 @@
-// app/(locale)/(private)/institutions/[id]/manage/invite/InviteManageClient.tsx
+// app/(institutions)/[id]/invite/InviteManageClient.tsx
 "use client"
 
-import { useMemo, useState } from "react"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import * as React from "react"
+import { useMemo, useState, useCallback } from "react"
+import { toast } from "@heroui/theme"
+import { useInstitutionUsers } from "@/hooks/institution/useInstitutionUsers"
+import { InviteResponse } from "@/hooks/invitations/useInviteUsersRaw"
 
-import { Separator } from "@/components/ui/separator"
-import { Users2, Clock, CheckCircle2, ListChecks, Search } from "lucide-react"
-import { Invitation } from "./types"
-import { MOCK_INVITATIONS } from "./mocks"
+import type { InstitutionUserDto } from "@/types/institution"
+import { mapInstitutionUserList } from "@/lib/mappers"
 import InviteForm from "./InviteForm"
-import InvitesTable from "./InvitesTable"
-import InviteDetailsSheet from "./InviteDetailsSheet"
-import Back from "../../_components/Back"
+import { MembersPanel } from "./MembersPanel"
 
+type SortKey = "name-asc" | "name-desc" | "role" | "joinedAt-desc"
+type RoleFilter = "all" | "admin" | "teacher" | "student"
 
-export default function InviteManageClient({
-  institutionId,
-}: {
-  institutionId: string
-}) {
- 
-   // MOCK de dados usando o schema fornecido
-   const [invites, setInvites] = useState<Invitation[]>(MOCK_INVITATIONS)
-   const [query, setQuery] = useState("")
-   const [active, setActive] = useState<
-     "pending" | "accepted" | "expired" | "all"
-   >("pending")
-   const [details, setDetails] = useState<Invitation | null>(null)
- 
-   // Filtros simples
-   const filtered = useMemo(() => {
-     const now = new Date()
-     const base = invites.filter((i) =>
-       [i.email, i.invited_by_user?.full_name, i.role]
-         .join(" ")
-         .toLowerCase()
-         .includes(query.toLowerCase())
-     )
-     switch (active) {
-       case "pending":
-         return base.filter(
-           (i) => !i.accepted_at && new Date(i.expires_at) > now
-         )
-       case "accepted":
-         return base.filter((i) => !!i.accepted_at)
-       case "expired":
-         return base.filter(
-           (i) => new Date(i.expires_at) <= now && !i.accepted_at
-         )
-       case "all":
-       default:
-         return base
-     }
-   }, [invites, query, active])
- 
-   // KPIs
-   const kpis = useMemo(() => {
-     const now = new Date()
-     const pend = invites.filter(
-       (i) => !i.accepted_at && new Date(i.expires_at) > now
-     ).length
-     const expSoon = invites.filter((i) => {
-       if (i.accepted_at) return false
-       const diff = +new Date(i.expires_at) - +now
-       const days = diff / (1000 * 60 * 60 * 24)
-       return days >= 0 && days <= 3
-     }).length
-     const accepted7d = invites.filter((i) => {
-       if (!i.accepted_at) return false
-       const diff = +now - +new Date(i.accepted_at)
-       const days = diff / (1000 * 60 * 60 * 24)
-       return days <= 7
-     }).length
-     return { pend, expSoon, accepted7d, total: invites.length }
-   }, [invites])
- 
-   // Handlers mockados (troque por mutations depois)
-   const handleRevoke = (id: string) =>
-     setInvites((prev) => prev.filter((i) => i.invitation_id !== id))
-   const handleResend = (_id: string) => {
-     // noop: simular toast depois
-   }
-   const handleCopy = (_id: string) => {
-     // noop: navigator.clipboard.writeText(link)
-   }
-   const handleOpen = (row: Invitation) => setDetails(row)
-   const handleClose = () => setDetails(null)
- 
-   return (
-     <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6 space-y-6">
-       <div className="space-x-4">
-         <Back hrefFallback={`/institutions/${institutionId}/manage`} />
-       </div>
+export default function InviteManageClient({ institutionId }: { institutionId: string }) {
+  const { data: rawUsers, isLoading, isError, refetch } = useInstitutionUsers(institutionId)
 
-       {/* Grid principal: Form à esquerda | Lista à direita */}
-       <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-         <InviteForm institutionId={institutionId} />
+  // 1) Normaliza SEMPRE que a hook retornar algo
+  const usersDto = useMemo<InstitutionUserDto[]>(
+    () => mapInstitutionUserList(rawUsers ?? []),
+    [rawUsers]
+  )
 
-         <Card className="rounded-2xl">
-           <CardHeader className="pb-3">
-             <div className="flex flex-wrap items-center justify-between gap-3">
-               <div>
-                 <CardTitle className="text-base">Convites</CardTitle>
-                 <p className="text-sm text-muted-foreground">
-                   Gerencie convites enviados para sua instituição
-                 </p>
-               </div>
-               <div className="relative">
-                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                 <Input
-                   value={query}
-                   onChange={(e) => setQuery(e.target.value)}
-                   placeholder="Buscar por e-mail, papel ou quem convidou…"
-                   className="pl-8 w-[240px]"
-                 />
-               </div>
-             </div>
-             <Separator className="mt-3" />
-           </CardHeader>
+  const [q, setQ] = useState("")
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all")
+  const [sortKey, setSortKey] = useState<SortKey>("name-asc")
+  const [recent, setRecent] = useState<InviteResponse[]>([])
 
-           <CardContent>
-             <Tabs
-               value={active}
-               onValueChange={(v) => setActive(v as any)}
-               className="w-full"
-             >
-               <TabsList className="mb-3">
-                 <TabsTrigger value="pending">Pendentes</TabsTrigger>
-                 <TabsTrigger value="accepted">Aceitos</TabsTrigger>
-                 <TabsTrigger value="expired">Expirados</TabsTrigger>
-                 <TabsTrigger value="all">Todos</TabsTrigger>
-               </TabsList>
+  const onInvited = useCallback((items: InviteResponse[]) => {
+    setRecent((prev) => [...items, ...prev].slice(0, 12))
+    toast({ title: `Convites enviados: ${items.length}` })
+    refetch()
+  }, [refetch])
 
-               <TabsContent value="pending" className="mt-0">
-                 <InvitesTable
-                   data={filtered}
-                   onOpen={handleOpen}
-                   onRevoke={handleRevoke}
-                   onResend={handleResend}
-                   onCopy={handleCopy}
-                 />
-               </TabsContent>
-               <TabsContent value="accepted" className="mt-0">
-                 <InvitesTable
-                   data={filtered}
-                   onOpen={handleOpen}
-                   onRevoke={handleRevoke}
-                   onResend={handleResend}
-                   onCopy={handleCopy}
-                 />
-               </TabsContent>
-               <TabsContent value="expired" className="mt-0">
-                 <InvitesTable
-                   data={filtered}
-                   onOpen={handleOpen}
-                   onRevoke={handleRevoke}
-                   onResend={handleResend}
-                   onCopy={handleCopy}
-                 />
-               </TabsContent>
-               <TabsContent value="all" className="mt-0">
-                 <InvitesTable
-                   data={filtered}
-                   onOpen={handleOpen}
-                   onRevoke={handleRevoke}
-                   onResend={handleResend}
-                   onCopy={handleCopy}
-                 />
-               </TabsContent>
-             </Tabs>
-           </CardContent>
-         </Card>
-       </div>
+  // 2) Contadores com DTOs
+  const counts = useMemo(() => {
+    const base = { admin: 0, teacher: 0, student: 0, total: 0 }
+    for (const u of usersDto) {
+      if (u.role === "admin") base.admin++
+      else if (u.role === "teacher") base.teacher++
+      else base.student++
+      base.total++
+    }
+    return base
+  }, [usersDto])
 
-       <InviteDetailsSheet
-         open={!!details}
-         invitation={details}
-         onOpenChange={(o) => !o && handleClose()}
-       />
-     </div>
-   )
+  // 3) Filtro + ordenação usando DTOs
+  const filtered = useMemo(() => {
+    const list = usersDto.filter((u) => {
+      const matchText =
+        q.trim().length === 0 ||
+        u.user.fullName?.toLowerCase().includes(q.toLowerCase()) ||
+        u.user.email?.toLowerCase().includes(q.toLowerCase())
+      const matchRole = roleFilter === "all" || u.role === roleFilter
+      return matchText && matchRole
+    })
+
+    switch (sortKey) {
+      case "name-asc":
+        return list.sort((a, b) => (a.user.fullName || "").localeCompare(b.user.fullName || ""))
+      case "name-desc":
+        return list.sort((a, b) => (b.user.fullName || "").localeCompare(a.user.fullName || ""))
+      case "role":
+        return list.sort((a, b) => a.role.localeCompare(b.role))
+      case "joinedAt-desc":
+        return list.sort((a, b) => (b.joinedAt || "").localeCompare(a.joinedAt || ""))
+      default:
+        return list
+    }
+  }, [usersDto, q, roleFilter, sortKey])
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">Membros da instituição</h1>
+        <p className="text-sm text-muted-foreground">Convide pessoas e gerencie quem já faz parte.</p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
+          <InviteForm institutionId={institutionId} />
+          {/* se quiser usar onInvited:
+             <InviteForm institutionId={institutionId} onInvited={onInvited} />
+             e ajuste o InviteForm para aceitar essa prop opcional */}
+          {/* RecentInvitesPanel(recent) pode continuar aqui se estiver usando */}
+        </div>
+
+        <MembersPanel
+          users={filtered}           
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
+          q={q}
+          setQ={setQ}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
+          sortKey={sortKey}
+          setSortKey={setSortKey}
+          counts={counts}
+          institutionId={institutionId}
+        />
+      </div>
+    </div>
+  )
 }

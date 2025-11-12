@@ -1,22 +1,56 @@
 // app/api/institutions/[id]/users/invite/route.ts
-import { Params } from "next/dist/server/request/params"
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 
-const API = process.env.API_BASE_URL!
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const API = process.env.API_BASE_URL
+  if (!API) {
+    return NextResponse.json(
+      { error: "API_BASE_URL não configurada" },
+      { status: 500 }
+    )
+  }
 
-if (!API) throw new Error("API_BASE_URL não definida")
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json(
+      { error: "JSON inválido no corpo da requisição" },
+      { status: 400 }
+    )
+  }
 
-export async function POST(req: NextRequest, { params }: { params: Params }) {
-  const invites = await req.json() // { invites: string[] }
-  const res = await fetch(`${API}/institutions/${params.id}/users/invite`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: req.headers.get("Authorization")!,
-    },
-    body: JSON.stringify(invites),
-  })
-  const body = await res.json()
-  return NextResponse.json(body, { status: res.status })
+  // 2) Obtém o token (prioriza header, senão cookie)
+  const hdrAuth = req.headers.get("authorization")
+  const cookieStore = cookies()
+  const tokenFromCookie = (await cookieStore).get("token")?.value || null
+
+  const auth =
+    hdrAuth ?? (tokenFromCookie ? `Bearer ${tokenFromCookie}` : undefined)
+
+  const upstream = await fetch(
+    `${API}/institutions/${params.id}/users/invite`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(auth ? { Authorization: auth } : {}),
+      },
+      body: JSON.stringify(body),
+    }
+  )
+
+  const text = await upstream.text()
+  let data: any
+  try {
+    data = JSON.parse(text)
+  } catch {
+    data = { raw: text }
+  }
+
+  return NextResponse.json(data, { status: upstream.status })
 }
