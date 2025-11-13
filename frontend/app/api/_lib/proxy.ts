@@ -76,7 +76,7 @@ async function proxy(req: NextRequest, path: string, init?: RequestInit) {
 }
 
 /** Helpers com semântica semelhante ao fetch */
-export function proxyGet(req: NextRequest, path: string, p0: { map404ToJSON: { items: never[]; total: number } }) {
+export function proxyGet(req: NextRequest, path: string, p0?: { map404ToJSON: { items: never[]; total: number } }) {
   return proxy(req, path, { method: "GET" })
 }
 

@@ -58,18 +58,20 @@ export default function UserMenu({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-56">
+      <PopoverContent className="w-56 p-3">
         <div className="mb-3 flex items-center gap-2">
           <Avatar
             alt={user?.name ?? "Usuário"}
             size="md"
             src={src || "#"}
-            className="shrink-0" 
+            className="shrink-0"
           />
-          <div className="min-w-0 flex-1">
-
-            <p className="truncate font-medium">{user?.name}</p>
-            <p className="truncate text-xs text-muted-foreground block">
+          <div
+            className="min-w-0 flex-1"
+            style={{ maxWidth: "calc(14rem - 5rem)" }}
+          >
+            <p className="truncate font-medium text-sm">{user?.name}</p>
+            <p className="truncate text-xs text-muted-foreground">
               {user?.email}
             </p>
           </div>
@@ -91,9 +93,9 @@ export default function UserMenu({
             </Link>
           </li>
           <li>
-            <Link href="/help">
+            <Link href="/invites">
               <Button as="span" className="w-full justify-start" variant="flat">
-                Ajuda
+                Convites
               </Button>
             </Link>
           </li>
