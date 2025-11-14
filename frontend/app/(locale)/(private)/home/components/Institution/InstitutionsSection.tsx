@@ -37,13 +37,22 @@ function toUICard(i: Institution, isOwner: boolean): CardInstitution {
     id: i.id,
     name: i.name,
     description: i.description,
+
+    // banner que vem da lista de instituições
     bannerUrl: i.banner?.url ?? undefined,
-    profilePictureUrl: i.profilePicture?.url ?? undefined,
+
+    // avatar: o Card espera "imageUrl" como fallback
+    imageUrl: i.profilePicture?.url ?? undefined,
+
+    // ainda deixo o role calculado aqui
     role: isOwner ? "admin" : undefined,
+
+    // se o Card ainda tiver esses campos no tipo, eles continuam existindo
     members: undefined,
     disciplines: undefined,
   };
 }
+
 
 function SkeletonGrid() {
   return (

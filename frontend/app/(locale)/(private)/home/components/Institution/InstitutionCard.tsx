@@ -32,32 +32,55 @@ import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 type Props = { institution: InstitutionCardItem; className?: string };
 
 export function InstitutionCard({ institution, className }: Props) {
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [editOpen, setEditOpen] = React.useState(false);
-  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false)
+  const [editOpen, setEditOpen] = React.useState(false)
+  const [deleteOpen, setDeleteOpen] = React.useState(false)
 
-  // Só busca summary quando faltar alguma imagem no item base (evita overfetch/404)
-  const needSummary = !institution.imageUrl || !institution.bannerUrl;
-  const { data: summary } = useInstitutionSummary(institution.id, { enabled: needSummary });
+  // Agora buscamos sempre o summary da instituição
+  const { data: summary, isLoading: isSummaryLoading } = useInstitutionSummary(
+    institution.id
+  )
 
   // URLs finais (summary tem prioridade por estar mais fresco)
   const bannerUrl = normalizeFileUrl(
     summary?.banner?.url ?? institution.bannerUrl ?? undefined
-  );
+  )
+
   const avatarUrl = normalizeFileUrl(
     summary?.profilePicture?.url ?? institution.imageUrl ?? undefined
-  );
+  )
 
-  const role = summary?.role || (institution.isOwner ? "admin" : undefined);
-  const status = summary?.status || "active";
-  const members = formatNumber(summary?.membersCount);
-  const subjects = formatNumber(summary?.subjectsCount);
-  const created = formatDatePtBR(summary?.createdAt);
-  const lastAct = timeAgo(summary?.lastActivityAt);
+  // Localização (summary > institution > vazio)
+  const city = summary?.city ?? institution.city ?? ""
+  const state = summary?.state ?? institution.state ?? ""
+
+  // Papel e status
+  const role = summary?.role || (institution.isOwner ? "admin" : undefined)
+  const status = summary?.status || institution.status || "active"
+
+  // Contagens (summary > institution > 0)
+  const members = formatNumber(
+    summary?.membersCount ?? institution.membersCount ?? 0
+  )
+  const subjects = formatNumber(
+    summary?.subjectsCount ?? institution.subjectsCount ?? 0
+  )
+
+  // Datas (summary > institution > undefined)
+  const createdRaw = summary?.createdAt ?? institution.createdAt
+  const created = createdRaw ? formatDatePtBR(createdRaw) : "—"
+
+  const lastActivityRaw = summary?.lastActivityAt ?? institution.lastActivityAt
+  const lastAct = lastActivityRaw ? timeAgo(lastActivityRaw) : "—"
 
   return (
     <>
-      <Card className={cn("overflow-hidden border-border bg-card shadow-md", className)}>
+      <Card
+        className={cn(
+          "overflow-hidden border-border bg-card shadow-md",
+          className
+        )}
+      >
         {/* Banner */}
         <div className="relative h-44 w-full sm:h-52 md:h-56">
           {bannerUrl ? (
@@ -84,7 +107,11 @@ export function InstitutionCard({ institution, className }: Props) {
 
           {/* menu */}
           <div className="absolute right-3 top-3">
-            <Popover isOpen={menuOpen} onOpenChange={setMenuOpen} placement="left-start">
+            <Popover
+              isOpen={menuOpen}
+              onOpenChange={setMenuOpen}
+              placement="left-start"
+            >
               <PopoverTrigger>
                 <Button
                   isIconOnly
@@ -102,14 +129,18 @@ export function InstitutionCard({ institution, className }: Props) {
                     color="warning"
                     className="justify-start gap-2"
                     onPress={() => {
-                      setMenuOpen(false);
-                      setEditOpen(true);
+                      setMenuOpen(false)
+                      setEditOpen(true)
                     }}
                   >
                     <Pencil className="h-4 w-4" /> Editar instituição
                   </Button>
 
-                  <Button variant="light" className="justify-start gap-2" isDisabled>
+                  <Button
+                    variant="light"
+                    className="justify-start gap-2"
+                    isDisabled
+                  >
                     <span className="inline-flex h-4 w-4 items-center justify-center rounded border border-border text-[10px]">
                       ✓
                     </span>
@@ -131,8 +162,8 @@ export function InstitutionCard({ institution, className }: Props) {
                     color="danger"
                     className="justify-start gap-2"
                     onPress={() => {
-                      setMenuOpen(false);
-                      setDeleteOpen(true);
+                      setMenuOpen(false)
+                      setDeleteOpen(true)
                     }}
                   >
                     <Trash2 className="h-4 w-4" /> Deletar instituição
@@ -147,7 +178,7 @@ export function InstitutionCard({ institution, className }: Props) {
           {/* Cabeçalho: avatar + textos */}
           <div className="relative -mt-10 mb-3 flex items-center gap-4">
             <Avatar
-              key={avatarUrl || "no-avatar"} // força re-render quando a URL muda
+              key={avatarUrl || "no-avatar"}
               src={avatarUrl}
               name={institution.name}
               alt={institution.name}
@@ -174,22 +205,40 @@ export function InstitutionCard({ institution, className }: Props) {
             </div>
           </div>
 
-          {/* infos */}
+          {/* Summarry mock */}
           <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <Info
               icon={<MapPin className="h-3.5 w-3.5" />}
               text={
-                summary?.city && summary?.state
-                  ? `${summary.city}, ${summary.state}`
-                  : "—"
+                isSummaryLoading
+                  ? "Carregando..."
+                  : city && state
+                    ? `${city}, ${state}`
+                    : "—"
               }
             />
-            <Info icon={<Users className="h-3.5 w-3.5" />} text={`${members} membros`} />
-            <Info icon={<BookOpen className="h-3.5 w-3.5" />} text={`${subjects} disciplinas`} />
+
+            <Info
+              icon={<Users className="h-3.5 w-3.5" />}
+              text={isSummaryLoading ? "Carregando..." : `${members} membros`}
+            />
+
+            <Info
+              icon={<BookOpen className="h-3.5 w-3.5" />}
+              text={
+                isSummaryLoading ? "Carregando..." : `${subjects} disciplinas`
+              }
+            />
+
             <Info
               icon={<CalendarDays className="h-3.5 w-3.5" />}
-              text={`Criado em ${created}`}
+              text={
+                created !== "—"
+                  ? `Criado em ${created}`
+                  : "Data de criação indisponível"
+              }
             />
+
             <Info
               icon={<Clock className="h-3.5 w-3.5" />}
               text={lastAct !== "—" ? lastAct : "Sem atividade recente"}
@@ -224,7 +273,7 @@ export function InstitutionCard({ institution, className }: Props) {
         onDeleted={() => {}}
       />
     </>
-  );
+  )
 }
 
 function Info({

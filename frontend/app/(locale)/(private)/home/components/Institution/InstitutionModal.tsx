@@ -111,9 +111,21 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
 
     const payload = await uploadWithFallback(kind, file)
 
-    // Mapeia automaticamente id/url retornados pelo backend
-    return payload?.id ?? payload?.fileId ?? payload?.url ?? null
+    const fileId =
+      // caso o backend use o mesmo formato do ApiFileMeta
+      payload?.file_id ??
+      // variações comuns
+      payload?.fileId ??
+      payload?.id ??
+      // alguns endpoints retornam o arquivo aninhado em "file"
+      payload?.file?.file_id ??
+      payload?.file?.fileId ??
+      payload?.file?.id
+
+    // 2) se NÃO achar nenhum id, como último recurso usa a url
+    return fileId ?? payload?.url ?? null
   }
+
 
   // -----------------------
   // Submit
