@@ -1,25 +1,41 @@
-// app/api/institutions/[institution_id]/subjects/[subject_id]/forum/messages/route.ts
+// app/api/institutions/[institution_id]/subjects/[subject_id]/route.ts
 import { NextRequest } from "next/server"
-import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
+import { proxyGet, proxyPut, proxyDelete } from "@/app/api/_lib/proxy"
 
-type Ctx = {
-  params: Promise<{ institution_id: string; subject_id: string }>
+type Params = { institution_id: string; subject_id: string }
+
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const { institution_id, subject_id } = await context.params
+
+  return proxyGet(req, `/institutions/${institution_id}/subjects/${subject_id}`)
 }
 
-export async function GET(req: NextRequest, ctx: Ctx) {
-  const { institution_id, subject_id } = await ctx.params
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const { institution_id, subject_id } = await context.params
+  const body = await req.json()
 
-  return proxyGet(
+  // Aqui o backend espera JSON (name, description, teacher_id, profile_picture_id, banner_id)
+  return proxyPut(
     req,
-    `/institutions/${institution_id}/subjects/${subject_id}/forum/messages`
+    `/institutions/${institution_id}/subjects/${subject_id}`,
+    JSON.stringify(body)
   )
 }
 
-export async function POST(req: NextRequest, ctx: Ctx) {
-  const { institution_id, subject_id } = await ctx.params
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<Params> }
+) {
+  const { institution_id, subject_id } = await context.params
 
-  return proxyPost(
+  return proxyDelete(
     req,
-    `/institutions/${institution_id}/subjects/${subject_id}/forum/messages`
+    `/institutions/${institution_id}/subjects/${subject_id}`
   )
 }

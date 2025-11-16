@@ -37,8 +37,7 @@ export default function InstitutionClient({
           isLoading={isLoading}
           isError={isError}
           onOpenClass={(classId) => {
-            // navegação/ação ao abrir turma
-            // router.push(`/institutions/${institutionId}/classes/${classId}`)
+            router.push(`/institutions/${institutionId}/classes/${classId}`)
           }}
         />
       </section>

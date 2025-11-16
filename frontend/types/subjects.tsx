@@ -42,6 +42,10 @@ export type Subject = {
   name: string
   description?: string
   institution_id: string
+
+  profile_picture_id?: string
+  banner_id?: string
+
   teacher_id?: string
   teacher?: TeacherLite
   profile_picture?: string | FileRef
@@ -53,6 +57,12 @@ export type ClassSubject = {
   class_id: string
   subject: Subject
 }
+
+export type CreateSubjectResponse = {
+  message: string
+  subject: Subject
+}
+
 
 
 export type InstitutionClassesResponse = ClassDTO[]
