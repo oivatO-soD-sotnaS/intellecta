@@ -1,89 +1,76 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Tabs, Tab } from "@heroui/tabs";
-import { Input } from "@heroui/input";
-import { Skeleton } from "@heroui/skeleton";
-import { addToast } from "@heroui/toast";
-import { Search } from "lucide-react";
+import * as React from "react"
+import { Tabs, Tab } from "@heroui/tabs"
+import { Input } from "@heroui/input"
+import { addToast } from "@heroui/toast"
+import { Search } from "lucide-react"
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Institution as CardInstitution, InstitutionCard } from "./InstitutionCard";
-import { CreateInstitutionButton } from "./CreateInstitutionButton";
-import { InstitutionModal } from "./InstitutionModal";
-import { EmptyState } from "./EmptyState";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Institution as CardInstitution,
+  InstitutionCard,
+} from "./InstitutionCard"
+import { CreateInstitutionButton } from "./CreateInstitutionButton"
+import { InstitutionModal } from "./InstitutionModal"
+import { EmptyState } from "./EmptyState"
 
-import { useInstitutions } from "@/hooks/institution/useInstitutions";
-import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned";
-import type { Institution } from "@/types/institution";
+import { useInstitutions } from "@/hooks/institution/useInstitutions"
+import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned"
+import type { Institution } from "@/types/institution"
+import { SkeletonGrid } from "./SkeletonGrid"
 
 /* ---------------- helpers fora do componente ---------------- */
 
-const SKELETON_COUNT = 6;
-
-function getErrorMessage(err: unknown, fallback = "Não foi possível carregar suas instituições.") {
-  if (typeof err === "string") return err;
-  if (err instanceof Error && err.message) return err.message;
+function getErrorMessage(
+  err: unknown,
+  fallback = "Não foi possível carregar suas instituições."
+) {
+  if (typeof err === "string") return err
+  if (err instanceof Error && err.message) return err.message
   try {
-    const any = err as any;
-    if (any?.message) return String(any.message);
+    const any = err as any
+    if (any?.message) return String(any.message)
   } catch {}
-  return fallback;
+  return fallback
 }
 
-/** Converte o type de domínio (Institution) para o type do seu InstitutionCard */
 function toUICard(i: Institution, isOwner: boolean): CardInstitution {
   return {
     id: i.id,
     name: i.name,
     description: i.description,
-
-    // banner que vem da lista de instituições
     bannerUrl: i.banner?.url ?? undefined,
-
-    // avatar: o Card espera "imageUrl" como fallback
     imageUrl: i.profilePicture?.url ?? undefined,
-
-    // ainda deixo o role calculado aqui
     role: isOwner ? "admin" : undefined,
-
-    // se o Card ainda tiver esses campos no tipo, eles continuam existindo
     members: undefined,
     disciplines: undefined,
-  };
-}
-
-
-function SkeletonGrid() {
-  return (
-    <ul className="grid grid-cols-1 gap-4">
-      {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-        <li key={i} className="w-full">
-          <div className="rounded-xl border border-border bg-muted/40 p-4">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-12 w-12 rounded-xl" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-1/3 rounded" />
-                <Skeleton className="mt-2 h-3 w-1/5 rounded" />
-              </div>
-            </div>
-            <Skeleton className="mt-4 h-36 w-full rounded-xl" />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
+  }
 }
 
 /* --------------------------- componente --------------------------- */
 
 export default function InstitutionsSection() {
-  const [tab, setTab] = React.useState<"all" | "owned">("all");
-  const [q, setQ] = React.useState("");
-  const [isModalOpen, setModalOpen] = React.useState(false);
+  const [tab, setTab] = React.useState<"all" | "owned">("all")
+  const [q, setQ] = React.useState("")
+  const [isModalOpen, setModalOpen] = React.useState(false)
 
-  const allQuery = useInstitutions();
-  const ownedQuery = useInstitutionsOwned();
+  const allQuery = useInstitutions()
+  const ownedQuery = useInstitutionsOwned()
+
+  const ownedLimit = 3 
+  const ownedCount = ownedQuery.data?.length ?? 0
+  const ownedCountLabel = ownedQuery.isLoading ? "…" : ownedCount
+
+  const ownedTabTitle = (
+    <div className="flex items-center gap-2">
+      <span>Proprietário</span>
+      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+        <span>{ownedCountLabel}</span>
+        <span className="text-default-500">/ {ownedLimit}</span>
+      </span>
+    </div>
+  )
 
   // toasts de erro (HeroUI)
   React.useEffect(() => {
@@ -93,9 +80,9 @@ export default function InstitutionsSection() {
         description: getErrorMessage(allQuery.error),
         color: "danger",
         variant: "flat",
-      });
+      })
     }
-  }, [allQuery.isError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allQuery.isError]) // eslint-disable-line react-hooks/exhaustive-deps
 
   React.useEffect(() => {
     if (ownedQuery.isError) {
@@ -104,32 +91,39 @@ export default function InstitutionsSection() {
         description: getErrorMessage(ownedQuery.error),
         color: "danger",
         variant: "flat",
-      });
+      })
     }
-  }, [ownedQuery.isError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ownedQuery.isError]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading;
-  const isError = tab === "all" ? allQuery.isError : ownedQuery.isError;
+  const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading
+  const isError = tab === "all" ? allQuery.isError : ownedQuery.isError
 
-  const list = tab === "all" ? allQuery.data ?? [] : ownedQuery.data ?? [];
-  const ownedIds = React.useMemo(() => new Set((ownedQuery.data ?? []).map((i) => i.id)), [ownedQuery.data]);
+  const list = tab === "all" ? (allQuery.data ?? []) : (ownedQuery.data ?? [])
+  const ownedIds = React.useMemo(
+    () => new Set((ownedQuery.data ?? []).map((i) => i.id)),
+    [ownedQuery.data]
+  )
 
   const filtered = React.useMemo(() => {
-    const term = q.trim().toLowerCase();
-    if (!term) return list;
-    return list.filter((i) => i.name.toLowerCase().includes(term) || i.email.toLowerCase().includes(term));
-  }, [list, q]);
+    const term = q.trim().toLowerCase()
+    if (!term) return list
+    return list.filter(
+      (i) =>
+        i.name.toLowerCase().includes(term) ||
+        i.email.toLowerCase().includes(term)
+    )
+  }, [list, q])
 
   const handleCreate = React.useCallback(() => {
     // atualiza as listas e dá feedback
-    Promise.allSettled([allQuery.refetch(), ownedQuery.refetch()]);
+    Promise.allSettled([allQuery.refetch(), ownedQuery.refetch()])
     addToast({
       title: "Instituição criada",
       description: "Sua instituição foi criada com sucesso.",
       color: "success",
       variant: "flat",
-    });
-  }, [allQuery, ownedQuery]);
+    })
+  }, [allQuery, ownedQuery])
 
   return (
     <Card className="border-border">
@@ -137,8 +131,12 @@ export default function InstitutionsSection() {
         {/* header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold sm:text-lg">Minhas Instituições</h3>
-            <p className="text-sm text-muted-foreground">Gerencie e acesse rapidamente suas instituições.</p>
+            <h3 className="text-base font-semibold sm:text-lg">
+              Minhas Instituições
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Gerencie e acesse rapidamente suas instituições.
+            </p>
           </div>
           <CreateInstitutionButton onClick={() => setModalOpen(true)} />
         </div>
@@ -152,7 +150,7 @@ export default function InstitutionsSection() {
             className="sm:col-span-1"
           >
             <Tab key="all" title="Todas" />
-            <Tab key="owned" title="Proprietário" />
+            <Tab key="owned" title={ownedTabTitle} />
           </Tabs>
 
           <div className="sm:col-span-2">
@@ -163,9 +161,12 @@ export default function InstitutionsSection() {
               variant="bordered"
               size="sm"
               placeholder="Buscar por nome ou e-mail…"
-              startContent={<Search className="h-4 w-4 text-muted-foreground" />}
+              startContent={
+                <Search className="h-4 w-4 text-muted-foreground" />
+              }
               classNames={{
-                inputWrapper: "bg-background border-border h-10 shadow-sm focus-within:ring-2 focus-within:ring-primary",
+                inputWrapper:
+                  "bg-background border-border h-10 shadow-sm focus-within:ring-2 focus-within:ring-primary",
                 input: "text-sm placeholder:text-muted-foreground/70",
               }}
             />
@@ -182,13 +183,23 @@ export default function InstitutionsSection() {
               title="Não foi possível carregar suas instituições."
               description="Tente novamente em instantes."
               primaryText="Tentar novamente"
-              onPrimaryClick={() => (tab === "all" ? allQuery.refetch() : ownedQuery.refetch())}
+              onPrimaryClick={() =>
+                tab === "all" ? allQuery.refetch() : ownedQuery.refetch()
+              }
             />
           ) : filtered.length === 0 ? (
             <EmptyState
               variant="empty"
-              title={tab === "owned" ? "Você ainda não criou instituições." : "Você ainda não participa de nenhuma instituição."}
-              description={tab === "owned" ? "Crie a primeira e convide sua equipe." : "Peça um convite ao administrador ou crie a sua agora mesmo."}
+              title={
+                tab === "owned"
+                  ? "Você ainda não criou instituições."
+                  : "Você ainda não participa de nenhuma instituição."
+              }
+              description={
+                tab === "owned"
+                  ? "Crie a primeira e convide sua equipe."
+                  : "Peça um convite ao administrador ou crie a sua agora mesmo."
+              }
               primaryText="Criar instituição"
               primaryHref="/institutions/create"
             />
@@ -196,15 +207,22 @@ export default function InstitutionsSection() {
             <ul className="grid grid-cols-1 gap-4">
               {filtered.map((i) => (
                 <li key={i.id} className="w-full">
-                  <InstitutionCard className="w-full" institution={toUICard(i, ownedIds.has(i.id))} />
+                  <InstitutionCard
+                    className="w-full"
+                    institution={toUICard(i, ownedIds.has(i.id))}
+                  />
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <InstitutionModal isOpen={isModalOpen} onCreate={handleCreate} onOpenChange={setModalOpen} />
+        <InstitutionModal
+          isOpen={isModalOpen}
+          onCreate={handleCreate}
+          onOpenChange={setModalOpen}
+        />
       </CardContent>
     </Card>
-  );
+  )
 }

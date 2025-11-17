@@ -13,6 +13,7 @@ import { Button } from "@heroui/button"
 import { addToast } from "@heroui/toast"
 
 import type { CreateInstitutionInput } from "@/types/institution"
+import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset"
 import FileUpload, { FileUploadHandle } from "@/components/comp-547"
 
 type Props = {
@@ -30,6 +31,8 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
 
   const [isPending, setIsPending] = React.useState(false)
 
+  const uploadProfileAsset = useUploadProfileAsset()
+
   const resetForm = React.useCallback(() => {
     setName("")
     setDescription("")
@@ -37,101 +40,8 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     bannerRef.current?.clear()
   }, [])
 
-  // -----------------------
-  // Helpers de upload (com fallbacks)
-  // -----------------------
-
-  async function uploadOnce(endpoint: string, fieldName: string, file: File) {
-    const fd = new FormData()
-    fd.append(fieldName, file)
-    const res = await fetch(endpoint, { method: "POST", body: fd })
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "")
-      const err = new Error(`${res.status} ${res.statusText} ${text}`.trim())
-      // Propaga junto o status para controle de fallback
-      // @ts-expect-error attach
-      err.status = res.status
-      throw err
-    }
-    return res.json()
-  }
-
-  /**
-   * Tenta subir o arquivo em várias combinações de (endpoint, field).
-   * Para "profile": prioriza o campo exigido pelo backend: profile-asset.
-   * Para "banner": rota dedicada pode não existir — fazemos fallback para upload genérico.
-   */
-  async function uploadWithFallback(
-    kind: "profile" | "banner",
-    file: File
-  ): Promise<any> {
-    const attempts: Array<{ endpoint: string; field: string }> =
-      kind === "profile"
-        ? [
-            {
-              endpoint: "/api/files/upload-profile-assets",
-              field: "profile-asset",
-            }, // o exigido pelo backend
-            { endpoint: "/api/files/upload-profile-assets", field: "file" }, // fallback 422->file
-            { endpoint: "/api/files/upload-file", field: "file" }, // fallback rota genérica
-          ]
-        : [
-            {
-              endpoint: "/api/files/upload-banner-assets",
-              field: "banner-asset",
-            }, // pode dar 404
-            { endpoint: "/api/files/upload-file", field: "file" }, // genérico
-            {
-              endpoint: "/api/files/upload-profile-assets",
-              field: "banner-asset",
-            }, // reaproveita handler
-          ]
-
-    let lastErr: unknown = null
-
-    for (const { endpoint, field } of attempts) {
-      try {
-        return await uploadOnce(endpoint, field, file)
-      } catch (e: any) {
-        lastErr = e
-        // se 404 numa rota dedicada, seguimos para próxima
-        // se 422 por campo ausente, próxima tentativa muda o field
-        continue
-      }
-    }
-    throw lastErr ?? new Error("Falha ao enviar arquivo (todas as tentativas).")
-  }
-
-  async function maybeUploadAndGetIdUrl(
-    file: File | null,
-    kind: "profile" | "banner"
-  ): Promise<string | null> {
-    if (!file) return null
-
-    const payload = await uploadWithFallback(kind, file)
-
-    const fileId =
-      // caso o backend use o mesmo formato do ApiFileMeta
-      payload?.file_id ??
-      // variações comuns
-      payload?.fileId ??
-      payload?.id ??
-      // alguns endpoints retornam o arquivo aninhado em "file"
-      payload?.file?.file_id ??
-      payload?.file?.fileId ??
-      payload?.file?.id
-
-    // 2) se NÃO achar nenhum id, como último recurso usa a url
-    return fileId ?? payload?.url ?? null
-  }
-
-
-  // -----------------------
-  // Submit
-  // -----------------------
-
-  const handleSubmit = React.useCallback(async () => {
+  const handleSubmit = async () => {
+    // 1) Validações básicas
     if (!name.trim() || !description.trim()) {
       addToast({
         title: "Preencha os campos obrigatórios",
@@ -145,56 +55,87 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     const profileFile = profileRef.current?.getRawFiles()?.[0] ?? null
     const bannerFile = bannerRef.current?.getRawFiles()?.[0] ?? null
 
-    // Mantém compatibilidade de tipo local (não enviado como FormData)
-    const _uiPayload: CreateInstitutionInput = {
-      name: name.trim(),
-      description: description.trim(),
-      profilePictureFile: profileFile ?? undefined,
-      bannerFile: bannerFile ?? undefined,
-    }
-
     setIsPending(true)
+
     try {
-      // 1) Uploads com fallbacks robustos
-      const [profileIdOrUrl, bannerIdOrUrl] = await Promise.all([
-        maybeUploadAndGetIdUrl(profileFile, "profile"),
-        maybeUploadAndGetIdUrl(bannerFile, "banner"),
+      // 2) Sobe avatar e banner (se existirem) em paralelo
+      const [profileResp, bannerResp] = await Promise.all([
+        profileFile
+          ? uploadProfileAsset.mutateAsync(profileFile)
+          : Promise.resolve(null),
+        bannerFile
+          ? uploadProfileAsset.mutateAsync(bannerFile)
+          : Promise.resolve(null),
       ])
 
-      // 2) POST JSON puro para /api/institutions
+      const profilePictureId = profileResp?.file_id ?? null
+      const bannerId = bannerResp?.file_id ?? null
+
+      // 3) Cria instituição com JSON – é isso que o back espera
       const res = await fetch("/api/institutions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim(),
-          // ajuste os nomes conforme seu backend espera:
-          profile_picture_id: profileIdOrUrl,
-          banner_id: bannerIdOrUrl,
+          profile_picture_id: profilePictureId,
+          banner_id: bannerId,
         }),
       })
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "")
-        throw new Error(text || `Erro ${res.status}`)
+        // Tenta interpretar a resposta como JSON
+        let errorPayload: any = null
+        try {
+          errorPayload = await res.json()
+        } catch {
+        }
+
+        const backendMessage =
+          errorPayload?.error?.message ||
+          errorPayload?.message ||
+          errorPayload?.error ||
+          null
+
+        // Caso específico: limite de instituições atingido (403)
+        if (
+          res.status === 403 &&
+          backendMessage?.includes("maximum number of owned institutions")
+        ) {
+          addToast({
+            title: "Limite de instituições atingido",
+            description:
+              "Você já possui 3 instituições. Exclua uma delas ou use outra conta para criar mais.",
+            color: "warning",
+            variant: "flat",
+          })
+          // Não lança erro – tratamos aqui
+          return
+        }
+
+        // Outros erros: lança com mensagem mais limpa
+        throw new Error(backendMessage || `Erro ${res.status}`)
       }
 
       addToast({
         title: "Instituição criada",
-        description: "Sua instituição foi criada com sucesso.",
+        description: "A instituição foi criada com sucesso.",
         color: "success",
         variant: "flat",
       })
 
-      onCreate?.()
+      onCreate()
       resetForm()
       onOpenChange(false)
     } catch (err) {
+      console.error(err)
       const msg =
-        (err instanceof Error && err.message) ||
-        (typeof err === "string"
-          ? err
-          : "Ocorreu um erro ao criar a instituição.")
+        err instanceof Error
+          ? err.message
+          : "Ocorreu um erro ao criar a instituição."
+
       addToast({
         title: "Não foi possível criar",
         description: msg,
@@ -204,7 +145,7 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     } finally {
       setIsPending(false)
     }
-  }, [name, description, onCreate, onOpenChange, resetForm])
+  }
 
   const canSubmit =
     name.trim().length > 0 && description.trim().length > 0 && !isPending

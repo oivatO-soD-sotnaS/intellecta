@@ -34,7 +34,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
     avatarUrl ??
     (avatarId ? `/api/files/${avatarId}` : undefined);
 
-  return (
+  return ( 
     <Card className="rounded-2xl shadow-lg w-full">
       <CardContent className="p-6 space-y-6">
         {/* Cabeçalho */}

@@ -4,7 +4,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import { Avatar } from "@heroui/avatar";
 import {
@@ -28,6 +27,7 @@ import type { InstitutionCardItem } from "@/types/institution";
 import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary";
 import { EditInstitutionModal } from "./EditInstitutionModal";
 import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+import { Badge } from "@/components/ui/badge";
 
 type Props = { institution: InstitutionCardItem; className?: string };
 
@@ -56,7 +56,6 @@ export function InstitutionCard({ institution, className }: Props) {
 
   // Papel e status
   const role = summary?.role || (institution.isOwner ? "admin" : undefined)
-  const status = summary?.status || institution.status || "active"
 
   // Contagens (summary > institution > 0)
   const members = formatNumber(
@@ -99,7 +98,7 @@ export function InstitutionCard({ institution, className }: Props) {
           {/* badges topo */}
           <div className="absolute left-3 top-3 flex gap-2">
             {role && (
-              <Badge color="danger" size="sm" variant="solid">
+              <Badge variant="secondary">
                 {role === "admin" ? "Admin" : "Membro"}
               </Badge>
             )}
@@ -195,11 +194,6 @@ export function InstitutionCard({ institution, className }: Props) {
                 <h3 className="truncate text-base font-semibold leading-5">
                   {institution.name}
                 </h3>
-                {status === "active" && (
-                  <Badge size="sm" variant="solid" color="success">
-                    Ativa
-                  </Badge>
-                )}
               </div>
               <div className="text-xs text-muted-foreground">Instituto</div>
             </div>

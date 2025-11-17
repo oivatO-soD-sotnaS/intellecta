@@ -7,6 +7,9 @@ import { ProfileCard } from "./ProfileCard"
 import { Activity, RecentActivities } from "./RecentActivities"
 import { UpcomingEvents } from "./UpcomingEvents"
 import  InstitutionsSection  from "./Institution/InstitutionsSection"
+import { useInstitutions } from "@/hooks/institution/useInstitutions"
+import { useSubjectsCountByInstitutions } from "@/hooks/subjects/useSubjectsCountByInstitutions"
+
 
 export interface User {
   user_id: string
@@ -22,6 +25,15 @@ interface HomeClientProps {
 
 
 export default function HomeClient({ user }: HomeClientProps) {
+  // 1) Todas as instituições em que o usuário participa
+  const institutionsQuery = useInstitutions()
+  const allInstitutions = institutionsQuery.data ?? []
+  const totalInstitutions = allInstitutions.length
+
+  const allInstitutionIds = allInstitutions.map((i) => i.id)
+
+  const { data: totalDisciplines = 0 } =
+    useSubjectsCountByInstitutions(allInstitutionIds)
 
   const activities: Activity[] = [
     {
@@ -75,7 +87,6 @@ export default function HomeClient({ user }: HomeClientProps) {
     },
   ]
 
-
   return (
     <div className="container mx-auto px-6 py-8 space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -88,8 +99,8 @@ export default function HomeClient({ user }: HomeClientProps) {
         <aside className="space-y-6">
           <ProfileCard
             name={user.full_name}
-            disciplinesCount={0}
-            institutionsCount={0}
+            institutionsCount={totalInstitutions}
+            disciplinesCount={totalDisciplines}
           />
 
           <RecentActivities activities={activities} />
