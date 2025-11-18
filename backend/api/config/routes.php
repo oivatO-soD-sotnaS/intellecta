@@ -68,7 +68,7 @@ return function (App $app) {
     
             $user->group('/notifications', function($userNotifications) {
                $userNotifications->get('', NotificationsController::class . ':getUserNotifications');
-               $userNotifications->patch('/{event_id:'.UUIDv4_REGEX.'}/set-as-seen', NotificationsController::class . ':setNotificationAsSeen'); 
+               $userNotifications->patch('/{notification_id:'.UUIDv4_REGEX.'}/set-as-seen', NotificationsController::class . ':setNotificationAsSeen'); 
             });
         });
 

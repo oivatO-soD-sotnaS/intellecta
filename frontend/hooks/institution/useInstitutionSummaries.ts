@@ -2,7 +2,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { apiGet } from "@/lib/apiClient";
-import type { ApiInstitutionSummary, InstitutionSummary } from "@/types/institution";
+import type { ApiInstitutionSummary } from "@/types/institution";
 import { mapApiInstitutionSummary, normalizeList } from "@/types/institution.mappers";
 
 export function useInstitutionsSummaries() {
