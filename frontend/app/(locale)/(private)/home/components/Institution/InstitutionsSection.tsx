@@ -200,13 +200,6 @@ export default function InstitutionsSection() {
               }
               primaryText="Criar instituição"
               primaryHref="/institutions/create"
-              primaryText="Criar instituição"
-              title={
-                tab === "owned"
-                  ? "Você ainda não criou instituições."
-                  : "Você ainda não participa de nenhuma instituição."
-              }
-              variant="empty"
             />
           ) : (
             <ul className="grid grid-cols-1 gap-4">

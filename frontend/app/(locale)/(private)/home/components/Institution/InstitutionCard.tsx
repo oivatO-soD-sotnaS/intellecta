@@ -28,13 +28,12 @@ import { normalizeFileUrl } from "@/lib/urls"
 import { InstitutionSummary } from "@/types/institution"
 // import { Badge } from "@/components/ui/badge";
 
-import type { InstitutionCardItem } from "@/types/institution";
 import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
 // import { EditInstitutionModal } from "./EditInstitutionModal";
 // import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 import { Badge } from "@/components/ui/badge"
 
-type Props = { institution: InstitutionCardItem; className?: string }
+type Props = { institution: InstitutionSummary; className?: string }
 
 export function InstitutionCard({ institution, className }: Props) {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -43,6 +42,9 @@ export function InstitutionCard({ institution, className }: Props) {
 
   // Usa o summary atualizado ou os dados da institution
   const finalInstitution = institution
+
+  console.log(finalInstitution)
+  
 
   // URLs finais
   const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url)
@@ -155,7 +157,7 @@ export function InstitutionCard({ institution, className }: Props) {
 
         <CardContent className="p-4">
           {/* Cabeçalho: avatar + textos */}
-          <div className="relative -mt-10 mqqqqqqqqqqqqqqqqqqqqqqqqb-3 flex items-center gap-4">
+          <div className="relative -mt-10 mb-3 flex items-center gap-4">
             <Avatar
               key={avatarUrl || "no-avatar"}
               showFallback

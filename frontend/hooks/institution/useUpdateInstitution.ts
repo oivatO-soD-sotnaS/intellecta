@@ -1,15 +1,15 @@
 // hooks/institution/useUpdateInstitution.ts
-"use client";
+"use client"
 
-import type { UpdateInstitutionInput } from "@/types/institution";
+import type { UpdateInstitutionInput } from "@/types/institution"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addToast } from "@heroui/toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { addToast } from "@heroui/toast"
 
-import { apiPut } from "@/lib/apiClient";
+import { apiPut } from "@/lib/apiClient"
 
 export function useUpdateInstitution(institutionId: string) {
-  const qc = useQueryClient();
+  const qc = useQueryClient()
 
   return useMutation({
     mutationKey: ["institutions", "update", institutionId],
@@ -21,7 +21,7 @@ export function useUpdateInstitution(institutionId: string) {
         banner: data.bannerId,
       }
 
-      await apiPut(`/api/institutions/${institutionId}`, JSON.stringify(body));
+      await apiPut(`/api/institutions/${institutionId}`, JSON.stringify(body))
     },
     onSuccess: async () => {
       await Promise.allSettled([
@@ -31,26 +31,26 @@ export function useUpdateInstitution(institutionId: string) {
         qc.invalidateQueries({
           queryKey: ["institution", institutionId, "summary"],
         }),
-      ]);
+      ])
       addToast({
         title: "Instituição atualizada",
         description: "Alterações salvas com sucesso.",
         color: "success",
         variant: "flat",
-      });
+      })
     },
     onError: (err: unknown) => {
       const msg =
         err instanceof Error
           ? err.message
-          : "Não foi possível atualizar a instituição.";
+          : "Não foi possível atualizar a instituição."
 
       addToast({
         title: "Erro ao atualizar",
         description: msg,
         color: "danger",
         variant: "flat",
-      });
+      })
     },
-  });
+  })
 }
