@@ -31,8 +31,6 @@ export default function CourseCard({
   const bannerUrl = klass.banner?.url ?? null
   const avatarUrl = klass.profile_picture?.url ?? null
 
-  console.log("log do onEditClass -> ", onEditClass)
-  
   
 
   return (

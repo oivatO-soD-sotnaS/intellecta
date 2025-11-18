@@ -1,72 +1,76 @@
-"use client";
+"use client"
 
-import type { InstitutionSummary } from "@/types/institution";
+import * as React from "react"
+import { Tabs, Tab } from "@heroui/tabs"
+import { Input } from "@heroui/input"
+import { addToast } from "@heroui/toast"
+import { Search } from "lucide-react"
 
-import * as React from "react";
-import { Tabs, Tab } from "@heroui/tabs";
-import { Input } from "@heroui/input";
-import { Skeleton } from "@heroui/skeleton";
-import { addToast } from "@heroui/toast";
-import { Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card"
+import {
+  Institution as CardInstitution,
+  InstitutionCard,
+} from "./InstitutionCard"
+import { CreateInstitutionButton } from "./CreateInstitutionButton"
+import { InstitutionModal } from "./InstitutionModal"
+import { EmptyState } from "./EmptyState"
 
-import { InstitutionCard } from "./InstitutionCard";
-import { CreateInstitutionButton } from "./CreateInstitutionButton";
-import { InstitutionModal } from "./InstitutionModal";
-import { EmptyState } from "./EmptyState";
-
-import { Card, CardContent } from "@/components/ui/card";
-import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned";
-import { useInstitutionsSummaries } from "@/hooks/institution/useInstitutionSummaries";
+import { useInstitutions } from "@/hooks/institution/useInstitutions"
+import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned"
+import type { Institution, InstitutionSummary } from "@/types/institution"
+import { SkeletonGrid } from "./SkeletonGrid"
 
 /* ---------------- helpers fora do componente ---------------- */
 
-const SKELETON_COUNT = 6;
-
 function getErrorMessage(
   err: unknown,
-  fallback = "Não foi possível carregar suas instituições.",
+  fallback = "Não foi possível carregar suas instituições."
 ) {
-  if (typeof err === "string") return err;
-  if (err instanceof Error && err.message) return err.message;
+  if (typeof err === "string") return err
+  if (err instanceof Error && err.message) return err.message
   try {
-    const any = err as any;
-
-    if (any?.message) return String(any.message);
+    const any = err as any
+    if (any?.message) return String(any.message)
   } catch {}
-
-  return fallback;
+  return fallback
 }
 
-function SkeletonGrid() {
-  return (
-    <ul className="grid grid-cols-1 gap-4">
-      {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-        <li key={i} className="w-full">
-          <div className="rounded-xl border border-border bg-muted/40 p-4">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-12 w-12 rounded-xl" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-1/3 rounded" />
-                <Skeleton className="mt-2 h-3 w-1/5 rounded" />
-              </div>
-            </div>
-            <Skeleton className="mt-4 h-36 w-full rounded-xl" />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
+function toUICard(i: Institution, isOwner: boolean): CardInstitution {
+  return {
+    id: i.id,
+    name: i.name,
+    description: i.description,
+    bannerUrl: i.banner?.url ?? undefined,
+    imageUrl: i.profilePicture?.url ?? undefined,
+    role: isOwner ? "admin" : undefined,
+    members: undefined,
+    disciplines: undefined,
+  }
 }
 
 /* --------------------------- componente --------------------------- */
 
 export default function InstitutionsSection() {
-  const [tab, setTab] = React.useState<"all" | "owned">("all");
-  const [q, setQ] = React.useState("");
-  const [isModalOpen, setModalOpen] = React.useState(false);
+  const [tab, setTab] = React.useState<"all" | "owned">("all")
+  const [q, setQ] = React.useState("")
+  const [isModalOpen, setModalOpen] = React.useState(false)
 
-  const allQuery = useInstitutionsSummaries();
-  const ownedQuery = useInstitutionsOwned();
+  const allQuery = useInstitutions()
+  const ownedQuery = useInstitutionsOwned()
+
+  const ownedLimit = 3
+  const ownedCount = ownedQuery.data?.length ?? 0
+  const ownedCountLabel = ownedQuery.isLoading ? "…" : ownedCount
+
+  const ownedTabTitle = (
+    <div className="flex items-center gap-2">
+      <span>Proprietário</span>
+      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+        <span>{ownedCountLabel}</span>
+        <span className="text-default-500">/ {ownedLimit}</span>
+      </span>
+    </div>
+  )
 
   // toasts de erro (HeroUI)
   React.useEffect(() => {
@@ -76,9 +80,9 @@ export default function InstitutionsSection() {
         description: getErrorMessage(allQuery.error),
         color: "danger",
         variant: "flat",
-      });
+      })
     }
-  }, [allQuery.isError]);
+  }, [allQuery.isError])
 
   React.useEffect(() => {
     if (ownedQuery.isError) {
@@ -87,37 +91,37 @@ export default function InstitutionsSection() {
         description: getErrorMessage(ownedQuery.error),
         color: "danger",
         variant: "flat",
-      });
+      })
     }
-  }, [ownedQuery.isError]);
+  }, [ownedQuery.isError])
 
-  const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading;
-  const isError = tab === "all" ? allQuery.isError : ownedQuery.isError;
+  const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading
+  const isError = tab === "all" ? allQuery.isError : ownedQuery.isError
 
-  const list = tab === "all" ? (allQuery.data ?? []) : (ownedQuery.data ?? []);
+  const list = tab === "all" ? (allQuery.data ?? []) : (ownedQuery.data ?? [])
 
   const filtered: InstitutionSummary[] = React.useMemo(() => {
-    const term = q.trim().toLowerCase();
+    const term = q.trim().toLowerCase()
 
-    if (!term) return list;
+    if (!term) return list
 
     return list.filter(
       (i) =>
         i.name.toLowerCase().includes(term) ||
-        i.email.toLowerCase().includes(term),
-    );
-  }, [list, q]);
+        i.email.toLowerCase().includes(term)
+    )
+  }, [list, q])
 
   const handleCreate = React.useCallback(() => {
     // atualiza as listas e dá feedback
-    Promise.allSettled([allQuery.refetch(), ownedQuery.refetch()]);
+    Promise.allSettled([allQuery.refetch(), ownedQuery.refetch()])
     addToast({
       title: "Instituição criada",
       description: "Sua instituição foi criada com sucesso.",
       color: "success",
       variant: "flat",
-    });
-  }, [allQuery, ownedQuery]);
+    })
+  }, [allQuery, ownedQuery])
 
   return (
     <Card className="border-border">
@@ -144,7 +148,7 @@ export default function InstitutionsSection() {
             onSelectionChange={(k) => setTab(k as "all" | "owned")}
           >
             <Tab key="all" title="Todas" />
-            <Tab key="owned" title="Proprietário" />
+            <Tab key="owned" title={ownedTabTitle} />
           </Tabs>
 
           <div className="sm:col-span-2">
@@ -183,11 +187,18 @@ export default function InstitutionsSection() {
             />
           ) : filtered.length === 0 ? (
             <EmptyState
+              variant="empty"
+              title={
+                tab === "owned"
+                  ? "Você ainda não criou instituições."
+                  : "Você ainda não participa de nenhuma instituição."
+              }
               description={
                 tab === "owned"
                   ? "Crie a primeira e convide sua equipe."
                   : "Peça um convite ao administrador ou crie a sua agora mesmo."
               }
+              primaryText="Criar instituição"
               primaryHref="/institutions/create"
               primaryText="Criar instituição"
               title={
@@ -215,5 +226,5 @@ export default function InstitutionsSection() {
         />
       </CardContent>
     </Card>
-  );
+  )
 }

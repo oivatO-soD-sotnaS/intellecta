@@ -16,6 +16,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { useRouter } from "next/navigation"
 
 type Props = {
   title?: string
@@ -24,7 +25,7 @@ type Props = {
   isLoading?: boolean
   isError?: boolean
 
-  onOpenClass?: (class_id: string) => void
+  onOpenClass: (class_id: string) => void
   institutionId: string
 
   /** controla o menu (três pontinhos) nos cards */
@@ -50,9 +51,20 @@ export default function ClassesCarousel({
   const [editOpen, setEditOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<ClassDTO | null>(null)
 
+  const router = useRouter() 
+
   const handleEditRequest = (klass: ClassDTO) => {
     setEditing(klass)
     setEditOpen(true)
+  }
+
+  const handleOpenClass = (classId: string) => {
+    if (onOpenClass) {
+      onOpenClass(classId)
+      return
+    }
+
+    router.push(`/institutions/${institutionId}/classes/${classId}`)
   }
 
   return (
@@ -114,7 +126,7 @@ export default function ClassesCarousel({
                       canManage={isInstitutionAdmin}
                       onDeleted={() => refetch()}
                       onEditClass={handleEditRequest}
-                      onOpen={() => onOpenClass?.(klass.class_id)}
+                      onOpen={() => handleOpenClass?.(klass.class_id)}
                     />
                   </motion.div>
                 </CarouselItem>

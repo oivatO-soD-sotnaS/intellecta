@@ -149,7 +149,7 @@ export default function NotificationsBellMaterial() {
                     style={{ background: materialColors.hover }}
                   >
                     <Icon className="h-4 w-4" />
-                  </div>
+              </div>
 
                   <div className="flex-1">
                     <p className="font-medium text-sm mb-1">{n.event.title}</p>
@@ -157,7 +157,7 @@ export default function NotificationsBellMaterial() {
                       <p className="text-xs opacity-70 line-clamp-2">{n.event.description}</p>
                     )}
                     <p className="text-xs opacity-50 mt-1">{timeAgo(new Date(n.created_at))}</p>
-                  </div>
+              </div>
 
                   {!n.seen && (
                     <button
@@ -170,7 +170,7 @@ export default function NotificationsBellMaterial() {
                       <Eye className="h-4 w-4 opacity-70" />
                     </button>
                   )}
-                </div>
+            </div>
               );
             })
           )}
@@ -190,9 +190,9 @@ export default function NotificationsBellMaterial() {
                 notifications.forEach((n: any) => !n.seen && markAsSeen.mutate(n.notification_id));
               }}
             >
-              Marcar todas como lidas
-            </Button>
-          </div>
+            Marcar todas como lidas
+          </Button>
+        </div>
         )}
       </PopoverContent>
     </Popover>

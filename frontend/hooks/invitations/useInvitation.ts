@@ -1,19 +1,21 @@
-// hooks/invitations/useInvitation.ts
-"use client"
-
-import { useQuery } from "@tanstack/react-query"
 import { apiGet } from "@/lib/apiClient"
-import type { InvitationDTO } from "@/types/invitation"
+import { InvitationDTO } from "@/types/invitation"
+import { useQuery } from "@tanstack/react-query"
 
-/**
- * Busca detalhes de um convite específico pelo ID/token.
- * Usado, por exemplo, na página /invitation/accept?token=...
- */
 export function useInvitation(invitationId?: string) {
   return useQuery({
     queryKey: ["invitation", invitationId],
     enabled: Boolean(invitationId),
     staleTime: 60_000,
+    retry: (failureCount, error: any) => {
+      const status =
+        error?.status ?? error?.response?.status ?? error?.cause?.status
+
+      // Não adianta ficar tentando se for 404 ou 403
+      if (status === 404 || status === 403) return false
+
+      return failureCount < 2
+    },
     queryFn: async () =>
       apiGet<InvitationDTO>(`/api/invitations/${invitationId}`),
   })

@@ -4,14 +4,15 @@ import { apiPut } from "@/lib/apiClient"
 import type { Subject } from "@/types/subjects"
 
 type UpdatePayload = Partial<
-  Pick<Subject, "name" | "description" | "teacher_id">
-> & {
-  profile_picture_id?: string
-  banner_id?: string
-}
+  Pick<
+    Subject,
+    "name" | "description" | "teacher_id" | "profile_picture_id" | "banner_id"
+  >
+>
 
 export function useUpdateSubject(institutionId: string, subjectId: string) {
   const qc = useQueryClient()
+
   return useMutation({
     mutationFn: (payload: UpdatePayload) =>
       apiPut(

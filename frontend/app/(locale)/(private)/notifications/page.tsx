@@ -189,7 +189,7 @@ export default function NotificationsPage() {
             <TableColumn>Descrição</TableColumn>
             <TableColumn>Tipo</TableColumn>
             <TableColumn>Recebida</TableColumn>
-            <TableColumn> </TableColumn>
+            <TableColumn>Visto</TableColumn>
           </TableHeader>
 
           <TableBody
