@@ -4,91 +4,196 @@ import * as React from "react";
 import { Button } from "@heroui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import { Badge } from "@heroui/badge";
-import { Bell, CalendarDays, ClipboardList } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { timeAgo } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import {
+  Bell,
+  Check,
+  Eye,
+  FileText,
+  BookOpen,
+  Users,
+  Presentation,
+  Clock,
+  GraduationCap,
+  Megaphone,
+  Palette,
+  Dumbbell,
+  HelpCircle,
+  ArrowRight,
+} from "lucide-react";
+import Link from "next/link";
 
-export type NotificationItem = {
-  id: string | number;
-  title: string;
-  description?: string;
-  timeAgo?: string;
-  icon?: "bell" | "calendar" | "tasks";
+// Material 2 colors and elevations
+const materialColors = {
+  primary: "#6200ee",
+  surface: "#ffffff",
+  onSurface: "#333",
+  divider: "rgba(0,0,0,0.12)",
+  ripple: "rgba(0,0,0,0.15)",
+  hover: "rgba(0,0,0,0.06)",
+  card: "#fff",
+  unread: "#e3f2fd",
 };
 
-const IconMap: Record<NonNullable<NotificationItem["icon"]>, React.ReactNode> = {
-  bell: <Bell className="h-5 w-5 text-primary mt-1" />,
-  calendar: <CalendarDays className="h-5 w-5 text-primary mt-1" />,
-  tasks: <ClipboardList className="h-5 w-5 text-primary mt-1" />,
+// Simplified event type mapping
+const getEventConfig = (type: string) => {
+  const map: any = {
+    exam: { icon: FileText, label: "Prova" },
+    quiz: { icon: HelpCircle, label: "Quiz" },
+    assignment: { icon: BookOpen, label: "Trabalho" },
+    lecture: { icon: GraduationCap, label: "Aula" },
+    workshop: { icon: Users, label: "Workshop" },
+    seminar: { icon: Presentation, label: "Seminário" },
+    presentation: { icon: Presentation, label: "Apresentação" },
+    deadline: { icon: Clock, label: "Prazo" },
+    holiday: { icon: Clock, label: "Feriado" },
+    announcement: { icon: Megaphone, label: "Anúncio" },
+    cultural: { icon: Palette, label: "Cultural" },
+    sports: { icon: Dumbbell, label: "Esportes" },
+  };
+  return map[type] || { icon: Bell, label: "Outro" };
 };
 
-export default function NotificationsBell({
-  count = 0,
-  items = [],
-  onMarkAllRead,
-}: {
-  count?: number;
-  items?: NotificationItem[];
-  onMarkAllRead?: () => void;
-}) {
-  const list =
-    items.length > 0
-      ? items
-      : [
-          {
-            id: 1,
-            title: "Prova de Física III",
-            description: "Amanhã às 14:00",
-            timeAgo: "2 horas atrás",
-            icon: "calendar" as const,
-          },
-          {
-            id: 2,
-            title: "3 Atividades pendentes",
-            description: "Turma 4º Ano • Física",
-            timeAgo: "hoje",
-            icon: "tasks" as const,
-          },
-        ];
+export default function NotificationsBellMaterial() {
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const { data, isPending } = useQuery({
+    queryKey: ["notifications", "material"],
+    queryFn: async () => {
+      const params = new URLSearchParams({ limit: "10", offset: "0" });
+      const res = await fetch(`/api/me/notifications?${params.toString()}`);
+      if (!res.ok) throw new Error("Erro ao carregar notificações");
+      return res.json();
+    },
+  });
+
+  const markAsSeen = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/me/notifications/${id}`, { method: "PATCH" });
+      if (!res.ok) throw new Error("Erro ao marcar como vista");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", "material"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const notifications = data?.records || [];
+  const unread: number = notifications.filter((n: any) => !n.seen).length;
 
   return (
-    <Popover placement="bottom-end">
+    <Popover placement="bottom-end" isOpen={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger>
-        <Button className="relative p-2" variant="flat" radius="lg" isIconOnly>
+        <Button
+          isIconOnly
+          variant="flat"
+          className="relative"
+        >
           <Bell className="h-5 w-5" />
-          {count > 0 && (
-            <Badge className="absolute -top-1 -right-1" color="danger" size="sm">
-              {count}
+          {unread > 0 && (
+            <Badge content={unread} color="primary">
+              <span></span>
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-80">
-        <h4 className="mb-2 font-semibold">Notificações</h4>
-
-        <div className="max-h-60 space-y-1 overflow-y-auto">
-          {list.map((n) => (
-            <div key={n.id} className="flex items-start gap-2 rounded p-2">
-              <div aria-hidden>
-                {n.icon ? IconMap[n.icon] : <Bell className="h-5 w-5 text-primary mt-1" />}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm">
-                  <strong>{n.title}</strong>
-                  {n.description ? ` — ${n.description}` : null}
-                </p>
-                {n.timeAgo ? (
-                  <span className="text-xs text-muted-foreground">{n.timeAgo}</span>
-                ) : null}
-              </div>
-            </div>
-          ))}
+      <PopoverContent
+        className="w-80 p-0 rounded-lg"
+        style={{
+          background: materialColors.surface,
+          boxShadow:
+            "0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)",
+        }}
+      >
+        {/* Header */}
+        <div className="px-4 py-3 border-b flex justify-between items-center w-full">
+          <div className="" style={{ borderColor: materialColors.divider }}>
+            <h3 className="font-medium" style={{ color: materialColors.onSurface }}>
+              Notificações
+            </h3>
+            <p className="text-xs opacity-70">{unread} não lidas</p>
+          </div>
+          <Link href="/notifications" className="underline text-primary flex gap-1 items-center">
+            Ver todas
+            <ArrowRight />
+          </Link>
         </div>
 
-        <div className="mt-3 text-right">
-          <Button size="sm" variant="flat" onPress={onMarkAllRead}>
+        {/* List */}
+        <div className="w-full max-h-96 overflow-y-auto">
+          {isPending ? (
+            <div className="p-4 text-sm opacity-70">Carregando...</div>
+          ) : notifications.length === 0 ? (
+            <div className="p-6 text-center text-sm opacity-60">Sem notificações</div>
+          ) : (
+            notifications.map((n: any) => {
+              const event = getEventConfig(n.event.type);
+              const Icon = event.icon;
+
+              return (
+                <div
+                  key={n.notification_id}
+                  className="flex items-start gap-3 px-4 py-3 cursor-pointer transition"
+                  style={{
+                    background: !n.seen ? materialColors.unread : materialColors.surface,
+                  }}
+                  onClick={() => !n.seen && markAsSeen.mutate(n.notification_id)}
+                >
+                  <div
+                    className="p-2 rounded-full"
+                    style={{ background: materialColors.hover }}
+                  >
+                    <Icon className="h-4 w-4" />
+              </div>
+
+                  <div className="flex-1">
+                    <p className="font-medium text-sm mb-1">{n.event.title}</p>
+                    {n.event.description && (
+                      <p className="text-xs opacity-70 line-clamp-2">{n.event.description}</p>
+                    )}
+                    <p className="text-xs opacity-50 mt-1">{timeAgo(new Date(n.created_at))}</p>
+              </div>
+
+                  {!n.seen && (
+                    <button
+                      className="p-1 rounded-full hover:bg-black/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsSeen.mutate(n.notification_id);
+                      }}
+                    >
+                      <Eye className="h-4 w-4 opacity-70" />
+                    </button>
+                  )}
+            </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer */}
+        {unread > 0 && (
+          <div
+            className="px-4 py-2 border-t"
+            style={{ borderColor: materialColors.divider }}
+          >
+            <Button
+              fullWidth
+              size="sm"
+              startContent={<Check className="h-4 w-4" />}
+              onPress={() => {
+                notifications.forEach((n: any) => !n.seen && markAsSeen.mutate(n.notification_id));
+              }}
+            >
             Marcar todas como lidas
           </Button>
         </div>
+        )}
       </PopoverContent>
     </Popover>
   );

@@ -66,17 +66,17 @@ readonly class NotificationsController extends BaseController {
         });
     }
 
-    public function setNotificationAsSeen(Request $request, Response $response, string $notificaation_id) {
-        return $this->handleErrors($request, function() use ($request, $response, $notificaation_id) {
+    public function setNotificationAsSeen(Request $request, Response $response, string $notification_id) {
+        return $this->handleErrors($request, function() use ($request, $response, $notification_id) {
             $user = $request->getAttribute("user");
 
-            $notification = $this->notificationsDao->getNotificationById($notificaation_id);
+            $notification = $this->notificationsDao->getNotificationById($notification_id);
 
             if ($notification === null || $notification->getUserId() !== $user->getUserId()) {
                 throw new HttpNotFoundException($request, "Notification not found.");
             }
 
-            $this->notificationsDao->setNotificationAsSeen($notificaation_id);
+            $this->notificationsDao->setNotificationAsSeen($notification_id);
 
             $response->getBody()->write(json_encode(["message" => "Notification marked as seen."]));
             return $response;
