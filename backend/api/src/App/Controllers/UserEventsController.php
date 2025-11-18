@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Dao\EventsDao;
-use App\Dao\UsersDao;
 use App\Dao\UserEventsDao;
 use App\Models\Event;
 use App\Models\UserEvent;
@@ -12,7 +11,6 @@ use App\Services\LogService;
 use App\Dto\UserEventDto;
 use App\Enums\EventType;
 use App\Services\ValidatorService;
-use App\Templates\Email\EmailTemplateProvider;
 use App\Vo\EventDateVo;
 use App\Vo\EventDescriptionVo;
 use App\Vo\EventTitleVo;
@@ -27,8 +25,6 @@ readonly class UserEventsController extends BaseController {
     public function __construct(
         private UserEventsDao $userEventDao,
         private EventsDao $eventsDao,
-        private UsersDao $usersDao,
-        private EmailTemplateProvider $emailTemplateProvider,
         private ValidatorService $validatorService
     ) {}
 
@@ -198,6 +194,27 @@ readonly class UserEventsController extends BaseController {
             $userEventDto = new UserEventDto($userEvent, $event);
             $response->getBody()->write(json_encode($userEventDto));
 
+            return $response;
+        });
+    }
+
+    public function getUpcomingEvents(Request $request, Response $response): Response {
+        return $this->handleErrors($request, function() use ($request, $response) {
+            $user = $request->getAttribute("user");
+            
+            $userEvents = $this->userEventDao->getUpcomingUserEvents($user->getUserId());
+
+            if(\count($userEvents) === 0){
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
+            }
+
+            // $userEventsDto = array_map(function (UserEvent $userEvent) {
+            //     $event = $this->eventsDao->getEventById($userEvent->getEventId());
+            //     return new UserEventDto($userEvent, $event);
+            // }, $userEvents);
+
+            $response->getBody()->write(json_encode($userEvents));
+            LogService::info("/users/me/events/upcoming", "Upcoming user events fetched for: $user");
             return $response;
         });
     }

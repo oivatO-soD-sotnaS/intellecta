@@ -1,28 +1,36 @@
-import { NextRequest, NextResponse } from "next/server"
-import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
+import { NextRequest } from "next/server";
 
-export const dynamic = "force-dynamic"
+import { proxyGet } from "@/app/api/_lib/proxy";
+import { cookies } from "next/headers";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/institutions -> proxy GET /institutions
  */
 export async function GET(req: NextRequest) {
-  const search = req.nextUrl.search || ""
+  const search = req.nextUrl.search || "";
+
   return proxyGet(req, `/institutions${search}`, {
     map404ToJSON: { items: [], total: 0 },
-  })
+  });
 }
 
 /**
- * POST /api/institutions -> proxy POST /institutions
+ * POST /api/institutions -> /institutions
  */
 export async function POST(req: NextRequest) {
-  let body: unknown
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: "Missing JSON body" }, { status: 400 })
-  }
+  const formData = await req.formData();
+  const token = (await cookies()).get("token")?.value
 
-  return proxyPost(req, "/institutions", JSON.stringify(body))
+  const response = await fetch("http://api.intellecta/institutions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "User-Agent": req.headers.get("User-Agent") ?? "",
+    },
+    body: formData, // repassa arquivos intactos
+  });
+
+  return response;
 }

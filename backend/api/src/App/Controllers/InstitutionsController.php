@@ -50,7 +50,7 @@ readonly class InstitutionsController extends BaseController
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }
 
-      $userOwnedInstitutionsDtos = array_map(function(Institution $institution) {
+      $userOwnedInstitutionsDtos = array_map(function(InstitutionSummary $institution) {
         $profilePicture = !empty($institution->getProfilePictureId())
           ? $this->filesDao->getFileById($institution->getProfilePictureId())
           : null;
@@ -58,7 +58,7 @@ readonly class InstitutionsController extends BaseController
           ? $this->filesDao->getFileById($institution->getBannerId())
           : null;
 
-        return new InstitutionDto($institution, $banner, $profilePicture);
+        return new InstitutionSummaryDto($institution, $banner, $profilePicture);
       }, $userOwnedInstitutions);
 
       $response->getBody()->write(json_encode($userOwnedInstitutionsDtos));
@@ -326,6 +326,7 @@ readonly class InstitutionsController extends BaseController
       $user = $request->getAttribute('user');
 
       $institution = $this->institutionsDao->getInstitutionById($institution_id);
+
       if (empty($institution)) {
         throw new HttpNotFoundException($request, LogService::HTTP_404);
       }

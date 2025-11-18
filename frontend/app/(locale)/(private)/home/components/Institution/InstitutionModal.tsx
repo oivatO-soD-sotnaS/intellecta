@@ -40,8 +40,11 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     bannerRef.current?.clear()
   }, [])
 
-  const handleSubmit = async () => {
-    // 1) Validações básicas
+  // -----------------------
+  // Submit
+  // -----------------------
+
+  const handleSubmit = React.useCallback(async () => {
     if (!name.trim() || !description.trim()) {
       addToast({
         title: "Preencha os campos obrigatórios",
@@ -49,6 +52,7 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
         color: "warning",
         variant: "flat",
       })
+
       return
     }
 
@@ -56,67 +60,27 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     const bannerFile = bannerRef.current?.getRawFiles()?.[0] ?? null
 
     setIsPending(true)
-
     try {
-      // 2) Sobe avatar e banner (se existirem) em paralelo
-      const [profileResp, bannerResp] = await Promise.all([
-        profileFile
-          ? uploadProfileAsset.mutateAsync(profileFile)
-          : Promise.resolve(null),
-        bannerFile
-          ? uploadProfileAsset.mutateAsync(bannerFile)
-          : Promise.resolve(null),
-      ])
+      const formData = new FormData()
 
-      const profilePictureId = profileResp?.file_id ?? null
-      const bannerId = bannerResp?.file_id ?? null
+      formData.append("name", name.trim())
+      formData.append("description", description.trim())
+      if (profileFile) formData.append("profile-picture", profileFile)
+      if (bannerFile) formData.append("banner", bannerFile)
+
+      // const profilePictureId = profileResp?.file_id ?? null
+      // const bannerId = bannerResp?.file_id ?? null
 
       // 3) Cria instituição com JSON – é isso que o back espera
       const res = await fetch("/api/institutions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim(),
-          profile_picture_id: profilePictureId,
-          banner_id: bannerId,
-        }),
+        body: formData,
       })
 
       if (!res.ok) {
-        // Tenta interpretar a resposta como JSON
-        let errorPayload: any = null
-        try {
-          errorPayload = await res.json()
-        } catch {
-        }
+        const text = await res.text().catch(() => "")
 
-        const backendMessage =
-          errorPayload?.error?.message ||
-          errorPayload?.message ||
-          errorPayload?.error ||
-          null
-
-        // Caso específico: limite de instituições atingido (403)
-        if (
-          res.status === 403 &&
-          backendMessage?.includes("maximum number of owned institutions")
-        ) {
-          addToast({
-            title: "Limite de instituições atingido",
-            description:
-              "Você já possui 3 instituições. Exclua uma delas ou use outra conta para criar mais.",
-            color: "warning",
-            variant: "flat",
-          })
-          // Não lança erro – tratamos aqui
-          return
-        }
-
-        // Outros erros: lança com mensagem mais limpa
-        throw new Error(backendMessage || `Erro ${res.status}`)
+        throw new Error(text || `Erro ${res.status}`)
       }
 
       addToast({
@@ -126,15 +90,16 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
         variant: "flat",
       })
 
-      onCreate()
+      onCreate?.()
       resetForm()
       onOpenChange(false)
     } catch (err) {
       console.error(err)
       const msg =
-        err instanceof Error
-          ? err.message
-          : "Ocorreu um erro ao criar a instituição."
+        (err instanceof Error && err.message) ||
+        (typeof err === "string"
+          ? err
+          : "Ocorreu um erro ao criar a instituição.")
 
       addToast({
         title: "Não foi possível criar",
@@ -145,22 +110,22 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
     } finally {
       setIsPending(false)
     }
-  }
+  }, [name, description, onCreate, onOpenChange, resetForm])
 
   const canSubmit =
     name.trim().length > 0 && description.trim().length > 0 && !isPending
 
   return (
     <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      size="lg"
       classNames={{
         base: "border border-border bg-card text-foreground",
         header: "border-b border-border",
         footer: "border-t border-border",
       }}
+      isOpen={isOpen}
       scrollBehavior="inside"
+      size="lg"
+      onOpenChange={onOpenChange}
     >
       <ModalContent>
         <ModalHeader className="text-base font-semibold">
@@ -170,27 +135,31 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
         <ModalBody className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
-              label="Nome da Instituição"
-              value={name}
-              onValueChange={setName}
               isRequired
-              variant="bordered"
-              size="sm"
               classNames={{ inputWrapper: "bg-background border-border" }}
+              label="Nome da Instituição"
               placeholder="Ex.: Instituto Intellecta"
+              size="sm"
+              value={name}
+              variant="bordered"
+              onValueChange={setName}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label
+              className="mb-1 block text-sm font-medium"
+              htmlFor="description"
+            >
               Descrição <span className="text-danger">*</span>
             </label>
             <textarea
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-primary"
+              id="description"
+              placeholder="Conte rapidamente sobre a instituição…"
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-primary"
-              placeholder="Conte rapidamente sobre a instituição…"
             />
           </div>
 
@@ -203,11 +172,11 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
               <FileUpload
                 ref={profileRef}
                 accept="image/*"
-                multiple={false}
-                maxFiles={1}
-                maxSizeMB={5}
                 description="PNG, JPG até 5MB"
                 dropzoneLabel="Selecionar imagem"
+                maxFiles={1}
+                maxSizeMB={5}
+                multiple={false}
               />
             </div>
 
@@ -216,11 +185,11 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
               <FileUpload
                 ref={bannerRef}
                 accept="image/*"
-                multiple={false}
-                maxFiles={1}
-                maxSizeMB={8}
                 description="PNG, JPG até 8MB • proporção 16:9 recomendada"
                 dropzoneLabel="Selecionar banner"
+                maxFiles={1}
+                maxSizeMB={8}
+                multiple={false}
               />
             </div>
           </div>
@@ -228,17 +197,17 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
 
         <ModalFooter>
           <Button
+            isDisabled={isPending}
             variant="flat"
             onPress={() => onOpenChange(false)}
-            isDisabled={isPending}
           >
             Cancelar
           </Button>
           <Button
             color="primary"
-            onPress={handleSubmit}
             isDisabled={!canSubmit}
             isLoading={isPending}
+            onPress={handleSubmit}
           >
             Criar instituição
           </Button>

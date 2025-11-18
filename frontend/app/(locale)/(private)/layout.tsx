@@ -1,13 +1,13 @@
 // app/(locale)/(private)/layout.tsx
-"use client"
-import "@/styles/globals.css"
-import { ReactNode } from "react"
+"use client";
+import "@/styles/globals.css";
+import { ReactNode } from "react";
 
-import { Providers } from "../../providers"
-import { ThemeSwitch } from "@/components/theme-switch"
-import Header from "./components/Header"
-import { SessionGuard } from "@/components/SessionGuar"
+import { Providers } from "../../providers";
 
+import Header from "./components/Header";
+
+import { SessionGuard } from "@/components/SessionGuar";
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (
@@ -18,5 +18,5 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
         <SessionGuard />
       </Providers>
     </div>
-  )
+  );
 }

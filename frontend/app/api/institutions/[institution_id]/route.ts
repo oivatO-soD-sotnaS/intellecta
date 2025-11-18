@@ -12,16 +12,18 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { institution_id: string } }
+  context: { params: Promise<{ institution_id: string }> },
 ) {
-  const { institution_id } = params
-  return proxyPut(req, `/institutions/${institution_id}`)
+  const { institution_id } = await context.params;
+  
+  return proxyPut(req, `/institutions/${institution_id}`);
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { institution_id: string } }
+  context: { params: Promise<{ institution_id: string }> },
 ) {
-  const { institution_id } = params
-  return proxyDelete(req, `/institutions/${institution_id}`)
+  const { institution_id } = await context.params;
+
+  return proxyDelete(req, `/institutions/${institution_id}`);
 }

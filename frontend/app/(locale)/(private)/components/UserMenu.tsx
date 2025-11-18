@@ -1,56 +1,43 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { Button } from "@heroui/button"
-import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover"
-import { Avatar } from "@heroui/avatar"
-import { ChevronDown } from "lucide-react"
-import { useSignOut } from "@/hooks/auth/useSignOut"
-import { useProfileForm } from "@/hooks/useProfileForm"
+import * as React from "react";
+import Link from "next/link";
+import { Button } from "@heroui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
+import { Avatar } from "@heroui/avatar";
+import { ChevronDown } from "lucide-react";
 
-
-// interface ProfileCardProps {
-//   name: string
-//   role?: string
-//   institutionsCount?: number
-//   disciplinesCount?: number
-//   avatarUrl?: string
-//   avatarId?: string
-// }
+import { useSignOut } from "@/hooks/auth/useSignOut";
+import { useProfileForm } from "@/hooks/useProfileForm";
 
 export type HeaderUser = {
-  name: string
-  email: string
-  avatarUrl?: string
-  avatarId?: string
-}
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  avatarId?: string;
+};
 
+export default function UserMenu({ user }: { user: HeaderUser }) {
+  const { mutate: signOut, isPending } = useSignOut();
 
-
-export default function UserMenu({
-  user,
-  onSignOut,
-}: {
-  user: HeaderUser
-  onSignOut?: () => void
-}) {
-  const { mutate: signOut, isPending } = useSignOut()
-
-  const { profilePictureId, profilePictureUrl } = useProfileForm()
+  const { profilePictureId, profilePictureUrl } = useProfileForm();
 
   const src =
     profilePictureUrl ??
     (profilePictureId ? `/api/files/${profilePictureId}` : undefined) ??
-   user.avatarUrl ??
-    (user.avatarId ? `/api/files/${user.avatarId}` : undefined)
-
+    user.avatarUrl ??
+    (user.avatarId ? `/api/files/${user.avatarId}` : undefined);
 
   return (
     <Popover placement="bottom-end">
       <PopoverTrigger>
-        <Button variant="flat" radius="lg" className="flex items-center gap-2">
-          <Avatar alt={user?.name ?? "Usuário"} size="sm" src={src || "#"} />
+        <Button className="flex items-center gap-2" radius="lg" variant="flat">
+          <Avatar
+            showFallback
+            alt={user?.name ?? "Usuário"}
+            size="sm"
+            src={src}
+          />
           <span className="hidden text-sm sm:inline">
             {user?.name || "Usuário"}
           </span>
@@ -61,10 +48,11 @@ export default function UserMenu({
       <PopoverContent className="w-56 p-3">
         <div className="mb-3 flex items-center gap-2">
           <Avatar
+            showFallback
             alt={user?.name ?? "Usuário"}
-            size="md"
-            src={src || "#"}
             className="shrink-0"
+            size="md"
+            src={src}
           />
           <div
             className="min-w-0 flex-1"
@@ -77,18 +65,11 @@ export default function UserMenu({
           </div>
         </div>
 
-        <ul className="space-y-1">
+        <ul className="space-y-1 w-full">
           <li>
             <Link href="/profile">
               <Button as="span" className="w-full justify-start" variant="flat">
                 Meu Perfil
-              </Button>
-            </Link>
-          </li>
-          <li>
-            <Link href="/settings">
-              <Button as="span" className="w-full justify-start" variant="flat">
-                Configurações
               </Button>
             </Link>
           </li>
@@ -102,9 +83,9 @@ export default function UserMenu({
           <li>
             <Button
               className="w-full justify-start text-danger"
+              isLoading={isPending}
               variant="flat"
               onPress={() => signOut()}
-              isLoading={isPending}
             >
               {isPending ? "Saindo..." : "Sair"}
             </Button>
@@ -112,5 +93,5 @@ export default function UserMenu({
         </ul>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

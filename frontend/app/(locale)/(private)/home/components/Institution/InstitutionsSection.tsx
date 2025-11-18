@@ -17,7 +17,7 @@ import { EmptyState } from "./EmptyState"
 
 import { useInstitutions } from "@/hooks/institution/useInstitutions"
 import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned"
-import type { Institution } from "@/types/institution"
+import type { Institution, InstitutionSummary } from "@/types/institution"
 import { SkeletonGrid } from "./SkeletonGrid"
 
 /* ---------------- helpers fora do componente ---------------- */
@@ -58,7 +58,7 @@ export default function InstitutionsSection() {
   const allQuery = useInstitutions()
   const ownedQuery = useInstitutionsOwned()
 
-  const ownedLimit = 3 
+  const ownedLimit = 3
   const ownedCount = ownedQuery.data?.length ?? 0
   const ownedCountLabel = ownedQuery.isLoading ? "…" : ownedCount
 
@@ -82,7 +82,7 @@ export default function InstitutionsSection() {
         variant: "flat",
       })
     }
-  }, [allQuery.isError]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allQuery.isError])
 
   React.useEffect(() => {
     if (ownedQuery.isError) {
@@ -93,20 +93,18 @@ export default function InstitutionsSection() {
         variant: "flat",
       })
     }
-  }, [ownedQuery.isError]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ownedQuery.isError])
 
   const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading
   const isError = tab === "all" ? allQuery.isError : ownedQuery.isError
 
   const list = tab === "all" ? (allQuery.data ?? []) : (ownedQuery.data ?? [])
-  const ownedIds = React.useMemo(
-    () => new Set((ownedQuery.data ?? []).map((i) => i.id)),
-    [ownedQuery.data]
-  )
 
-  const filtered = React.useMemo(() => {
+  const filtered: InstitutionSummary[] = React.useMemo(() => {
     const term = q.trim().toLowerCase()
+
     if (!term) return list
+
     return list.filter(
       (i) =>
         i.name.toLowerCase().includes(term) ||
@@ -145,9 +143,9 @@ export default function InstitutionsSection() {
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <Tabs
             aria-label="Filtro de instituições"
+            className="sm:col-span-1"
             selectedKey={tab}
             onSelectionChange={(k) => setTab(k as "all" | "owned")}
-            className="sm:col-span-1"
           >
             <Tab key="all" title="Todas" />
             <Tab key="owned" title={ownedTabTitle} />
@@ -155,20 +153,20 @@ export default function InstitutionsSection() {
 
           <div className="sm:col-span-2">
             <Input
-              value={q}
-              onValueChange={setQ}
-              radius="full"
-              variant="bordered"
-              size="sm"
-              placeholder="Buscar por nome ou e-mail…"
-              startContent={
-                <Search className="h-4 w-4 text-muted-foreground" />
-              }
               classNames={{
                 inputWrapper:
                   "bg-background border-border h-10 shadow-sm focus-within:ring-2 focus-within:ring-primary",
                 input: "text-sm placeholder:text-muted-foreground/70",
               }}
+              placeholder="Buscar por nome ou e-mail…"
+              radius="full"
+              size="sm"
+              startContent={
+                <Search className="h-4 w-4 text-muted-foreground" />
+              }
+              value={q}
+              variant="bordered"
+              onValueChange={setQ}
             />
           </div>
         </div>
@@ -179,10 +177,10 @@ export default function InstitutionsSection() {
             <SkeletonGrid />
           ) : isError ? (
             <EmptyState
-              variant="error"
-              title="Não foi possível carregar suas instituições."
               description="Tente novamente em instantes."
               primaryText="Tentar novamente"
+              title="Não foi possível carregar suas instituições."
+              variant="error"
               onPrimaryClick={() =>
                 tab === "all" ? allQuery.refetch() : ownedQuery.refetch()
               }
@@ -202,15 +200,19 @@ export default function InstitutionsSection() {
               }
               primaryText="Criar instituição"
               primaryHref="/institutions/create"
+              primaryText="Criar instituição"
+              title={
+                tab === "owned"
+                  ? "Você ainda não criou instituições."
+                  : "Você ainda não participa de nenhuma instituição."
+              }
+              variant="empty"
             />
           ) : (
             <ul className="grid grid-cols-1 gap-4">
               {filtered.map((i) => (
-                <li key={i.id} className="w-full">
-                  <InstitutionCard
-                    className="w-full"
-                    institution={toUICard(i, ownedIds.has(i.id))}
-                  />
+                <li key={i.institution_id} className="w-full">
+                  <InstitutionCard className="w-full" institution={i} />
                 </li>
               ))}
             </ul>
