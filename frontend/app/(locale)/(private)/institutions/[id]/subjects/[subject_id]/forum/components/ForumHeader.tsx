@@ -11,14 +11,6 @@ type ForumHeaderProps = {
 export function ForumHeader({ totalCount, isFetching }: ForumHeaderProps) {
   return (
     <header className="space-y-3">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span>Instituições</span>
-        <span className="text-muted-foreground/60">/</span>
-        <span>Disciplinas</span>
-        <span className="text-muted-foreground/60">/</span>
-        <span className="font-medium text-foreground">Fórum</span>
-      </div>
-
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">

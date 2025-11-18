@@ -1,5 +1,6 @@
 // app/(locale)/(private)/institutions/[institution_id]/subjects/[subject_id]/forum/page.tsx
 
+import SubjectForumClientMock from "./components/mock/SubjectForumClient"
 import SubjectForumClient from "./SubjectForumClient"
 
 type PageParams = {

@@ -3,6 +3,7 @@ import SubjectMaterialsTab from "./SubjectMaterialsTab"
 import SubjectAssignmentsTab from "./SubjectAssignmentsTab"
 
 
+
 interface SubjectTabsProps {
   institutionId: string
   subjectId: string
