@@ -1,11 +1,11 @@
 // components/InstitutionCard.tsx
-"use client";
+"use client"
 
-import * as React from "react";
-import Link from "next/link";
-import { Button } from "@heroui/button";
-import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
-import { Avatar } from "@heroui/avatar";
+import * as React from "react"
+import Link from "next/link"
+import { Button } from "@heroui/button"
+import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover"
+import { Avatar } from "@heroui/avatar"
 import {
   MoreVertical,
   MapPin,
@@ -16,46 +16,52 @@ import {
   Pencil,
   Trash2,
   Settings,
-} from "lucide-react";
+} from "lucide-react"
 
-import { EditInstitutionModal } from "./EditInstitutionModal";
-import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+import { EditInstitutionModal } from "./EditInstitutionModal"
+import { ConfirmDeleteModal } from "./ConfirmDeleteModal"
 
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { formatDatePtBR, formatNumber, timeAgo } from "@/lib/format";
-import { normalizeFileUrl } from "@/lib/urls";
-import { InstitutionSummary } from "@/types/institution";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+import { formatDatePtBR, formatNumber, timeAgo } from "@/lib/format"
+import { normalizeFileUrl } from "@/lib/urls"
+import { InstitutionSummary } from "@/types/institution"
+// import { Badge } from "@/components/ui/badge";
 
-type Props = { institution: InstitutionSummary; className?: string };
+import type { InstitutionCardItem } from "@/types/institution";
+import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
+// import { EditInstitutionModal } from "./EditInstitutionModal";
+// import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+import { Badge } from "@/components/ui/badge"
+
+type Props = { institution: InstitutionCardItem; className?: string }
 
 export function InstitutionCard({ institution, className }: Props) {
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [editOpen, setEditOpen] = React.useState(false);
-  const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false)
+  const [editOpen, setEditOpen] = React.useState(false)
+  const [deleteOpen, setDeleteOpen] = React.useState(false)
 
   // Usa o summary atualizado ou os dados da institution
-  const finalInstitution = institution;
+  const finalInstitution = institution
 
   // URLs finais
-  const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url);
-  const avatarUrl = normalizeFileUrl(finalInstitution.profilePicture?.url);
+  const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url)
+  const avatarUrl = normalizeFileUrl(finalInstitution.profilePicture?.url)
 
-  const role = finalInstitution.role;
-  const members = formatNumber(finalInstitution.active_user_count);
-  const created = formatDatePtBR(new Date()); // Não temos created_at no summary
-  const lastAct = timeAgo(new Date()); // Não temos last_activity no summary
+  const role = finalInstitution.role
+  const members = formatNumber(finalInstitution.active_user_count)
+  const created = formatDatePtBR(new Date()) // Não temos created_at no summary
+  const lastAct = timeAgo(new Date()) // Não temos last_activity no summary
 
   // Verifica se o usuário é admin para mostrar opções de edição
-  const isAdmin = role === "admin";
+  const isAdmin = role === "admin"
 
   return (
     <>
       <Card
         className={cn(
           "overflow-hidden border-border bg-card shadow-md",
-          className,
+          className
         )}
       >
         {/* Banner */}
@@ -112,8 +118,8 @@ export function InstitutionCard({ institution, className }: Props) {
                       color="warning"
                       variant="light"
                       onPress={() => {
-                        setMenuOpen(false);
-                        setEditOpen(true);
+                        setMenuOpen(false)
+                        setEditOpen(true)
                       }}
                     >
                       <Pencil className="h-4 w-4" /> Editar instituição
@@ -134,8 +140,8 @@ export function InstitutionCard({ institution, className }: Props) {
                       color="danger"
                       variant="light"
                       onPress={() => {
-                        setMenuOpen(false);
-                        setDeleteOpen(true);
+                        setMenuOpen(false)
+                        setDeleteOpen(true)
                       }}
                     >
                       <Trash2 className="h-4 w-4" /> Deletar instituição
@@ -149,7 +155,7 @@ export function InstitutionCard({ institution, className }: Props) {
 
         <CardContent className="p-4">
           {/* Cabeçalho: avatar + textos */}
-          <div className="relative -mt-10 mb-3 flex items-center gap-4">
+          <div className="relative -mt-10 mqqqqqqqqqqqqqqqqqqqqqqqqb-3 flex items-center gap-4">
             <Avatar
               key={avatarUrl || "no-avatar"}
               showFallback
@@ -179,7 +185,7 @@ export function InstitutionCard({ institution, className }: Props) {
             </div>
           </div>
 
-          {/* infos */}
+          {/* Summarry mock */}
           <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <Info
               icon={<MapPin className="h-3.5 w-3.5" />}
@@ -197,6 +203,7 @@ export function InstitutionCard({ institution, className }: Props) {
               icon={<CalendarDays className="h-3.5 w-3.5" />}
               text={`Criada em ${created}`}
             />
+
             <Info
               className="sm:col-span-2"
               icon={<Clock className="h-3.5 w-3.5" />}
@@ -235,7 +242,7 @@ export function InstitutionCard({ institution, className }: Props) {
         </>
       )}
     </>
-  );
+  )
 }
 
 function Info({
@@ -243,14 +250,14 @@ function Info({
   text,
   className,
 }: {
-  icon: React.ReactNode;
-  text: React.ReactNode;
-  className?: string;
+  icon: React.ReactNode
+  text: React.ReactNode
+  className?: string
 }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <span className="text-foreground/70">{icon}</span>
       <span className="truncate">{text}</span>
     </div>
-  );
+  )
 }

@@ -1,22 +1,25 @@
 // app/(locale)/(private)/home/components/HomeClient.tsx
-"use client";
+"use client"
 
-import React from "react";
+import React from "react"
 
-import { ProfileCard } from "./ProfileCard";
-import { UpcomingEvents } from "./UpcomingEvents";
-import InstitutionsSection from "./Institution/InstitutionsSection";
+import { UpcomingEvents } from "./UpcomingEvents"
+import InstitutionsSection from "./Institution/InstitutionsSection"
+import { useInstitutions } from "@/hooks/institution/useInstitutions"
+import { useSubjectsCountByInstitutions } from "@/hooks/subjects/useSubjectsCountByInstitutions"
+
+import { ProfileCard } from "./ProfileCard"
 
 export interface User {
-  user_id: string;
-  full_name: string;
-  email: string;
-  profile_picture_id?: string;
-  profile_picture_url?: string;
+  user_id: string
+  full_name: string
+  email: string
+  profile_picture_id?: string
+  profile_picture_url?: string
 }
 
 interface HomeClientProps {
-  user: User;
+  user: User
 }
 
 export default function HomeClient({ user }: HomeClientProps) {
@@ -34,5 +37,5 @@ export default function HomeClient({ user }: HomeClientProps) {
         </aside>
       </div>
     </div>
-  );
+  )
 }

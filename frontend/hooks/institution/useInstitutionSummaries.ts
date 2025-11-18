@@ -5,13 +5,26 @@ import { apiGet } from "@/lib/apiClient";
 import type { ApiInstitutionSummary } from "@/types/institution";
 import { mapApiInstitutionSummary, normalizeList } from "@/types/institution.mappers";
 
-export function useInstitutionsSummaries() {
+export function useInstitutionSummaries() {
   return useQuery({
-    queryKey: ["institutions", "summaries"],
-    queryFn: async () => {
-      const data = await apiGet<ApiInstitutionSummary[] | { items: ApiInstitutionSummary[] }>("/api/institutions/summaries");
-      return normalizeList(data).map(mapApiInstitutionSummary);
-    },
+    queryKey: ["institution", "summaries"],
     staleTime: 60_000,
-  });
+    queryFn: async () => {
+      try {
+        // aqui usamos o proxy do Next:
+        // app/api/institutions/summaries/route.ts  ->  /api/institutions/summaries
+        const data = await apiGet<ApiList>("/api/institutions/summaries")
+        return norm(data)
+      } catch (err: any) {
+        const status =
+          err?.status ?? err?.response?.status ?? err?.cause?.status
+
+        if (status === 404) {
+          return []
+        }
+
+        throw err
+      }
+    },
+  })
 }

@@ -1,15 +1,13 @@
-// app/api/institutions/[id]/route.ts
-import { NextRequest } from "next/server";
-
-import { proxyGet, proxyPut, proxyDelete } from "@/app/api/_lib/proxy";
+// app/api/institutions/[institution_id]/route.ts
+import { NextRequest } from "next/server"
+import { proxyGet, proxyPut, proxyDelete } from "@/app/api/_lib/proxy"
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ institution_id: string }> },
+  { params }: { params: { institution_id: string } }
 ) {
-  const { institution_id } = await context.params;
-
-  return proxyGet(req, `/institutions/${institution_id}`);
+  const { institution_id } = params
+  return proxyGet(req, `/institutions/${institution_id}`)
 }
 
 export async function PUT(

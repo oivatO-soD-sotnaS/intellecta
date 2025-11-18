@@ -8,16 +8,19 @@ import type {
   CreateInstitutionInput,
 } from "./institution";
 
-export function mapApiInstitution(i: ApiInstitution): Institution {
+export function mapApiInstitution(i: ApiInstitution | any): Institution {
+  const profilePicture = i.profile_picture ?? i.profilePicture ?? null
+  const banner = i.banner ?? null
+
   return {
     id: i.institution_id,
     ownerUserId: i.user_id,
     name: i.name,
     email: i.email,
     description: i.description,
-    profilePicture: i.profile_picture ?? null,
-    banner: i.banner ?? null,
-  };
+    profilePicture,
+    banner,
+  }
 }
 
 export function buildCreateInstitutionFormData(
