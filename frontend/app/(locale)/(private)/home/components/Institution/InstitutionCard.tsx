@@ -4,7 +4,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@heroui/button";
-import { Badge } from "@heroui/badge";
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
 import { Avatar } from "@heroui/avatar";
 import {
@@ -19,53 +18,54 @@ import {
   Settings,
 } from "lucide-react";
 
+import { EditInstitutionModal } from "./EditInstitutionModal";
+import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatDatePtBR, formatNumber, timeAgo } from "@/lib/format";
 import { normalizeFileUrl } from "@/lib/urls";
+import { InstitutionSummary } from "@/types/institution";
+import { Badge } from "@/components/ui/badge";
 
-import type { InstitutionCardItem } from "@/types/institution";
-import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary";
-import { EditInstitutionModal } from "./EditInstitutionModal";
-import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
-
-type Props = { institution: InstitutionCardItem; className?: string };
+type Props = { institution: InstitutionSummary; className?: string };
 
 export function InstitutionCard({ institution, className }: Props) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
   const [deleteOpen, setDeleteOpen] = React.useState(false);
 
-  // Só busca summary quando faltar alguma imagem no item base (evita overfetch/404)
-  const needSummary = !institution.imageUrl || !institution.bannerUrl;
-  const { data: summary } = useInstitutionSummary(institution.id, { enabled: needSummary });
+  // Usa o summary atualizado ou os dados da institution
+  const finalInstitution = institution;
 
-  // URLs finais (summary tem prioridade por estar mais fresco)
-  const bannerUrl = normalizeFileUrl(
-    summary?.banner?.url ?? institution.bannerUrl ?? undefined
-  );
-  const avatarUrl = normalizeFileUrl(
-    summary?.profilePicture?.url ?? institution.imageUrl ?? undefined
-  );
+  // URLs finais
+  const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url);
+  const avatarUrl = normalizeFileUrl(finalInstitution.profilePicture?.url);
 
-  const role = summary?.role || (institution.isOwner ? "admin" : undefined);
-  const status = summary?.status || "active";
-  const members = formatNumber(summary?.membersCount);
-  const subjects = formatNumber(summary?.subjectsCount);
-  const created = formatDatePtBR(summary?.createdAt);
-  const lastAct = timeAgo(summary?.lastActivityAt);
+  const role = finalInstitution.role;
+  const members = formatNumber(finalInstitution.active_user_count);
+  const created = formatDatePtBR(new Date()); // Não temos created_at no summary
+  const lastAct = timeAgo(new Date()); // Não temos last_activity no summary
+
+  // Verifica se o usuário é admin para mostrar opções de edição
+  const isAdmin = role === "admin";
 
   return (
     <>
-      <Card className={cn("overflow-hidden border-border bg-card shadow-md", className)}>
+      <Card
+        className={cn(
+          "overflow-hidden border-border bg-card shadow-md",
+          className,
+        )}
+      >
         {/* Banner */}
         <div className="relative h-44 w-full sm:h-52 md:h-56">
           {bannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={bannerUrl}
-              alt=""
+              alt={`Banner da instituição ${finalInstitution.name}`}
               className="absolute inset-0 h-full w-full object-cover"
+              src={bannerUrl}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500" />
@@ -75,102 +75,107 @@ export function InstitutionCard({ institution, className }: Props) {
 
           {/* badges topo */}
           <div className="absolute left-3 top-3 flex gap-2">
-            {role && (
-              <Badge color="danger" size="sm" variant="solid">
-                {role === "admin" ? "Admin" : "Membro"}
-              </Badge>
+            <Badge>
+              {role === "admin"
+                ? "Admin"
+                : role === "teacher"
+                  ? "Professor"
+                  : "Estudante"}
+            </Badge>
+            {finalInstitution.upcoming_event_count > 0 && (
+              <Badge>{finalInstitution.upcoming_event_count} evento(s)</Badge>
             )}
           </div>
 
-          {/* menu */}
-          <div className="absolute right-3 top-3">
-            <Popover isOpen={menuOpen} onOpenChange={setMenuOpen} placement="left-start">
-              <PopoverTrigger>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="flat"
-                  className="bg-border opacity-55 backdrop-blur hover:opacity-100"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-1">
-                <div className="grid">
+          {/* menu - só mostra para admins */}
+          {isAdmin && (
+            <div className="absolute right-3 top-3">
+              <Popover
+                isOpen={menuOpen}
+                placement="left-start"
+                onOpenChange={setMenuOpen}
+              >
+                <PopoverTrigger>
                   <Button
-                    variant="light"
-                    color="warning"
-                    className="justify-start gap-2"
-                    onPress={() => {
-                      setMenuOpen(false);
-                      setEditOpen(true);
-                    }}
+                    isIconOnly
+                    className="bg-border opacity-55 backdrop-blur hover:opacity-100"
+                    size="sm"
+                    variant="flat"
                   >
-                    <Pencil className="h-4 w-4" /> Editar instituição
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
-
-                  <Button variant="light" className="justify-start gap-2" isDisabled>
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded border border-border text-[10px]">
-                      ✓
-                    </span>
-                    Selecionar instituição
-                  </Button>
-
-                  <Button variant="light" className="justify-start gap-2">
-                    <Settings className="h-4 w-4" />
-                    <Link
-                      href={`/institutions/${institution.id}/settings`}
-                      className="ml-3 hidden text-xs text-muted-foreground underline-offset-2 hover:underline sm:inline"
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-1">
+                  <div className="grid">
+                    <Button
+                      className="justify-start gap-2"
+                      color="warning"
+                      variant="light"
+                      onPress={() => {
+                        setMenuOpen(false);
+                        setEditOpen(true);
+                      }}
                     >
-                      Configurações
-                    </Link>
-                  </Button>
+                      <Pencil className="h-4 w-4" /> Editar instituição
+                    </Button>
 
-                  <Button
-                    variant="light"
-                    color="danger"
-                    className="justify-start gap-2"
-                    onPress={() => {
-                      setMenuOpen(false);
-                      setDeleteOpen(true);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" /> Deletar instituição
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+                    <Button className="justify-start gap-2" variant="light">
+                      <Settings className="h-4 w-4" />
+                      <Link
+                        className="ml-3 hidden text-xs text-muted-foreground underline-offset-2 hover:underline sm:inline"
+                        href={`/institutions/${finalInstitution.institution_id}/settings`}
+                      >
+                        Configurações
+                      </Link>
+                    </Button>
+
+                    <Button
+                      className="justify-start gap-2"
+                      color="danger"
+                      variant="light"
+                      onPress={() => {
+                        setMenuOpen(false);
+                        setDeleteOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" /> Deletar instituição
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
         </div>
 
         <CardContent className="p-4">
           {/* Cabeçalho: avatar + textos */}
           <div className="relative -mt-10 mb-3 flex items-center gap-4">
             <Avatar
-              key={avatarUrl || "no-avatar"} // força re-render quando a URL muda
-              src={avatarUrl}
-              name={institution.name}
-              alt={institution.name}
-              size="lg"
+              key={avatarUrl || "no-avatar"}
               showFallback
+              alt={finalInstitution.name}
               classNames={{
                 base: "rounded-xl ring-2 ring-background shadow-sm bg-muted",
                 img: "object-cover",
               }}
+              name={finalInstitution.name}
+              size="lg"
+              src={avatarUrl}
             />
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="truncate text-base font-semibold leading-5">
-                  {institution.name}
+                  {finalInstitution.name}
                 </h3>
-                {status === "active" && (
-                  <Badge size="sm" variant="solid" color="success">
-                    Ativa
-                  </Badge>
-                )}
+                <Badge variant={"outline"}>Ativa</Badge>
               </div>
-              <div className="text-xs text-muted-foreground">Instituto</div>
+              <div className="text-xs text-muted-foreground">Instituição</div>
+              {finalInstitution.description && (
+                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                  {finalInstitution.description}
+                </p>
+              )}
             </div>
           </div>
 
@@ -178,30 +183,32 @@ export function InstitutionCard({ institution, className }: Props) {
           <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
             <Info
               icon={<MapPin className="h-3.5 w-3.5" />}
-              text={
-                summary?.city && summary?.state
-                  ? `${summary.city}, ${summary.state}`
-                  : "—"
-              }
+              text={finalInstitution.email}
             />
-            <Info icon={<Users className="h-3.5 w-3.5" />} text={`${members} membros`} />
-            <Info icon={<BookOpen className="h-3.5 w-3.5" />} text={`${subjects} disciplinas`} />
+            <Info
+              icon={<Users className="h-3.5 w-3.5" />}
+              text={`${members} membros`}
+            />
+            <Info
+              icon={<BookOpen className="h-3.5 w-3.5" />}
+              text={`${finalInstitution.upcoming_event_count} eventos`}
+            />
             <Info
               icon={<CalendarDays className="h-3.5 w-3.5" />}
-              text={`Criado em ${created}`}
+              text={`Criada em ${created}`}
             />
             <Info
+              className="sm:col-span-2"
               icon={<Clock className="h-3.5 w-3.5" />}
               text={lastAct !== "—" ? lastAct : "Sem atividade recente"}
-              className="sm:col-span-2"
             />
           </div>
 
           {/* CTA */}
           <div className="mt-5">
             <Link
-              href={`/institutions/${institution.id}`}
               className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-opacity hover:opacity-90 sm:w-full"
+              href={`/institutions/${finalInstitution.institution_id}`}
             >
               Acessar
             </Link>
@@ -209,20 +216,24 @@ export function InstitutionCard({ institution, className }: Props) {
         </CardContent>
       </Card>
 
-      {/* Modais */}
-      <EditInstitutionModal
-        institutionId={institution.id}
-        isOpen={editOpen}
-        onOpenChange={setEditOpen}
-        onUpdated={() => {}}
-      />
-      <ConfirmDeleteModal
-        institutionId={institution.id}
-        name={institution.name}
-        isOpen={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        onDeleted={() => {}}
-      />
+      {/* Modais - só renderiza para admins */}
+      {isAdmin && (
+        <>
+          <EditInstitutionModal
+            institutionId={finalInstitution.institution_id}
+            isOpen={editOpen}
+            onOpenChange={setEditOpen}
+            onUpdated={() => {}}
+          />
+          <ConfirmDeleteModal
+            institutionId={finalInstitution.institution_id}
+            isOpen={deleteOpen}
+            name={finalInstitution.name}
+            onDeleted={() => {}}
+            onOpenChange={setDeleteOpen}
+          />
+        </>
+      )}
     </>
   );
 }

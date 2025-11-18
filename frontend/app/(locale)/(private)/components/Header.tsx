@@ -1,22 +1,24 @@
 // app/(locale)/(private)/components/Header.tsx
-"use client"
+"use client";
 
-import Link from "next/link"
-import { ReactNode } from "react"
-import { GraduationCap } from "lucide-react"
-import { cn } from "@/lib/utils"
-import NotificationsBell from "./NotificationsBell"
-import SearchBar from "./SearchBar"
-import UserMenu, { type HeaderUser } from "./UserMenu"
-import { useCurrentUser } from "@/hooks/auth/useCurrentUser" 
+import Link from "next/link";
+import { ReactNode } from "react";
+import { GraduationCap } from "lucide-react";
+
+import NotificationsBell from "./NotificationsBell";
+import SearchBar from "./SearchBar";
+import UserMenu, { type HeaderUser } from "./UserMenu";
+
+import { cn } from "@/lib/utils";
+import { useCurrentUser } from "@/hooks/auth/useCurrentUser";
 
 type HeaderProps = {
-  leftSlot?: ReactNode
-  className?: string
-}
+  leftSlot?: ReactNode;
+  className?: string;
+};
 
 export default function Header({ leftSlot, className }: HeaderProps) {
-  const { data: me } = useCurrentUser() 
+  const { data: me } = useCurrentUser();
 
   const user: HeaderUser = {
     name: me?.full_name ?? me?.email?.split("@")[0] ?? "Usuário",
@@ -24,27 +26,26 @@ export default function Header({ leftSlot, className }: HeaderProps) {
     // avatarUrl: (me as any)?.profile_picture_url ?? (me as any)?.image ?? undefined,
     avatarUrl: me?.profile_picture ?? undefined,
     avatarId: me?.profile_picture ?? undefined,
-  }
+  };
 
   // console.log("User avatar URL:", user.avatarUrl);
 
-
   return (
     <header
-      role="banner"
       className={cn(
         "sticky top-0 z-40 w-full border-b backdrop-blur bg-white/80 supports-[backdrop-filter]:bg-white/60 dark:bg-neutral-900/70",
-        className
+        className,
       )}
+      role="banner"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-3 sm:px-4">
         <div className="flex items-center gap-2">
           {leftSlot ? <div className="md:hidden">{leftSlot}</div> : null}
 
           <Link
-            href="/"
             aria-label="Ir para a página inicial"
             className="hidden items-center gap-2 md:flex"
+            href="/home"
           >
             <GraduationCap className="h-5 w-5 text-primary" />
             <span className="text-sm font-semibold tracking-tight">
@@ -65,5 +66,5 @@ export default function Header({ leftSlot, className }: HeaderProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }

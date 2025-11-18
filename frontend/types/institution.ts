@@ -1,5 +1,6 @@
 // types/institution.ts
 
+import { ApiUploadedFile } from "./file";
 import { AppUserDto, Role } from "./user";
 
 /** Arquivo vindo do backend */
@@ -38,25 +39,24 @@ export type ApiInstitutionSummary = {
   institution_id: string;
   name: string;
   email: string;
-  profile_picture?: ApiFileMeta | null;
-  banner?: ApiFileMeta | null;
-  city?: string;
-  state?: string;
-  members_count?: number;
-  subjects_count?: number;
-  created_at?: string;        // ISO
-  last_activity_at?: string;  // ISO
-  status?: "active" | "inactive" | string;
-  role?: "admin" | "member" | string;
-  progress_percent?: number;  // 0..100
+  profilePicture?: ApiFileMeta;
+  banner?: ApiFileMeta;
+  active_user_count: number;
+  description: string;
+  role: "admin" | "teacher" | "student";
+  upcoming_event_count: number;
 };
 
 export type InstitutionSummary = {
-  id: string;
+  institution_id: string;
   name: string;
   email: string;
-  profilePicture?: ApiFileMeta | null;
-  banner?: ApiFileMeta | null;
+  profilePicture?: ApiFileMeta;
+  banner?: ApiFileMeta;
+  active_user_count: number;
+  description: string;
+  role: "admin" | "teacher" | "student";
+  upcoming_event_count: number;
 };
 
 /** Payload para criar (POST /institutions) */

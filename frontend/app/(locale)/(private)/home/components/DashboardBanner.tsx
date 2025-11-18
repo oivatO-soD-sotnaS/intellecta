@@ -4,6 +4,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { CalendarDays, Mail, ClipboardList } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 
@@ -37,6 +38,7 @@ export default function DashboardBanner({
 
   React.useEffect(() => {
     const base = nowISO ? new Date(nowISO) : new Date();
+
     setFormattedDate(new Intl.DateTimeFormat("pt-BR", fmtOpts).format(base));
   }, [nowISO]);
 
@@ -71,10 +73,10 @@ export default function DashboardBanner({
         "
       >
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
           className="grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6 lg:grid-cols-12"
+          initial={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
         >
           {/* Texto esquerdo */}
           <div className="lg:col-span-7">
@@ -95,29 +97,29 @@ export default function DashboardBanner({
           <div className="lg:col-span-5">
             <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <StatCard
-                value={stats.activities}
+                Icon={ClipboardList}
                 label="Atividades"
                 sublabel="Pendentes"
-                Icon={ClipboardList}
+                value={stats.activities}
               />
               <StatCard
-                value={stats.events}
+                Icon={CalendarDays}
                 label="Eventos"
                 sublabel="Próximos"
-                Icon={CalendarDays}
+                value={stats.events}
               />
               <StatCard
-                value={stats.messages}
+                Icon={Mail}
                 label="Mensagens"
                 sublabel="Não lidas"
-                Icon={Mail}
+                value={stats.messages}
               />
             </div>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }
 
 function StatCard({
@@ -146,14 +148,16 @@ function StatCard({
             bg-white/15 ring-1 ring-white/15
           "
         >
-          <Icon className="h-5 w-5" aria-hidden />
+          <Icon aria-hidden className="h-5 w-5" />
         </div>
         <div className="min-w-0">
           <div className="text-base font-semibold tabular-nums">{value}</div>
           <div className="mt-0.5 text-[10px] uppercase tracking-wide text-white/70 sm:visible invisible font-black">
             {label}
           </div>
-          <div className="text-[10px] text-white/60 sm:visible invisible font-black">{sublabel}</div>
+          <div className="text-[10px] text-white/60 sm:visible invisible font-black">
+            {sublabel}
+          </div>
         </div>
       </CardContent>
     </Card>

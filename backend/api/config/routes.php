@@ -54,10 +54,11 @@ return function (App $app) {
             $user->put('', UsersController::class . ':updateUser');
             $user->delete('', UsersController::class . ':deleteUser');
 
-            $user->group('/events', function($userEvents) {
+            $user->group('/events', function($userEvents) use ($user) {
                 $userEvents->post('', UserEventsController::class . ':createUserEvent');
                 $userEvents->get('', UserEventsController::class . ':getUserEvents');
-    
+                $userEvents->get('/upcoming', UserEventsController::class . ':getUpcomingEvents');
+
                 $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
                     $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
                     $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');

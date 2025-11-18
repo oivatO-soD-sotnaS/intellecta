@@ -1,5 +1,7 @@
 "use client";
 
+import type { InstitutionSummary } from "@/types/institution";
+
 import * as React from "react";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Input } from "@heroui/input";
@@ -7,42 +9,32 @@ import { Skeleton } from "@heroui/skeleton";
 import { addToast } from "@heroui/toast";
 import { Search } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Institution as CardInstitution, InstitutionCard } from "./InstitutionCard";
+import { InstitutionCard } from "./InstitutionCard";
 import { CreateInstitutionButton } from "./CreateInstitutionButton";
 import { InstitutionModal } from "./InstitutionModal";
 import { EmptyState } from "./EmptyState";
 
-import { useInstitutions } from "@/hooks/institution/useInstitutions";
+import { Card, CardContent } from "@/components/ui/card";
 import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned";
-import type { Institution } from "@/types/institution";
+import { useInstitutionsSummaries } from "@/hooks/institution/useInstitutionSummaries";
 
 /* ---------------- helpers fora do componente ---------------- */
 
 const SKELETON_COUNT = 6;
 
-function getErrorMessage(err: unknown, fallback = "Não foi possível carregar suas instituições.") {
+function getErrorMessage(
+  err: unknown,
+  fallback = "Não foi possível carregar suas instituições.",
+) {
   if (typeof err === "string") return err;
   if (err instanceof Error && err.message) return err.message;
   try {
     const any = err as any;
+
     if (any?.message) return String(any.message);
   } catch {}
-  return fallback;
-}
 
-/** Converte o type de domínio (Institution) para o type do seu InstitutionCard */
-function toUICard(i: Institution, isOwner: boolean): CardInstitution {
-  return {
-    id: i.id,
-    name: i.name,
-    description: i.description,
-    bannerUrl: i.banner?.url ?? undefined,
-    profilePictureUrl: i.profilePicture?.url ?? undefined,
-    role: isOwner ? "admin" : undefined,
-    members: undefined,
-    disciplines: undefined,
-  };
+  return fallback;
 }
 
 function SkeletonGrid() {
@@ -73,7 +65,7 @@ export default function InstitutionsSection() {
   const [q, setQ] = React.useState("");
   const [isModalOpen, setModalOpen] = React.useState(false);
 
-  const allQuery = useInstitutions();
+  const allQuery = useInstitutionsSummaries();
   const ownedQuery = useInstitutionsOwned();
 
   // toasts de erro (HeroUI)
@@ -86,7 +78,7 @@ export default function InstitutionsSection() {
         variant: "flat",
       });
     }
-  }, [allQuery.isError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allQuery.isError]);
 
   React.useEffect(() => {
     if (ownedQuery.isError) {
@@ -97,18 +89,23 @@ export default function InstitutionsSection() {
         variant: "flat",
       });
     }
-  }, [ownedQuery.isError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ownedQuery.isError]);
 
   const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading;
   const isError = tab === "all" ? allQuery.isError : ownedQuery.isError;
 
-  const list = tab === "all" ? allQuery.data ?? [] : ownedQuery.data ?? [];
-  const ownedIds = React.useMemo(() => new Set((ownedQuery.data ?? []).map((i) => i.id)), [ownedQuery.data]);
+  const list = tab === "all" ? (allQuery.data ?? []) : (ownedQuery.data ?? []);
 
-  const filtered = React.useMemo(() => {
+  const filtered: InstitutionSummary[] = React.useMemo(() => {
     const term = q.trim().toLowerCase();
+
     if (!term) return list;
-    return list.filter((i) => i.name.toLowerCase().includes(term) || i.email.toLowerCase().includes(term));
+
+    return list.filter(
+      (i) =>
+        i.name.toLowerCase().includes(term) ||
+        i.email.toLowerCase().includes(term),
+    );
   }, [list, q]);
 
   const handleCreate = React.useCallback(() => {
@@ -128,8 +125,12 @@ export default function InstitutionsSection() {
         {/* header */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-semibold sm:text-lg">Minhas Instituições</h3>
-            <p className="text-sm text-muted-foreground">Gerencie e acesse rapidamente suas instituições.</p>
+            <h3 className="text-base font-semibold sm:text-lg">
+              Minhas Instituições
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Gerencie e acesse rapidamente suas instituições.
+            </p>
           </div>
           <CreateInstitutionButton onClick={() => setModalOpen(true)} />
         </div>
@@ -138,9 +139,9 @@ export default function InstitutionsSection() {
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <Tabs
             aria-label="Filtro de instituições"
+            className="sm:col-span-1"
             selectedKey={tab}
             onSelectionChange={(k) => setTab(k as "all" | "owned")}
-            className="sm:col-span-1"
           >
             <Tab key="all" title="Todas" />
             <Tab key="owned" title="Proprietário" />
@@ -148,17 +149,20 @@ export default function InstitutionsSection() {
 
           <div className="sm:col-span-2">
             <Input
-              value={q}
-              onValueChange={setQ}
-              radius="full"
-              variant="bordered"
-              size="sm"
-              placeholder="Buscar por nome ou e-mail…"
-              startContent={<Search className="h-4 w-4 text-muted-foreground" />}
               classNames={{
-                inputWrapper: "bg-background border-border h-10 shadow-sm focus-within:ring-2 focus-within:ring-primary",
+                inputWrapper:
+                  "bg-background border-border h-10 shadow-sm focus-within:ring-2 focus-within:ring-primary",
                 input: "text-sm placeholder:text-muted-foreground/70",
               }}
+              placeholder="Buscar por nome ou e-mail…"
+              radius="full"
+              size="sm"
+              startContent={
+                <Search className="h-4 w-4 text-muted-foreground" />
+              }
+              value={q}
+              variant="bordered"
+              onValueChange={setQ}
             />
           </div>
         </div>
@@ -169,32 +173,46 @@ export default function InstitutionsSection() {
             <SkeletonGrid />
           ) : isError ? (
             <EmptyState
-              variant="error"
-              title="Não foi possível carregar suas instituições."
               description="Tente novamente em instantes."
               primaryText="Tentar novamente"
-              onPrimaryClick={() => (tab === "all" ? allQuery.refetch() : ownedQuery.refetch())}
+              title="Não foi possível carregar suas instituições."
+              variant="error"
+              onPrimaryClick={() =>
+                tab === "all" ? allQuery.refetch() : ownedQuery.refetch()
+              }
             />
           ) : filtered.length === 0 ? (
             <EmptyState
-              variant="empty"
-              title={tab === "owned" ? "Você ainda não criou instituições." : "Você ainda não participa de nenhuma instituição."}
-              description={tab === "owned" ? "Crie a primeira e convide sua equipe." : "Peça um convite ao administrador ou crie a sua agora mesmo."}
-              primaryText="Criar instituição"
+              description={
+                tab === "owned"
+                  ? "Crie a primeira e convide sua equipe."
+                  : "Peça um convite ao administrador ou crie a sua agora mesmo."
+              }
               primaryHref="/institutions/create"
+              primaryText="Criar instituição"
+              title={
+                tab === "owned"
+                  ? "Você ainda não criou instituições."
+                  : "Você ainda não participa de nenhuma instituição."
+              }
+              variant="empty"
             />
           ) : (
             <ul className="grid grid-cols-1 gap-4">
               {filtered.map((i) => (
-                <li key={i.id} className="w-full">
-                  <InstitutionCard className="w-full" institution={toUICard(i, ownedIds.has(i.id))} />
+                <li key={i.institution_id} className="w-full">
+                  <InstitutionCard className="w-full" institution={i} />
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <InstitutionModal isOpen={isModalOpen} onCreate={handleCreate} onOpenChange={setModalOpen} />
+        <InstitutionModal
+          isOpen={isModalOpen}
+          onCreate={handleCreate}
+          onOpenChange={setModalOpen}
+        />
       </CardContent>
     </Card>
   );

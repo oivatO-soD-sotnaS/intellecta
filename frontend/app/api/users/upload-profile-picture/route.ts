@@ -1,5 +1,6 @@
 // app/api/v1/users/upload-profile-picture/route.ts
 import { NextRequest } from "next/server";
+
 import { proxyPost } from "@/app/api/_lib/proxy";
 
 export const dynamic = "force-dynamic";

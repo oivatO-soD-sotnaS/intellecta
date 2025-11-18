@@ -54,6 +54,44 @@ readonly class InstitutionsDao extends BaseDao {
   }
 
   /**
+ * Summary of getOwnedInstitutions
+ * @param string $user_id
+ * @return InstitutionSummary[]
+ */
+public function getUserOwnedInstitutions(string $user_id): array {
+    $sql = "SELECT 
+                isum.institution_id,
+                isum.name,
+                isum.email,
+                isum.banner_id,
+                isum.profile_picture_id,
+                isum.description,
+                isum.user_id,
+                isum.role,
+                isum.active_user_count,
+                isum.upcoming_event_count
+            FROM institution_summary isum
+            WHERE isum.user_id = :user_id
+            AND isum.role = 'admin'";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt->execute();
+
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $institutions = [];
+
+    foreach($data as $row) {
+      $institutions[] = new InstitutionSummary($row);
+    }
+
+    return $institutions;
+  }
+
+  /**
    * Summary of getInstitutionSummaryById
    * @param string $userId
    * @param string $institutionId
@@ -99,33 +137,7 @@ readonly class InstitutionsDao extends BaseDao {
 
     return $success ? $institution : null;
   }
-  
-  /**
-   * Summary of getOwnedInstitutions
-   * @param string $user_id
-   * @return Institution[]
-   */
-  public function getUserOwnedInstitutions(string $user_id): array {
-    $sql = "SELECT * FROM institutions
-            WHERE user_id LIKE :user_id";
 
-    $pdo = $this->database->getConnection();
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
-
-    $stmt->execute();
-
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $institutions = [];
-
-    foreach($data as $row) {
-      $institutions[] = new Institution($row);
-    }
-
-    return $institutions;
-  }
 
   /**
    * Summary of getInstitutionsByUserId

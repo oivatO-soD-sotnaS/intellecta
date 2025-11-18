@@ -90,9 +90,9 @@ INSERT INTO `forum_messages` (`forum_messages_id`, `content`, `created_at`, `cha
 ('cedeaaf4-58dc-4e30-a0f0-d873ccfdea19', 'Can we use NumPy for the matrix operations?', '2023-01-15 12:00:00', '2023-01-15 12:00:00', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'df4b74b3-4bff-460e-aa77-14bb84435b33');
 
 INSERT INTO `events` (`event_id`, `title`, `description`, `type`, `event_date`, `created_at`, `changed_at`) VALUES
-('81708416-9c20-4eea-af06-b54e1061d736', 'Final Exam', 'Comprehensive final exam', 'exam', '2023-05-15 09:00:00', '2023-01-01 10:00:00', '2023-01-01 10:00:00'),
-('97d32fa5-38ea-4e6e-a6c3-2a03537204a5', 'Guest Lecture', 'Industry expert on AI', 'lecture', '2023-04-10 14:00:00', '2023-01-02 11:00:00', '2023-01-02 11:00:00'),
-('71c1a651-77c7-45c7-b17e-0e6913987138', 'Spring Break', 'No classes this week', 'holiday', '2023-03-13 00:00:00', '2023-01-03 12:00:00', '2023-01-03 12:00:00');
+('81708416-9c20-4eea-af06-b54e1061d736', 'Final Exam', 'Comprehensive final exam', 'exam', '2026-05-15 09:00:00', '2023-01-01 10:00:00', '2023-01-01 10:00:00'),
+('97d32fa5-38ea-4e6e-a6c3-2a03537204a5', 'Guest Lecture', 'Industry expert on AI', 'lecture', '2026-04-10 14:00:00', '2023-01-02 11:00:00', '2023-01-02 11:00:00'),
+('71c1a651-77c7-45c7-b17e-0e6913987138', 'Spring Break', 'No classes this week', 'holiday', '2026-03-13 00:00:00', '2023-01-03 12:00:00', '2023-01-03 12:00:00');
 
 INSERT INTO `institutional_events` (`institutional_event_id`, `event_id`, `institution_id`) VALUES
 ('ee778b97-0d7b-4648-aced-b3447c8298fc', '81708416-9c20-4eea-af06-b54e1061d736', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),

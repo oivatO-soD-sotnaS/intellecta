@@ -1,5 +1,12 @@
 // types/institution.mappers.ts
-import type { ApiInstitution, Institution, ApiInstitutionSummary, InstitutionSummary, UpdateInstitutionInput, CreateInstitutionInput } from "./institution";
+import type {
+  ApiInstitution,
+  Institution,
+  ApiInstitutionSummary,
+  InstitutionSummary,
+  UpdateInstitutionInput,
+  CreateInstitutionInput,
+} from "./institution";
 
 export function mapApiInstitution(i: ApiInstitution): Institution {
   return {
@@ -13,12 +20,17 @@ export function mapApiInstitution(i: ApiInstitution): Institution {
   };
 }
 
-export function buildCreateInstitutionFormData(input: CreateInstitutionInput): FormData {
+export function buildCreateInstitutionFormData(
+  input: CreateInstitutionInput,
+): FormData {
   const fd = new FormData();
+
   fd.append("name", input.name);
   fd.append("description", input.description);
-  if (input.profilePictureFile) fd.append("profile-picture", input.profilePictureFile);
+  if (input.profilePictureFile)
+    fd.append("profile-picture", input.profilePictureFile);
   if (input.bannerFile) fd.append("banner", input.bannerFile);
+
   return fd;
 }
 
@@ -41,40 +53,56 @@ export function buildCreateInstitutionFormData(input: CreateInstitutionInput): F
 //   };
 // }
 
-export function normalizeList<T>(data: T[] | { items: T[]; total?: number }): T[] {
-  return Array.isArray(data) ? data : data.items ?? [];
+export function normalizeList<T>(
+  data: T[] | { items: T[]; total?: number },
+): T[] {
+  return Array.isArray(data) ? data : (data.items ?? []);
 }
 
-export function buildUpdateInstitutionFormData(input: UpdateInstitutionInput): FormData {
+export function buildUpdateInstitutionFormData(
+  input: UpdateInstitutionInput,
+): FormData {
   const fd = new FormData();
+
   if (input.name !== undefined) fd.append("name", input.name);
-  if (input.description !== undefined) fd.append("description", input.description);
+  if (input.description !== undefined)
+    fd.append("description", input.description);
   if (input.profilePictureFile !== undefined) {
-    if (input.profilePictureFile) fd.append("profile-picture", input.profilePictureFile);
+    if (input.profilePictureFile)
+      fd.append("profile-picture", input.profilePictureFile);
   }
   if (input.bannerFile !== undefined) {
     if (input.bannerFile) fd.append("banner", input.bannerFile);
   }
+
   return fd;
 }
 
-
-export function mapApiInstitutionSummary(s: ApiInstitutionSummary): InstitutionSummary {
+export function mapApiInstitutionSummary(
+  s: ApiInstitutionSummary,
+): InstitutionSummary {
   return {
-    id: s.institution_id,
+    institution_id: s.institution_id,
     name: s.name,
     email: s.email,
-    profilePicture: s.profile_picture ?? null,
-    banner: s.banner ?? null,
+    profilePicture: s.profilePicture,
+    banner: s.banner,
+    active_user_count: s.active_user_count,
+    description: s.description,
+    role: s.role,
+    upcoming_event_count: s.upcoming_event_count,
   };
 }
 
 /** Monta o body JSON aceito pelo PUT /institutions/{id} */
 export function buildUpdateInstitutionPayload(input: UpdateInstitutionInput) {
   const body: Record<string, unknown> = {};
+
   if (input.name !== undefined) body.name = input.name;
   if (input.description !== undefined) body.description = input.description;
-  if (input.profilePictureId !== undefined) body.profile_picture_id = input.profilePictureId;
+  if (input.profilePictureId !== undefined)
+    body.profile_picture_id = input.profilePictureId;
   if (input.bannerId !== undefined) body.banner_id = input.bannerId;
+
   return body;
 }

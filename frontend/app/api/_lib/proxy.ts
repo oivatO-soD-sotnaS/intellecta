@@ -1,43 +1,46 @@
 // app/api/_lib/proxy.ts
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE =
-  process.env.API_BASE_URL || process.env.BACKEND_API_BASE_URL || ""
+  process.env.API_BASE_URL || process.env.BACKEND_API_BASE_URL || "";
 
 /** nomes de cookies aceitos para o token; prioridade para "token" */
-const TOKEN_COOKIE_NAMES = ["token", "access_token"]
+const TOKEN_COOKIE_NAMES = ["token", "access_token"];
 
 /** extrai token do cookie do NextRequest */
 function getTokenFromCookies(req: NextRequest): string | undefined {
   for (const n of TOKEN_COOKIE_NAMES) {
-    const v = req.cookies.get(n)?.value
-    if (v) return v
+    const v = req.cookies.get(n)?.value;
+
+    if (v) return v;
   }
-  return undefined
+
+  return undefined;
 }
 
 /** clona headers do request original e aplica extras, removendo headers problemáticos */
 function forwardHeaders(req: NextRequest, extra?: HeadersInit) {
-  const h = new Headers(req.headers)
+  const h = new Headers(req.headers);
 
   // headers que não devem ser reaproveitados diretamente
-  h.delete("host")
-  h.delete("content-length")
+  h.delete("host");
+  h.delete("content-length");
 
   // injeta Authorization a partir do cookie, caso não exista
-  const token = getTokenFromCookies(req)
+  const token = getTokenFromCookies(req);
+
   if (token && !h.has("authorization")) {
-    h.set("authorization", `Bearer ${token}`)
+    h.set("authorization", `Bearer ${token}`);
   }
 
   // aplica sobrescritas/adições do caller
   if (extra) {
     for (const [k, v] of Object.entries(extra)) {
-      if (v !== undefined && v !== null) h.set(k, String(v))
+      if (v !== undefined && v !== null) h.set(k, String(v));
     }
   }
 
-  return h
+  return h;
 }
 
 /**
@@ -48,8 +51,8 @@ function forwardHeaders(req: NextRequest, extra?: HeadersInit) {
  * - usa duplex: "half" para streaming no Node
  */
 async function proxy(req: NextRequest, path: string, init?: RequestInit) {
-  const url = `${API_BASE}${path}`
-  const headers = forwardHeaders(req, init?.headers as HeadersInit | undefined)
+  const url = `${API_BASE}${path}`;
+  const headers = forwardHeaders(req, init?.headers as HeadersInit | undefined);
 
   const res = await fetch(url, {
     method: init?.method ?? req.method,
@@ -61,27 +64,32 @@ async function proxy(req: NextRequest, path: string, init?: RequestInit) {
     // @ts-expect-error: necessário no Node para streaming do body
     duplex: "half",
     cache: "no-store",
-  })
+  });
 
   // repassa headers/corpo/status do backend
-  const respHeaders = new Headers(res.headers)
+  const respHeaders = new Headers(res.headers);
+
   // remove encodings que podem conflitar
-  respHeaders.delete("content-encoding")
-  respHeaders.delete("transfer-encoding")
+  respHeaders.delete("content-encoding");
+  respHeaders.delete("transfer-encoding");
 
   return new NextResponse(res.body, {
     status: res.status,
     headers: respHeaders,
-  })
+  });
 }
 
 /** Helpers com semântica semelhante ao fetch */
-export function proxyGet(req: NextRequest, path: string, p0?: { map404ToJSON: { items: never[]; total: number } }) {
-  return proxy(req, path, { method: "GET" })
+export function proxyGet(
+  req: NextRequest,
+  path: string,
+  p0?: { map404ToJSON: { items: never[]; total: number } },
+) {
+  return proxy(req, path, { method: "GET" });
 }
 
 export function proxyDelete(req: NextRequest, path: string) {
-  return proxy(req, path, { method: "DELETE" })
+  return proxy(req, path, { method: "DELETE" });
 }
 
 /**
@@ -98,8 +106,8 @@ export function proxyPost(req: NextRequest, path: string, body?: BodyInit) {
           body,
           headers: { "content-type": "application/json" },
         }
-      : { method: "POST" } // sem body => usa req.body (stream)
-  )
+      : { method: "POST" }, // sem body => usa req.body (stream)
+  );
 }
 
 export function proxyPut(req: NextRequest, path: string, body?: BodyInit) {
@@ -108,8 +116,8 @@ export function proxyPut(req: NextRequest, path: string, body?: BodyInit) {
     path,
     body
       ? { method: "PUT", body, headers: { "content-type": "application/json" } }
-      : { method: "PUT" }
-  )
+      : { method: "PUT" },
+  );
 }
 
 export function proxyPatch(req: NextRequest, path: string, body?: BodyInit) {
@@ -122,6 +130,6 @@ export function proxyPatch(req: NextRequest, path: string, body?: BodyInit) {
           body,
           headers: { "content-type": "application/json" },
         }
-      : { method: "PATCH" }
-  )
+      : { method: "PATCH" },
+  );
 }

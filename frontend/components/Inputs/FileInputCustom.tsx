@@ -1,27 +1,27 @@
-import { Input } from "@heroui/input"
-import { useState, useRef } from "react"
-import { RxUpload } from "react-icons/rx"
+import { Input } from "@heroui/input";
+import { useState, useRef } from "react";
+import { RxUpload } from "react-icons/rx";
 
 interface FileInputCustomPorps {
-  uploading: any
-  uploadProfilePicture: any
+  uploading: any;
+  uploadProfilePicture: any;
 }
 
 const FileInputCustom = ({
   uploading,
   uploadProfilePicture,
 }: FileInputCustomPorps) => {
-  const [fileName, setFileName] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [fileName, setFileName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
 
     if (file) {
-      setFileName(file.name)
-      uploadProfilePicture(file)
+      setFileName(file.name);
+      uploadProfilePicture(file);
     }
-  }
+  };
 
   return (
     <div className="relative cursor-pointer">
@@ -67,7 +67,7 @@ const FileInputCustom = ({
         onClick={() => inputRef.current?.click()}
       />
     </div>
-  )
-}
+  );
+};
 
-export default FileInputCustom
+export default FileInputCustom;
