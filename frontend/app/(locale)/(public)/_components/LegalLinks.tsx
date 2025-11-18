@@ -17,7 +17,7 @@ export default function LegalLinks() {
         </Link>
         .
       </p>
-      <p className="opacity-80">© 2025 IFPR by Davyd &amp; Otavio</p>
+      <p className="opacity-80">© 2025 IFPR by Otavio &amp; Davyd</p>
     </div>
   )
 }

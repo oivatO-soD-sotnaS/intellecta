@@ -76,8 +76,8 @@ export function SubjectsGrid({
               : subject?.profile_picture ||
                 (subject?.teacher?.profile_picture as any)?.url
 
-          // rotas (ajuste se forem diferentes no teu app)
-          const subjectHref = `/institutions/${institutionId}/classes/${classId}/subjects/${subjectId}`
+                
+          const subjectHref = `/institutions/${institutionId}/subjects/${subjectId}`
           const forumHref = `${subjectHref}/forum`
 
           return (
