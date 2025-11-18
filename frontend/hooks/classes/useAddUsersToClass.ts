@@ -9,7 +9,6 @@ export function useAddUsersToClass(institutionId: string, classId?: string) {
   return useMutation({
     mutationKey: ["add-class-users", institutionId, classId],
     mutationFn: async (userIds: string[]) => {
-      // Backend espera: { "user_ids": ["..."] }
       return apiPost<{ message?: string }>(
         `/api/institutions/${institutionId}/classes/${classId}/users`,
         { user_ids: userIds }
