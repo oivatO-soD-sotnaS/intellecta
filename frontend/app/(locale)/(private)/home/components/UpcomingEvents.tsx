@@ -157,94 +157,94 @@ const getEventSourceConfig = (event: Event) => {
 };
 
 // Componente de evento individual
-const EventItem = ({ event }: { event: Event }) => {
-  const eventDate = new Date(event.event_date);
-  const day = eventDate.getDate().toString().padStart(2, "0");
-  const month = eventDate
-    .toLocaleString("pt-BR", { month: "short" })
-    .toUpperCase()
-    .replace(".", "");
+// const EventItem = ({ event }: { event: Event }) => {
+//   const eventDate = new Date(event.event_date);
+//   const day = eventDate.getDate().toString().padStart(2, "0");
+//   const month = eventDate
+//     .toLocaleString("pt-BR", { month: "short" })
+//     .toUpperCase()
+//     .replace(".", "");
 
-  const eventConfig = getEventConfig(event.type);
-  const sourceConfig = getEventSourceConfig(event);
-  const EventIcon = eventConfig.icon;
-  const SourceIcon = sourceConfig.icon;
+//   const eventConfig = getEventConfig(event.type);
+//   const sourceConfig = getEventSourceConfig(event);
+//   const EventIcon = eventConfig.icon;
+//   const SourceIcon = sourceConfig.icon;
 
-  const isToday = new Date().toDateString() === eventDate.toDateString();
-  const isTomorrow =
-    new Date(Date.now() + 86400000).toDateString() === eventDate.toDateString();
+//   const isToday = new Date().toDateString() === eventDate.toDateString();
+//   const isTomorrow =
+//     new Date(Date.now() + 86400000).toDateString() === eventDate.toDateString();
 
-  return (
-    <div className="group flex items-start gap-4 rounded-lg p-3 transition-colors hover:bg-muted/50">
-      {/* Data */}
-      <div className="flex flex-col items-center justify-center rounded-lg border bg-background p-2 min-w-12">
-        <span className="text-xs font-medium text-muted-foreground">
-          {month}
-        </span>
-        <span className="text-lg font-bold">{day}</span>
-      </div>
+//   return (
+//     <div className="group flex items-start gap-4 rounded-lg p-3 transition-colors hover:bg-muted/50">
+//       {/* Data */}
+//       <div className="flex flex-col items-center justify-center rounded-lg border bg-background p-2 min-w-12">
+//         <span className="text-xs font-medium text-muted-foreground">
+//           {month}
+//         </span>
+//         <span className="text-lg font-bold">{day}</span>
+//       </div>
 
-      {/* Conteúdo */}
-      <div className="flex-1 min-w-0 space-y-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <h4 className="font-semibold leading-none text-foreground group-hover:text-primary transition-colors">
-              {event.title}
-            </h4>
-            {event.description && (
-              <p className="text-sm text-muted-foreground line-clamp-1">
-                {event.description}
-              </p>
-            )}
-          </div>
-          <EventIcon className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
-        </div>
+//       {/* Conteúdo */}
+//       <div className="flex-1 min-w-0 space-y-2">
+//         <div className="flex items-start justify-between gap-2">
+//           <div className="space-y-1">
+//             <h4 className="font-semibold leading-none text-foreground group-hover:text-primary transition-colors">
+//               {event.title}
+//             </h4>
+//             {event.description && (
+//               <p className="text-sm text-muted-foreground line-clamp-1">
+//                 {event.description}
+//               </p>
+//             )}
+//           </div>
+//           <EventIcon className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+//         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Tipo do evento */}
-          <Badge className="text-xs" variant={eventConfig.variant}>
-            {eventConfig.label}
-          </Badge>
+//         <div className="flex flex-wrap items-center gap-2">
+//           {/* Tipo do evento */}
+//           <Badge className="text-xs" variant={eventConfig.variant}>
+//             {eventConfig.label}
+//           </Badge>
 
-          {/* Origem do evento */}
-          <Badge className="text-xs" variant={sourceConfig.variant}>
-            <SourceIcon className="h-3 w-3 mr-1" />
-            {sourceConfig.label}
-          </Badge>
+//           {/* Origem do evento */}
+//           <Badge className="text-xs" variant={sourceConfig.variant}>
+//             <SourceIcon className="h-3 w-3 mr-1" />
+//             {sourceConfig.label}
+//           </Badge>
 
-          {/* Instituição para eventos de disciplina */}
-          {event.event_source === "subject" && event.institution_name && (
-            <Badge className="text-xs" variant="outline">
-              <Building className="h-3 w-3 mr-1" />
-              {event.institution_name}
-            </Badge>
-          )}
+//           {/* Instituição para eventos de disciplina */}
+//           {event.event_source === "subject" && event.institution_name && (
+//             <Badge className="text-xs" variant="outline">
+//               <Building className="h-3 w-3 mr-1" />
+//               {event.institution_name}
+//             </Badge>
+//           )}
 
-          {/* Indicador de data próxima */}
-          {isToday && (
-            <Badge className="text-xs" variant="destructive">
-              Hoje
-            </Badge>
-          )}
-          {isTomorrow && (
-            <Badge className="text-xs" variant="destructive">
-              Amanhã
-            </Badge>
-          )}
-        </div>
+//           {/* Indicador de data próxima */}
+//           {isToday && (
+//             <Badge className="text-xs" variant="destructive">
+//               Hoje
+//             </Badge>
+//           )}
+//           {isTomorrow && (
+//             <Badge className="text-xs" variant="destructive">
+//               Amanhã
+//             </Badge>
+//           )}
+//         </div>
 
-        {/* Horário */}
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          {eventDate.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
+//         {/* Horário */}
+//         <div className="flex items-center gap-1 text-xs text-muted-foreground">
+//           <Clock className="h-3 w-3" />
+//           {eventDate.toLocaleTimeString("pt-BR", {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//           })}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 // Skeleton para loading
 const EventSkeleton = () => (
@@ -361,11 +361,11 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        {/* <div className="space-y-3">
           {events.slice(0, 5).map((event) => (
             <EventItem key={event.user_event_id} event={event} />
           ))}
-        </div>
+        </div> */}
 
         {events.length > 5 && (
           <div className="mt-4 pt-4 border-t">
