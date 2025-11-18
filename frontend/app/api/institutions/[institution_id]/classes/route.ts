@@ -1,3 +1,5 @@
+// app/api/institutions/[institution_id]/route.ts
+
 import { NextRequest } from "next/server"
 import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
 

@@ -73,7 +73,7 @@ export function useCreateSubject(institutionId: string) {
           method: "POST",
           body: formData,
         }
-      )
+      )      
 
       return data
     },

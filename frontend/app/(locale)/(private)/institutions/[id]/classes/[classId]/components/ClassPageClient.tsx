@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { ClassHeader } from "./ClassHeader"
 import { ClassTabs } from "./ClassTabs"
 import { ClassSubjectsTab } from "./ClassSubjectsTab"
-
+import { useClass } from "@/hooks/classes/useClasses"
 
 type Props = {
   institutionId: string
@@ -21,6 +21,8 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
   // TODO: depois você troca isso pra algo baseado no usuário logado (admin/professor)
   const canManageSubjects = true
 
+  const { data: classData, isLoading } = useClass(institutionId, classId)
+
   return (
     <motion.div
       className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pb-10 pt-6"
@@ -28,8 +30,11 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
     >
-      <ClassHeader institutionId={institutionId} classId={classId} />
-
+      <ClassHeader
+        institutionId={institutionId}
+        classData={classData}
+        isLoading={isLoading}
+      />
       <ClassTabs value={activeTab} onValueChange={setActiveTab} />
 
       <div className="mt-4">
