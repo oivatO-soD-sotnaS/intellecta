@@ -1,11 +1,11 @@
 "use client"
 
 import { useMemo } from "react"
-
-import { useSubject } from "@/hooks/subjects/useSubject"
-import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
 import SubjectHeader from "./SubjectHeader"
 import SubjectTabs from "./SubjectTabs"
+import { useSubject } from "@/hooks/subjects/useSubject"
+import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
+import SubjectHeaderMock from "./mocks/SubjectHeader"
 
 interface SubjectPageClientProps {
   institutionId: string
@@ -24,12 +24,13 @@ export default function SubjectPageClient({
 
   const { data: currentUser } = useCurrentUser()
 
-  // TODO: ajustar lógica real de role (talvez venha de useSubject ou outro hook)
+  console.log("log do institution_id -> ", institutionId)
+
   const isTeacher = useMemo(() => {
-    // Exemplo bem genérico: se o usuário logado é o teacher da disciplina
-    if (!subject || !currentUser) return false
-    return subject.teacher?.user_id === currentUser.user_id
-  }, [subject, currentUser])
+    if (!currentUser) return false
+    // MODO DEV: todo mundo logado pode gerenciar a disciplina
+    return true
+  }, [currentUser])
 
   if (error) {
     return (

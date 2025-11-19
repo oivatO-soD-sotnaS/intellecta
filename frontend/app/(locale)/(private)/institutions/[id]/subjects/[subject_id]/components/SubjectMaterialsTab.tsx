@@ -73,7 +73,7 @@ export default function SubjectMaterialsTab({
         },
       }
     )
-  }qqq
+  }
 
   return (
     <section className="space-y-4">

@@ -19,6 +19,7 @@ import { useInstitutions } from "@/hooks/institution/useInstitutions"
 import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned"
 import type { Institution, InstitutionSummary } from "@/types/institution"
 import { SkeletonGrid } from "./SkeletonGrid"
+import { useInstitutionsSummaries } from "@/hooks/institution/useInstitutionSummaries"
 
 /* ---------------- helpers fora do componente ---------------- */
 
@@ -55,7 +56,7 @@ export default function InstitutionsSection() {
   const [q, setQ] = React.useState("")
   const [isModalOpen, setModalOpen] = React.useState(false)
 
-  const allQuery = useInstitutions()
+  const allQuery = useInstitutionsSummaries()
   const ownedQuery = useInstitutionsOwned()
 
   const ownedLimit = 3

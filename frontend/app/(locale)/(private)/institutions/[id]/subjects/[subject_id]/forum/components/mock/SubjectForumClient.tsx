@@ -40,7 +40,7 @@ const MOCK_FORUM_MESSAGES: ForumMessageDTO[] = [
     subject_id: "mock-subject-id",
     sent_by: {
       user_id: "mock-teacher-1",
-      full_name: "Prof. Ana Carvalho",
+      full_name: "Prof. Jorge Amado",
       email: "ana.carvalho@example.com",
       created_at: "2024-02-01T12:00:00Z",
       changed_at: "2024-06-10T08:30:00Z",
@@ -64,7 +64,7 @@ const MOCK_FORUM_MESSAGES: ForumMessageDTO[] = [
     subject_id: "mock-subject-id",
     sent_by: {
       user_id: "mock-teacher-1",
-      full_name: "Prof. Ana Carvalho",
+      full_name: "Prof. Jorge Amado",
       email: "ana.carvalho@example.com",
       created_at: "2024-02-01T12:00:00Z",
       changed_at: "2024-06-10T08:30:00Z",
@@ -88,7 +88,7 @@ const MOCK_FORUM_MESSAGES: ForumMessageDTO[] = [
     subject_id: "mock-subject-id",
     sent_by: {
       user_id: "mock-teacher-1",
-      full_name: "Prof. Ana Carvalho",
+      full_name: "Prof. Jorge Amado",
       email: "ana.carvalho@example.com",
       created_at: "2024-02-01T12:00:00Z",
       changed_at: "2024-06-10T08:30:00Z",
@@ -112,7 +112,7 @@ const MOCK_FORUM_MESSAGES: ForumMessageDTO[] = [
     subject_id: "mock-subject-id",
     sent_by: {
       user_id: "mock-teacher-1",
-      full_name: "Prof. Ana Carvalho",
+      full_name: "Prof. Jorge Amado",
       email: "ana.carvalho@example.com",
       created_at: "2024-02-01T12:00:00Z",
       changed_at: "2024-06-10T08:30:00Z",

@@ -1,5 +1,6 @@
 // app/(locale)/(private)/institutions/[institution_id]/subjects/[subject_id]/forum/_components/ForumHeader.tsx
 
+import { Highlighter } from "@/components/ui/highlighter"
 import { Badge } from "@heroui/badge"
 import { Megaphone, RefreshCw } from "lucide-react"
 
@@ -14,7 +15,14 @@ export function ForumHeader({ totalCount, isFetching }: ForumHeaderProps) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            Fórum da disciplina
+            Fórum{" "}
+            <Highlighter
+              action="highlight"
+              color="#9dedba
+"
+            >
+              Matemática I — Funções Afim e Quadrática
+            </Highlighter>
           </h1>
           <p className="max-w-xl text-sm text-muted-foreground">
             Espaço para avisos e comunicados oficiais do professor para a turma.

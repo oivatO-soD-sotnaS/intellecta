@@ -127,11 +127,11 @@ export default function SubjectMaterialsTabMock({
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col">
           <h2 className="text-sm font-semibold">Materiais da disciplina</h2>
-          {isUsingMock && (
+          {/* {isUsingMock && (
             <span className="text-[11px] text-muted-foreground">
               Exibindo dados de exemplo (mock) enquanto a API estiver vazia.
             </span>
-          )}
+          )} */}
         </div>
 
         {isTeacher && (
