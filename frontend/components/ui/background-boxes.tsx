@@ -1,28 +1,25 @@
-"use client";
-import React from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+"use client"
+import React from "react"
+import { motion } from "motion/react"
+import { cn } from "@/lib/utils"
 
-export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
-  const rows = new Array(150).fill(1);
-  const cols = new Array(100).fill(1);
-  
-  // Using direct color values instead of CSS variables
-  const colors = [
-    "rgb(125 211 252)", // sky-300
-    "rgb(22, 163, 74)", // pink-300
-    "rgb(134 239 172)", // green-300
-    "rgb(34, 197, 94)",  // yellow-300
-    "rgb(74, 222, 128)", // red-300
-    "rgb(20, 83, 45)", // purple-300
-    "rgb(147 197 253)", // blue-300
-    "rgb(165 180 252)", // indigo-300
-    "rgb(196 181 253)", // violet-300
-  ];
-
+export const BoxesCore = ({ className, ...rest }: { eeeee?: string }) => {
+  const rows = new Array(150).fill(1)
+  const cols = new Array(100).fill(1)
+  let colors = [
+    "#86efac", // Verde médio claro
+    "#4ade80", // Verde vibrante
+    "#22c55e", // Verde sólido
+    "#16a34a", // Verde floresta
+    "#bbf7d0", // Verde pastel claro
+    "#dcfce7", // Verde muito claro
+    "#65a30d", // Verde oliva
+    "#15803d", // Verde escuro
+    "#ecfccb", // Verde lima claro
+  ]
   const getRandomColor = () => {
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
+    return colors[Math.floor(Math.random() * colors.length)]
+  }
 
   return (
     <div
@@ -30,7 +27,7 @@ export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
         transform: `translate(-40%,-60%) skewX(-48deg) skewY(14deg) scale(0.675) rotate(0deg) translateZ(0)`,
       }}
       className={cn(
-        "absolute left-1/4 p-4 -top-1/4 flex -translate-x-1/2 -translate-y-1/2 w-full h-full z-0",
+        "absolute -top-1/4 left-1/4 z-0 flex h-full w-full -translate-x-1/2 -translate-y-1/2 p-4",
         className
       )}
       {...rest}
@@ -38,19 +35,19 @@ export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
       {rows.map((_, i) => (
         <motion.div
           key={`row` + i}
-          className="w-16 h-8 border-l border-slate-700 relative"
+          className="relative h-8 w-16 border-l border-slate-700"
         >
           {cols.map((_, j) => (
             <motion.div
               whileHover={{
-                backgroundColor: getRandomColor(),
+                backgroundColor: `${getRandomColor()}`,
                 transition: { duration: 0 },
               }}
               animate={{
                 transition: { duration: 2 },
               }}
               key={`col` + j}
-              className="w-16 h-8 border-r border-t border-slate-700 relative"
+              className="relative h-8 w-16 border-t border-r border-slate-700"
             >
               {j % 2 === 0 && i % 2 === 0 ? (
                 <svg
@@ -59,7 +56,7 @@ export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
-                  className="absolute h-6 w-10 -top-[14px] -left-[22px] text-slate-700 stroke-[1px] pointer-events-none"
+                  className="pointer-events-none absolute -top-[14px] -left-[22px] h-6 w-10 stroke-[1px] text-slate-700"
                 >
                   <path
                     strokeLinecap="round"
@@ -73,7 +70,7 @@ export const BoxesCore = ({ className, ...rest }: { className?: string }) => {
         </motion.div>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export const Boxes = React.memo(BoxesCore);
+export const Boxes = React.memo(BoxesCore)

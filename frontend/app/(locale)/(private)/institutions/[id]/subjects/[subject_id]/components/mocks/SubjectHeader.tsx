@@ -14,7 +14,6 @@ export default function SubjectHeaderMock({
   subject,
   isLoading,
 }: SubjectHeaderProps) {
-  // 👉 Se estiver carregando, mostra só o skeleton
   if (isLoading) {
     return (
       <section className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">

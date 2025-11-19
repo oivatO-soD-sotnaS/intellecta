@@ -29,6 +29,10 @@ export function SubjectsGrid({
     classId
   )
 
+  console.log("log do classSubjects -> ",classSubjects)
+  console.log("log do classId -> ", classId)
+  
+
   if (!classSubjects.length) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -57,11 +61,10 @@ export function SubjectsGrid({
               .join("")
               .toUpperCase() ?? "P"
 
-          // id da relação classe–disciplina
-          const subjectId =
-            (classSubject as any).class_subjects_id ??
-            subject?.subject_id ??
-            String(Math.random())
+          const classSubjectId =
+            (classSubject as any).class_subjects_id ?? String(Math.random())
+
+          const subjectId = subject?.subject_id
 
           // Banner pode vir como string ou como objeto de arquivo
           const banner =
@@ -77,12 +80,17 @@ export function SubjectsGrid({
                 (subject?.teacher?.profile_picture as any)?.url
 
                 
-          const subjectHref = `/institutions/${institutionId}/subjects/${subjectId}`
-          const forumHref = `${subjectHref}/forum`
+          const subjectHref = subjectId
+            ? `/institutions/${institutionId}/subjects/${subjectId}`
+            : "#"          
+          const forumHref = subjectId
+            ? `/institutions/${institutionId}/subjects/${subjectId}/forum`
+            : "#"
+
 
           return (
             <motion.div
-              key={subjectId}
+              key={classSubjectId}
               layout
               initial={{ opacity: 0, y: 8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -189,7 +197,7 @@ export function SubjectsGrid({
                         disabled={isPending}
                         onClick={async () => {
                           try {
-                            await removeClassSubject(subjectId)
+                            await removeClassSubject(classSubjectId)
                             addToast({
                               title: "Disciplina removida da turma",
                               description:

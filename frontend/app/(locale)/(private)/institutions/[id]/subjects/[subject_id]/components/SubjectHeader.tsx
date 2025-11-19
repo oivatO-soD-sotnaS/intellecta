@@ -7,14 +7,15 @@ interface SubjectHeaderProps {
   institutionId: string
   subject?: any
   isLoading?: boolean
+  institutionName: string
 }
 
 export default function SubjectHeader({
   institutionId,
   subject,
   isLoading,
+  institutionName,
 }: SubjectHeaderProps) {
-  // ✅ enquanto estiver carregando OU não tiver subject, mostra skeleton
   if (isLoading || !subject) {
     return (
       <section className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
@@ -35,7 +36,6 @@ export default function SubjectHeader({
     )
   }
 
-  // 👇 A PARTIR DAQUI, subject é garantidamente "truthy"
   const subjectName: string = subject.name ?? "Disciplina sem nome"
   const subjectDescription: string =
     subject.description ?? "Disciplina cadastrada na instituição."
@@ -63,9 +63,12 @@ export default function SubjectHeader({
     .slice(0, 2)
     .toUpperCase()
 
+  
+ const institutionLabel = institutionName ?? institutionId
+
+
   return (
     <section className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
-      {/* 🌈 faixa de cima: banner ou gradiente, igual turma */}
       <div className="relative h-32 w-full md:h-40">
         {banner ? (
           <Image
@@ -110,23 +113,15 @@ export default function SubjectHeader({
               <h1 className="truncate text-xl font-semibold leading-tight md:text-2xl">
                 {subjectName}
               </h1>
-              {/* se quiser colocar algum outro badge, dá pra encaixar aqui */}
             </div>
 
-            <p className="truncate text-xs text-muted-foreground md:text-sm">
-              {teacherName}
-            </p>
-
-            {/* linha de metadados, estilo da turma */}
             <div className="flex flex-wrap gap-2 text-[11px] text-muted-foreground md:text-xs">
               <span className="rounded-full border border-border/70 px-2 py-[2px] font-mono">
-                Instituição: {institutionId}
+                Instituição: {institutionLabel}
               </span>
-              {subject.subject_id && (
                 <span className="rounded-full border border-border/70 px-2 py-[2px] font-mono">
-                  ID da disciplina: {subject.subject_id}
+                  Prof.{teacherName}
                 </span>
-              )}
             </div>
           </div>
         </div>
