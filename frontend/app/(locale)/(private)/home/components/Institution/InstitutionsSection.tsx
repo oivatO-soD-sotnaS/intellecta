@@ -40,7 +40,6 @@ export default function InstitutionsSection() {
   const [isModalOpen, setModalOpen] = React.useState(false)
 
   const allQuery = useInstitutionsSummaries()
-  const allQuery = useInstitutionsSummaries()
   const ownedQuery = useInstitutionsOwned()
 
   const ownedLimit = 3
