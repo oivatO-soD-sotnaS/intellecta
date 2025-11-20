@@ -20,7 +20,6 @@ export async function PUT(
   const { institution_id, subject_id } = await context.params
   const body = await req.json()
 
-  // Aqui o backend espera JSON (name, description, teacher_id, profile_picture_id, banner_id)
   return proxyPut(
     req,
     `/institutions/${institution_id}/subjects/${subject_id}`,

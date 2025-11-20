@@ -5,13 +5,13 @@ import SubjectPageClient from "./components/SubjectPageClient"
 interface SubjectPageProps {
   params: {
     locale: string
-    institution_id: string
+    id: string
     subject_id: string
   }
 }
 
 export default async function SubjectPage({ params }: SubjectPageProps) {
-  const { locale, institution_id, subject_id } = params
+  const { locale, id, subject_id } = await params 
   const cookieStore = await cookies()
   const token = cookieStore.get("token")?.value
 
@@ -20,7 +20,5 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
     redirect(`/${locale}/signin`)
   }
 
-  return (
-    <SubjectPageClient institutionId={institution_id} subjectId={subject_id} />
-  )
+  return <SubjectPageClient institutionId={id} subjectId={subject_id} />
 }

@@ -1,6 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import SubjectMaterialsTab from "./SubjectMaterialsTab"
 import SubjectAssignmentsTab from "./SubjectAssignmentsTab"
+import SubjectOverviewTab from "./SubjectOverviewTab"
+import SubjectAssignmentsTabMock from "./mocks/SubjectAssignmentsTab"
+import SubjectMaterialsTabMock from "./mocks/SubjectMaterialsTab"
 
 
 interface SubjectTabsProps {
@@ -27,13 +30,12 @@ export default function SubjectTabs({
       </TabsList>
 
       <TabsContent value="overview" className="space-y-4">
-        <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-          <h2 className="text-sm font-semibold">Visão geral da disciplina</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Aqui você pode acompanhar os materiais publicados, as atividades
-            avaliativas e as entregas relacionadas a esta disciplina.
-          </p>
-        </div>
+        <SubjectOverviewTab
+          institutionId={institutionId}
+          subjectId={subjectId}
+          isTeacher={isTeacher}
+          isLoading={isLoading}
+        />
       </TabsContent>
 
       <TabsContent value="materials" className="space-y-4">

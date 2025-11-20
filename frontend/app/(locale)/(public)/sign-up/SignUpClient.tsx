@@ -11,40 +11,42 @@ import Step3Form from "@/components/Forms/Step3Form"
 
 import DarkVeil from "@/components/ui/darkveil"
 import { useTheme } from "next-themes"
+import { Boxes } from "@/components/ui/background-boxes"
 
 export default function SignUpClient() {
   const [fullName, setFullName] = React.useState("")
   const [email, setEmail] = React.useState("")
 
-  const { theme,  } = useTheme()
-
+  const { theme } = useTheme()
 
   return (
     <section
       className="
-        relative isolate
+        relative 
         min-h-[100svh] 
         bg-background text-foreground
-        overflow-x-hidden 
+        overflow-hidden 
         font-sans
       "
     >
-      {/* BG atrás de tudo, sem interferir no layout */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <DarkVeil background={`${theme === "light" ? "white" : "black"}`} />
+      {/* Background fixo sem causar scroll */}
+      <div className="fixed inset-0  overflow-hidden">
+        <div className="absolute inset-0">
+          <Boxes />
+        </div>
       </div>
 
-      {/* grid = header | conteúdo | footer */}
-      <div className="relative grid min-h-[100svh] grid-rows-[auto,1fr,auto]">
-        {/* HEADER centralizado no mesmo container do conteúdo */}
-        <header className="relative z-10">
+      {/* Conteúdo principal com scroll se necessário */}
+      <div className="relative z-10 min-h-[100svh] flex flex-col">
+        {/* HEADER */}
+        <header className="flex-shrink-0">
           <div className="mx-auto w-full max-w-5xl px-4 py-6">
             <Header />
           </div>
         </header>
 
-        {/* CONTEÚDO: central no eixo horizontal; no vertical usamos espaçamento sutil */}
-        <main className="relative z-10 mx-auto w-full max-w-5xl px-4 py-4 md:py-8">
+        {/* CONTEÚDO PRINCIPAL - cresce para ocupar espaço disponível */}
+        <main className="flex-grow mx-auto w-full max-w-5xl px-4 py-4 md:py-8">
           <StepperRoot
             totalSteps={3}
             titles={["Nome completo", "Criar Conta", "Verificação"]}
@@ -64,8 +66,8 @@ export default function SignUpClient() {
           </StepperRoot>
         </main>
 
-        {/* FOOTER enxuto (evita “altura imensa”) */}
-        <footer className="relative z-10 px-4 py-4">
+        {/* FOOTER */}
+        <footer className="flex-shrink-0 px-4 py-4">
           <div className="mx-auto w-full max-w-5xl">
             <LegalLinks />
           </div>

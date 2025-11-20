@@ -1,10 +1,10 @@
-"use client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+"use client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-import { apiDelete } from "@/lib/apiClient";
+import { apiDelete } from "@/lib/apiClient"
 
 export function useDeleteInstitution(institutionId: string) {
-  const qc = useQueryClient();
+  const qc = useQueryClient()
 
   return useMutation({
     mutationFn: () => apiDelete<unknown>(`/api/institutions/${institutionId}`),
@@ -15,7 +15,7 @@ export function useDeleteInstitution(institutionId: string) {
       qc.invalidateQueries({queryKey: ["institutions", "summaries"]});
       qc.invalidateQueries({
         queryKey: ["institution", institutionId, "summary"],
-      });
+      })
     },
-  });
+  })
 }

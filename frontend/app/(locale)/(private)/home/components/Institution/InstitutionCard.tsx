@@ -30,6 +30,7 @@ import { InstitutionSummary } from "@/types/institution"
 import { Badge } from "@/components/ui/badge"
 
 type Props = { institution: InstitutionSummary; className?: string }
+type Props = { institution: InstitutionSummary; className?: string }
 
 export function InstitutionCard({ institution, className }: Props) {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -38,6 +39,9 @@ export function InstitutionCard({ institution, className }: Props) {
 
   // Usa o summary atualizado ou os dados da institution
   const finalInstitution = institution
+
+  console.log(finalInstitution)
+  
 
   // URLs finais
   const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url)
