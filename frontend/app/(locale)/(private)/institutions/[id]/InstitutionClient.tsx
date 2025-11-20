@@ -51,9 +51,9 @@ export default function InstitutionClient({
         </div>
       </section>
 
-      <section className="mt-6">
+      {/* <section className="mt-6">
         <RecentActivities />
-      </section>
+      </section> */}
     </>
   )
 }

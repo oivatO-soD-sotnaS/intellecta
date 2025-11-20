@@ -59,22 +59,33 @@ readonly class SubjectEventsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id) {
             $user = $request->getAttribute("user");
             $body = $request->getParsedBody();
-            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            // Agora exige event_start e event_end
+            $this->validatorService->validateRequired(
+                $body,
+                ["title", "description", "event_start", "event_end", "event_type"]
+            );
 
             $title = new EventTitleVo($body['title']);
             $description = new EventDescriptionVo($body['description']);
-            $eventDate = new EventDateVo($body['event_date']);
+            $eventStart = new EventDateVo($body['event_start']);
+            $eventEnd = new EventDateVo($body['event_end']);
             $eventType = EventType::tryFrom($body['event_type']);
-    
-            if($eventType === null) {
+
+            if ($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
+            }
+
+            if ($eventStart->getDateTime() >= $eventEnd->getDateTime()) {
+                throw new InvalidArgumentException("Event end must be after event start");
             }
 
             $event = $this->eventsDao->createEvent(new Event([
                 'event_id' => Uuid::uuid4()->toString(),
                 'title' => $title->getValue(),
                 'description' => $description->getValue(),
-                'event_date' => $eventDate->toString(),
+                'event_start' => $eventStart->toString(),
+                'event_end' => $eventEnd->toString(),
                 'type' => $eventType->value
             ]));
 
@@ -89,17 +100,17 @@ readonly class SubjectEventsController extends BaseController {
 
             foreach ($subjectStudents as $student) {
                 $this->emailQueue->push([
-                'to' => $student->getEmail(),
-                'toName' => $student->getFullName(),
-                'subject' => "{$subject->getName()} - Novo evento de disciplina: {$event->getTitle()}",
-                'body' => $this->emailTemplateProvider->getSubjectNotificationEmailTemplate(
-                    $student->getFullName(),
-                    $event,
-                    $subject->getName(),
-                    $user->getFullName(),
-                    $user->getEmail()
-                ),
-                'altBody' => "Olá {$student->getFullName()},\n\nUm novo evento foi criado para a disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                    'to' => $student->getEmail(),
+                    'toName' => $student->getFullName(),
+                    'subject' => "{$subject->getName()} - Novo evento de disciplina: {$event->getTitle()}",
+                    'body' => $this->emailTemplateProvider->getSubjectNotificationEmailTemplate(
+                        $student->getFullName(),
+                        $event,
+                        $subject->getName(),
+                        $user->getFullName(),
+                        $user->getEmail()
+                    ),
+                    'altBody' => "Olá {$student->getFullName()},\n\nUm novo evento foi criado para a disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nInício: {$event->getEventStart()}\nFim: {$event->getEventEnd()}\n\nAtenciosamente,\nEquipe Intellecta"
                 ]);
             }
 
@@ -111,35 +122,43 @@ readonly class SubjectEventsController extends BaseController {
             ]));
 
             LogService::info(
-                "/institutions/{$institution_id}/subjects/{$subject_id}/events", 
+                "/institutions/{$institution_id}/subjects/{$subject_id}/events",
                 "{$user->getUserId()} created a subject event with id '{$subjectEvent->getSubjectEventId()}'"
             );
+
             return $response->withStatus(201);
         });
     }
 
+
     public function updateSubjectEvent(Request $request, Response $response, string $institution_id, string $subject_id, string $subject_event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $subject_event_id) {
             $user = $request->getAttribute("user");
-
             $body = $request->getParsedBody();
-            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            // Agora exige event_start e event_end
+            $this->validatorService->validateRequired(
+                $body,
+                ["title", "description", "event_start", "event_end", "event_type"]
+            );
 
             $title = new EventTitleVo($body['title']);
             $description = new EventDescriptionVo($body['description']);
-            $eventDate = new EventDateVo($body['event_date']);
+            $eventStart = new EventDateVo($body['event_start']);
+            $eventEnd = new EventDateVo($body['event_end']);
             $eventType = EventType::tryFrom($body['event_type']);
-            
-            if($eventType === null) {
+
+            if ($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
-                
+
+            if ($eventStart->getDateTime() >= $eventEnd->getDateTime()) {
+                throw new InvalidArgumentException("Event end must be after event start");
+            }
+
             $subjectEvent = $this->subjectEventsDao->getSubjectEventById($subject_event_id);
-            
-            if (
-                empty($subjectEvent)
-                || $subjectEvent->getSubjectId() !== $subject_id
-            ) {
+
+            if (empty($subjectEvent) || $subjectEvent->getSubjectId() !== $subject_id) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -150,7 +169,8 @@ readonly class SubjectEventsController extends BaseController {
 
             $event->setTitle($title->getValue());
             $event->setDescription($description->getValue());
-            $event->setEventDate($eventDate->toString());
+            $event->setEventStart($eventStart->toString());
+            $event->setEventEnd($eventEnd->toString());
             $event->setType($eventType->value);
 
             $event = $this->eventsDao->updateEvent($event);
@@ -160,33 +180,36 @@ readonly class SubjectEventsController extends BaseController {
 
             foreach ($subjectStudents as $student) {
                 $this->emailQueue->push([
-                'to' => $student->getEmail(),
-                'toName' => $student->getFullName(),
-                'subject' => "{$subject->getName()} - Evento de disciplina atualizado: {$event->getTitle()}",
-                'body' => $this->emailTemplateProvider->getSubjectNotificationUpdatedEmailTemplate(
-                    $student->getFullName(),
-                    $event,
-                    $subject->getName(),
-                    $user->getFullName(),
-                    $user->getEmail()
-                ),
-                'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi atualizado na disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                    'to' => $student->getEmail(),
+                    'toName' => $student->getFullName(),
+                    'subject' => "{$subject->getName()} - Evento de disciplina atualizado: {$event->getTitle()}",
+                    'body' => $this->emailTemplateProvider->getSubjectNotificationUpdatedEmailTemplate(
+                        $student->getFullName(),
+                        $event,
+                        $subject->getName(),
+                        $user->getFullName(),
+                        $user->getEmail()
+                    ),
+                    'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi atualizado na disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nInício: {$event->getEventStart()}\nFim: {$event->getEventEnd()}\n\nAtenciosamente,\nEquipe Intellecta"
                 ]);
             }
 
             $subjectEventDto = new SubjectEventDto($subjectEvent, $event);
+
             $response->getBody()->write(json_encode([
                 "Message" => "Subject event updated successfully",
                 "subject_event" => $subjectEventDto
             ]));
 
             LogService::info(
-                "/institutions/{$institution_id}/subjects/{$subject_id}/events/{$subject_event_id}", 
-            "{$user->getUserId()} updated a subject event with ID '{$subjectEvent->getSubjectEventId()}'"
+                "/institutions/{$institution_id}/subjects/{$subject_id}/events/{$subject_event_id}",
+                "{$user->getUserId()} updated a subject event with ID '{$subjectEvent->getSubjectEventId()}'"
             );
+
             return $response;
         });
     }
+
 
     public function deleteSubjectEvent(Request $request, Response $response,string $institution_id, string $subject_id, string $subject_event_id): Response {
         return $this->handleErrors($request, function() use ($request, $response, $institution_id, $subject_id, $subject_event_id) {
@@ -226,7 +249,7 @@ readonly class SubjectEventsController extends BaseController {
                     $user->getFullName(),
                     $user->getEmail()
                 ),
-                'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi removido da disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nData do Evento: {$event->getEventDate()}\n\nAtenciosamente,\nEquipe Intellecta"
+                'altBody' => "Olá {$student->getFullName()},\n\nUm evento foi removido da disciplina {$subject->getName()}.\n\nTítulo: {$event->getTitle()}\nDescrição: {$event->getDescription()}\nInício: {$event->getEventStart()}\nFim: {$event->getEventEnd()}\n\nAtenciosamente,\nEquipe Intellecta"
                 ]);
             }
 

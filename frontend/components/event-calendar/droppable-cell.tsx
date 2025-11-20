@@ -12,6 +12,7 @@ interface DroppableCellProps {
   children?: React.ReactNode
   className?: string
   onClick?: () => void
+  style?: React.CSSProperties;
 }
 
 export function DroppableCell({
@@ -21,6 +22,7 @@ export function DroppableCell({
   children,
   className,
   onClick,
+  style
 }: DroppableCellProps) {
   const { activeEvent } = useCalendarDnd()
 
@@ -44,6 +46,7 @@ export function DroppableCell({
     <div
       ref={setNodeRef}
       onClick={onClick}
+      style={style}
       className={cn(
         "flex h-full flex-col overflow-hidden px-0.5 py-1 data-dragging:bg-accent sm:px-1",
         className

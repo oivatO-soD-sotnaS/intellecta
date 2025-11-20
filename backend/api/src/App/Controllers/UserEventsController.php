@@ -53,22 +53,33 @@ readonly class UserEventsController extends BaseController {
         return $this->handleErrors($request, function() use ($request, $response) {
             $user = $request->getAttribute("user");
             $body = $request->getParsedBody();
-            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            // Agora exige event_start e event_end
+            $this->validatorService->validateRequired(
+                $body,
+                ["title", "description", "event_start", "event_end", "event_type"]
+            );
 
             $title = new EventTitleVo($body['title']);
             $description = new EventDescriptionVo($body['description']);
-            $eventDate = new EventDateVo($body['event_date']);
+            $eventStart = new EventDateVo($body['event_start']);
+            $eventEnd = new EventDateVo($body['event_end']);
             $eventType = EventType::tryFrom($body['event_type']);
 
-            if($eventType === null) {
+            if ($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
+            }
+
+            if ($eventStart->getDateTime() >= $eventEnd->getDateTime()) {
+                throw new InvalidArgumentException("Event end must be after event start");
             }
 
             $event = $this->eventsDao->createEvent(new Event([
                 'event_id' => Uuid::uuid4()->toString(),
                 'title' => $title->getValue(),
                 'description' => $description->getValue(),
-                'event_date' => $eventDate->toString(),
+                'event_start' => $eventStart->toString(),
+                'event_end' => $eventEnd->toString(),
                 'type' => $eventType->value
             ]));
 
@@ -86,31 +97,40 @@ readonly class UserEventsController extends BaseController {
             ]));
 
             LogService::info("/users/me/events", "User event created: $userEvent");
+
             return $response->withStatus(201);
         });
     }
 
-    public function updateUserEvent(Request $request, Response $response, string $event_id): Response {
-        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
-            $user = $request->getAttribute("user");
 
+    public function updateUserEvent(Request $request, Response $response, string $user_event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $user_event_id) {
+            $user = $request->getAttribute("user");
             $body = $request->getParsedBody();
-            $this->validatorService->validateRequired($body, ["title", "description", "event_date", "event_type"]);
+
+            // Atualizado para exigir event_start e event_end
+            $this->validatorService->validateRequired(
+                $body,
+                ["title", "description", "event_start", "event_end", "event_type"]
+            );
 
             $title = new EventTitleVo($body['title']);
             $description = new EventDescriptionVo($body['description']);
-            $eventDate = new EventDateVo($body['event_date']);
+            $eventStart = new EventDateVo($body['event_start']);
+            $eventEnd = new EventDateVo($body['event_end']);
             $eventType = EventType::tryFrom($body['event_type']);
 
-            if($eventType === null) {
+            if ($eventType === null) {
                 throw new InvalidArgumentException("Event type does not match any of the available event types");
             }
 
-            $userEvent = $this->userEventDao->getUserEventById($event_id);
-            if (
-                empty($userEvent)
-                || $userEvent->getUserId() !== $user->getUserId()
-            ) {
+            if ($eventStart->getDateTime() >= $eventEnd->getDateTime()) {
+                throw new InvalidArgumentException("Event end must be after event start");
+            }
+
+            $userEvent = $this->userEventDao->getUserEventById($user_event_id);
+
+            if (empty($userEvent) || $userEvent->getUserId() !== $user->getUserId()) {
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
 
@@ -121,30 +141,33 @@ readonly class UserEventsController extends BaseController {
 
             $event->setTitle($title->getValue());
             $event->setDescription($description->getValue());
-            $event->setEventDate($eventDate->toString());
+            $event->setEventStart($eventStart->toString());
+            $event->setEventEnd($eventEnd->toString());
             $event->setType($eventType->value);
 
             $this->eventsDao->updateEvent($event);
 
-            $userEventDto = new userEventDto($userEvent, $event);
+            $userEventDto = new UserEventDto($userEvent, $event);
+
             $response->getBody()->write(json_encode([
                 "Message" => "User event updated successfully",
                 "user_event" => $userEventDto
             ]));
 
             LogService::info(
-                "/users/me/events/{$event_id}",
-                "{$user->getUserId()} has updated a user event with id '{$event_id}'"
+                "/users/me/events/{$user_event_id}",
+                "{$user->getUserId()} has updated a user event with id '{$user_event_id}'"
             );
+
             return $response;
         });
     }
 
-    public function deleteUserEvent(Request $request, Response $response, string $event_id): Response {
-        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
+    public function deleteUserEvent(Request $request, Response $response, string $user_event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $user_event_id) {
             $user = $request->getAttribute("user");
 
-            $userEvent = $this->userEventDao->getUserEventById($event_id);
+            $userEvent = $this->userEventDao->getUserEventById($user_event_id);
             if (
                 empty($userEvent)
                 || $userEvent->getUserId() !== $user->getUserId()
@@ -167,18 +190,18 @@ readonly class UserEventsController extends BaseController {
             ]));
 
             LogService::info(
-                "/users/me/events/{$event_id}",
-                "{$user->getUserId()} has deleted a user event with id '{$event_id}'"
+                "/users/me/events/{$user_event_id}",
+                "{$user->getUserId()} has deleted a user event with id '{$user_event_id}'"
             );
             return $response;
         });
     }
 
-    public function getUserEvent(Request $request, Response $response, string $event_id): Response {
-        return $this->handleErrors($request, function() use ($request, $response, $event_id) {
+    public function getUserEvent(Request $request, Response $response, string $user_event_id): Response {
+        return $this->handleErrors($request, function() use ($request, $response, $user_event_id) {
             $user = $request->getAttribute("user");
 
-            $userEvent = $this->userEventDao->getUserEventById($event_id);
+            $userEvent = $this->userEventDao->getUserEventById($user_event_id);
             if (
                 empty($userEvent)
                 || $userEvent->getUserId() !== $user->getUserId()
@@ -207,11 +230,6 @@ readonly class UserEventsController extends BaseController {
             if(\count($userEvents) === 0){
                 throw new HttpNotFoundException($request, LogService::HTTP_404);
             }
-
-            // $userEventsDto = array_map(function (UserEvent $userEvent) {
-            //     $event = $this->eventsDao->getEventById($userEvent->getEventId());
-            //     return new UserEventDto($userEvent, $event);
-            // }, $userEvents);
 
             $response->getBody()->write(json_encode($userEvents));
             LogService::info("/users/me/events/upcoming", "Upcoming user events fetched for: $user");

@@ -33,30 +33,30 @@ export const makeNav = (institutionId: string) => {
       icon: <CalendarDays className="size-4" />,
       href: `${base}/calendar`,
     },
-    {
-      label: "Fórum",
-      icon: <MessageSquareMore className="size-4" />,
-      href: `${base}/forum`,
-    },
-    {
-      label: "Materiais",
-      icon: <FolderOpen className="size-4" />,
-      href: `${base}/materials`,
-    },
+    // {
+    //   label: "Fórum",
+    //   icon: <MessageSquareMore className="size-4" />,
+    //   href: `${base}/forum`,
+    // },
+    // {
+    //   label: "Materiais",
+    //   icon: <FolderOpen className="size-4" />,
+    //   href: `${base}/materials`,
+    // },
   ]
 
   // se suas turmas forem dinâmicas, você pode montar isso via fetch/props
   const CLASSES: NavItem[] = [
     {
-      label: "3º Ano - Informática",
+      label: "Computer Science 101",
       icon: <Users className="size-4" />,
       href: `${base}/classes/3-ano-info`,
     },
-    {
-      label: "4º Ano - Informática",
-      icon: <Users className="size-4" />,
-      href: `${base}/classes/4-ano-info`,
-    },
+    // {
+    //   label: "4º Ano - Informática",
+    //   icon: <Users className="size-4" />,
+    //   href: `${base}/classes/4-ano-info`,
+    // },
   ]
 
   const SETTINGS: NavItem[] = [
@@ -65,11 +65,11 @@ export const makeNav = (institutionId: string) => {
       icon: <UserCog className="size-4" />,
       href: `${base}/manage`,
     },
-    {
-      label: "Preferências",
-      icon: <Settings className="size-4" />,
-      href: `${base}/settings`,
-    },
+    // {
+    //   label: "Preferências",
+    //   icon: <Settings className="size-4" />,
+    //   href: `${base}/settings`,
+    // },
     { label: "Sair", icon: <LogOut className="size-4" />, href: `/logout` },
   ]
 

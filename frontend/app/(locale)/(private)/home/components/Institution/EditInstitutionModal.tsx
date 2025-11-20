@@ -1,378 +1,261 @@
-// app/(locale)/(private)/institutions/[id]/manage/institution/components/EditInstitutionModal.tsx
 "use client"
 
 import * as React from "react"
 import {
   Modal,
-  ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "@heroui/modal"
 import { Input } from "@heroui/input"
 import { Button } from "@heroui/button"
 import { addToast } from "@heroui/toast"
-import { motion } from "framer-motion"
 
-import { useInstitution } from "@/hooks/institution/useInstitution"
-import { useUpdateInstitution } from "@/hooks/institution/useUpdateInstitution"
-import type { UpdateInstitutionInput } from "@/types/institution"
 import FileUpload, { FileUploadHandle } from "@/components/comp-547"
-import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset"
+import type { InstitutionSummary } from "@/types/institution"
+import { useQueryClient } from "@tanstack/react-query"
 
 type Props = {
-  institutionId: string
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onUpdated?: () => void
-  // Novas props opcionais para compatibilidade
-  defaultValues?: { name: string; email: string; description: string }
-  initialValues?: { name?: string; email?: string; description?: string }
-  initialName?: string
-  initialEmail?: string
-  initialDescription?: string
-  onSubmit?: (values: {
-    name?: string
-    email?: string
-    description?: string
-  }) => void | Promise<void>
-  onSave?: (values: {
-    name?: string
-    email?: string
-    description?: string
-  }) => void | Promise<void>
+  institution: InstitutionSummary   // ← Agora usando sua tipagem real
+  onUpdated: () => void
 }
 
 export function EditInstitutionModal({
-  institutionId,
   isOpen,
   onOpenChange,
+  institution,
   onUpdated,
-  // Novas props
-  defaultValues,
-  initialValues,
-  initialName,
-  initialEmail,
-  initialDescription,
-  onSubmit,
-  onSave,
 }: Props) {
-  const { data, isLoading, isError, error } = useInstitution(institutionId, {
-    enabled: isOpen,
-  })
-  const { mutateAsync: updateAsync, isPending: isUpdating } =
-    useUpdateInstitution(institutionId)
+  const [name, setName] = React.useState(institution.name)
+  const [description, setDescription] = React.useState(institution.description)
 
-  const { mutateAsync: uploadAsset, isPending: isUploading } =
-    useUploadProfileAsset()
-
-  const [name, setName] = React.useState("")
-  const [description, setDescription] = React.useState("")
+  const [profileId, setProfileId] = React.useState(
+    institution.profilePicture?.file_id ?? null
+  )
+  const [bannerId, setBannerId] = React.useState(
+    institution.banner?.file_id ?? null
+  )
 
   const profileRef = React.useRef<FileUploadHandle>(null)
   const bannerRef = React.useRef<FileUploadHandle>(null)
 
-  const initialProfileId = React.useMemo(
-    () => data?.profilePicture?.file_id ?? undefined,
-    [data]
-  )
-  const initialBannerId = React.useMemo(
-    () => data?.banner?.file_id ?? undefined,
-    [data]
-  )
+  const [isPending, setIsPending] = React.useState(false)
+  const qc = useQueryClient()
 
-  // Lógica de inicialização com ordem de preferência
+  // Atualiza campos ao abrir
   React.useEffect(() => {
     if (isOpen) {
-      // Ordem de preferência: defaultValues > initialValues > initialName/initialDescription > data
-      const initialNameValue =
-        defaultValues?.name ??
-        initialValues?.name ??
-        initialName ??
-        data?.name ??
-        ""
+      setName(institution.name)
+      setDescription(institution.description)
+      setProfileId(institution.profilePicture?.file_id ?? null)
+      setBannerId(institution.banner?.file_id ?? null)
 
-      const initialDescriptionValue =
-        defaultValues?.description ??
-        initialValues?.description ??
-        initialDescription ??
-        data?.description ??
-        ""
-
-      setName(initialNameValue)
-      setDescription(initialDescriptionValue)
+      profileRef.current?.clear()
+      bannerRef.current?.clear()
     }
-  }, [
-    isOpen,
-    data,
-    defaultValues,
-    initialValues,
-    initialName,
-    initialDescription,
-  ])
+  }, [isOpen, institution])
 
-  React.useEffect(() => {
-    if (isError) {
+  // ==============================
+  // Upload individual
+  // ==============================
+  const uploadAsset = async (file: File): Promise<string> => {
+    const fd = new FormData()
+    fd.append("profile-asset", file)
+
+    const res = await fetch("/api/files/upload-profile-assets", {
+      method: "POST",
+      body: fd,
+    })
+
+    if (!res.ok) throw new Error("Erro ao enviar arquivo.")
+
+    const data = await res.json()
+    return data.file_id
+  }
+
+  // ==============================
+  // Submit (PUT sem arquivos)
+  // ==============================
+  const handleSubmit = React.useCallback(async () => {
+    if (!name.trim() || !description.trim()) {
       addToast({
-        title: "Erro ao carregar instituição",
-        description: (error as Error)?.message ?? "Tente novamente mais tarde.",
+        title: "Preencha os campos obrigatórios",
+        description: "Nome e descrição são obrigatórios.",
+        color: "warning",
+        variant: "flat",
+      })
+      return
+    }
+
+    setIsPending(true)
+    try {
+      let newProfileId = profileId
+      let newBannerId = bannerId
+
+      const selectedProfile = profileRef.current?.getRawFiles()?.[0] ?? null
+      const selectedBanner = bannerRef.current?.getRawFiles()?.[0] ?? null
+
+      // Upload individual se necessário
+      if (selectedProfile) newProfileId = await uploadAsset(selectedProfile)
+      if (selectedBanner) newBannerId = await uploadAsset(selectedBanner)
+
+      const payload = {
+        name: name.trim(),
+        description: description.trim(),
+        profile_picture_id: newProfileId,
+        banner_id: newBannerId,
+      }
+
+      const res = await fetch(`/api/institutions/${institution.institution_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "")
+        throw new Error(text || `Erro ${res.status}`)
+      }
+
+      addToast({
+        title: "Instituição atualizada",
+        description: "As alterações foram salvas com sucesso.",
+        color: "success",
+        variant: "flat",
+      })
+
+      onUpdated()
+      onOpenChange(false)
+    } catch (err) {
+      console.error(err)
+      addToast({
+        title: "Erro ao atualizar",
+        description:
+          err instanceof Error ? err.message : "Não foi possível atualizar.",
         color: "danger",
         variant: "flat",
       })
+    } finally {
+      qc.invalidateQueries({queryKey: ["institutions", "summaries"]})
+      setIsPending(false)
     }
-  }, [isError]) // eslint-disable-line
+  }, [name, description, profileId, bannerId, institution.institution_id, onUpdated, onOpenChange])
 
-  const initialProfile = React.useMemo(
-    () =>
-      data?.profilePicture
-        ? [
-            {
-              id: data.profilePicture.file_id,
-              name: data.profilePicture.filename,
-              size: data.profilePicture.size,
-              type: data.profilePicture.mime_type,
-              url: data.profilePicture.url,
-            },
-          ]
-        : undefined,
-    [data]
-  )
-
-  const initialBanner = React.useMemo(
-    () =>
-      data?.banner
-        ? [
-            {
-              id: data.banner.file_id,
-              name: data.banner.filename,
-              size: data.banner.size,
-              type: data.banner.mime_type,
-              url: data.banner.url,
-            },
-          ]
-        : undefined,
-    [data]
-  )
-
-  const handleSave = async () => {
-    const trimmedName = name.trim()
-    const trimmedDesc = description.trim()
-
-    // Determinar email para callback (não editável no form)
-    const email =
-      defaultValues?.email ??
-      initialValues?.email ??
-      initialEmail ??
-      data?.email ??
-      ""
-
-    // alterações textuais
-    const changedName =
-      data && trimmedName !== data.name ? trimmedName : undefined
-    const changedDesc =
-      data && trimmedDesc !== (data.description ?? "") ? trimmedDesc : undefined
-
-    // estado dos uploads
-    const profileRaw = profileRef.current?.getRawFiles?.() ?? []
-    const bannerRaw = bannerRef.current?.getRawFiles?.() ?? []
-    const profileFiles = profileRef.current?.getFiles?.() ?? []
-    const bannerFiles = bannerRef.current?.getFiles?.() ?? []
-
-    // remoções (limpou o slot)
-    const initialProfileId = data?.profilePicture?.file_id
-    const initialBannerId = data?.banner?.file_id
-    const profileCleared = !!initialProfileId && profileFiles.length === 0
-    const bannerCleared = !!initialBannerId && bannerFiles.length === 0
-
-    // payload base
-    const payload: UpdateInstitutionInput = {}
-    if (changedName !== undefined) payload.name = changedName
-    if (changedDesc !== undefined) payload.description = changedDesc
-    if (profileCleared) payload.profilePictureId = null
-    if (bannerCleared) payload.bannerId = null
-
-    try {
-      // 1) upload dos NOVOS arquivos (se houver)
-      const uploads: Promise<void>[] = []
-      if (profileRaw[0]) {
-        uploads.push(
-          uploadAsset(profileRaw[0]).then((up) => {
-            payload.profilePictureId = up.file_id
-          })
-        )
-      }
-      if (bannerRaw[0]) {
-        uploads.push(
-          uploadAsset(bannerRaw[0]).then((up) => {
-            payload.bannerId = up.file_id
-          })
-        )
-      }
-      if (uploads.length) await Promise.all(uploads)
-
-      // 2) o backend exige SEMPRE "name"
-      //    – se o usuário não mudou o nome, mande o atual
-      const effectiveName = (payload.name ?? data?.name ?? "").trim()
-      if (!effectiveName) {
-        addToast({
-          title: "Nome obrigatório",
-          description: "Informe o nome da instituição para salvar.",
-          color: "warning",
-          variant: "flat",
-        })
-        return
-      }
-      payload.name = effectiveName
-
-      // (opcional) envie a descrição atual para manter simetria
-      if (
-        payload.description === undefined &&
-        (data?.description ?? "") !== ""
-      ) {
-        payload.description = data!.description!
-      }
-
-      // nada mudou MESMO?
-      const nothingChanged =
-        changedName === undefined &&
-        changedDesc === undefined &&
-        !profileCleared &&
-        !bannerCleared &&
-        profileRaw.length === 0 &&
-        bannerRaw.length === 0
-
-      if (nothingChanged) {
-        addToast({
-          title: "Nada para atualizar",
-          description:
-            "Altere algum campo ou modifique as imagens para salvar.",
-          color: "warning",
-          variant: "flat",
-        })
-        return
-      }
-
-      // 3) update JSON com os IDs resultantes
-      await updateAsync(payload)
-
-      // Executar callback apropriado
-      const callbackValues = {
-        name: effectiveName,
-        email,
-        description: trimmedDesc,
-      }
-
-      if (onSubmit) {
-        await onSubmit(callbackValues)
-      } else if (onSave) {
-        await onSave(callbackValues)
-      } else {
-        onUpdated?.()
-      }
-
-      onOpenChange(false)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const isSaving = isUpdating || isUploading
+  const canSubmit =
+    name.trim().length > 0 && description.trim().length > 0 && !isPending
 
   return (
     <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      size="lg"
       classNames={{
         base: "border border-border bg-card text-foreground",
         header: "border-b border-border",
         footer: "border-t border-border",
       }}
+      isOpen={isOpen}
       scrollBehavior="inside"
+      size="lg"
+      onOpenChange={onOpenChange}
     >
       <ModalContent>
         <ModalHeader className="text-base font-semibold">
-          Editar instituição
+          ✏️ Editar instituição
         </ModalHeader>
 
-        <ModalBody>
-          {isLoading ? (
-            <div className="space-y-3">
-              <div className="h-10 w-full animate-pulse rounded-lg bg-muted" />
-              <div className="h-24 w-full animate-pulse rounded-lg bg-muted" />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="h-52 animate-pulse rounded-lg bg-muted" />
-                <div className="h-52 animate-pulse rounded-lg bg-muted" />
-              </div>
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.18 }}
-            >
-              <div className="grid gap-4">
-                <Input
-                  label="Nome da Instituição"
-                  value={name}
-                  onValueChange={setName}
-                  variant="bordered"
-                  size="sm"
-                  classNames={{ inputWrapper: "bg-background border-border" }}
+        <ModalBody className="space-y-4">
+
+          {/* Nome */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              isRequired
+              label="Nome da Instituição"
+              placeholder="Ex.: Instituto Intellecta"
+              size="sm"
+              value={name}
+              variant="bordered"
+              classNames={{ inputWrapper: "bg-background border-border" }}
+              onValueChange={setName}
+            />
+          </div>
+
+          {/* Descrição */}
+          <div>
+            <label className="mb-1 block text-sm font-medium" htmlFor="description">
+              Descrição <span className="text-danger">*</span>
+            </label>
+            <textarea
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+              id="description"
+              rows={4}
+              value={description}
+              placeholder="Atualize a descrição…"
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          {/* Uploads */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Perfil */}
+            <div>
+              <div className="mb-1 text-sm font-medium">Imagem de perfil</div>
+
+              {institution.profilePicture?.url && (
+                <img
+                  src={institution.profilePicture.url}
+                  alt="Imagem atual de perfil"
+                  className="mb-2 mx-auto h-20 w-20 object-cover border border-border"
                 />
+              )}
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Descrição
-                  </label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/70 focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+              <FileUpload
+                ref={profileRef}
+                accept="image/*"
+                description="PNG, JPG até 5MB"
+                dropzoneLabel="Trocar imagem"
+                maxFiles={1}
+                maxSizeMB={5}
+                multiple={false}
+              />
+            </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <div className="mb-1 text-sm font-medium">
-                      Imagem de perfil
-                    </div>
-                    <FileUpload
-                      ref={profileRef}
-                      accept="image/*"
-                      multiple={false}
-                      maxFiles={1}
-                      maxSizeMB={5}
-                      initialFiles={initialProfile}
-                    />
-                  </div>
-                  <div>
-                    <div className="mb-1 text-sm font-medium">Banner</div>
-                    <FileUpload
-                      ref={bannerRef}
-                      accept="image/*"
-                      multiple={false}
-                      maxFiles={1}
-                      maxSizeMB={8}
-                      initialFiles={initialBanner}
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
+
+            {/* Banner */}
+            <div>
+              <div className="mb-1 text-sm font-medium">Banner</div>
+
+              {institution.banner?.url && (
+                <img
+                  src={institution.banner.url}
+                  alt="Banner atual"
+                  className="mb-2 w-full h-24 rounded-lg object-cover border border-border"
+                />
+              )}
+
+              <FileUpload
+                ref={bannerRef}
+                accept="image/*"
+                description="PNG, JPG até 8MB • 16:9 recomendado"
+                dropzoneLabel="Trocar banner"
+                maxFiles={1}
+                maxSizeMB={8}
+                multiple={false}
+              />
+            </div>
+          </div>
         </ModalBody>
 
         <ModalFooter>
-          <Button
-            variant="flat"
-            onPress={() => onOpenChange(false)}
-            isDisabled={isSaving}
-          >
+          <Button variant="flat" isDisabled={isPending} onPress={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button color="primary" onPress={handleSave} isLoading={isSaving}>
+          <Button
+            color="primary"
+            isDisabled={!canSubmit}
+            isLoading={isPending}
+            onPress={handleSubmit}
+          >
             Salvar alterações
           </Button>
         </ModalFooter>

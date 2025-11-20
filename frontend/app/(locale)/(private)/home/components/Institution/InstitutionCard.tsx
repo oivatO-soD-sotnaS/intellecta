@@ -26,15 +26,10 @@ import { cn } from "@/lib/utils"
 import { formatDatePtBR, formatNumber, timeAgo } from "@/lib/format"
 import { normalizeFileUrl } from "@/lib/urls"
 import { InstitutionSummary } from "@/types/institution"
-// import { Badge } from "@/components/ui/badge";
 
-import type { InstitutionCardItem } from "@/types/institution";
-import { useInstitutionSummary } from "@/hooks/institution/useInstitutionSummary"
-// import { EditInstitutionModal } from "./EditInstitutionModal";
-// import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 import { Badge } from "@/components/ui/badge"
 
-type Props = { institution: InstitutionCardItem; className?: string }
+type Props = { institution: InstitutionSummary; className?: string }
 
 export function InstitutionCard({ institution, className }: Props) {
   const [menuOpen, setMenuOpen] = React.useState(false)
@@ -125,7 +120,7 @@ export function InstitutionCard({ institution, className }: Props) {
                       <Pencil className="h-4 w-4" /> Editar instituição
                     </Button>
 
-                    <Button className="justify-start gap-2" variant="light">
+                    {/* <Button className="justify-start gap-2" variant="light">
                       <Settings className="h-4 w-4" />
                       <Link
                         className="ml-3 hidden text-xs text-muted-foreground underline-offset-2 hover:underline sm:inline"
@@ -133,7 +128,7 @@ export function InstitutionCard({ institution, className }: Props) {
                       >
                         Configurações
                       </Link>
-                    </Button>
+                    </Button> */}
 
                     <Button
                       className="justify-start gap-2"
@@ -155,7 +150,7 @@ export function InstitutionCard({ institution, className }: Props) {
 
         <CardContent className="p-4">
           {/* Cabeçalho: avatar + textos */}
-          <div className="relative -mt-10 mqqqqqqqqqqqqqqqqqqqqqqqqb-3 flex items-center gap-4">
+          <div className="relative -mt-6 mb-6 mqqqqqqqqqqqqqqqqqqqqqqqqb-3 flex items-center gap-4">
             <Avatar
               key={avatarUrl || "no-avatar"}
               showFallback
@@ -227,7 +222,7 @@ export function InstitutionCard({ institution, className }: Props) {
       {isAdmin && (
         <>
           <EditInstitutionModal
-            institutionId={finalInstitution.institution_id}
+            institution={institution}
             isOpen={editOpen}
             onOpenChange={setEditOpen}
             onUpdated={() => {}}

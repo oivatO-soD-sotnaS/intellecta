@@ -6,7 +6,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { differenceInDays } from "date-fns"
 import { useCalendarDnd } from "./calendar-dnd-context"
 import { EventItem } from "./event-item"
-import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
+import { CalendarEvent } from "./types"
 
 
 interface DraggableEventProps {
@@ -42,14 +42,14 @@ export function DraggableEvent({
   } | null>(null)
 
   // Check if this is a multi-day event
-  const eventStart = new Date(event.start)
-  const eventEnd = new Date(event.end)
+  const eventStart = new Date(event.event.event_start)
+  const eventEnd = new Date(event.event.event_end)
   const isMultiDayEvent =
-    isMultiDay || event.allDay || differenceInDays(eventEnd, eventStart) >= 1
+    isMultiDay || differenceInDays(eventEnd, eventStart) >= 1
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
-      id: `${event.id}-${view}`,
+      id: `${event.generic_id}-${view}`,
       data: {
         event,
         view,
@@ -74,7 +74,7 @@ export function DraggableEvent({
   }
 
   // Don't render if this event is being dragged
-  if (isDragging || activeId === `${event.id}-${view}`) {
+  if (isDragging || activeId === `${event.generic_id}-${view}`) {
     return (
       <div
         ref={setNodeRef}

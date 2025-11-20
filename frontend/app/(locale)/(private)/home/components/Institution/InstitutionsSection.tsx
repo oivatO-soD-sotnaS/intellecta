@@ -8,19 +8,16 @@ import { Search } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  Institution as CardInstitution,
   InstitutionCard,
 } from "./InstitutionCard"
 import { CreateInstitutionButton } from "./CreateInstitutionButton"
 import { InstitutionModal } from "./InstitutionModal"
 import { EmptyState } from "./EmptyState"
 
-import { useInstitutions } from "@/hooks/institution/useInstitutions"
 import { useInstitutionsOwned } from "@/hooks/institution/useInstitutionsOwned"
-import type { Institution, InstitutionSummary } from "@/types/institution"
+import type { InstitutionSummary } from "@/types/institution"
 import { SkeletonGrid } from "./SkeletonGrid"
-
-/* ---------------- helpers fora do componente ---------------- */
+import { useInstitutionsSummaries } from "@/hooks/institution/useInstitutionSummaries"
 
 function getErrorMessage(
   err: unknown,
@@ -35,19 +32,6 @@ function getErrorMessage(
   return fallback
 }
 
-function toUICard(i: Institution, isOwner: boolean): CardInstitution {
-  return {
-    id: i.id,
-    name: i.name,
-    description: i.description,
-    bannerUrl: i.banner?.url ?? undefined,
-    imageUrl: i.profilePicture?.url ?? undefined,
-    role: isOwner ? "admin" : undefined,
-    members: undefined,
-    disciplines: undefined,
-  }
-}
-
 /* --------------------------- componente --------------------------- */
 
 export default function InstitutionsSection() {
@@ -55,7 +39,7 @@ export default function InstitutionsSection() {
   const [q, setQ] = React.useState("")
   const [isModalOpen, setModalOpen] = React.useState(false)
 
-  const allQuery = useInstitutions()
+  const allQuery = useInstitutionsSummaries()
   const ownedQuery = useInstitutionsOwned()
 
   const ownedLimit = 3
@@ -200,13 +184,6 @@ export default function InstitutionsSection() {
               }
               primaryText="Criar instituição"
               primaryHref="/institutions/create"
-              primaryText="Criar instituição"
-              title={
-                tab === "owned"
-                  ? "Você ainda não criou instituições."
-                  : "Você ainda não participa de nenhuma instituição."
-              }
-              variant="empty"
             />
           ) : (
             <ul className="grid grid-cols-1 gap-4">

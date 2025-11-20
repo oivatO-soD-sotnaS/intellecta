@@ -8,6 +8,7 @@ import { Providers } from "../../providers";
 import Header from "./components/Header";
 
 import { SessionGuard } from "@/components/SessionGuar";
+import { Toaster } from "sonner";
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
   return (
@@ -17,6 +18,11 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 border-none h-">{children}</main>
         <SessionGuard />
       </Providers>
+      <Toaster 
+        position="bottom-right"
+        richColors
+        closeButton
+      />
     </div>
   );
 }

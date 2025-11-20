@@ -49,7 +49,7 @@ class EventDateVo
 
   public function toString(): string
   {
-    return $this->datetime->format(DateTimeInterface::ATOM); // ISO 8601 format
+    return $this->datetime->format("Y-m-d H:i:s");
   }
 
   public function equals(EventDateVo $other): bool

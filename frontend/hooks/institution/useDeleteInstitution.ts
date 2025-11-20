@@ -12,6 +12,7 @@ export function useDeleteInstitution(institutionId: string) {
       qc.invalidateQueries({ queryKey: ["institutions"] });
       qc.invalidateQueries({ queryKey: ["institutions", "owned"] });
       qc.invalidateQueries({ queryKey: ["institution", institutionId] });
+      qc.invalidateQueries({queryKey: ["institutions", "summaries"]});
       qc.invalidateQueries({
         queryKey: ["institution", institutionId, "summary"],
       });
