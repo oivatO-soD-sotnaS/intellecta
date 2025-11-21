@@ -54,7 +54,6 @@ export async function POST(
       body: forwardFormData,
     })
 
-    console.log("log do backendResponse ->", backendResponse)
     
   } else {
     let jsonBody: any = null
@@ -73,7 +72,6 @@ export async function POST(
       body: jsonBody ? JSON.stringify(jsonBody) : null,
     })
 
-    console.log("log do backendResponse else", backendResponse)
     
   }
 

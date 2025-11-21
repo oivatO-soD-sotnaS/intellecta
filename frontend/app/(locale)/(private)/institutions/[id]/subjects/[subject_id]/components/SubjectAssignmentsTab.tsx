@@ -31,8 +31,25 @@ import MySubmissionPanel from "./assignments/MySubmissionPanel"
 import { DateTimePicker } from "@/components/DatePickerDemo"
 import { formatBytes, useFileUpload } from "@/hooks/use-file-upload"
 import { AssignmentDetailsSheet } from "./AssignmentDetailsSheet"
-import { TopSheet, TopSheetClose, TopSheetContent, TopSheetDescription, TopSheetFooter, TopSheetHeader, TopSheetTitle } from "@/components/ui/top-sheet"
+import {
+  TopSheet,
+  TopSheetClose,
+  TopSheetContent,
+  TopSheetDescription,
+  TopSheetFooter,
+  TopSheetHeader,
+  TopSheetTitle,
+} from "@/components/ui/top-sheet"
 import { FileUploadComponent } from "../../../components/FileUploadComponent"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 
 interface SubjectAssignmentsTabProps {
   institutionId: string
@@ -40,11 +57,14 @@ interface SubjectAssignmentsTabProps {
   isTeacher: boolean
 }
 
+const ITEMS_PER_PAGE = 6
+
 export default function SubjectAssignmentsTab({
   institutionId,
   subjectId,
   isTeacher,
 }: SubjectAssignmentsTabProps) {
+  const [currentPage, setCurrentPage] = useState(1)
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<
     string | null
   >(null)
@@ -94,6 +114,68 @@ export default function SubjectAssignmentsTab({
 
   const createAssignmentMutation = useCreateAssignment(institutionId, subjectId)
 
+  // Cálculos de paginação
+  const totalPages = assignments
+    ? Math.ceil(assignments.length / ITEMS_PER_PAGE)
+    : 0
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedAssignments = assignments?.slice(startIndex, endIndex) || []
+
+  const handlePageClick = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // Gera os números das páginas para exibir
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = []
+    const maxVisiblePages = 5
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 3; i++) {
+          pages.push(i)
+        }
+        pages.push("ellipsis")
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1)
+        pages.push("ellipsis")
+        for (let i = totalPages - 2; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        pages.push(1)
+        pages.push("ellipsis")
+        pages.push(currentPage - 1)
+        pages.push(currentPage)
+        pages.push(currentPage + 1)
+        pages.push("ellipsis")
+        pages.push(totalPages)
+      }
+    }
+
+    return pages
+  }
+
   function handleOpenDialog() {
     setOpenDialog(true)
   }
@@ -128,26 +210,80 @@ export default function SubjectAssignmentsTab({
         onSuccess(data: any) {
           setSelectedAssignmentId(data.assignment_id ?? null)
           handleCloseDialog()
+          // Volta para a primeira página após criar
+          setCurrentPage(1)
         },
       }
     )
   }
 
-  
-
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-sm font-semibold">Atividades da disciplina</h2>
-        {isTeacher && (
-          <Button size="sm" variant="outline" onClick={handleOpenDialog}>
-            Nova atividade
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {!isLoading &&
+            assignments &&
+            assignments.length > 0 &&
+            totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={handlePrevious}
+                      size="default"
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                  {getPageNumbers().map((page, index) => (
+                    <PaginationItem key={index}>
+                      {page === "ellipsis" ? (
+                        <PaginationEllipsis />
+                      ) : (
+                        <PaginationLink
+                          href="#"
+                          size="default"
+                          isActive={currentPage === page}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handlePageClick(page)
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={handleNext}
+                      size="default"
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          {isTeacher && (
+            <Button size="sm" variant="outline" onClick={handleOpenDialog}>
+              Nova atividade
+            </Button>
+          )}
+        </div>
       </div>
       {isLoading && (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="border-border/60 p-4">
               <Skeleton className="mb-2 h-4 w-40" />
               <Skeleton className="mb-1 h-3 w-full" />
@@ -174,31 +310,35 @@ export default function SubjectAssignmentsTab({
       )}
 
       {!isLoading && assignments && assignments.length > 0 && (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {assignments.map((assignment: any) => (
-            <AssignmentCard
-              key={assignment.assignment_id}
-              assignment={assignment}
-              isSelected={selectedAssignmentId === assignment.assignment_id}
-              onOpenDetails={() => handleOpenDetails(assignment.assignment_id)}
-              canManage={isTeacher}
-              onSelect={() => {
-                setSelectedAssignmentId((prev) => {
-                  const next =
-                    prev === assignment.assignment_id
-                      ? null
-                      : assignment.assignment_id
+        <>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedAssignments.map((assignment: any) => (
+              <AssignmentCard
+                key={assignment.assignment_id}
+                assignment={assignment}
+                isSelected={selectedAssignmentId === assignment.assignment_id}
+                onOpenDetails={() =>
+                  handleOpenDetails(assignment.assignment_id)
+                }
+                canManage={isTeacher}
+                onSelect={() => {
+                  setSelectedAssignmentId((prev) => {
+                    const next =
+                      prev === assignment.assignment_id
+                        ? null
+                        : assignment.assignment_id
 
-                  if (isTeacher) {
-                    setSubmissionsOpen(Boolean(next))
-                  }
+                    if (isTeacher) {
+                      setSubmissionsOpen(Boolean(next))
+                    }
 
-                  return next
-                })
-              }}
-            />
-          ))}
-        </div>
+                    return next
+                  })
+                }}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       {/* Painel inferior: professor vê lista de entregas; aluno vê "Minha entrega" */}

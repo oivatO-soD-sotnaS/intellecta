@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { useSubjectMaterials } from "@/hooks/subjects/useSubjectMaterials"
+import { useSubjectMaterials } from "@/hooks/subjects/materials/useSubjectMaterials"
 import { useSubjectAssignment } from "@/hooks/subjects/assignments/useSubjectAssignments"
 import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
