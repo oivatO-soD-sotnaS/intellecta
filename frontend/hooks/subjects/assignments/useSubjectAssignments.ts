@@ -96,16 +96,36 @@ export function useUpdateAssignment(institutionId: string, subjectId?: string) {
     mutationFn: async (
       input: UpdateAssignmentInput & { assignmentId: string }
     ) => {
-      const { assignmentId, attachment, ...rest } = input
+      const { assignmentId, ...rest } = input
       const url = `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}`
 
-      const response = await fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(rest), // title, description, deadline
-      })
+      const hasAttachment = rest.attachment instanceof File
+      let response: Response
+
+      if (hasAttachment) {
+        const formData = new FormData()
+        formData.append("title", rest.title)
+        formData.append("description", rest.description)
+        if (rest.deadline) {
+          formData.append("deadline", rest.deadline)
+        }
+        formData.append("attachment", rest.attachment as File)
+
+        response = await fetch(url, {
+          method: "PATCH",
+          body: formData,
+        })
+      } else {
+        const { attachment, ...jsonBody } = rest
+
+        response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(jsonBody),
+        })
+      }
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "")

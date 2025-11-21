@@ -1,7 +1,6 @@
 import { isSameDay } from "date-fns"
 import { CalendarEvent, EventColor } from "./types"
 
-
 /**
  * Get CSS classes for event colors
  */
@@ -45,9 +44,23 @@ export function getBorderRadiusClasses(
 }
 
 /**
+ * Check if an event is valid
+ */
+function isValidEvent(event: CalendarEvent): boolean {
+  return !!(
+    event &&
+    event.event &&
+    event.event.event_start &&
+    event.event.event_end
+  )
+}
+
+/**
  * Check if an event is a multi-day event
  */
 export function isMultiDayEvent(event: CalendarEvent): boolean {
+  if (!isValidEvent(event)) return false
+
   const eventStart = new Date(event.event.event_start)
   const eventEnd = new Date(event.event.event_end)
   return eventStart.getDate() !== eventEnd.getDate()
@@ -60,26 +73,39 @@ export function getEventsForDay(
   events: CalendarEvent[],
   day: Date
 ): CalendarEvent[] {
+  if (!Array.isArray(events)) return []
+
   return events
     .filter((event) => {
+      if (!isValidEvent(event)) return false
+
       const eventStart = new Date(event.event.event_start)
       return isSameDay(day, eventStart)
     })
-    .sort((a, b) => new Date(a.event.event_start).getTime() - new Date(b.event.event_start).getTime())
+    .sort(
+      (a, b) =>
+        new Date(a.event.event_start).getTime() -
+        new Date(b.event.event_start).getTime()
+    )
 }
 
 /**
  * Sort events with multi-day events first, then by start time
  */
 export function sortEvents(events: CalendarEvent[]): CalendarEvent[] {
-  return [...events].sort((a, b) => {
+  if (!Array.isArray(events)) return []
+
+  return [...events].filter(isValidEvent).sort((a, b) => {
     const aIsMultiDay = isMultiDayEvent(a)
     const bIsMultiDay = isMultiDayEvent(b)
 
     if (aIsMultiDay && !bIsMultiDay) return -1
     if (!aIsMultiDay && bIsMultiDay) return 1
 
-    return new Date(a.event.event_start).getTime() - new Date(b.event.event_start).getTime()
+    return (
+      new Date(a.event.event_start).getTime() -
+      new Date(b.event.event_start).getTime()
+    )
   })
 }
 
@@ -90,8 +116,10 @@ export function getSpanningEventsForDay(
   events: CalendarEvent[],
   day: Date
 ): CalendarEvent[] {
+  if (!Array.isArray(events)) return []
+
   return events.filter((event) => {
-    if (!isMultiDayEvent(event)) return false
+    if (!isValidEvent(event) || !isMultiDayEvent(event)) return false
 
     const eventStart = new Date(event.event.event_start)
     const eventEnd = new Date(event.event.event_end)
@@ -111,7 +139,11 @@ export function getAllEventsForDay(
   events: CalendarEvent[],
   day: Date
 ): CalendarEvent[] {
+  if (!Array.isArray(events)) return []
+
   return events.filter((event) => {
+    if (!isValidEvent(event)) return false
+
     const eventStart = new Date(event.event.event_start)
     const eventEnd = new Date(event.event.event_end)
     return (
@@ -129,8 +161,12 @@ export function getAgendaEventsForDay(
   events: CalendarEvent[],
   day: Date
 ): CalendarEvent[] {
+  if (!Array.isArray(events)) return []
+
   return events
     .filter((event) => {
+      if (!isValidEvent(event)) return false
+
       const eventStart = new Date(event.event.event_start)
       const eventEnd = new Date(event.event.event_end)
       return (
@@ -139,7 +175,11 @@ export function getAgendaEventsForDay(
         (day > eventStart && day < eventEnd)
       )
     })
-    .sort((a, b) => new Date(a.event.event_start).getTime() - new Date(b.event.event_start).getTime())
+    .sort(
+      (a, b) =>
+        new Date(a.event.event_start).getTime() -
+        new Date(b.event.event_start).getTime()
+    )
 }
 
 /**

@@ -1,4 +1,10 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CalendarClock, ChevronRight, DownloadIcon } from "lucide-react"
@@ -16,13 +22,42 @@ export default function AssignmentCard({
   isSelected,
   onSelect,
   canManage,
-  onOpenDetails
+  onOpenDetails,
 }: AssignmentCardProps) {
   const title = assignment.title ?? assignment.name ?? "Atividade sem título"
   const description =
     assignment.description ??
     "Atividade avaliativa da disciplina. Detalhes serão exibidos ao abrir."
+
   const dueDate = assignment.due_date ?? assignment.deadline
+  const formattedDueDate =
+    dueDate &&
+    new Date(dueDate).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+
+  let deadlineClasses =
+    "mt-2 flex items-center gap-2 rounded-md px-2 py-1 text-[11px] ring-1"
+
+  if (dueDate) {
+    const now = new Date()
+    const due = new Date(dueDate)
+    const diffDays = (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+
+    if (diffDays >= 7) {
+      deadlineClasses += " bg-emerald-50 text-emerald-900 ring-emerald-200"
+    } else if (diffDays >= 4 && diffDays <= 6) {
+      deadlineClasses += " bg-amber-50 text-amber-900 ring-amber-200"
+    } else {
+      deadlineClasses += " bg-red-50 text-red-900 ring-red-200"
+    }
+  }
+
   const concept = assignment.concept
   const hasAttachment = !!assignment.attachment?.url
 
@@ -46,14 +81,14 @@ export default function AssignmentCard({
             </Badge>
           )}
         </div>
-
-        {dueDate && (
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        
+        {formattedDueDate && (
+          <div className={deadlineClasses}>
             <CalendarClock className="h-3 w-3" />
-            <span>Entrega até:</span>
-            <span className="font-medium">
-              {new Date(dueDate).toLocaleString()}
+            <span className="font-semibold uppercase tracking-wide">
+              Entrega até:
             </span>
+            <span className="font-medium">{formattedDueDate}</span>
           </div>
         )}
       </CardHeader>

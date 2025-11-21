@@ -32,6 +32,7 @@ import { DateTimePicker } from "@/components/DatePickerDemo"
 import { formatBytes, useFileUpload } from "@/hooks/use-file-upload"
 import { AssignmentDetailsSheet } from "./AssignmentDetailsSheet"
 import { TopSheet, TopSheetClose, TopSheetContent, TopSheetDescription, TopSheetFooter, TopSheetHeader, TopSheetTitle } from "@/components/ui/top-sheet"
+import { FileUploadComponent } from "../../../components/FileUploadComponent"
 
 interface SubjectAssignmentsTabProps {
   institutionId: string
@@ -131,6 +132,8 @@ export default function SubjectAssignmentsTab({
       }
     )
   }
+
+  
 
   return (
     <section className="space-y-4">
@@ -263,7 +266,7 @@ export default function SubjectAssignmentsTab({
 
       {/* Dialog de criação de atividade */}
       <Dialog open={openDialog} onOpenChange={handleCloseDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md overflow-hidden">
           <DialogHeader>
             <DialogTitle>Nova atividade</DialogTitle>
             <DialogDescription>
@@ -271,7 +274,10 @@ export default function SubjectAssignmentsTab({
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmitAssignment} className="space-y-3 py-2">
+          <form
+            onSubmit={handleSubmitAssignment}
+            className="space-y-3 py-2 overflow-hidden"
+          >
             <div className="space-y-1">
               <label className="text-xs font-medium text-foreground">
                 Título
@@ -306,84 +312,20 @@ export default function SubjectAssignmentsTab({
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-foreground">
-                Anexo (opcional)
-              </label>
-
-              <div
-                role="button"
-                onClick={openFileDialog}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                data-dragging={isDragging || undefined}
-                className="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-input p-4 transition-colors hover:bg-accent/50 has-disabled:pointer-events-none has-disabled:opacity-50 has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50"
-              >
-                <input
-                  {...getInputProps()}
-                  className="sr-only"
-                  aria-label="Upload file"
-                  disabled={Boolean(file)}
-                />
-
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div
-                    className="mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border bg-background"
-                    aria-hidden="true"
-                  >
-                    <UploadIcon className="size-4 opacity-60" />
-                  </div>
-                  <p className="mb-1.5 text-sm font-medium">
-                    Upload de arquivo
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Arraste e solte ou clique para procurar (máx.{" "}
-                    {formatBytes(maxSize)})
-                  </p>
-                </div>
-              </div>
-
-              {/* Erros de upload */}
-              {errors.length > 0 && (
-                <div
-                  className="flex items-center gap-1 text-xs text-destructive"
-                  role="alert"
-                >
-                  <AlertCircleIcon className="size-3 shrink-0" />
-                  <span>{errors[0]}</span>
-                </div>
-              )}
-
-              {/* Arquivo selecionado */}
-              {file && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2 rounded-xl border px-4 py-2">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <PaperclipIcon
-                        className="size-4 shrink-0 opacity-60"
-                        aria-hidden="true"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate text-[13px] font-medium">
-                          {file.file.name}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="-me-2 size-8 text-muted-foreground/80 hover:bg-transparent hover:text-foreground"
-                      onClick={() => removeFile(file.id)}
-                      aria-label="Remover arquivo"
-                    >
-                      <XIcon className="size-4" aria-hidden="true" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+            <div className="overflow-hidden">
+              <FileUploadComponent
+                maxSize={maxSize}
+                file={file ?? null}
+                errors={errors}
+                isDragging={isDragging}
+                openFileDialog={openFileDialog}
+                handleDragEnter={handleDragEnter}
+                handleDragLeave={handleDragLeave}
+                handleDragOver={handleDragOver}
+                handleDrop={handleDrop}
+                getInputProps={getInputProps}
+                removeFile={removeFile}
+              />
             </div>
 
             <DialogFooter>

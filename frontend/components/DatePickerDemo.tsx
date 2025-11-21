@@ -30,6 +30,9 @@ export function DateTimePicker({
   const [time, setTime] = useState<string | undefined>(undefined)
 
   const allTimeSlots = [
+    "07:30",
+    "08:00",
+    "08:30",
     "09:00",
     "09:30",
     "10:00",
@@ -60,7 +63,7 @@ export function DateTimePicker({
     "22:30",
     "23:00",
     "23:30",
-    "23:59"
+    "23:59",
   ]
 
   /**
@@ -152,12 +155,12 @@ export function DateTimePicker({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="relative w-[250px]">
+        <div className="relative">
           <Button
             type="button"
             variant="outline"
             mode="input"
-            className="w-full justify-start gap-2"
+            className="w-auto justify-start gap-2"
           >
             <CalendarIcon className="h-4 w-4 opacity-70" />
             <span className="truncate text-left text-sm">{labelText}</span>
