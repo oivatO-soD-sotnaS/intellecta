@@ -97,7 +97,6 @@ export function InstitutionCard({ institution, className }: Props) {
                 <h3 className="truncate text-base font-semibold leading-5">
                   {finalInstitution.name}
                 </h3>
-                <Badge variant={"outline"}>Ativa</Badge>
               </div>
               <div className="text-xs text-muted-foreground">Instituição</div>
               {finalInstitution.description && (

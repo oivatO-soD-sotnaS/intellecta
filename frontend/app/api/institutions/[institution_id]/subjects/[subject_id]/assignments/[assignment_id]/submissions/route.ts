@@ -1,16 +1,18 @@
 import { proxyGet, proxyPost } from "@/app/api/_lib/proxy"
 import { NextRequest } from "next/server"
 
-type Params = {
-  params: {
-    institution_id: string
-    subject_id: string
-    assignment_id: string
-  }
+type RouteParams = {
+  institution_id: string
+  subject_id: string
+  assignment_id: string
 }
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const { institution_id, subject_id, assignment_id } = params
+type Params = {
+  params: Promise<RouteParams>
+}
+
+export async function GET(req: NextRequest, ctx: Params) {
+  const { institution_id, subject_id, assignment_id } = await ctx.params
 
   return proxyGet(
     req,
@@ -18,8 +20,9 @@ export async function GET(req: NextRequest, { params }: Params) {
   )
 }
 
-export async function POST(req: NextRequest, { params }: Params) {
-  const { institution_id, subject_id, assignment_id } = params
+
+export async function POST(req: NextRequest, ctx: Params) {
+  const { institution_id, subject_id, assignment_id } = await ctx.params
 
   return proxyPost(
     req,

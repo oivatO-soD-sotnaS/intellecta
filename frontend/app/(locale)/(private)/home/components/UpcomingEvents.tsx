@@ -1,8 +1,8 @@
 // components/UpcomingEvents.tsx
-"use client";
+"use client"
 
-import React from "react";
-import Link from "next/link";
+import React from "react"
+import Link from "next/link"
 import {
   AlertCircle,
   Calendar,
@@ -19,31 +19,37 @@ import {
   Building,
   BookMarked,
   ArrowRight,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+} from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 
 interface Event {
-  event_id: string;
-  title: string;
-  description: string;
-  type: string;
-  event_start: string;
-  event_end: string;
-  created_at: string;
-  changed_at: string;
-  user_event_id: string;
-  user_id: string;
-  event_source: string;
-  institution_id: string | null;
-  institution_name: string | null;
-  subject_id: string | null;
-  subject_name: string | null;
-  subject_code: string | null;
+  event_id: string
+  title: string
+  description: string
+  type: string
+  event_start: string
+  event_end: string
+  created_at: string
+  changed_at: string
+  user_event_id: string
+  user_id: string
+  event_source: string
+  institution_id: string | null
+  institution_name: string | null
+  subject_id: string | null
+  subject_name: string | null
+  subject_code: string | null
 }
 
 interface UpcomingEventsProps {}
@@ -149,48 +155,50 @@ const getEventSourceConfig = (event: Event) => {
         icon: Building,
         label: event.institution_name || "Instituição",
         variant: "secondary" as const,
-      };
+      }
     case "subject":
       return {
         icon: BookMarked,
         label: event.subject_name || "Disciplina",
         variant: "default" as const,
-      };
+      }
     case "user":
     default:
       return {
         icon: Users,
         label: "Pessoal",
         variant: "outline" as const,
-      };
+      }
   }
-};
+}
 
 // Componente de evento individual
 const EventItem = ({ event }: { event: Event }) => {
-  const start = new Date(event.event_start);
-  const end = new Date(event.event_end);
+  const start = new Date(event.event_start)
+  const end = new Date(event.event_end)
 
-  const day = start.getDate().toString().padStart(2, "0");
+  const day = start.getDate().toString().padStart(2, "0")
   const month = start
     .toLocaleString("pt-BR", { month: "short" })
     .toUpperCase()
-    .replace(".", "");
+    .replace(".", "")
 
   const { label, className, icon: Icon } = getEventTypeConfig(event.type);
   const sourceConfig = getEventSourceConfig(event);
 
   const SourceIcon = sourceConfig.icon;
 
-  const isToday = new Date().toDateString() === start.toDateString();
+  const isToday = new Date().toDateString() === start.toDateString()
   const isTomorrow =
-    new Date(Date.now() + 86400000).toDateString() === start.toDateString();
+    new Date(Date.now() + 86400000).toDateString() === start.toDateString()
 
   return (
     <div className="group flex items-start gap-4 rounded-lg p-3 transition-colors hover:bg-muted/50">
       {/* Data */}
       <div className="flex flex-col items-center justify-center rounded-lg border bg-background p-2 min-w-12">
-        <span className="text-xs font-medium text-muted-foreground">{month} / {start.getFullYear()}</span>
+        <span className="text-xs font-medium text-muted-foreground">
+          {month} / {start.getFullYear()}
+        </span>
         <span className="text-lg font-bold">{day}</span>
       </div>
 
@@ -250,7 +258,7 @@ const EventItem = ({ event }: { event: Event }) => {
             hour: "2-digit",
             minute: "2-digit",
           })}{" "}
-          —{" "}
+          –{" "}
           {end.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -258,8 +266,8 @@ const EventItem = ({ event }: { event: Event }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Skeleton para loading
 const EventSkeleton = () => (
@@ -273,7 +281,7 @@ const EventSkeleton = () => (
       <Skeleton className="h-3 w-12" />
     </div>
   </div>
-);
+)
 
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
   const {
@@ -307,7 +315,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
           ))}
         </CardContent>
       </Card>
-    );
+    )
   }
 
   // Error
@@ -329,11 +337,11 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
           </Alert>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   // Empty
-  if (!events || events.length === 0) {
+  if (events.length === 0) {
     return (
       <Card className="rounded-xl border shadow-sm">
         <CardHeader className="pb-4">
@@ -362,7 +370,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
           </div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   console.log("EVENTS:", events);
@@ -384,10 +392,9 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
             <EventItem key={event.user_event_id} event={event} />
           ))}
         </div>
-
       </CardContent>
       <CardFooter>
-        {(events.length > 5 || events.length <= 5) && (
+        {events.length > 0 && (
           <div className="mt-4 pt-4 border-t w-full">
             <Link
               href="/events"
@@ -399,5 +406,5 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
         )}
       </CardFooter>
     </Card>
-  );
-};
+  )
+}

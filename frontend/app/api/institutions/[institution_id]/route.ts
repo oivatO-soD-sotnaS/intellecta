@@ -10,20 +10,14 @@ export async function GET(
   return proxyGet(req, `/institutions/${institution_id}`)
 }
 
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ institution_id: string }> },
-) {
-  const { institution_id } = await context.params;
-  
-  return proxyPut(req, `/institutions/${institution_id}`);
+export async function PUT(req: NextRequest, ctx: Params) {
+  const {institution_id} = await ctx.params
+  return proxyPut(req, `/institutions/${institution_id}`)
 }
 
-export async function DELETE(
-  req: NextRequest,
-  context: { params: Promise<{ institution_id: string }> },
+export async function DELETE(req: NextRequest, ctx: Params
 ) {
-  const { institution_id } = await context.params;
+  const { institution_id } = await ctx.params
 
-  return proxyDelete(req, `/institutions/${institution_id}`);
+  return proxyDelete(req, `/institutions/${institution_id}`)
 }
