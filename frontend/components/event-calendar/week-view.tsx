@@ -17,6 +17,7 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 import {
   EndHour,
@@ -24,12 +25,12 @@ import {
   WeekCellsHeight,
 } from "@/components/event-calendar/constants"
 import { cn } from "@/lib/utils"
-import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
 import { isMultiDayEvent } from "./utils"
 import { useCurrentTimeIndicator } from "./hooks/use-current-time-indicator"
 import { EventItem } from "./event-item"
 import { DraggableEvent } from "./draggable-event"
 import { DroppableCell } from "./droppable-cell"
+import { CalendarEvent } from "./types"
 
 interface WeekViewProps {
   currentDate: Date
@@ -53,164 +54,158 @@ export function WeekView({
   onEventSelect,
   onEventCreate,
 }: WeekViewProps) {
-  const days = useMemo(() => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 })
-    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 })
-    return eachDayOfInterval({ start: weekStart, end: weekEnd })
+  const cellHeight = WeekCellsHeight
+
+  const dias = useMemo(() => {
+    const inicioSemana = startOfWeek(currentDate, { weekStartsOn: 0 })
+    const fimSemana = endOfWeek(currentDate, { weekStartsOn: 0 })
+    return eachDayOfInterval({ start: inicioSemana, end: fimSemana })
   }, [currentDate])
 
-  const weekStart = useMemo(
+  const inicioSemana = useMemo(
     () => startOfWeek(currentDate, { weekStartsOn: 0 }),
     [currentDate]
   )
 
-  const hours = useMemo(() => {
-    const dayStart = startOfDay(currentDate)
+  const horas = useMemo(() => {
+    const inicioDia = startOfDay(currentDate)
     return eachHourOfInterval({
-      start: addHours(dayStart, StartHour),
-      end: addHours(dayStart, EndHour - 1),
+      start: addHours(inicioDia, StartHour),
+      end: addHours(inicioDia, EndHour - 1),
     })
   }, [currentDate])
 
-  // Get all-day events and multi-day events for the week
-  const allDayEvents = useMemo(() => {
+  // Obter eventos de dia inteiro e eventos de múltiplos dias para a semana
+  const eventosDiaInteiro = useMemo(() => {
     return events
       .filter((event) => {
-        // Include explicitly marked all-day events or multi-day events
-        return event.allDay || isMultiDayEvent(event)
+        return isMultiDayEvent(event)
       })
       .filter((event) => {
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
-        return days.some(
-          (day) =>
-            isSameDay(day, eventStart) ||
-            isSameDay(day, eventEnd) ||
-            (day > eventStart && day < eventEnd)
+        const inicioEvento = new Date(event.event.event_start)
+        const fimEvento = new Date(event.event.event_end)
+        return dias.some(
+          (dia) =>
+            isSameDay(dia, inicioEvento) ||
+            isSameDay(dia, fimEvento) ||
+            (dia > inicioEvento && dia < fimEvento)
         )
       })
-  }, [events, days])
+  }, [events, dias])
 
-  // Process events for each day to calculate positions
-  const processedDayEvents = useMemo(() => {
-    const result = days.map((day) => {
-      // Get events for this day that are not all-day events or multi-day events
-      const dayEvents = events.filter((event) => {
-        // Skip all-day events and multi-day events
-        if (event.allDay || isMultiDayEvent(event)) return false
+  // Processar eventos para cada dia para calcular posições
+  const eventosProcessadosPorDia = useMemo(() => {
+    const resultado = dias.map((dia) => {
+      // Obter eventos para este dia que não são eventos de dia inteiro ou de múltiplos dias
+      const eventosDoDia = events.filter((event) => {
+        if (isMultiDayEvent(event)) return false
 
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+        const inicioEvento = new Date(event.event.event_start)
+        const fimEvento = new Date(event.event.event_end)
 
-        // Check if event is on this day
         return (
-          isSameDay(day, eventStart) ||
-          isSameDay(day, eventEnd) ||
-          (eventStart < day && eventEnd > day)
+          isSameDay(dia, inicioEvento) ||
+          isSameDay(dia, fimEvento) ||
+          (inicioEvento < dia && fimEvento > dia)
         )
       })
 
-      // Sort events by start time and duration
-      const sortedEvents = [...dayEvents].sort((a, b) => {
-        const aStart = new Date(a.start)
-        const bStart = new Date(b.start)
-        const aEnd = new Date(a.end)
-        const bEnd = new Date(b.end)
+      // Ordenar eventos por horário de início e duração
+      const eventosOrdenados = [...eventosDoDia].sort((a, b) => {
+        const inicioA = new Date(a.event.event_start)
+        const inicioB = new Date(b.event.event_start)
+        const fimA = new Date(a.event.event_end)
+        const fimB = new Date(b.event.event_end)
 
-        // First sort by start time
-        if (aStart < bStart) return -1
-        if (aStart > bStart) return 1
+        if (inicioA < inicioB) return -1
+        if (inicioA > inicioB) return 1
 
-        // If start times are equal, sort by duration (longer events first)
-        const aDuration = differenceInMinutes(aEnd, aStart)
-        const bDuration = differenceInMinutes(bEnd, bStart)
-        return bDuration - aDuration
+        const duracaoA = differenceInMinutes(fimA, inicioA)
+        const duracaoB = differenceInMinutes(fimB, inicioB)
+        return duracaoB - duracaoA
       })
 
-      // Calculate positions for each event
-      const positionedEvents: PositionedEvent[] = []
-      const dayStart = startOfDay(day)
+      // Calcular posições para cada evento
+      const eventosPosicionados: PositionedEvent[] = []
+      const inicioDia = startOfDay(dia)
 
-      // Track columns for overlapping events
-      const columns: { event: CalendarEvent; end: Date }[][] = []
+      // Acompanhar colunas para eventos sobrepostos
+      const colunas: { event: CalendarEvent; end: Date }[][] = []
 
-      sortedEvents.forEach((event) => {
-        const eventStart = new Date(event.start)
-        const eventEnd = new Date(event.end)
+      eventosOrdenados.forEach((event) => {
+        const inicioEvento = new Date(event.event.event_start)
+        const fimEvento = new Date(event.event.event_end)
 
-        // Adjust start and end times if they're outside this day
-        const adjustedStart = isSameDay(day, eventStart) ? eventStart : dayStart
-        const adjustedEnd = isSameDay(day, eventEnd)
-          ? eventEnd
-          : addHours(dayStart, 24)
+        // Ajustar horários de início e fim se estiverem fora deste dia
+        const inicioAjustado = isSameDay(dia, inicioEvento) ? inicioEvento : inicioDia
+        const fimAjustado = isSameDay(dia, fimEvento)
+          ? fimEvento
+          : addHours(inicioDia, 24)
 
-        // Calculate top position and height
-        const startHour =
-          getHours(adjustedStart) + getMinutes(adjustedStart) / 60
-        const endHour = getHours(adjustedEnd) + getMinutes(adjustedEnd) / 60
+        // Calcular posição superior e altura
+        const horaInicio =
+          getHours(inicioAjustado) + getMinutes(inicioAjustado) / 60
+        const horaFim = getHours(fimAjustado) + getMinutes(fimAjustado) / 60
 
-        // Adjust the top calculation to account for the new start time
-        const top = (startHour - StartHour) * WeekCellsHeight
-        const height = (endHour - startHour) * WeekCellsHeight
+        const topo = (horaInicio - StartHour) * cellHeight
+        const altura = (horaFim - horaInicio) * cellHeight
 
-        // Find a column for this event
-        let columnIndex = 0
-        let placed = false
+        // Encontrar uma coluna para este evento
+        let indiceColuna = 0
+        let colocado = false
 
-        while (!placed) {
-          const col = columns[columnIndex] || []
-          if (col.length === 0) {
-            columns[columnIndex] = col
-            placed = true
+        while (!colocado) {
+          const coluna = colunas[indiceColuna] || []
+          if (coluna.length === 0) {
+            colunas[indiceColuna] = coluna
+            colocado = true
           } else {
-            const overlaps = col.some((c) =>
+            const sobrepoe = coluna.some((c) =>
               areIntervalsOverlapping(
-                { start: adjustedStart, end: adjustedEnd },
+                { start: inicioAjustado, end: fimAjustado },
                 {
-                  start: new Date(c.event.start),
-                  end: new Date(c.event.end),
+                  start: new Date(c.event.event.event_start),
+                  end: new Date(c.event.event.event_end),
                 }
               )
             )
-            if (!overlaps) {
-              placed = true
+            if (!sobrepoe) {
+              colocado = true
             } else {
-              columnIndex++
+              indiceColuna++
             }
           }
         }
 
-        // Ensure column is initialized before pushing
-        const currentColumn = columns[columnIndex] || []
-        columns[columnIndex] = currentColumn
-        currentColumn.push({ event, end: adjustedEnd })
+        const colunaAtual = colunas[indiceColuna] || []
+        colunas[indiceColuna] = colunaAtual
+        colunaAtual.push({ event, end: fimAjustado })
 
-        // Calculate width and left position based on number of columns
-        const width = columnIndex === 0 ? 1 : 0.9
-        const left = columnIndex === 0 ? 0 : columnIndex * 0.1
+        const largura = indiceColuna === 0 ? 1 : 0.9
+        const esquerda = indiceColuna === 0 ? 0 : indiceColuna * 0.1
 
-        positionedEvents.push({
+        eventosPosicionados.push({
           event,
-          top,
-          height,
-          left,
-          width,
-          zIndex: 10 + columnIndex, // Higher columns get higher z-index
+          top: topo,
+          height: altura,
+          left: esquerda,
+          width: largura,
+          zIndex: 10 + indiceColuna,
         })
       })
 
-      return positionedEvents
+      return eventosPosicionados
     })
 
-    return result
-  }, [days, events])
+    return resultado
+  }, [dias, events, cellHeight])
 
-  const handleEventClick = (event: CalendarEvent, e: React.MouseEvent) => {
+  const handleCliqueEvento = (evento: CalendarEvent, e: React.MouseEvent) => {
     e.stopPropagation()
-    onEventSelect(event)
+    onEventSelect(evento)
   }
 
-  const showAllDaySection = allDayEvents.length > 0
+  const mostrarSecaoDiaInteiro = eventosDiaInteiro.length > 0
   const { currentTimePosition, currentTimeVisible } = useCurrentTimeIndicator(
     currentDate,
     "week"
@@ -220,76 +215,74 @@ export function WeekView({
     <div data-slot="week-view" className="flex h-full flex-col">
       <div className="sticky top-0 z-30 grid grid-cols-8 border-b border-border/70 bg-background/80 backdrop-blur-md">
         <div className="py-2 text-center text-sm text-muted-foreground/70">
-          <span className="max-[479px]:sr-only">{format(new Date(), "O")}</span>
+          <span className="max-[479px]:sr-only">{format(new Date(), "O", { locale: ptBR })}</span>
         </div>
-        {days.map((day) => (
+        {dias.map((dia) => (
           <div
-            key={day.toString()}
+            key={dia.toString()}
             className="py-2 text-center text-sm text-muted-foreground/70 data-today:font-medium data-today:text-foreground"
-            data-today={isToday(day) || undefined}
+            data-today={isToday(dia) || undefined}
           >
             <span className="sm:hidden" aria-hidden="true">
-              {format(day, "E")[0]} {format(day, "d")}
+              {format(dia, "E", { locale: ptBR })[0]} {format(dia, "d", { locale: ptBR })}
             </span>
-            <span className="max-sm:hidden">{format(day, "EEE dd")}</span>
+            <span className="max-sm:hidden">{format(dia, "EEE dd", { locale: ptBR })}</span>
           </div>
         ))}
       </div>
 
-      {showAllDaySection && (
+      {mostrarSecaoDiaInteiro && (
         <div className="border-b border-border/70 bg-muted/50">
           <div className="grid grid-cols-8">
             <div className="relative border-r border-border/70">
               <span className="absolute bottom-0 left-0 h-6 w-16 max-w-full pe-2 text-right text-[10px] text-muted-foreground/70 sm:pe-4 sm:text-xs">
-                All day
+                Dia inteiro
               </span>
             </div>
-            {days.map((day, dayIndex) => {
-              const dayAllDayEvents = allDayEvents.filter((event) => {
-                const eventStart = new Date(event.start)
-                const eventEnd = new Date(event.end)
+            {dias.map((dia, indiceDia) => {
+              const eventosDiaInteiroDoDia = eventosDiaInteiro.filter((event) => {
+                const inicioEvento = new Date(event.event.event_start)
+                const fimEvento = new Date(event.event.event_end)
                 return (
-                  isSameDay(day, eventStart) ||
-                  (day > eventStart && day < eventEnd) ||
-                  isSameDay(day, eventEnd)
+                  isSameDay(dia, inicioEvento) ||
+                  (dia > inicioEvento && dia < fimEvento) ||
+                  isSameDay(dia, fimEvento)
                 )
               })
 
               return (
                 <div
-                  key={day.toString()}
+                  key={dia.toString()}
                   className="relative border-r border-border/70 p-1 last:border-r-0"
-                  data-today={isToday(day) || undefined}
+                  data-today={isToday(dia) || undefined}
                 >
-                  {dayAllDayEvents.map((event) => {
-                    const eventStart = new Date(event.start)
-                    const eventEnd = new Date(event.end)
-                    const isFirstDay = isSameDay(day, eventStart)
-                    const isLastDay = isSameDay(day, eventEnd)
+                  {eventosDiaInteiroDoDia.map((evento) => {
+                    const inicioEvento = new Date(evento.event.event_start)
+                    const fimEvento = new Date(evento.event.event_end)
+                    const isPrimeiroDia = isSameDay(dia, inicioEvento)
+                    const isUltimoDia = isSameDay(dia, fimEvento)
 
-                    // Check if this is the first day in the current week view
-                    const isFirstVisibleDay =
-                      dayIndex === 0 && isBefore(eventStart, weekStart)
-                    const shouldShowTitle = isFirstDay || isFirstVisibleDay
+                    const isPrimeiroDiaVisivel =
+                      indiceDia === 0 && isBefore(inicioEvento, inicioSemana)
+                    const deveMostrarTitulo = isPrimeiroDia || isPrimeiroDiaVisivel
 
                     return (
                       <EventItem
-                        key={`spanning-${event.id}`}
-                        onClick={(e) => handleEventClick(event, e)}
-                        event={event}
+                        key={`spanning-${evento.generic_id}`}
+                        onClick={(e) => handleCliqueEvento(evento, e)}
+                        event={evento}
                         view="month"
-                        isFirstDay={isFirstDay}
-                        isLastDay={isLastDay}
+                        isFirstDay={isPrimeiroDia}
+                        isLastDay={isUltimoDia}
                       >
-                        {/* Show title if it's the first day of the event or the first visible day in the week */}
                         <div
                           className={cn(
                             "truncate",
-                            !shouldShowTitle && "invisible"
+                            !deveMostrarTitulo && "invisible"
                           )}
-                          aria-hidden={!shouldShowTitle}
+                          aria-hidden={!deveMostrarTitulo}
                         >
-                          {event.title}
+                          {evento.event.title}
                         </div>
                       </EventItem>
                     )
@@ -301,56 +294,57 @@ export function WeekView({
         </div>
       )}
 
-      <div className="grid flex-1 grid-cols-8 overflow-hidden">
+      <div className="grid flex-1 grid-cols-8 overflow-auto">
         <div className="grid auto-cols-fr border-r border-border/70">
-          {hours.map((hour, index) => (
+          {horas.map((hora, indice) => (
             <div
-              key={hour.toString()}
-              className="relative min-h-[var(--week-cells-height)] border-b border-border/70 last:border-b-0"
+              key={hora.toString()}
+              style={{ height: cellHeight }}
+              className="relative border-b border-border/70 last:border-b-0"
             >
-              {index > 0 && (
+              {indice > 0 && (
                 <span className="absolute -top-3 left-0 flex h-6 w-16 max-w-full items-center justify-end bg-background pe-2 text-[10px] text-muted-foreground/70 sm:pe-4 sm:text-xs">
-                  {format(hour, "h a")}
+                  {format(hora, "HH'h'", { locale: ptBR })}
                 </span>
               )}
             </div>
           ))}
         </div>
 
-        {days.map((day, dayIndex) => (
+        {dias.map((dia, indiceDia) => (
           <div
-            key={day.toString()}
+            key={dia.toString()}
             className="relative grid auto-cols-fr border-r border-border/70 last:border-r-0"
-            data-today={isToday(day) || undefined}
+            data-today={isToday(dia) || undefined}
           >
-            {/* Positioned events */}
-            {(processedDayEvents[dayIndex] ?? []).map((positionedEvent) => (
+            {/* Eventos posicionados */}
+            {(eventosProcessadosPorDia[indiceDia] ?? []).map((eventoPosicionado) => (
               <div
-                key={positionedEvent.event.id}
+                key={eventoPosicionado.event.generic_id}
                 className="absolute z-10 px-0.5"
                 style={{
-                  top: `${positionedEvent.top}px`,
-                  height: `${positionedEvent.height}px`,
-                  left: `${positionedEvent.left * 100}%`,
-                  width: `${positionedEvent.width * 100}%`,
-                  zIndex: positionedEvent.zIndex,
+                  top: `${eventoPosicionado.top}px`,
+                  height: `${eventoPosicionado.height}px`,
+                  left: `${eventoPosicionado.left * 100}%`,
+                  width: `${eventoPosicionado.width * 100}%`,
+                  zIndex: eventoPosicionado.zIndex,
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="size-full">
                   <DraggableEvent
-                    event={positionedEvent.event}
+                    event={eventoPosicionado.event}
                     view="week"
-                    onClick={(e) => handleEventClick(positionedEvent.event, e)}
+                    onClick={(e) => handleCliqueEvento(eventoPosicionado.event, e)}
                     showTime
-                    height={positionedEvent.height}
+                    height={eventoPosicionado.height}
                   />
                 </div>
               </div>
             ))}
 
-            {/* Current time indicator - only show for today's column */}
-            {currentTimeVisible && isToday(day) && (
+            {/* Indicador de hora atual - mostrar apenas para a coluna de hoje */}
+            {currentTimeVisible && isToday(dia) && (
               <div
                 className="pointer-events-none absolute right-0 left-0 z-20"
                 style={{ top: `${currentTimePosition}%` }}
@@ -361,39 +355,42 @@ export function WeekView({
                 </div>
               </div>
             )}
-            {hours.map((hour) => {
-              const hourValue = getHours(hour)
+            
+            {/* Células para cada hora e quarto de hora */}
+            {horas.map((hora) => {
+              const valorHora = getHours(hora)
               return (
                 <div
-                  key={hour.toString()}
-                  className="relative min-h-[var(--week-cells-height)] border-b border-border/70 last:border-b-0"
+                  key={hora.toString()}
+                  style={{ height: cellHeight }}
+                  className="relative border-b border-border/70 last:border-b-0"
                 >
-                  {/* Quarter-hour intervals */}
-                  {[0, 1, 2, 3].map((quarter) => {
-                    const quarterHourTime = hourValue + quarter * 0.25
+                  {/* Intervalos de quarto de hora */}
+                  {[0, 1, 2, 3].map((quarto) => {
+                    const horaQuarto = valorHora + quarto * 0.25
                     return (
-                      <DroppableCell
-                        key={`${hour.toString()}-${quarter}`}
-                        id={`week-cell-${day.toISOString()}-${quarterHourTime}`}
-                        date={day}
-                        time={quarterHourTime}
-                        className={cn(
-                          "absolute h-[calc(var(--week-cells-height)/4)] w-full",
-                          quarter === 0 && "top-0",
-                          quarter === 1 &&
-                            "top-[calc(var(--week-cells-height)/4)]",
-                          quarter === 2 &&
-                            "top-[calc(var(--week-cells-height)/4*2)]",
-                          quarter === 3 &&
-                            "top-[calc(var(--week-cells-height)/4*3)]"
-                        )}
-                        onClick={() => {
-                          const startTime = new Date(day)
-                          startTime.setHours(hourValue)
-                          startTime.setMinutes(quarter * 15)
-                          onEventCreate(startTime)
+                      <div
+                        key={`${hora.toString()}-${quarto}`}
+                        style={{
+                          height: cellHeight / 4,
+                          top: quarto * (cellHeight / 4),
+                          position: 'absolute',
+                          width: '100%',
                         }}
-                      />
+                      >
+                        <DroppableCell
+                          id={`week-cell-${dia.toISOString()}-${horaQuarto}`}
+                          date={dia}
+                          time={horaQuarto}
+                          className="w-full h-full"
+                          onClick={() => {
+                            const horarioInicio = new Date(dia)
+                            horarioInicio.setHours(valorHora)
+                            horarioInicio.setMinutes(quarto * 15)
+                            onEventCreate(horarioInicio)
+                          }}
+                        />
+                      </div>
                     )
                   })}
                 </div>

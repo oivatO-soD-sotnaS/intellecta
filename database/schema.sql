@@ -181,10 +181,13 @@ CREATE TABLE `events` (
     'exam', 'quiz', 'assignment', 'lecture', 'workshop',
     'seminar', 'presentation', 'deadline',
     'holiday', 'announcement', 'cultural', 'sports', 'other'
-  ) DEFAULT 'other', -- Tipos de evento, mais detalhes podem ser encontados em ./README.md
-  `event_date` TIMESTAMP NOT NULL,
+  ) DEFAULT 'other',  
+  `event_start` TIMESTAMP NOT NULL,
+  `event_end`   TIMESTAMP NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `changed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `changed_at` TIMESTAMP NOT NULL 
+      DEFAULT CURRENT_TIMESTAMP 
+      ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Eventos globais da instituição
@@ -232,7 +235,7 @@ CREATE TABLE `jwt_blacklists` (
   `expires_at` DATETIME NOT NULL
 );
 
-CREATE VIEW `institution_summary` AS
+CREATE OR REPLACE VIEW `institution_summary` AS
 SELECT
   i.institution_id,
   i.name,
@@ -242,23 +245,42 @@ SELECT
   i.description,
   iu.user_id,
   iu.role,
+
+  -- Count all users in the same institution
   COUNT(DISTINCT iu2.user_id) AS active_user_count,
+
+  -- Count upcoming institutional events within 7 days
   COUNT(DISTINCT e.event_id) AS upcoming_event_count
+
 FROM institutions i
 
--- Join to get role of each user in the institution
-JOIN institution_users iu ON iu.institution_id = i.institution_id
+-- Get institution users (main row source)
+JOIN institution_users iu 
+  ON iu.institution_id = i.institution_id
 
--- Count active users in the same institution
-LEFT JOIN institution_users iu2 ON iu2.institution_id = i.institution_id
+-- Second join to count all users of the same institution
+LEFT JOIN institution_users iu2
+  ON iu2.institution_id = i.institution_id
 
--- Left join to institutional_events with upcoming events
-LEFT JOIN institutional_events ie ON ie.institution_id = i.institution_id
-LEFT JOIN events e ON e.event_id = ie.event_id
-                   AND e.event_date >= CURRENT_TIMESTAMP
-                   AND e.event_date <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
+-- Institutional events
+LEFT JOIN institutional_events ie
+  ON ie.institution_id = i.institution_id
 
-GROUP BY i.institution_id, i.name, i.email, iu.user_id, iu.role;
+-- Events tied to institutional events, now using event_start
+LEFT JOIN events e
+  ON e.event_id = ie.event_id
+ AND e.event_start >= CURRENT_TIMESTAMP
+ AND e.event_start <= CURRENT_TIMESTAMP + INTERVAL 7 DAY
+
+GROUP BY 
+  i.institution_id,
+  i.name,
+  i.email,
+  i.banner_id,
+  i.profile_picture_id,
+  i.description,
+  iu.user_id,
+  iu.role;
 
 CREATE VIEW `subject_users` AS
 SELECT DISTINCT

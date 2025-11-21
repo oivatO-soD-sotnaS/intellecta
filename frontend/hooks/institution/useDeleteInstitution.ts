@@ -9,9 +9,10 @@ export function useDeleteInstitution(institutionId: string) {
   return useMutation({
     mutationFn: () => apiDelete<unknown>(`/api/institutions/${institutionId}`),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["institutions"] })
-      qc.invalidateQueries({ queryKey: ["institutions", "owned"] })
-      qc.invalidateQueries({ queryKey: ["institution", institutionId] })
+      qc.invalidateQueries({ queryKey: ["institutions"] });
+      qc.invalidateQueries({ queryKey: ["institutions", "owned"] });
+      qc.invalidateQueries({ queryKey: ["institution", institutionId] });
+      qc.invalidateQueries({queryKey: ["institutions", "summaries"]});
       qc.invalidateQueries({
         queryKey: ["institution", institutionId, "summary"],
       })

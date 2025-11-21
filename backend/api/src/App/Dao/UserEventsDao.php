@@ -73,81 +73,81 @@ readonly class UserEventsDao extends BaseDao {
   }
 
   /**
- * Get all upcoming events for a user
- * Includes user events, institutional events, and subject events
- * 
- * @param string $userId
- * @return array
- */
-public function getUpcomingUserEvents(string $userId): array {
-  $sql = '
-    -- User Events
-    SELECT 
-      e.*,
-      ue.user_event_id,
-      ue.user_id,
-      "user" as event_source,
-      NULL as institution_id,
-      NULL as institution_name,
-      NULL as subject_id,
-      NULL as subject_name,
-      NULL as subject_code
-    FROM user_events ue
-    JOIN events e ON ue.event_id = e.event_id
-    WHERE ue.user_id = :user_id
-      AND e.event_date >= NOW()
+   * Get all upcoming events for a user
+   * Includes user events, institutional events, and subject events
+   * 
+   * @param string $userId
+   * @return array
+   */
+  public function getUpcomingUserEvents(string $userId): array {
+    $sql = '
+      -- User Events
+      SELECT 
+        e.*,
+        ue.user_event_id,
+        ue.user_id,
+        "user" as event_source,
+        NULL as institution_id,
+        NULL as institution_name,
+        NULL as subject_id,
+        NULL as subject_name,
+        NULL as subject_code
+      FROM user_events ue
+      JOIN events e ON ue.event_id = e.event_id
+      WHERE ue.user_id = :user_id
+        AND e.event_start >= NOW()
+      
+      UNION ALL
+      
+      -- Institutional Events
+      SELECT 
+        e.*,
+        ie.institutional_event_id AS user_event_id,
+        iu.user_id,
+        "institution" as event_source,
+        i.institution_id,
+        i.name as institution_name,
+        NULL as subject_id,
+        NULL as subject_name,
+        NULL as subject_code
+      FROM institutional_events ie
+      JOIN events e ON ie.event_id = e.event_id
+      JOIN institution_users iu ON ie.institution_id = iu.institution_id
+      JOIN institutions i ON ie.institution_id = i.institution_id
+      WHERE iu.user_id = :user_id
+        AND e.event_start >= NOW()
+      
+      UNION ALL
+      
+      -- Subject Events
+      SELECT 
+        e.*,
+        se.subject_event_id as user_event_id,
+        su.user_id,
+        "subject" as event_source,
+        s.institution_id,
+        i.name as institution_name,
+        s.subject_id,
+        s.name as subject_name,
+        NULL as subject_code
+      FROM subject_events se
+      JOIN events e ON se.event_id = e.event_id
+      JOIN subjects s ON se.subject_id = s.subject_id
+      JOIN institution_users iu ON s.institution_id = iu.institution_id
+      JOIN institutions i ON s.institution_id = i.institution_id
+      JOIN subject_users su ON se.subject_id = su.subject_id
+      WHERE su.user_id = :user_id
+        AND iu.user_id = :user_id
+        AND e.event_start >= NOW()
+      
+      ORDER BY event_start ASC
+    ';
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
     
-    UNION ALL
-    
-    -- Institutional Events
-    SELECT 
-      e.*,
-      ie.institutional_event_id as user_event_id,
-      iu.user_id,
-      "institution" as event_source,
-      i.institution_id,
-      i.name as institution_name,
-      NULL as subject_id,
-      NULL as subject_name,
-      NULL as subject_code
-    FROM institutional_events ie
-    JOIN events e ON ie.event_id = e.event_id
-    JOIN institution_users iu ON ie.institution_id = iu.institution_id
-    JOIN institutions i ON ie.institution_id = i.institution_id
-    WHERE iu.user_id = :user_id
-      AND e.event_date >= NOW()
-    
-    UNION ALL
-    
-    -- Subject Events
-    SELECT 
-      e.*,
-      se.subject_event_id as user_event_id,
-      su.user_id,
-      "subject" as event_source,
-      s.institution_id,
-      i.name as institution_name,
-      s.subject_id,
-      s.name as subject_name,
-      NULL as subject_code  -- Removido s.code já que não existe
-    FROM subject_events se
-    JOIN events e ON se.event_id = e.event_id
-    JOIN subjects s ON se.subject_id = s.subject_id
-    JOIN institution_users iu ON s.institution_id = iu.institution_id
-    JOIN institutions i ON s.institution_id = i.institution_id
-    JOIN subject_users su ON se.subject_id = su.subject_id
-    WHERE su.user_id = :user_id
-      AND iu.user_id = :user_id
-      AND e.event_date >= NOW()
-    
-    ORDER BY event_date ASC
-  ';
-  
-  $pdo = $this->database->getConnection();
-  $stmt = $pdo->prepare($sql);
-  $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
-  
-  $stmt->execute();
-  return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
 }

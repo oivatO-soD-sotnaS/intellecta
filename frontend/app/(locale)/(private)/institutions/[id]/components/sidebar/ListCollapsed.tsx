@@ -38,14 +38,6 @@ export default function ListCollapsed({
         );
 
         return btn;
-
-        // return (
-        //   <TooltipProvider key={it.label} delayDuration={200}>
-        //     <Tooltip><TooltipTrigger asChild>{btn}</TooltipTrigger>
-        //       <TooltipContent side="right" className="px-2 py-1 text-xs">{it.label}</TooltipContent>
-        //     </Tooltip>
-        //   </TooltipProvider>
-        // );
       })}
     </div>
   );

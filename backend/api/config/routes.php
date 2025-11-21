@@ -59,7 +59,7 @@ return function (App $app) {
                 $userEvents->get('', UserEventsController::class . ':getUserEvents');
                 $userEvents->get('/upcoming', UserEventsController::class . ':getUpcomingEvents');
 
-                $userEvents->group('/{event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
+                $userEvents->group('/{user_event_id:'.UUIDv4_REGEX.'}', function($userEventsWithId) {
                     $userEventsWithId->get('', UserEventsController::class . ':getUserEvent');
                     $userEventsWithId->put('', UserEventsController::class . ':updateUserEvent');
                     $userEventsWithId->delete('', UserEventsController::class . ':deleteUserEvent');

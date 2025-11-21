@@ -13,7 +13,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns"
-
+import { ptBR } from "date-fns/locale"
 
 import { DefaultStartHour, EventGap, EventHeight } from "@/components/event-calendar/constants"
 import {
@@ -21,25 +21,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarEvent } from "@/app/(locale)/(private)/institutions/[id]/dashboard/_mocks/events.mock"
 import { useEventVisibility } from "./hooks/use-event-visibility"
 import { getAllEventsForDay, getEventsForDay, getSpanningEventsForDay, sortEvents } from "./utils"
 import { DroppableCell } from "./droppable-cell"
 import { EventItem } from "./event-item"
 import { DraggableEvent } from "./draggable-event"
+import { CalendarEvent } from "./types"
 
 interface MonthViewProps {
   currentDate: Date
   events: CalendarEvent[]
   onEventSelect: (event: CalendarEvent) => void
-  onEventCreate: (startTime: Date) => void
+  onEventCreate: (startTime: CalendarEvent) => void
 }
 
 export function MonthView({
   currentDate,
   events,
   onEventSelect,
-  onEventCreate,
 }: MonthViewProps) {
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate)
@@ -53,7 +52,7 @@ export function MonthView({
   const weekdays = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
       const date = addDays(startOfWeek(new Date()), i)
-      return format(date, "EEE")
+      return format(date, "EEE", { locale: ptBR })
     })
   }, [])
 
@@ -106,7 +105,7 @@ export function MonthView({
             className="grid grid-cols-7 [&:last-child>*]:border-b-0"
           >
             {week.map((day, dayIndex) => {
-              if (!day) return null // Skip if day is undefined
+              if (!day) return null // Pular se o dia for undefined
 
               const dayEvents = getEventsForDay(events, day)
               const spanningEvents = getSpanningEventsForDay(events, day)
@@ -138,19 +137,18 @@ export function MonthView({
                     onClick={() => {
                       const startTime = new Date(day)
                       startTime.setHours(DefaultStartHour, 0, 0)
-                      onEventCreate(startTime)
                     }}
                   >
                     <div className="mt-1 inline-flex size-6 items-center justify-center rounded-full text-sm group-data-today:bg-primary group-data-today:text-primary-foreground">
-                      {format(day, "d")}
+                      {format(day, "d", { locale: ptBR })}
                     </div>
                     <div
                       ref={isReferenceCell ? contentRef : null}
                       className="min-h-[calc((var(--event-height)+var(--event-gap))*2)] sm:min-h-[calc((var(--event-height)+var(--event-gap))*3)] lg:min-h-[calc((var(--event-height)+var(--event-gap))*4)]"
                     >
                       {sortEvents(allDayEvents).map((event, index) => {
-                        const eventStart = new Date(event.start)
-                        const eventEnd = new Date(event.end)
+                        const eventStart = new Date(event.event.event_start)
+                        const eventEnd = new Date(event.event.event_end)
                         const isFirstDay = isSameDay(day, eventStart)
                         const isLastDay = isSameDay(day, eventEnd)
 
@@ -162,7 +160,7 @@ export function MonthView({
                         if (!isFirstDay) {
                           return (
                             <div
-                              key={`spanning-${event.id}-${day.toISOString().slice(0, 10)}`}
+                              key={`spanning-${event.generic_id}-${day.toISOString().slice(0, 10)}`}
                               className="aria-hidden:hidden"
                               aria-hidden={isHidden ? "true" : undefined}
                             >
@@ -174,15 +172,14 @@ export function MonthView({
                                 isLastDay={isLastDay}
                               >
                                 <div className="invisible" aria-hidden={true}>
-                                  {!event.allDay && (
-                                    <span>
-                                      {format(
-                                        new Date(event.start),
-                                        "h:mm"
-                                      )}{" "}
-                                    </span>
-                                  )}
-                                  {event.title}
+                                  <span>
+                                    {format(
+                                      new Date(event.event.event_start),
+                                      "HH:mm",
+                                      { locale: ptBR }
+                                    )}{" "}
+                                  </span>
+                                  {event.event.title}
                                 </div>
                               </EventItem>
                             </div>
@@ -191,7 +188,7 @@ export function MonthView({
 
                         return (
                           <div
-                            key={event.id}
+                            key={event.generic_event_id}
                             className="aria-hidden:hidden"
                             aria-hidden={isHidden ? "true" : undefined}
                           >
@@ -215,7 +212,7 @@ export function MonthView({
                             >
                               <span>
                                 + {remainingCount}{" "}
-                                <span className="max-sm:sr-only">more</span>
+                                <span className="max-sm:sr-only">mais</span>
                               </span>
                             </button>
                           </PopoverTrigger>
@@ -230,18 +227,18 @@ export function MonthView({
                           >
                             <div className="space-y-2">
                               <div className="text-sm font-medium">
-                                {format(day, "EEE d")}
+                                {format(day, "EEE d", { locale: ptBR })}
                               </div>
                               <div className="space-y-1">
                                 {sortEvents(allEvents).map((event) => {
-                                  const eventStart = new Date(event.start)
-                                  const eventEnd = new Date(event.end)
+                                  const eventStart = new Date(event.event.event_start)
+                                  const eventEnd = new Date(event.event.event_end)
                                   const isFirstDay = isSameDay(day, eventStart)
                                   const isLastDay = isSameDay(day, eventEnd)
 
                                   return (
                                     <EventItem
-                                      key={event.id}
+                                      key={event.generic_event_id}
                                       onClick={(e) =>
                                         handleEventClick(event, e)
                                       }

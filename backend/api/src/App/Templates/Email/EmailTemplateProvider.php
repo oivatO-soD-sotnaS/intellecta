@@ -457,6 +457,7 @@ readonly class EmailTemplateProvider {
     ";
   }
 
+
   /**
    * Institutional Event Notification
    */
@@ -466,7 +467,8 @@ readonly class EmailTemplateProvider {
     string $institutionName,
     string $institutionEmail,
   ): string {
-      $eventDate = date('d/m/Y \à\s H:i', strtotime($event->getEventDate()));
+      $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+      $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
       $notificationDate = date('d/m/Y \à\s H:i');
       $currentYear = date('Y');
 
@@ -488,8 +490,9 @@ readonly class EmailTemplateProvider {
         'intro' => "Você recebeu uma notificação sobre um <strong>evento institucional</strong> na plataforma Intellecta.",
         'accentColor' => '#16a34a',
         'eventTitle' => $event->getTitle(),
-        'eventDate' => $eventDate,
-        'eventTypeLabel' => ucfirst($event->getType()),
+        'eventStart' => $eventStart,
+        'eventEnd' => $eventEnd,
+        'eventTypeLabel' => $event->getType(),
         'descriptionSection' => $descriptionSection,
         'notificationDate' => $notificationDate,
         'currentYear' => $currentYear,
@@ -506,7 +509,8 @@ readonly class EmailTemplateProvider {
     string $institutionName,
     ?string $institutionEmail = null,
   ): string {
-    $eventDate = date('d/m/Y \à\s H:i', strtotime($event->getEventDate()));
+    $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+    $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
     $notificationDate = date('d/m/Y \à\s H:i');
     $currentYear = date('Y');
 
@@ -526,10 +530,11 @@ readonly class EmailTemplateProvider {
       'userName' => $userName,
       'title' => 'Atualização de Evento Institucional',
       'intro' => "O seguinte <strong>evento institucional</strong> na plataforma Intellecta foi atualizado.",
-      'accentColor' => '#f59e0b', // orange for updates
+      'accentColor' => '#f59e0b',
       'eventTitle' => $event->getTitle(),
-      'eventDate' => $eventDate,
-      'eventTypeLabel' => ucfirst($event->getType()),
+      'eventStart' => $eventStart,
+      'eventEnd' => $eventEnd,
+      'eventTypeLabel' => $event->getType(),
       'descriptionSection' => $descriptionSection,
       'notificationDate' => $notificationDate,
       'currentYear' => $currentYear,
@@ -546,6 +551,8 @@ readonly class EmailTemplateProvider {
     string $institutionName,
     string $institutionEmail,
   ): string {
+    $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+    $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
     $notificationDate = date('d/m/Y \à\s H:i');
     $currentYear = date('Y');
 
@@ -560,10 +567,11 @@ readonly class EmailTemplateProvider {
       'userName' => $userName,
       'title' => 'Evento Institucional Removido',
       'intro' => "O seguinte <strong>evento institucional</strong> na plataforma Intellecta foi removido.",
-      'accentColor' => '#dc2626', // red for deletion
+      'accentColor' => '#dc2626',
       'eventTitle' => $event->getTitle(),
-      'eventDate' => date('d/m/Y \à\s H:i', strtotime($event->getEventDate())),
-      'eventTypeLabel' => ucfirst($event->getType()),
+      'eventStart' => $eventStart,
+      'eventEnd' => $eventEnd,
+      'eventTypeLabel' => $event->getType(),
       'descriptionSection' => '',
       'notificationDate' => $notificationDate,
       'currentYear' => $currentYear,
@@ -571,7 +579,7 @@ readonly class EmailTemplateProvider {
     ]);
   }
 
-    /**
+  /**
    * Subject Event Notification
    */
   public function getSubjectNotificationEmailTemplate(
@@ -581,7 +589,8 @@ readonly class EmailTemplateProvider {
     string $professorName,
     string $professorEmail
   ): string {
-    $eventDate = date('d/m/Y \à\s H:i', strtotime($event->getEventDate()));
+    $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+    $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
     $notificationDate = date('d/m/Y \à\s H:i');
     $currentYear = date('Y');
 
@@ -606,15 +615,17 @@ readonly class EmailTemplateProvider {
       'intro' => "Você recebeu uma notificação sobre um <strong>evento de disciplina</strong> na plataforma Intellecta.",
       'accentColor' => '#2563eb',
       'eventTitle' => $event->getTitle(),
-      'eventDate' => $eventDate,
-      'eventTypeLabel' => ucfirst($event->getType()),
+      'eventStart' => $eventStart,
+      'eventEnd' => $eventEnd,
+      'eventTypeLabel' => $event->getType(),
       'descriptionSection' => $descriptionSection,
       'notificationDate' => $notificationDate,
       'currentYear' => $currentYear,
       'sourceInfo' => $subjectDetails,
     ]);
   }
-    /**
+
+  /**
    * Subject Event Updated Notification
    */
   public function getSubjectNotificationUpdatedEmailTemplate(
@@ -624,7 +635,8 @@ readonly class EmailTemplateProvider {
     string $professorName,
     string $professorEmail
   ): string {
-    $eventDate = date('d/m/Y \à\s H:i', strtotime($event->getEventDate()));
+    $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+    $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
     $notificationDate = date('d/m/Y \à\s H:i');
     $currentYear = date('Y');
 
@@ -647,10 +659,11 @@ readonly class EmailTemplateProvider {
       'userName' => $userName,
       'title' => 'Evento de Disciplina Atualizado',
       'intro' => "O seguinte <strong>evento de disciplina</strong> na plataforma Intellecta foi atualizado.",
-      'accentColor' => '#f59e0b', // orange for updates
+      'accentColor' => '#f59e0b',
       'eventTitle' => $event->getTitle(),
-      'eventDate' => $eventDate,
-      'eventTypeLabel' => ucfirst($event->getType()),
+      'eventStart' => $eventStart,
+      'eventEnd' => $eventEnd,
+      'eventTypeLabel' => $event->getType(),
       'descriptionSection' => $descriptionSection,
       'notificationDate' => $notificationDate,
       'currentYear' => $currentYear,
@@ -668,6 +681,8 @@ readonly class EmailTemplateProvider {
     string $professorName,
     string $professorEmail
   ): string {
+    $eventStart = date('d/m/Y \à\s H:i', strtotime($event->getEventStart()));
+    $eventEnd = date('d/m/Y \à\s H:i', strtotime($event->getEventEnd()));
     $notificationDate = date('d/m/Y \à\s H:i');
     $currentYear = date('Y');
 
@@ -685,10 +700,11 @@ readonly class EmailTemplateProvider {
       'userName' => $userName,
       'title' => 'Evento de Disciplina Removido',
       'intro' => "O seguinte <strong>evento de disciplina</strong> na plataforma Intellecta foi removido.",
-      'accentColor' => '#dc2626', // red for deletion
+      'accentColor' => '#dc2626',
       'eventTitle' => $event->getTitle(),
-      'eventDate' => date('d/m/Y \à\s H:i', strtotime($event->getEventDate())),
-      'eventTypeLabel' => ucfirst($event->getType()),
+      'eventStart' => $eventStart,
+      'eventEnd' => $eventEnd,
+      'eventTypeLabel' => $event->getType(),
       'descriptionSection' => '',
       'notificationDate' => $notificationDate,
       'currentYear' => $currentYear,
@@ -703,6 +719,17 @@ readonly class EmailTemplateProvider {
   {
       extract($data);
       $platformUrl = $this->platformUrl;
+      
+      // Format date information based on whether it's a single day or multi-day event
+      $dateInfo = '';
+      if ($eventStart === $eventEnd) {
+          $dateInfo = "<div class='event-date'><strong>Data do Evento:</strong> {$eventStart}</div>";
+      } else {
+          $dateInfo = "
+            <div class='event-date'><strong>Início:</strong> {$eventStart}</div>
+            <div class='event-date'><strong>Término:</strong> {$eventEnd}</div>
+          ";
+      }
       
       return "
       <html>
@@ -924,7 +951,7 @@ readonly class EmailTemplateProvider {
               </div>
               
               <div class='event-meta'>
-                <div class='event-date'><strong>Data do Evento:</strong> {$eventDate}</div>
+                {$dateInfo}
               </div>
               
               <div class='event-type'>{$this->formatEventType($eventTypeLabel)}</div>
@@ -1011,7 +1038,7 @@ readonly class EmailTemplateProvider {
       'currentYear' => $currentYear,
       'actionType' => 'updated',
     ]);
-}
+  }
 
   /**
    * Shared base template for forum messages

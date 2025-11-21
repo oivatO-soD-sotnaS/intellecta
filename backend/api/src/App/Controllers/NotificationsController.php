@@ -18,7 +18,6 @@ readonly class NotificationsController extends BaseController {
     public function __construct(
         private NotificationsDao $notificationsDao,
         private EventsDao $eventsDao,
-        private ValidatorService $validatorService
     ) {}
     public function getUserNotifications(Request $request, Response $response) {
         return $this->handleErrors($request, function() use ($request, $response) {

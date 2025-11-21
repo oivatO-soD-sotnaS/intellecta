@@ -12,8 +12,6 @@ import { Input } from "@heroui/input"
 import { Button } from "@heroui/button"
 import { addToast } from "@heroui/toast"
 
-import type { CreateInstitutionInput } from "@/types/institution"
-import { useUploadProfileAsset } from "@/hooks/files/useUploadProfileAsset"
 import FileUpload, { FileUploadHandle } from "@/components/comp-547"
 
 type Props = {
@@ -30,8 +28,6 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
   const bannerRef = React.useRef<FileUploadHandle>(null)
 
   const [isPending, setIsPending] = React.useState(false)
-
-  const uploadProfileAsset = useUploadProfileAsset()
 
   const resetForm = React.useCallback(() => {
     setName("")

@@ -12,11 +12,9 @@ export function useInstitutionsSummaries() {
   return useQuery({
     queryKey: ["institutions", "summaries"],
     queryFn: async () => {
-      const data = await apiGet<
-        ApiInstitutionSummary[] | { items: ApiInstitutionSummary[] }
-      >("/api/institutions/summaries")
-      return normalizeList(data).map(mapApiInstitutionSummary)
+      const data = await apiGet<ApiInstitutionSummary[] | { items: ApiInstitutionSummary[] }>("/api/institutions/summaries");
+      return normalizeList(data).map(mapApiInstitutionSummary);
     },
     staleTime: 60_000,
-  })
+  });
 }

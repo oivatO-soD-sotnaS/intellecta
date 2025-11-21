@@ -7,7 +7,7 @@ import { useInstitutionDashboardSummary } from "@/hooks/institution-page/useInst
 export default function StatCards() {
   const { data } = useInstitutionDashboardSummary() // mock por enquanto
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-4 lg:grid-cols-2">
       <StatCard
         icon={ClipboardCheck}
         value={data.pendingActivities}
@@ -20,12 +20,12 @@ export default function StatCards() {
         label="Eventos próximos"
         iconBg="bg-blue-100 text-blue-600"
       />
-      <StatCard
+      {/* <StatCard
         icon={MessagesSquare}
         value={data.unreadMessages}
         label="Mensagens não lidas"
         iconBg="bg-emerald-100 text-emerald-600"
-      />
+      /> */}
     </div>
   )
 }
