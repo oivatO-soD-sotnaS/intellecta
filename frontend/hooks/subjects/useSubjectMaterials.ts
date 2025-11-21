@@ -30,6 +30,7 @@ export function useSubjectMaterials(institutionId: string, subjectId?: string) {
       apiGet<Material[]>(
         `/api/institutions/${institutionId}/subjects/${subjectId}/materials`
       ),
+      retry:1
   })
 }
 

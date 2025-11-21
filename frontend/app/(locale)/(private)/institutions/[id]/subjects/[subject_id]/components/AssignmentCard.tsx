@@ -1,25 +1,30 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CalendarClock, ChevronRight } from "lucide-react"
+import { CalendarClock, ChevronRight, DownloadIcon } from "lucide-react"
 
 interface AssignmentCardProps {
   assignment: any
   isSelected?: boolean
   onSelect?: () => void
+  canManage?: boolean
+  onOpenDetails?: () => void
 }
 
 export default function AssignmentCard({
   assignment,
   isSelected,
   onSelect,
+  canManage,
+  onOpenDetails
 }: AssignmentCardProps) {
   const title = assignment.title ?? assignment.name ?? "Atividade sem título"
   const description =
     assignment.description ??
     "Atividade avaliativa da disciplina. Detalhes serão exibidos ao abrir."
   const dueDate = assignment.due_date ?? assignment.deadline
-  const concept = assignment.concept // se algum endpoint já trouxer isso
+  const concept = assignment.concept
+  const hasAttachment = !!assignment.attachment?.url
 
   return (
     <Card
@@ -57,17 +62,45 @@ export default function AssignmentCard({
         <p className="line-clamp-3 text-xs text-muted-foreground">
           {description}
         </p>
-
-        <Button
-          size="sm"
-          variant={isSelected ? "default" : "outline"}
-          className="w-full justify-between text-xs"
-          onClick={onSelect}
-        >
-          {isSelected ? "Ocultar entregas" : "Ver detalhes & entregas"}
-          <ChevronRight className="h-3 w-3" />
-        </Button>
       </CardContent>
+
+      <CardFooter className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={isSelected ? "default" : "outline"}
+            className="justify-between cursor-pointer"
+            onClick={onSelect}
+          >
+            {isSelected ? "Ocultar entregas" : "Ver Entregas"}
+            <ChevronRight className="h-3 w-3" />
+          </Button>
+
+          {canManage && onOpenDetails && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onOpenDetails}
+              className="cursor-pointer"
+            >
+              Ver Detalhes
+            </Button>
+          )}
+        </div>
+
+        {hasAttachment && (
+          <Button size="icon" variant="ghost" asChild>
+            <a
+              href={assignment.attachment!.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={assignment.attachment!.filename}
+            >
+              <DownloadIcon className="h-4 w-4" />
+            </a>
+          </Button>
+        )}
+      </CardFooter>
     </Card>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useSubjectMaterials } from "@/hooks/subjects/useSubjectMaterials"
-import { useSubjectAssignments } from "@/hooks/subjects/useSubjectAssignments"
+import { useSubjectAssignment } from "@/hooks/subjects/assignments/useSubjectAssignments"
 import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -42,7 +42,7 @@ export default function SubjectOverviewTab({
     useSubjectMaterials(institutionId, subjectId)
 
   const { data: assignments, isLoading: isLoadingAssignments } =
-    useSubjectAssignments(institutionId, subjectId)
+    useSubjectAssignment(institutionId, subjectId)
 
   const loading = isLoading || isLoadingMaterials || isLoadingAssignments
 

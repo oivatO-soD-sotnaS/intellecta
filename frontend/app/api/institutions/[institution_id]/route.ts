@@ -2,28 +2,27 @@
 import { NextRequest } from "next/server"
 import { proxyGet, proxyPut, proxyDelete } from "@/app/api/_lib/proxy"
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { institution_id: string } }
-) {
-  const { institution_id } = params
+type RouteParams = {
+  institution_id: string
+}
+
+type Params = {
+  params: Promise<RouteParams>
+}
+
+export async function GET(req: NextRequest, ctx: Params) {
+  const { institution_id } = await ctx.params
   return proxyGet(req, `/institutions/${institution_id}`)
 }
 
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ institution_id: string }> },
-) {
-  const { institution_id } = await context.params;
-  
-  return proxyPut(req, `/institutions/${institution_id}`);
+export async function PUT(req: NextRequest, ctx: Params) {
+  const {institution_id} = await ctx.params
+  return proxyPut(req, `/institutions/${institution_id}`)
 }
 
-export async function DELETE(
-  req: NextRequest,
-  context: { params: Promise<{ institution_id: string }> },
+export async function DELETE(req: NextRequest, ctx: Params
 ) {
-  const { institution_id } = await context.params;
+  const { institution_id } = await ctx.params
 
-  return proxyDelete(req, `/institutions/${institution_id}`);
+  return proxyDelete(req, `/institutions/${institution_id}`)
 }

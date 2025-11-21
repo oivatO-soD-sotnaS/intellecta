@@ -1,11 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { useCreateAssignment, useSubjectAssignments } from "@/hooks/subjects/useSubjectAssignments"
+import {
+  useCreateAssignment,
+  useSubjectAssignment,
+} from "@/hooks/subjects/assignments/useSubjectAssignments"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { ClipboardList } from "lucide-react"
+import {
+  AlertCircleIcon,
+  ClipboardList,
+  PaperclipIcon,
+  UploadIcon,
+  XIcon,
+} from "lucide-react"
 import AssignmentCard from "./AssignmentCard"
 import AssignmentSubmissionsPanel from "./AssignmentSubmissionsPanel"
 import {
@@ -19,6 +28,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import MySubmissionPanel from "./assignments/MySubmissionPanel"
+import { DateTimePicker } from "@/components/DatePickerDemo"
+import { formatBytes, useFileUpload } from "@/hooks/use-file-upload"
+import { AssignmentDetailsSheet } from "./AssignmentDetailsSheet"
+import { TopSheet, TopSheetClose, TopSheetContent, TopSheetDescription, TopSheetFooter, TopSheetHeader, TopSheetTitle } from "@/components/ui/top-sheet"
 
 interface SubjectAssignmentsTabProps {
   institutionId: string
@@ -35,14 +48,47 @@ export default function SubjectAssignmentsTab({
     string | null
   >(null)
 
+  const [submissionsOpen, setSubmissionsOpen] = useState(false)
+
+  const [detailsAssignmentId, setDetailsAssignmentId] = useState<string | null>(
+    null
+  )
+
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+
+  const handleOpenDetails = (assignmentId: string) => {
+    setDetailsAssignmentId(assignmentId)
+    setIsDetailsOpen(true)
+  }
+
   const [openDialog, setOpenDialog] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [dueDate, setDueDate] = useState("")
+  const [deadline, setDeadline] = useState<string | null>(null)
 
-  const { data: assignments, isLoading } = useSubjectAssignments(
+  const maxSize = 10 * 1024 * 1024 // 10MB
+
+  const [
+    { files, isDragging, errors },
+    {
+      handleDragEnter,
+      handleDragLeave,
+      handleDragOver,
+      handleDrop,
+      openFileDialog,
+      removeFile,
+      getInputProps,
+    },
+  ] = useFileUpload({
+    maxSize,
+    initialFiles: [],
+  })
+
+  const file = files[0]
+
+  const { data: assignments, isLoading } = useSubjectAssignment(
     institutionId,
-    subjectId,
+    subjectId
   )
 
   const createAssignmentMutation = useCreateAssignment(institutionId, subjectId)
@@ -56,23 +102,26 @@ export default function SubjectAssignmentsTab({
     setOpenDialog(false)
     setTitle("")
     setDescription("")
-    setDueDate("")
+    setDeadline("")
+
+    if (file) {
+      removeFile(file.id)
+    }
   }
 
   function handleSubmitAssignment(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
+    if (!deadline) return
+
+    const attachment = file?.file ?? null
 
     createAssignmentMutation.mutate(
       {
-        institutionId,
-        subjectId,
-        payload: {
-          title,
-          description,
-          // ajuste o nome do campo conforme o backend (due_date, deadline, etc.)
-          due_date: dueDate || null,
-        },
+        title,
+        description,
+        deadline,
+        attachment,
       },
       {
         onSuccess(data: any) {
@@ -93,7 +142,6 @@ export default function SubjectAssignmentsTab({
           </Button>
         )}
       </div>
-
       {isLoading && (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -105,7 +153,6 @@ export default function SubjectAssignmentsTab({
           ))}
         </div>
       )}
-
       {!isLoading && (!assignments || assignments.length === 0) && (
         <Card className="border-dashed border-border/60">
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
@@ -130,35 +177,88 @@ export default function SubjectAssignmentsTab({
               key={assignment.assignment_id}
               assignment={assignment}
               isSelected={selectedAssignmentId === assignment.assignment_id}
-              onSelect={() =>
-                setSelectedAssignmentId((prev) =>
-                  prev === assignment.assignment_id
-                    ? null
-                    : assignment.assignment_id
-                )
-              }
+              onOpenDetails={() => handleOpenDetails(assignment.assignment_id)}
+              canManage={isTeacher}
+              onSelect={() => {
+                setSelectedAssignmentId((prev) => {
+                  const next =
+                    prev === assignment.assignment_id
+                      ? null
+                      : assignment.assignment_id
+
+                  if (isTeacher) {
+                    setSubmissionsOpen(Boolean(next))
+                  }
+
+                  return next
+                })
+              }}
             />
           ))}
         </div>
       )}
 
       {/* Painel inferior: professor vê lista de entregas; aluno vê "Minha entrega" */}
-      {selectedAssignmentId && (
+
+      {isTeacher && (
+        <TopSheet
+          open={submissionsOpen && !!selectedAssignmentId}
+          onOpenChange={(open) => {
+            setSubmissionsOpen(open)
+            if (!open) {
+              setSelectedAssignmentId(null)
+            }
+          }}
+        >
+          <TopSheetContent>
+            <TopSheetHeader>
+              <TopSheetTitle>Entregas da atividade</TopSheetTitle>
+              <TopSheetDescription>
+                Acompanhe, visualize anexos e avalie as entregas dos alunos para
+                esta atividade.
+              </TopSheetDescription>
+            </TopSheetHeader>
+
+            {selectedAssignmentId && (
+              <div className="mt-2">
+                <AssignmentSubmissionsPanel
+                  institutionId={institutionId}
+                  subjectId={subjectId}
+                  assignmentId={selectedAssignmentId}
+                />
+              </div>
+            )}
+
+            <TopSheetFooter>
+              <TopSheetClose asChild>
+                <Button variant="outline" size="sm">
+                  Fechar
+                </Button>
+              </TopSheetClose>
+            </TopSheetFooter>
+          </TopSheetContent>
+        </TopSheet>
+      )}
+
+      {!isTeacher && selectedAssignmentId && (
         <div className="space-y-3">
-          {isTeacher ? (
-            <AssignmentSubmissionsPanel
-              institutionId={institutionId}
-              subjectId={subjectId}
-              assignmentId={selectedAssignmentId}
-            />
-          ) : (
-            <MySubmissionPanel
-              institutionId={institutionId}
-              subjectId={subjectId}
-              assignmentId={selectedAssignmentId}
-            />
-          )}
+          <MySubmissionPanel
+            institutionId={institutionId}
+            subjectId={subjectId}
+            assignmentId={selectedAssignmentId}
+          />
         </div>
+      )}
+
+      {detailsAssignmentId && (
+        <AssignmentDetailsSheet
+          open={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
+          institutionId={institutionId}
+          subjectId={subjectId}
+          assignmentId={detailsAssignmentId}
+          isTeacher={isTeacher}
+        />
       )}
 
       {/* Dialog de criação de atividade */}
@@ -198,17 +298,92 @@ export default function SubjectAssignmentsTab({
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-foreground">
-                Data limite (opcional)
+                Data limite
               </label>
-              <Input
-                type="datetime-local"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+              <DateTimePicker
+                value={deadline}
+                onChange={(newValue) => setDeadline(newValue)}
               />
-              <p className="text-[11px] text-muted-foreground">
-                Ajuste o campo enviado conforme o atributo esperado pelo backend
-                (ex.: due_date).
-              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-foreground">
+                Anexo (opcional)
+              </label>
+
+              <div
+                role="button"
+                onClick={openFileDialog}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                data-dragging={isDragging || undefined}
+                className="flex min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-input p-4 transition-colors hover:bg-accent/50 has-disabled:pointer-events-none has-disabled:opacity-50 has-[input:focus]:border-ring has-[input:focus]:ring-[3px] has-[input:focus]:ring-ring/50 data-[dragging=true]:bg-accent/50"
+              >
+                <input
+                  {...getInputProps()}
+                  className="sr-only"
+                  aria-label="Upload file"
+                  disabled={Boolean(file)}
+                />
+
+                <div className="flex flex-col items-center justify-center text-center">
+                  <div
+                    className="mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border bg-background"
+                    aria-hidden="true"
+                  >
+                    <UploadIcon className="size-4 opacity-60" />
+                  </div>
+                  <p className="mb-1.5 text-sm font-medium">
+                    Upload de arquivo
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Arraste e solte ou clique para procurar (máx.{" "}
+                    {formatBytes(maxSize)})
+                  </p>
+                </div>
+              </div>
+
+              {/* Erros de upload */}
+              {errors.length > 0 && (
+                <div
+                  className="flex items-center gap-1 text-xs text-destructive"
+                  role="alert"
+                >
+                  <AlertCircleIcon className="size-3 shrink-0" />
+                  <span>{errors[0]}</span>
+                </div>
+              )}
+
+              {/* Arquivo selecionado */}
+              {file && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2 rounded-xl border px-4 py-2">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <PaperclipIcon
+                        className="size-4 shrink-0 opacity-60"
+                        aria-hidden="true"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-medium">
+                          {file.file.name}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="-me-2 size-8 text-muted-foreground/80 hover:bg-transparent hover:text-foreground"
+                      onClick={() => removeFile(file.id)}
+                      aria-label="Remover arquivo"
+                    >
+                      <XIcon className="size-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter>
@@ -224,7 +399,13 @@ export default function SubjectAssignmentsTab({
               <Button
                 type="submit"
                 size="sm"
-                disabled={createAssignmentMutation.isPending}
+                disabled={
+                  !deadline ||
+                  !title.trim() ||
+                  !title ||
+                  !description ||
+                  createAssignmentMutation.isPending
+                }
               >
                 {createAssignmentMutation.isPending
                   ? "Criando..."
