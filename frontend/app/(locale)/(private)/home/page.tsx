@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // app/(locale)/(private)/home/page.tsx
 import { cookies } from "next/headers";
 

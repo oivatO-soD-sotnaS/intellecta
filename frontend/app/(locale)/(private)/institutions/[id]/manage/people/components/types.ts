@@ -13,7 +13,7 @@ export type User = {
   full_name: string
   email: string
   created_at: string
-  changed_at?: string
+  changed_at: string
   profile_picture?: FileRef
 }
 

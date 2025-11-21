@@ -27,9 +27,13 @@ export type Subject = {
   banner?: string
 }
 
-export type ClassSummary = {
-  class_id: string
-  name: string
+export type Class = {
+  "class_id": string,
+  "name": string,
+  "description": string,
+  "institution_id": string,
+  "profile_picture": FileRef|null,
+  "banner": FileRef|null
 }
 
 export type ClassSubject = {

@@ -15,11 +15,10 @@ export type ApiFileMeta = {
 /** Instituição como a API retorna (snake-case, campos com underscore) */
 export type ApiInstitution = {
   institution_id: string;
-  user_id: string;
   name: string;
   email: string;
   description: string;
-  profile_picture: ApiFileMeta | null;
+  profilePicture: ApiFileMeta | null;
   banner: ApiFileMeta | null;
 };
 
@@ -30,8 +29,8 @@ export type Institution = {
   name: string;
   email: string;
   description: string;
-  profilePicture?: ApiFileMeta | null;
-  banner?: ApiFileMeta | null;
+  profilePicture?: ApiFileMeta;
+  banner?: ApiFileMeta;
 };
 
 /** Modelo SUMMARY (ex.: GET /institutions/summaries, /institutions/summaries/{id}) */

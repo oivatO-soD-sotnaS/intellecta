@@ -2,16 +2,20 @@
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import type { NavItem } from "./types";
+import { InstitutionUserMe } from "../../layout";
 
 
 
 export default function ListCollapsed({
   items,
   isActive,
-}: { items: NavItem[]; isActive: (href: string) => boolean }) {
+  me
+}: { items: NavItem[]; isActive: (href: string) => boolean, me: InstitutionUserMe }) {
   return (
     <div className="flex flex-col items-center gap-2">
       {items.map((it) => {
+        if(it.admin && me.role !== "admin") return
+
         const active = isActive(it.href);
         const btn = (
           <Link

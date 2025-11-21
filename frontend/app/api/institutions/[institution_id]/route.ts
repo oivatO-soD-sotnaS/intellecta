@@ -6,7 +6,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { institution_id: string } }
 ) {
-  const { institution_id } = params
+  const { institution_id } = await params
   return proxyGet(req, `/institutions/${institution_id}`)
 }
 

@@ -29,10 +29,6 @@ export function SubjectsGrid({
     classId
   )
 
-  console.log("log do classSubjects -> ",classSubjects)
-  console.log("log do classId -> ", classId)
-  
-
   if (!classSubjects.length) {
     return (
       <p className="text-sm text-muted-foreground">

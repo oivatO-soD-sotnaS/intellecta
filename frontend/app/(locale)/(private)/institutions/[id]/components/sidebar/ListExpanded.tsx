@@ -10,17 +10,22 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import type { NavItem } from "./types";
+import { InstitutionUserMe } from "../../layout";
 
 export default function ListExpanded({
   items,
   isActive,
+  me
 }: {
   items: NavItem[];
   isActive: (href: string) => boolean;
+  me: InstitutionUserMe;
 }) {
   return (
     <SidebarMenu>
       {items.map((it, idx) => {
+        if(it.admin && me.role !== "admin") return
+
         const active = isActive(it.href);
         return (
           <SidebarMenuItem key={it.label} className="mt-1">

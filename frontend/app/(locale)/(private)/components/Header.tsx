@@ -11,6 +11,8 @@ import UserMenu, { type HeaderUser } from "./UserMenu";
 
 import { cn } from "@/lib/utils";
 import { useCurrentUser } from "@/hooks/auth/useCurrentUser";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { unauthorized } from "next/navigation";
 
 type HeaderProps = {
   leftSlot?: ReactNode;
@@ -18,8 +20,15 @@ type HeaderProps = {
 };
 
 export default function Header({ leftSlot, className }: HeaderProps) {
-  const { data: me } = useCurrentUser();
+  const { 
+    data: me,
+    isPending 
+  } = useCurrentUser();
 
+  if (!isPending && !me) {
+    unauthorized()
+  }
+  
   const user: HeaderUser = {
     name: me?.full_name ?? me?.email?.split("@")[0] ?? "Usuário",
     email: me?.email ?? "",
@@ -64,6 +73,7 @@ export default function Header({ leftSlot, className }: HeaderProps) {
           <NotificationsBell />
           <UserMenu user={user} />
         </div>
+        <ThemeSwitch/>
       </div>
     </header>
   );

@@ -47,6 +47,7 @@ export interface EventCalendarProps {
   onEventDelete: (eventId: string) => void
   className?: string
   initialView?: CalendarView
+  canMutate: boolean
 }
 
 export function EventCalendar({
@@ -56,6 +57,7 @@ export function EventCalendar({
   onEventDelete,
   className,
   initialView = "mês",
+  canMutate = false
 }: EventCalendarProps) {
   const [dataAtual, setDataAtual] = useState(new Date())
   const [visualizacao, setVisualizacao] = useState<CalendarView>(initialView)
@@ -279,21 +281,23 @@ export function EventCalendar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button
-              className="max-[479px]:aspect-square max-[479px]:p-0!"
-              size="sm"
-              onClick={() => {
-                setEventoSelecionado(null) // Garantir que estamos criando um novo evento
-                setDialogEventoAberto(true)
-              }}
-            >
-              <PlusIcon
-                className="opacity-60 sm:-ms-1"
-                size={16}
-                aria-hidden="true"
-              />
-              <span className="max-sm:sr-only">Novo evento</span>
-            </Button>
+            {canMutate && (
+              <Button
+                className="max-[479px]:aspect-square max-[479px]:p-0!"
+                size="sm"
+                onClick={() => {
+                  setEventoSelecionado(null) // Garantir que estamos criando um novo evento
+                  setDialogEventoAberto(true)
+                }}
+              >
+                <PlusIcon
+                  className="opacity-60 sm:-ms-1"
+                  size={16}
+                  aria-hidden="true"
+                />
+                <span className="max-sm:sr-only">Novo evento</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -334,6 +338,7 @@ export function EventCalendar({
         <EventDialog
           event={eventoSelecionado}
           isOpen={dialogEventoAberto}
+          canMutate={canMutate}
           onClose={() => {
             setDialogEventoAberto(false)
             setEventoSelecionado(null)

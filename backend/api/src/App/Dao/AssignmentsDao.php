@@ -124,4 +124,64 @@ readonly class AssignmentsDao extends BaseDao {
 
         return $stmt->execute();
     }
+
+    /**
+     * Summary of getUpcomingAssignmentsByInstitutionId
+     * Retorna todas as atividades avaliativas futuras da instituição.
+     *
+     * @param string $institution_id
+     * @return Assignment[]
+     */
+    public function getUpcomingAssignmentsByInstitutionId(string $institution_id): array {
+        $sql = "
+            SELECT a.*
+            FROM assignments a
+            JOIN subjects s ON s.subject_id = a.subject_id
+            WHERE s.institution_id = :institution_id
+            AND a.deadline >= CURRENT_DATE
+            ORDER BY a.deadline ASC
+        ";
+
+        $pdo = $this->database->getConnection();
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(":institution_id", $institution_id, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn(array $row) => new Assignment($row), $data);
+    }
+
+    /**
+     * Retorna apenas as atividades avaliativas futuras das disciplinas
+     * nas quais o usuário participa dentro de uma instituição.
+     *
+     * @param string $institution_id
+     * @param string $user_id
+     * @return Assignment[]
+     */
+    public function getUpcomingAssignmentsForUserInInstitution(string $institution_id, string $user_id): array {
+        $sql = "
+            SELECT a.*
+            FROM assignments a
+            JOIN subjects s ON s.subject_id = a.subject_id
+            JOIN subject_users su ON su.subject_id = s.subject_id
+            WHERE s.institution_id = :institution_id
+            AND su.user_id = :user_id
+            AND a.deadline >= CURRENT_DATE
+            ORDER BY a.deadline ASC
+        ";
+
+        $pdo = $this->database->getConnection();
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(":institution_id", $institution_id, PDO::PARAM_STR);
+        $stmt->bindValue(":user_id", $user_id, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn(array $row) => new Assignment($row), $rows);
+    }
 }

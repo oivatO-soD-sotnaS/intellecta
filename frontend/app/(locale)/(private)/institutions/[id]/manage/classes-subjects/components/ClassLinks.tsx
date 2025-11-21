@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Link as LinkIcon, Plus, Unlink } from "lucide-react"
-import type { ClassSummary, ClassSubject, Subject } from "./types"
+import type { Class, ClassSubject, Subject } from "./types"
 import { Badge } from "@heroui/badge"
 import AppAvatar from "@/app/(locale)/(private)/components/AppAvatar"
 import AddSubjectToClassDrawer from "./AddSubjectToClassDrawer"
@@ -23,7 +23,7 @@ export default function ClassLinks({
   onAdd,
   onRemove,
 }: {
-  classes: ClassSummary[]
+  classes: Class[]
   links: Record<string, ClassSubject[]>
   subjectsCatalog: Subject[]
   onAdd: (class_id: string, subject_ids: string[]) => void

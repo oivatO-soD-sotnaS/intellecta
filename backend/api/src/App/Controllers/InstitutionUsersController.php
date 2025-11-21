@@ -13,6 +13,7 @@ use App\Dto\UserDto;
 use App\Enums\InstitutionUserType;
 use App\Models\InstitutionUser;
 use App\Models\Invitation;
+use App\Models\User;
 use App\Queue\RedisEmailQueue;
 use App\Services\LogService;
 use App\Services\ValidatorService;
@@ -193,6 +194,23 @@ readonly class InstitutionUsersController extends BaseController
         "message" => "{$user->getUserId()} removed {$institutionUser->getUserId()} from {$institution_id} institutions"
       ]));
 
+      return $response;
+    });
+  }
+
+  public function getInstitutionUserMe(Request $request, Response $response, string $_): Response
+  {
+    return $this->handleErrors($request, function() use ($request, $response) {
+      /** @var User $user */
+      $user = $request->getAttribute("user");
+
+      $institutionUser = $this->institutionUsersDao->getInstitutionUserByUserId($user->getUserId());
+
+      if(empty($institutionUser)) {
+        throw new HttpNotFoundException($request, LogService::HTTP_404);
+      }
+
+      $response->getBody()->write(json_encode($institutionUser));
       return $response;
     });
   }

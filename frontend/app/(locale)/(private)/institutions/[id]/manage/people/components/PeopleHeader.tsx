@@ -1,65 +1,53 @@
-// app/(locale)/(private)/institutions/[id]/manage/people/_components/PeopleHeader.tsx
-"use client"
+// app/(locale)/(private)/institutions/[id]/manage/people/components/PeopleHeader.tsx
+import { ArrowLeft, Users, MailPlus } from "lucide-react"
+import Back from "../../_components/Back";
 
-import * as React from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { Users, UserCog, Plus } from "lucide-react"
-import { Badge } from "@heroui/badge"
-
-type Props = {
+interface PeopleHeaderProps {
   institutionId: string
   total: number
   counts: { admin: number; teacher: number; student: number }
-  onBack?: () => void
+  onInviteClick?: () => void
+  showInviteForm?: boolean
 }
 
 export default function PeopleHeader({
-  institutionId,
   total,
   counts,
-  onBack,
-}: Props) {
-  const router = useRouter()
+  onInviteClick,
+  showInviteForm = false,
+  institutionId
+}: PeopleHeaderProps) {
 
   return (
-    <Card className="p-4 md:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-xl md:text-2xl font-semibold">
-            Membros da instituição
-          </h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {total} membros · <span className="font-medium">{counts.admin}</span>{" "}
-          admins · <span className="font-medium">{counts.teacher}</span>{" "}
-          professores · <span className="font-medium">{counts.student}</span>{" "}
-          alunos
-        </p>
-        <div className="flex gap-2">
-          <Badge variant="solid">Todos: {total}</Badge>
-          <Badge>Admins: {counts.admin}</Badge>
-          <Badge variant="solid">Professores: {counts.teacher}</Badge>
-          <Badge variant="solid">Alunos: {counts.student}</Badge>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-4">
+        <Back hrefFallback={`/institutions/${institutionId}/manage`}/>
+
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Gerenciar Pessoas</h1>
+            <p className="text-foreground/50">
+              {total} membros • {counts.admin} admin • {counts.teacher} teacher • {counts.student} student
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" onClick={onBack}>
-          <UserCog className="h-4 w-4 mr-2" />
-          Gerenciar
-        </Button>
-        <Button
-          onClick={() =>
-            router.push(`/institutions/${institutionId}/manage/invite`)
-          }
+      {onInviteClick && (
+        <button
+          onClick={onInviteClick}
+          className={`
+            inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors
+            ${showInviteForm
+              ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              : "bg-blue-600 text-white hover:bg-blue-700"
+            }
+          `}
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Convidar pessoas
-        </Button>
-      </div>
-    </Card>
+          <MailPlus className="h-4 w-4" />
+          {showInviteForm ? "Ver Lista" : "Convidar Pessoas"}
+        </button>
+      )}
+    </div>
   )
 }

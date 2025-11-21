@@ -14,7 +14,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis_container")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_QUEUE_NAME = os.getenv("REDIS_QUEUE_NAME", "email_queue")
 
-MAX_WORKERS = int(os.getenv("MAX_WORKERS", 5)) # Number of concurrent email sending threads
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", 10)) # Number of concurrent email sending threads
 POLL_INTERVAL = float(os.getenv("POLL_INTERVAL", 0.2)) # seconds
 
 def process_email_job(email_data):

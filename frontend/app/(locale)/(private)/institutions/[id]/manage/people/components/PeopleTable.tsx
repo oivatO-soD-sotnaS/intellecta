@@ -3,12 +3,12 @@
 
 import * as React from "react"
 import { Card } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import RoleSelect from "./RoleSelect"
 import { Trash2 } from "lucide-react"
 import type { InstitutionUser } from "@/hooks/institutions/useInstitutionUsers"
 import { Avatar } from "@heroui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type Props = {
   rows: InstitutionUser[]
@@ -33,7 +33,6 @@ export default function PeopleTable({
   loadingRowId,
 }: Props) {
   const allChecked = rows.length > 0 && selectedIds.length === rows.length
-  const someChecked = selectedIds.length > 0 && !allChecked
 
   return (
     <Card className="overflow-hidden">
@@ -46,7 +45,6 @@ export default function PeopleTable({
                   checked={allChecked}
                   onCheckedChange={(v) => onToggleAll(Boolean(v))}
                   aria-label="Selecionar todos"
-                  indeterminate={someChecked}
                 />
               </th>
               <th className="px-3 py-2">Membro</th>

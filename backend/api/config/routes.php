@@ -97,6 +97,7 @@ return function (App $app) {
             $institutionWithId->delete('', InstitutionsController::class . ':deleteInstitution')
                 ->add(RequireAdmin::class);
             $institutionWithId->get('/summary', InstitutionsController::class . ':getInstitutionSummaryById');
+            $institutionWithId->get('/upcoming-assignments', AssignmentsController::class . ':getUpcomingAssignments');
 
             // Institution subjects
             $institutionWithId->group('/subjects', function ($institutionSubjects) {
@@ -190,6 +191,9 @@ return function (App $app) {
             $institutionWithId->group('/users', function ($institutionUsers) {
                 $institutionUsers->get('', InstitutionUsersController::class . ':getInstitutionUsers')
                     ->add(RequireAdmin::class);
+                
+                $institutionUsers->get('/me', InstitutionUsersController::class . ':getInstitutionUserMe');
+
                 $institutionUsers->post('/invite', InstitutionUsersController::class . ':inviteUsers')
                     ->add(RequireAdmin::class);
                 $institutionUsers->group('/{institution_user_id:'.UUIDv4_REGEX.'}', function($institutionUsersWithId) {

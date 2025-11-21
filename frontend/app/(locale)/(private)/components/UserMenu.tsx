@@ -74,6 +74,13 @@ export default function UserMenu({ user }: { user: HeaderUser }) {
             </Link>
           </li>
           <li>
+            <Link href="/events">
+              <Button as="span" className="w-full justify-start" variant="flat">
+                Eventos de usuário
+              </Button>
+            </Link>
+          </li>
+          <li>
             <Link href="/invites">
               <Button as="span" className="w-full justify-start" variant="flat">
                 Convites
