@@ -1,7 +1,10 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useCreateMaterial, useSubjectMaterials } from "@/hooks/subjects/useSubjectMaterials"
+import {
+  useCreateMaterial,
+  useSubjectMaterials,
+} from "@/hooks/subjects/materials/useSubjectMaterials"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -75,10 +78,7 @@ export default function SubjectMaterialsTabMock({
   const [attachmentId, setAttachmentId] = useState("")
 
   const { data: materials, isLoading: isLoadingMaterials } =
-    useSubjectMaterials(
-      institutionId,
-      subjectId,
-    )
+    useSubjectMaterials(institutionId, subjectId)
 
   const createMaterialMutation = useCreateMaterial(institutionId, subjectId)
 

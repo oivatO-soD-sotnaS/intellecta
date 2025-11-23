@@ -7,6 +7,9 @@ import { ClassHeader } from "./ClassHeader"
 import { ClassTabs } from "./ClassTabs"
 import { ClassSubjectsTab } from "./ClassSubjectsTab"
 import { useClass } from "@/hooks/classes/useClasses"
+import { ClassPeopleTab } from "./ClassPeopleTab"
+import { ClassTimelineTab } from "./ClassTimelineTab"
+import { ClassOverviewTab } from "./ClassOverviewTab"
 
 type Props = {
   institutionId: string
@@ -39,9 +42,7 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
 
       <div className="mt-4">
         {activeTab === "overview" && (
-          <div className="text-sm text-muted-foreground">
-            Em breve: visão geral da turma (resumo, próximos eventos, etc.).
-          </div>
+          <ClassOverviewTab institutionId={institutionId} classId={classId} />
         )}
 
         {activeTab === "subjects" && (
@@ -53,15 +54,11 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
         )}
 
         {activeTab === "people" && (
-          <div className="text-sm text-muted-foreground">
-            Em breve: lista de professores e alunos da turma.
-          </div>
+          <ClassPeopleTab institutionId={institutionId} classId={classId} />
         )}
 
         {activeTab === "timeline" && (
-          <div className="text-sm text-muted-foreground">
-            Em breve: linha do tempo da turma com avisos e atividades.
-          </div>
+          <ClassTimelineTab institutionId={institutionId} classId={classId} />
         )}
       </div>
     </motion.div>
