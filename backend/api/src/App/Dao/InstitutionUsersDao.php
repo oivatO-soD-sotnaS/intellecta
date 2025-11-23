@@ -33,6 +33,25 @@ readonly class InstitutionUsersDao extends BaseDao {
   }
 
   /**
+   * Summary of getInstitutionUserById
+   * @param string $institution_user_id
+   * @return InstitutionUser|null
+   */
+  public function getInstitutionUserByUserId(string $user_id): ?InstitutionUser {
+    $sql = "SELECT * FROM institution_users
+            WHERE user_id LIKE :user_id";
+
+    $pdo = $this->database->getConnection();
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt->execute();
+    
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $data ? new InstitutionUser($data) : null;
+  }
+
+  /**
    * Summary of getInstitutionUserByIds
    * @param string $institution_id
    * @param string $user_id
@@ -224,4 +243,5 @@ readonly class InstitutionUsersDao extends BaseDao {
     return $dtos;
   }
 
+  
 }

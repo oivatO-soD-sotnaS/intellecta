@@ -5,7 +5,6 @@ import SubjectHeader from "./SubjectHeader"
 import SubjectTabs from "./SubjectTabs"
 import { useSubject } from "@/hooks/subjects/useSubject"
 import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
-import SubjectHeaderMock from "./mocks/SubjectHeader"
 import { useInstitution } from "@/hooks/institution/useInstitution"
 
 interface SubjectPageClientProps {

@@ -13,6 +13,9 @@ const nextConfig = {
       { protocol: "https", hostname: "storage.example.com", pathname: "/**" },
     ],
   },
+  experimental: {
+    authInterrupts: true,
+  },
 }
 
 module.exports = nextConfig

@@ -1,7 +1,7 @@
 // hooks/classes/useClasses.ts
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, UseQueryOptions } from "@tanstack/react-query"
 import { apiGet } from "@/lib/apiClient"
 import type { ClassDTO } from "@/types/class"
 
@@ -12,8 +12,15 @@ const norm = (data: ApiList): ClassDTO[] => {
   return arr
 }
 
-export function useClasses(institutionId: string) {
+export function useClasses(
+  institutionId: string,
+  options?: Omit<
+    UseQueryOptions<ClassDTO[], Error>,
+    'queryKey' | 'queryFn'
+  >
+) {
   return useQuery({
+    ...options,
     queryKey: ["classes", institutionId],
     enabled: Boolean(institutionId),
     staleTime: 60_000,

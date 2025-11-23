@@ -1,10 +1,9 @@
-// app/api/institutions/[institution_id]/subjects/[subject_id]/materials/[material_id]/route.ts
 import { NextRequest } from "next/server"
-import { proxyGet, proxyPut, proxyDelete } from "@/app/api/_lib/proxy"
+import { proxyDelete } from "@/app/api/_lib/proxy"
+
 import { cookies } from "next/headers"
 
 export const dynamic = "force-dynamic"
-
 
 export async function GET(
   req: NextRequest,
@@ -80,6 +79,7 @@ export async function PUT(
   const token = cookieStore.get("token")?.value
 
   const baseUrl = process.env.API_BASE_URL
+
   if (!baseUrl) {
     return new Response(
       JSON.stringify({ message: "API_BASE_URL não configurada" }),
@@ -92,39 +92,16 @@ export async function PUT(
 
   const backendUrl = `${baseUrl}/institutions/${institution_id}/subjects/${subject_id}/materials/${material_id}`
 
-  const contentType = req.headers.get("content-type") || ""
-
-  let body: BodyInit | null = null
-  let headers: HeadersInit = {}
-
   try {
-    // 1) multipart/form-data → título + material_file (troca de anexo)
-    if (contentType.includes("multipart/form-data")) {
-      const incomingFormData = await req.formData()
-      const forwardFormData = new FormData()
-
-      incomingFormData.forEach((value, key) => {
-        forwardFormData.append(key, value)
-      })
-
-      body = forwardFormData
-      // não setamos content-type manual para multipart
-    } else {
-      // 2) JSON (atualização só de título)
-      let jsonBody: unknown = null
-      try {
-        jsonBody = await req.json()
-      } catch {
-        jsonBody = null
-      }
-
-      body = jsonBody ? JSON.stringify(jsonBody) : null
-      headers["content-type"] = "application/json"
+    // Backend de materials (pelo que vimos) atualiza apenas TITLE via JSON
+    let jsonBody: unknown = null
+    try {
+      jsonBody = await req.json()
+    } catch {
+      jsonBody = null
     }
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`
-    }
+    const bodyString = jsonBody ? JSON.stringify(jsonBody) : null
 
     const methodsToTry: ("PUT" | "PATCH")[] = ["PUT", "PATCH"]
     let backendResponse: Response | null = null
@@ -132,23 +109,30 @@ export async function PUT(
     for (const method of methodsToTry) {
       backendResponse = await fetch(backendUrl, {
         method,
-        headers,
-        body,
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: bodyString,
       })
 
+      // se não for 405, a gente aceita esse resultado
       if (backendResponse.status !== 405) {
         break
       }
     }
 
     if (!backendResponse) {
-      throw new Error("Falha ao chamar backend para atualizar material")
+      return new Response(
+        JSON.stringify({ message: "Falha ao comunicar com o backend" }),
+        {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        }
+      )
     }
 
     const text = await backendResponse.text()
-
-    console.log("log do text -> ", text)
-    
 
     return new Response(text, {
       status: backendResponse.status,

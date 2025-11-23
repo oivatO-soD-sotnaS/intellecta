@@ -31,9 +31,6 @@ export async function PUT(
         event_type
     } = await req.json()
     
-    console.log(event_start)
-    console.log(event_end)
-
     const token = (await cookies()).get("token")?.value
     const { id } = await ctx.params
 

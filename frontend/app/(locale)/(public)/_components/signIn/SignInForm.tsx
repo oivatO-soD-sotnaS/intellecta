@@ -1,188 +1,216 @@
-// components/ui/SignInForm.tsx
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Form } from "@heroui/form"
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useMutation } from "@tanstack/react-query"
 
-import { InputField } from "../InputField"
-import { PasswordInput } from "../PasswordInput"
-import { RecaptchaCheckbox } from "../RecaptchaCheckbox"
-import { PrimaryButton } from "../PrimaryButton"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-import { assertOkOrThrow, friendlyMessage, HttpError } from "@/lib/http-errors"
-import { useErrorFeedback } from "@/hooks/useErrorFeedback"
 import { addToast } from "@heroui/toast"
+import { cn } from "@/lib/utils"
+
+import { Eye, EyeOff } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+// ----------------------
+// ✔ Zod Schema
+// ----------------------
+const schema = z.object({
+  email: z.string().email("Digite um email válido."),
+  password: z
+    .string()
+    .min(5, "A senha deve ter ao menos 5 caracteres.")
+    .refine((pw) => /[A-Z]/.test(pw), {
+      message: "A senha deve incluir pelo menos 1 letra maiúscula.",
+    })
+    .refine((pw) => /[^a-zA-Z0-9]/.test(pw), {
+      message: "A senha deve incluir pelo menos 1 símbolo.",
+    }),
+})
+
+type FormValues = z.infer<typeof schema>
 
 
-type SignInValues = {
-  email: string
-  password: string
+async function signInApi(values: FormValues) {
+  const res = await fetch("/api/sign-in", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(values),
+  })
+
+  if (!res.ok) throw new Error(`${res.status}`)
+
+  return res.json()
 }
 
-
-export const SignInForm: React.FC = () => {
-  const router = useRouter()
-
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isHuman, setIsHuman] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{
-    api?: string
-    email?: string
-    password?: string[]
-    terms?: string
-  }>({})
-
-  const [tried, setTried] = useState(false)
-
-  const { notifyError, notifySuccess } = useErrorFeedback<SignInValues>()
-
-
-  const validatePassword = (pw: string) => {
-    const err: string[] = []
-
-    if (pw.length < 5) err.push("A senha deve ter ao menos 5 caracteres.")
-    if (!/[A-Z]/.test(pw))
-      err.push("A senha deve incluir pelo menos 1 letra maiúscula.")
-    if (!/[^a-zA-Z0-9]/.test(pw))
-      err.push("A senha deve incluir pelo menos 1 símbolo.")
-
-    return err
-  }
-
-  useEffect(() => {
-    if (!tried) return
-    const pwErr = validatePassword(password)
-
-    setErrors((prev) => {
-      const next = { ...prev }
-
-      if (pwErr.length) next.password = pwErr
-      else delete next.password
-
-      return next
-    })
-  }, [password, tried])
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setTried(true)
-
-    const locErr: typeof errors = {}
-
-    if (!email) locErr.email = "Digite seu email."
-    const pwErr = validatePassword(password)
-    if (pwErr.length) locErr.password = pwErr
-    if (!isHuman) locErr.terms = "Marque que você é humano."
-
-    if (Object.keys(locErr).length) {
-      setErrors(locErr)
-      return
-    }
-
-    setErrors({})
-    setIsLoading(true)
-
-    try {
-      const res = await fetch("/api/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
-
-      await assertOkOrThrow(res)
-
-      router.push("/home")
-    } catch (err) {
-      const { title, description } = friendlyMessage(err, "signin")
-
-      addToast({ title, description, color: "danger", variant: "flat" })
-
-      if (err instanceof HttpError && err.status === 422) {
-        setErrors({ password: ["Senha incorreta."] })
-      } else if (err instanceof HttpError && err.status >= 500) {
-        setErrors({ api: "Erro no servidor. Tente novamente em instantes." })
-      } else if (err instanceof TypeError) {
-        setErrors({ api: "Falha na conexão. Tente novamente." })
-      } else {
-        setErrors({ api: title || "Não foi possível efetuar login." })
+function getErrorMessage(status: string) {
+  switch (status) {
+    case "401":
+      return {
+        title: "Credenciais inválidas",
+        description: "Email ou senha incorretos.",
       }
-    } finally {
-      setIsLoading(false)
-    }
+    case "403":
+      return {
+        title: "E-mail não verificado",
+        description: "Confirme seu e-mail antes de fazer login.",
+      }
+    case "404":
+      return {
+        title: "Usuário não encontrado",
+        description: "Verifique se o email está correto.",
+      }
+    case "500":
+      return {
+        title: "Erro interno do servidor",
+        description: "Estamos trabalhando para resolver.",
+      }
+    default:
+      return {
+        title: "Erro inesperado",
+        description: "Algo deu errado. Tente novamente.",
+      }
   }
+}
 
+export const SignInForm = () => {
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
 
-  const hasPwErr = tried && !!errors.password?.length
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "", password: "" },
+  })
+
+  const mutation = useMutation({
+    mutationFn: signInApi,
+
+    onSuccess: () => {
+      addToast({
+        title: "Bem-vindo!",
+        description: "Login realizado com sucesso.",
+        color: "success",
+        variant: "flat",
+      });
+
+      router.push("/home");
+      router.refresh();
+    },
+
+    onError: (err) => {
+      const msg = getErrorMessage(err.message)
+      addToast({
+        title: msg.title,
+        description: msg.description,
+        color: "danger",
+        variant: "flat",
+      })
+    },
+  })
+
+  const isLoading = mutation.isPending
+
+  const onSubmit = (values: FormValues) => mutation.mutate(values)
 
   return (
     <Card className="w-full max-w-md mx-auto rounded-lg shadow-xl border-none">
-      <CardContent className=" 00 p-8 space-y-6">
-        <Form className="space-y-5" onSubmit={handleSubmit}>
-          {errors.api && (
-            <div className="text-sm text-red-600">{errors.api}</div>
-          )}
+      <CardContent className="p-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-          <div className="flex flex-col gap-7 w-full">
-            <InputField
-              isRequired
-              errorMessage={errors.email}
-              isInvalid={!!errors.email}
-              label="Email"
+            {/* EMAIL */}
+            <FormField
+              control={form.control}
               name="email"
-              type="email"
-              value={email}
-              variant="bordered"
-              onChange={setEmail}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="seu@email.com"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <PasswordInput
-              isRequired
-              errorMessage={
-                hasPwErr ? (
-                  <ul className="list-disc list-inside text-xs text-red-600 space-y-1">
-                    {errors.password!.map((msg, i) => (
-                      <li key={i}>{msg}</li>
-                    ))}
-                  </ul>
-                ) : undefined
-              }
-              isInvalid={hasPwErr}
+
+            {/* PASSWORD COM TOGGLE */}
+            <FormField
+              control={form.control}
               name="password"
-              value={password}
-              onChange={setPassword}
-              variant="bordered"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        disabled={isLoading}
+                        {...field}
+                      />
+
+                      {/* Botão de ver senha */}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="p-4 rounded-lg w-full">
-            <RecaptchaCheckbox isSelected={isHuman} onChange={setIsHuman} />
-          </div>
-          {errors.terms && (
-            <span className="text-xs text-red-600">{errors.terms}</span>
-          )}
-
-          <PrimaryButton
-            isDisabled={
-              isLoading || !email || !password || !isHuman || hasPwErr
-            }
-            isLoading={isLoading}
-            type="submit"
-            className="bg-primary"
-          >
-            Entrar
-          </PrimaryButton>
+            {/* SUBMIT */}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={cn("w-full bg-primary text-white")}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  Entrando...
+                </span>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+          </form>
         </Form>
 
-        <div className=" text-center pt-6 tracking-wide text-base">
+        {/* Sign up link */}
+        <p className="text-center pt-6 text-base tracking-wide">
           Não tem conta ainda?{" "}
-          <Link className="text-primary  font-bold" href="/sign-up">
+          <Link className="text-primary font-bold" href="/sign-up">
             Inscreva-se
           </Link>
-        </div>
+        </p>
       </CardContent>
     </Card>
   )

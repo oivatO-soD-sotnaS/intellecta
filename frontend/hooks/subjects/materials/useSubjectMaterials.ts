@@ -1,32 +1,20 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiPut, apiDelete } from "@/lib/apiClient"
-import { CreateMaterialInput, Material, UpdateMaterialInput } from "./types"
-
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/apiClient"
+import { CreateMaterialInput, Material, UpdateMaterialInput } from "./type"
 
 export function useSubjectMaterials(institutionId: string, subjectId?: string) {
-  return useQuery<Material[]>({
-    enabled: !!institutionId && !!subjectId,
+  return useQuery({
+    enabled: Boolean(institutionId && subjectId),
     queryKey: ["subject-materials", institutionId, subjectId],
-    retry: 1,
-    queryFn: async () => {
-      const res = await fetch(
+    queryFn: () =>
+      apiGet<Material[]>(
         `/api/institutions/${institutionId}/subjects/${subjectId}/materials`
-      )
-
-      if (!res.ok) {
-        const errorText = await res.text().catch(() => "")
-        throw new Error(
-          errorText || `Erro ao carregar materiais (status ${res.status})`
-        )
-      }
-
-      return res.json()
-    },
+      ),
+    retry: 1,
   })
 }
-
 
 export function useCreateMaterial(institutionId: string, subjectId?: string) {
   const qc = useQueryClient()
@@ -38,17 +26,18 @@ export function useCreateMaterial(institutionId: string, subjectId?: string) {
         throw new Error("institutionId e subjectId são obrigatórios")
       }
 
-      if (!input.file) {
-        throw new Error("Arquivo do material é obrigatório")
-      }
-
       const url = `/api/institutions/${institutionId}/subjects/${subjectId}/materials`
 
       const formData = new FormData()
       formData.append("title", input.title)
 
+      if (input.description?.trim()) {
+        formData.append("description", input.description.trim())
+      }
 
-      formData.append("material_file", input.file)
+      if (input.file instanceof File) {
+        formData.append("material_file", input.file)
+      }
 
       const res = await fetch(url, {
         method: "POST",
@@ -96,8 +85,6 @@ export function useMaterialById(
     },
   })
 }
-
-
 
 export function useUpdateMaterial(
   institutionId: string,

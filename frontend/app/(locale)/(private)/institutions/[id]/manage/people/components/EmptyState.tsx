@@ -9,10 +9,21 @@ import { useRouter } from "next/navigation"
 
 export default function EmptyState({
   institutionId,
+  onInviteClick
 }: {
-  institutionId: string
+  institutionId: string,
+  onInviteClick?: () => void
 }) {
   const router = useRouter()
+
+  const handleInviteClick = () => {
+    if (onInviteClick) {
+      onInviteClick()
+    } else {
+      router.push(`/institutions/${institutionId}/manage/invite`)
+    }
+  }
+
   return (
     <Card className="p-8 text-center space-y-3">
       <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -22,11 +33,7 @@ export default function EmptyState({
       <p className="text-sm text-muted-foreground">
         Convide pessoas para começar a montar sua instituição.
       </p>
-      <Button
-        onClick={() =>
-          router.push(`/institutions/${institutionId}/manage/invite`)
-        }
-      >
+      <Button onClick={handleInviteClick}>
         Convidar pessoas
       </Button>
     </Card>

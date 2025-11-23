@@ -14,12 +14,12 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_ve
 ('3fa85f64-5717-4562-b3fc-2c963f66afa6', 'Alice Wonderland', 'alice@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('c56a4180-65aa-42ec-a945-5fd21dec0538', 'Charlie Brown', 'charlie@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('21ec2020-3aea-4069-a2dd-08002b30309d', 'David Gilmour', 'david@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
-('7d444840-9dc0-11d1-b245-5ffdce74fad2', 'Eve Polastri', 'eve@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
-('e02fd0e4-00fd-090A-ca30-0d00a0038ba0', 'Frank Underwood', 'frank@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
+('920a3a86-a3ad-4811-82e5-3df143c36512', 'Eve Polastri', 'eve@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
+('927ef8b8-fb55-4d18-8714-600d050ed336', 'Frank Underwood', 'frank@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'Grace Hopper', 'grace@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('9c858901-8a57-4791-81fe-4c455b099bc9', 'Hannah Baker', 'hannah@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('16fd2706-8baf-433b-82eb-8c7fada847da', 'Ian Curtis', 'ian@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
-('6fa459ea-ee8a-3ca4-894e-db77e160355e', 'Julia Roberts', 'julia@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
+('d1c9a7f2-6000-40ae-840e-3c24da6d80db', 'Julia Roberts', 'julia@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Kevin Spacey', 'kevin@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('7bae5f09-48fd-47d6-958d-26809f97a2e0', 'Blibs Blobs', 'bblobs@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('65fe5128-3fbd-424c-86e9-6d8e42ef9286', 'Otávio dos Santos Lima', 'otavio@unix.com.br', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, @today, @today, NULL),
@@ -37,15 +37,14 @@ INSERT INTO `institution_users` (`institution_user_id`, `role`, `joined_at`, `in
 ('014a55e8-e20f-44d9-91f9-c58096704d27', 'student', '2023-01-03 12:00:00', 'c7579a48-cddb-43f3-af78-d0f26edb327c', 'bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e'),
 ('3fa85f64-5717-4562-b3fc-2c963f66afa7', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '3fa85f64-5717-4562-b3fc-2c963f66afa6'),
 ('c56a4180-65aa-42ec-a945-5fd21dec0539', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'c56a4180-65aa-42ec-a945-5fd21dec0538'),
-('21ec2020-3aea-4069-a2dd-08002b30309e', 'teacher', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '21ec2020-3aea-4069-a2dd-08002b30309d'),
-('7d444840-9dc0-11d1-b245-5ffdce74fad3', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '7d444840-9dc0-11d1-b245-5ffdce74fad2'),
-('e02fd0e4-00fd-090A-ca30-0d00a0038ba1', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e02fd0e4-00fd-090A-ca30-0d00a0038ba0'),
+('21ec2020-3aea-4069-a2dd-08002b30309d', 'teacher', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '21ec2020-3aea-4069-a2dd-08002b30309d'),
+('7d444840-9dc0-4f1a-b245-5ffdce74fad3', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '920a3a86-a3ad-4811-82e5-3df143c36512'),
+('e02fd0e4-00fd-4f0a-ba30-0d00a0038ba1', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '927ef8b8-fb55-4d18-8714-600d050ed336'),
 ('f47ac10b-58cc-4372-a567-0e02b2c3d470', 'teacher', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'f47ac10b-58cc-4372-a567-0e02b2c3d479'),
 ('9c858901-8a57-4791-81fe-4c455b099bca', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '9c858901-8a57-4791-81fe-4c455b099bc9'),
 ('16fd2706-8baf-433b-82eb-8c7fada847db', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '16fd2706-8baf-433b-82eb-8c7fada847da'),
-('6fa459ea-ee8a-3ca4-894e-db77e160355f', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '6fa459ea-ee8a-3ca4-894e-db77e160355e'),
+('6fa459ea-ee8a-4ca4-894e-db77e160355f', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'd1c9a7f2-6000-40ae-840e-3c24da6d80db'),
 ('7c9e6679-7425-40de-944b-e07fc1f90ae8', 'student', NOW(), '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', '7c9e6679-7425-40de-944b-e07fc1f90ae7');
-
 
 INSERT INTO `invitations` (`invitation_id`, `email`, `role`, `expires_at`, `accepted_at`, `created_at`, `institution_id`, `invited_by`) VALUES
 ('e9c22b07-4d63-40fb-b9fd-b212575fabf6', 'newuser1@example.com', 'teacher', '2023-02-01 10:00:00', NULL, '2023-01-01 10:00:00', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
@@ -81,6 +80,19 @@ INSERT INTO `assignments` (`assignment_id`, `title`, `description`, `deadline`, 
 ('9d583a3b-6d4c-4f2a-819b-7120130e70ec', 'Python Project', 'Create a simple calculator', '2023-02-01', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
 ('3d7e4c1f-be71-4898-9791-edc3d0a4d9e1', 'Matrix Quiz', 'Solve matrix problems', '2023-02-15', 'df4b74b3-4bff-460e-aa77-14bb84435b33', NULL),
 ('54e4a6aa-9e20-46ee-a827-84691260f1f2', 'Thermo Lab Report', 'Report on heat transfer experiment', '2023-03-01', '8b046b6f-1fa2-462c-84ba-1c7b88450c87', NULL);
+
+-- Novos Assignments para Programming Fundamentals
+INSERT INTO `assignments` (`assignment_id`, `title`, `description`, `deadline`, `subject_id`, `attachment_id`) VALUES
+('a1f82d6e-40f3-4491-b41c-5c0f2ed7e901', 'Variables & Data Types', 'Write examples using different data types in Python.', DATE_ADD(@today, INTERVAL 2 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('b2d993a4-02af-4b77-9b34-2a49d5d3c002', 'Control Structures', 'Implement if/else and loops in simple programs.', DATE_ADD(@today, INTERVAL 5 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('c3eaa4b2-19c2-4cd4-89e3-7f8b2a4bb103', 'Functions Practice', 'Create reusable functions to process numbers and strings.', DATE_ADD(@today, INTERVAL 7 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('d4fab5c3-29c8-4cc3-9fa4-8ab3c4fbc204', 'List Operations', 'Write algorithms that manipulate lists in Python.', DATE_ADD(@today, INTERVAL 9 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('e50bc6d4-3ad0-46ed-9afb-91c4d5acc305', 'Dictionary Challenges', 'Use dictionaries to store and process structured data.', DATE_ADD(@today, INTERVAL 11 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('f61cd7e5-4be2-4b5c-905e-a2d6e6bdd406', 'Loops & Algorithms', 'Solve exercises using while and for loops.', DATE_ADD(@today, INTERVAL 13 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('a72de8f6-5cf1-47e3-b02b-b3e7f7ced507', 'Mini Project: Text Analyzer', 'Build a script that counts words, characters and sentences.', DATE_ADD(@today, INTERVAL 15 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('b83ef907-6d01-4ed8-8e3c-c4f808def608', 'Debugging Practice', 'Fix bugs in a provided Python script.', DATE_ADD(@today, INTERVAL 17 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('c94f0a18-7e12-4df9-934d-d5f919f0f709', 'File I/O Basics', 'Read and write files using Python.', DATE_ADD(@today, INTERVAL 19 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL),
+('da50fa29-8f23-4c0e-a34e-e6fa2af10710', 'Final Project: Student Manager', 'Build a CRUD system for students using Python structures.', DATE_ADD(@today, INTERVAL 25 DAY), '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd', NULL);
 
 INSERT INTO `submissions` (`submission_id`, `submitted_at`, `concept`, `feedback`, `assignment_id`, `user_id`, `attachment_id`) VALUES
 ('73cce72b-2c86-44dd-b6d9-c4f8c5aa7f9a', '2023-01-25 10:00:00', 'Excellent', 'Great work!', '9d583a3b-6d4c-4f2a-819b-7120130e70ec', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', 'e27d83a7-4329-43d9-b011-e1289cf2b5f9'),
@@ -148,17 +160,90 @@ INSERT INTO `user_events` (`user_event_id`, `event_id`, `user_id`) VALUES
 ('89e0871f-ffce-4dde-926d-242afd9f2b82', '87f2ad44-8bf2-4f14-bad1-2bfc2fb3d241', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6'),
 ('e76f28c4-8acc-4a0f-afad-9ff74a7c34f0', '7cb9fcd8-8550-4a37-8dad-c31d18b9bdb9', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6');
 
+-- Corrigir os eventos com tipos válidos do ENUM
+INSERT INTO `events` 
+(`event_id`, `title`, `description`, `type`, `event_start`, `event_end`, `created_at`, `changed_at`) VALUES
+-- Eventos Institucionais Adicionais
+('a1b2c3d4-e5f6-4780-abcd-ef1234567890', 'Orientation Week', 'Welcome event for new students', 'seminar',
+ DATE_ADD(@today, INTERVAL 1 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 1 DAY), INTERVAL 3 HOUR),
+ @today, @today),
+
+('b2c3d4e5-f6a7-4801-bcde-f23456789012', 'Career Fair', 'Annual career fair with top companies', 'seminar',
+ DATE_ADD(@today, INTERVAL 8 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 8 DAY), INTERVAL 6 HOUR),
+ @today, @today),
+
+('c3d4e5f6-a7b8-4902-cdef-345678901234', 'Research Symposium', 'Showcase of student research projects', 'seminar',
+ DATE_ADD(@today, INTERVAL 18 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 18 DAY), INTERVAL 4 HOUR),
+ @today, @today),
+
+('d4e5f6a7-b8c9-4a23-def4-456789012345', 'Faculty Meeting', 'Monthly faculty development meeting', 'seminar',
+ DATE_ADD(@today, INTERVAL 6 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 6 DAY), INTERVAL 2 HOUR),
+ @today, @today),
+
+('e5f6a7b8-c9d0-4b34-ef56-567890123456', 'Sports Tournament', 'Inter-department sports competition', 'sports',
+ DATE_ADD(@today, INTERVAL 14 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 14 DAY), INTERVAL 8 HOUR),
+ @today, @today),
+
+-- Eventos de Disciplina Adicionais
+('f6a7b8c9-d0e1-4c45-f678-678901234567', 'Chapter 2 Quiz', 'Quiz covering chapter 2 materials', 'quiz',
+ DATE_ADD(@today, INTERVAL 4 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 4 DAY), INTERVAL 1 HOUR),
+ @today, @today),
+
+('a7b8c9d0-e1f2-4d56-789a-789012345678', 'Group Project Presentation', 'Final group project presentations', 'presentation',
+ DATE_ADD(@today, INTERVAL 16 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 16 DAY), INTERVAL 3 HOUR),
+ @today, @today),
+
+('b8c9d0e1-f2a3-4e67-89ab-890123456789', 'Lab Session 3', 'Hands-on laboratory session', 'workshop',
+ DATE_ADD(@today, INTERVAL 5 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 5 DAY), INTERVAL 2 HOUR),
+ @today, @today),
+
+('c9d0e1f2-a3b4-4f78-9abc-901234567890', 'Midterm Review', 'Review session for midterm exam', 'lecture',
+ DATE_ADD(@today, INTERVAL 13 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 13 DAY), INTERVAL 2 HOUR),
+ @today, @today),
+
+('d0e1f2a3-b4c5-4a89-0def-012345678901', 'Assignment 2 Deadline', 'Submission deadline for assignment 2', 'deadline',
+ DATE_ADD(@today, INTERVAL 11 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 11 DAY), INTERVAL 1 HOUR),
+ @today, @today),
+
+('e1f2a3b4-c5d6-4b90-1ef2-123456789012', 'Final Project Proposal', 'Submit final project proposals', 'assignment',
+ DATE_ADD(@today, INTERVAL 9 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 9 DAY), INTERVAL 1 HOUR),
+ @today, @today),
+
+('f2a3b4c5-d6e7-4c01-2f34-234567890123', 'Office Hours Special', 'Extended office hours for questions', 'seminar',
+ DATE_ADD(@today, INTERVAL 7 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 7 DAY), INTERVAL 3 HOUR),
+ @today, @today),
+
+('a3b4c5d6-e7f8-4d12-3f45-345678901234', 'Case Study Discussion', 'Discussion of weekly case study', 'seminar',
+ DATE_ADD(@today, INTERVAL 3 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 3 DAY), INTERVAL 1.5 HOUR),
+ @today, @today),
+
+('b4c5d6e7-f8a9-4e23-4f56-456789012345', 'Practical Exam', 'Hands-on practical examination', 'exam',
+ DATE_ADD(@today, INTERVAL 19 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 19 DAY), INTERVAL 2 HOUR),
+ @today, @today),
+
+('c5d6e7f8-a9b0-4f34-5f67-567890123456', 'Reading Week', 'No classes - dedicated reading time', 'holiday',
+ DATE_ADD(@today, INTERVAL 21 DAY), DATE_ADD(DATE_ADD(@today, INTERVAL 21 DAY), INTERVAL 24 HOUR),
+ @today, @today);
+-- Institutional Events (UUIDv4 corrigidos)
 INSERT INTO `institutional_events` (`institutional_event_id`, `event_id`, `institution_id`) VALUES
-('ee778b97-0d7b-4648-aced-b3447c8298fc', '81708416-9c20-4eea-af06-b54e1061d736', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
-('527e7f0f-35a2-44c1-9f0d-a5dc3b5d56f0', '97d32fa5-38ea-4e6e-a6c3-2a03537204a5', 'c7579a48-cddb-43f3-af78-d0f26edb327c'),
-('e5832ce8-4218-4787-b52a-436f5327f51d', '71c1a651-77c7-45c7-b17e-0e6913987138', 'f6989a00-0032-4068-a2d0-efd8b1085aad');
+('133e4567-e89b-42d3-a456-426614174000', 'a1b2c3d4-e5f6-4780-abcd-ef1234567890', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
+('233e4567-e89b-42d3-a456-426614174001', 'b2c3d4e5-f6a7-4801-bcde-f23456789012', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
+('333e4567-e89b-42d3-a456-426614174002', 'c3d4e5f6-a7b8-4902-cdef-345678901234', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
+('433e4567-e89b-42d3-a456-426614174003', 'd4e5f6a7-b8c9-4a23-def4-456789012345', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072'),
+('533e4567-e89b-42d3-a456-426614174004', 'e5f6a7b8-c9d0-4b34-ef56-567890123456', '2dcdcdc1-cf6e-4e8a-9253-57d01ec69072');
 
+-- Subject Events (UUIDv4 corrigidos)
 INSERT INTO `subject_events` (`subject_event_id`, `event_id`, `subject_id`) VALUES
-('71b4b51d-38f1-4b71-8a3c-a4c7cd344557', '81708416-9c20-4eea-af06-b54e1061d736', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
-('4fbd511c-9424-4592-b708-c488d7d4e53e', '97d32fa5-38ea-4e6e-a6c3-2a03537204a5', 'df4b74b3-4bff-460e-aa77-14bb84435b33'),
-('b22541fc-50d6-4992-8981-f5d93791423e', '71c1a651-77c7-45c7-b17e-0e6913987138', '8b046b6f-1fa2-462c-84ba-1c7b88450c87');
-
-INSERT INTO `notifications` (`notification_id`, `user_id`, `event_id`, `seen`, `created_at`) VALUES
+('143e4567-e89b-42d3-a456-426614174000', 'f6a7b8c9-d0e1-4c45-f678-678901234567', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('243e4567-e89b-42d3-a456-426614174001', 'a7b8c9d0-e1f2-4d56-789a-789012345678', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('343e4567-e89b-42d3-a456-426614174002', 'b8c9d0e1-f2a3-4e67-89ab-890123456789', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('443e4567-e89b-42d3-a456-426614174003', 'c9d0e1f2-a3b4-4f78-9abc-901234567890', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('543e4567-e89b-42d3-a456-426614174004', 'd0e1f2a3-b4c5-4a89-0def-012345678901', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('643e4567-e89b-42d3-a456-426614174005', 'e1f2a3b4-c5d6-4b90-1ef2-123456789012', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('743e4567-e89b-42d3-a456-426614174006', 'f2a3b4c5-d6e7-4c01-2f34-234567890123', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('843e4567-e89b-42d3-a456-426614174007', 'a3b4c5d6-e7f8-4d12-3f45-345678901234', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('943e4567-e89b-42d3-a456-426614174008', 'b4c5d6e7-f8a9-4e23-4f56-456789012345', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd'),
+('a43e4567-e89b-42d3-a456-426614174009', 'c5d6e7f8-a9b0-4f34-5f67-567890123456', '5a88c02b-83a2-4ffe-9d9f-b4ab689ebffd');INSERT INTO `notifications` (`notification_id`, `user_id`, `event_id`, `seen`, `created_at`) VALUES
 -- Notificações para eventos recentes/passados (algumas vistas, outras não)
 ('3a1f5c5a-4a5e-4cb1-b7ec-6fd3fb37f2b9', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', '81708416-9c20-4eea-af06-b54e1061d736', FALSE, @today),
 ('8b6a4d10-d9df-4f63-a1a5-33e52315a6f1', 'e41acf37-cf82-44ea-b979-d0b3244d6cd6', '81708416-9c20-4eea-af06-b54e1061d736', TRUE, @today),

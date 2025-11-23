@@ -6,19 +6,15 @@ import { format, isBefore, isFuture } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 import { RiCalendarLine, RiDeleteBinLine } from "@remixicon/react"
-import { DefaultEndHour, DefaultStartHour, EndHour, StartHour } from "@/components/event-calendar/constants"
+import { DefaultEndHour, DefaultStartHour } from "@/components/event-calendar/constants"
 
-import {
-  Button
-} from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Dialog, DialogContent, DialogDescription,
   DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover, PopoverContent, PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -64,6 +60,9 @@ const formSchema = z.object({
 })
 
 // ------------------------------------
+// Helper functions
+// ------------------------------------
+
 function formatLocalDateTime(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -75,15 +74,29 @@ function formatLocalDateTime(date: Date) {
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 
+function splitHour(value: string) {
+  const [h, m] = value.split(":")
+  return { h, m }
+}
+
+function setTime(onChange: (v: string) => void, hour: string, minute: string) {
+  onChange(`${hour}:${minute}`)
+}
+
+// ------------------------------------
+// Component
+// ------------------------------------
+
 interface EventDialogProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
   onSave: (event: CalendarEvent) => void
   onDelete: (eventId: string) => void
+  canMutate: boolean
 }
 
-export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventDialogProps) {
+export function EventDialog({ event, isOpen, onClose, onSave, onDelete, canMutate }: EventDialogProps) {
   const [openStartDate, setOpenStartDate] = useState(false)
   const [openEndDate, setOpenEndDate] = useState(false)
 
@@ -100,7 +113,10 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
     },
   })
 
-  // Ao abrir o modal, carregamos os valores do evento
+  const horas = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"))
+  const minutos = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"))
+
+  // Carregar dados ao abrir modal
   useEffect(() => {
     if (event) {
       const start = new Date(event.event.event_start)
@@ -112,24 +128,17 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
         type: event.event.type || "other",
         startDate: start,
         endDate: end,
-        startHour: `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
-        endHour: `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`,
+        startHour: `${String(start.getHours()).padStart(2, "0")}:${String(
+          start.getMinutes()
+        ).padStart(2, "0")}`,
+        endHour: `${String(end.getHours()).padStart(2, "0")}:${String(
+          end.getMinutes()
+        ).padStart(2, "0")}`,
       })
     } else {
       form.reset()
     }
   }, [event])
-
-  const opcoesHora = Array.from({ length: (EndHour - StartHour + 1) * 4 }, (_, i) => {
-    const hour = StartHour + Math.floor(i / 4)
-    const minute = (i % 4) * 15
-    const h = hour.toString().padStart(2, "0")
-    const m = minute.toString().padStart(2, "0")
-    return {
-      value: `${h}:${m}`,
-      label: `${h}h${m}`,
-    }
-  })
 
   const tiposEvento = [
     "exam", "quiz", "assignment", "lecture", "workshop",
@@ -169,9 +178,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {event ? "Editar Evento" : "Criar Evento"}
-          </DialogTitle>
+          <DialogTitle>{event ? "Editar Evento" : "Criar Evento"}</DialogTitle>
           <DialogDescription className="sr-only">
             Modal de criação/edição de evento
           </DialogDescription>
@@ -188,7 +195,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                 <FormItem>
                   <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite o título" {...field} />
+                    <Input disabled={!canMutate} placeholder="Digite o título" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,7 +210,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
                   <FormControl>
-                    <Textarea rows={3} placeholder="Descrição do evento" {...field} />
+                    <Textarea disabled={!canMutate} rows={3} placeholder="Descrição do evento" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -217,7 +224,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de Evento</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select disabled={!canMutate} onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o tipo" />
@@ -236,7 +243,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
               )}
             />
 
-            {/* Data início + hora */}
+            {/* DATA INÍCIO + HORA */}
             <div className="flex gap-4">
               <FormField
                 name="startDate"
@@ -250,6 +257,7 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                           <Button
                             variant="outline"
                             className="w-full justify-between"
+                            disabled={!canMutate}
                           >
                             {field.value
                               ? format(field.value, "PPP", { locale: ptBR })
@@ -276,33 +284,58 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                 )}
               />
 
+              {/* HORÁRIO */}
               <FormField
                 name="startHour"
                 control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Hora</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {opcoesHora.map(h => (
-                          <SelectItem key={h.value} value={h.value}>
-                            {h.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const { h, m } = splitHour(field.value)
+                  return (
+                    <FormItem className="flex-1">
+                      <FormLabel>Hora</FormLabel>
+                      <div className="flex gap-2">
+
+                        {/* HORAS */}
+                        <Select
+                          disabled={!canMutate}
+                          value={h}
+                          onValueChange={(newHour) => setTime(field.onChange, newHour, m)}
+                        >
+                          <FormControl>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {horas.map(x => (
+                              <SelectItem key={x} value={x}>{x}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {/* MINUTOS */}
+                        <Select
+                          disabled={!canMutate}
+                          value={m}
+                          onValueChange={(newMinute) => setTime(field.onChange, h, newMinute)}
+                        >
+                          <FormControl>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {minutos.map(x => (
+                              <SelectItem key={x} value={x}>{x}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
             </div>
 
-            {/* Data fim + hora */}
+            {/* DATA FIM + HORA */}
             <div className="flex gap-4">
               <FormField
                 name="endDate"
@@ -313,7 +346,11 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                     <Popover open={openEndDate} onOpenChange={setOpenEndDate}>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <Button variant="outline" className="w-full justify-between">
+                          <Button
+                            disabled={!canMutate}
+                            variant="outline"
+                            className="w-full justify-between"
+                          >
                             {field.value
                               ? format(field.value, "PPP", { locale: ptBR })
                               : "Selecione"}
@@ -339,54 +376,82 @@ export function EventDialog({ event, isOpen, onClose, onSave, onDelete }: EventD
                 )}
               />
 
+              {/* HORÁRIO */}
               <FormField
                 name="endHour"
                 control={form.control}
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Hora</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {opcoesHora.map(h => (
-                          <SelectItem key={h.value} value={h.value}>
-                            {h.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const { h, m } = splitHour(field.value)
+                  return (
+                    <FormItem className="flex-1">
+                      <FormLabel>Hora</FormLabel>
+                      <div className="flex gap-2">
+
+                        {/* HORAS */}
+                        <Select
+                          disabled={!canMutate}
+                          value={h}
+                          onValueChange={(newHour) => setTime(field.onChange, newHour, m)}
+                        >
+                          <FormControl>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {horas.map(x => (
+                              <SelectItem key={x} value={x}>{x}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {/* MINUTOS */}
+                        <Select
+                          disabled={!canMutate}
+                          value={m}
+                          onValueChange={(newMinute) => setTime(field.onChange, h, newMinute)}
+                        >
+                          <FormControl>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {minutos.map(x => (
+                              <SelectItem key={x} value={x}>{x}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
             </div>
 
-            {/* Rodapé */}
-            <DialogFooter className="flex-row sm:justify-between">
-              {event?.generic_id && (
-                <Button
-                  variant="outline"
-                  type="button"
-                  size="icon"
-                  onClick={() => {
-                    onDelete(event.generic_event_id!)
-                    onClose()
-                  }}
-                >
-                  <RiDeleteBinLine size={16} />
-                </Button>
-              )}
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Salvar</Button>
-              </div>
-            </DialogFooter>
+            {/* RODAPÉ */}
+            {canMutate && (
+              <DialogFooter className="flex-row sm:justify-between">
+                {event?.generic_id && (
+                  <Button
+                    variant="outline"
+                    type="button"
+                    size="icon"
+                    onClick={() => {
+                      onDelete(event.generic_event_id!)
+                      onClose()
+                    }}
+                  >
+                    <RiDeleteBinLine size={16} />
+                  </Button>
+                )}
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={onClose}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Salvar</Button>
+                </div>
+              </DialogFooter>
+            )}
+
           </form>
         </Form>
       </DialogContent>

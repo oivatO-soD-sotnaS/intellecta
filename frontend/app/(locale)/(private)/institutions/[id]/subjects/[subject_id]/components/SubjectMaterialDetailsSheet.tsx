@@ -29,7 +29,8 @@ import {
 
 import { useFileUpload } from "@/hooks/use-file-upload"
 import { FileUploadComponent } from "../../../components/FileUploadComponent"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { AlertDialog } from "@radix-ui/react-alert-dialog"
+import { AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 interface SubjectMaterialDetailsSheetProps {
   open: boolean
@@ -112,22 +113,22 @@ export function SubjectMaterialDetailsSheet({
     )
   }
 
-function handleDelete() {
-  if (!materialId) return
+  function handleDelete() {
+    if (!materialId) return
 
-  deleteMutation.mutate(materialId, {
-    onSuccess: () => {
-      onOpenChange(false)
-    },
-  } as any)
-}
+    deleteMutation.mutate(materialId, {
+      onSuccess: () => {
+        onOpenChange(false)
+      },
+    } as any)
+  }
 
   const file = material?.file
   const isSaving = updateMutation.isPending
   const isDeleting = deleteMutation.isPending
 
   const formattedCreatedAt =
-    material &&
+    material?.created_at &&
     new Date(material.created_at).toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -137,7 +138,7 @@ function handleDelete() {
     })
 
   const formattedChangedAt =
-    material &&
+    material?.changed_at &&
     new Date(material.changed_at).toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -145,10 +146,9 @@ function handleDelete() {
       hour: "2-digit",
       minute: "2-digit",
     })
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col gap-4 p-1">
+      <SheetContent className="flex flex-col gap-4 p-3">
         <SheetHeader className="border-b border-border/60 pb-3">
           <SheetTitle className="text-base font-semibold">
             Detalhes do material
@@ -180,27 +180,25 @@ function handleDelete() {
                   </p>
 
                   <div className="grid gap-2 rounded-xl border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground sm:grid-cols-2">
-
-
-                      <div className="flex items-start gap-2">
-                        <CalendarClock className="mt-[1px] h-3 w-3 shrink-0 text-muted-foreground" />
-                        <div className="space-y-0.5">
-                          <p className="font-medium text-foreground/80">
-                            Criado em
-                          </p>
-                          <p>{formattedCreatedAt}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <CalendarClock className="mt-[1px] h-3 w-3 shrink-0 text-muted-foreground" />
-                        <div className="space-y-0.5">
-                          <p className="font-medium text-foreground/80">
-                            Atualizado em
-                          </p>
-                          <p>{formattedChangedAt}</p>
-                        </div>
+                    <div className="flex flex-row gap-1 ">
+                      <CalendarClock className="mt-[1px] h-3 w-3 shrink-0 text-muted-foreground" />
+                      <div className="space-y-0.5">
+                        <p className="font-medium text-foreground/80">
+                          Criado em
+                        </p>
+                        <p>{formattedCreatedAt}</p>
                       </div>
                     </div>
+                    <div className="flex items-start gap-2">
+                      <CalendarClock className="mt-[1px] h-3 w-3 shrink-0 text-muted-foreground" />
+                      <div className="space-y-0.5">
+                        <p className="font-medium text-foreground/80">
+                          Atualizado em
+                        </p>
+                        <p>{formattedChangedAt}</p>
+                      </div>
+                    </div>
+                  </div>
                 </section>
 
                 {/* Título */}
@@ -308,47 +306,47 @@ function handleDelete() {
           </div>
         </div>
 
-        <SheetFooter className="border-t border-border/60">
-          <div className="mx-auto flex w-full max-w-xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="destructive"
-                  disabled={isDeleting || !material}
-                  className="gap-1"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  Excluir material
-                </Button>
-              </AlertDialogTrigger>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Excluir material</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja excluir este material? Essa ação não
-                    pode ser desfeita e o arquivo deixará de aparecer para os
-                    alunos.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="text-xs sm:text-sm">
-                    Cancelar
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs sm:text-sm"
-                    disabled={isDeleting}
-                    onClick={handleDelete}
-                  >
-                    {isDeleting ? "Excluindo..." : "Sim, excluir"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
+        <SheetFooter className="border-t border-border/60 pt-3">
+          <div className="mx-auto flex w-full max-w-xl flex-row gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    disabled={isDeleting || !material}
+                    className="gap-1"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Excluir material
+                  </Button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir material</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja excluir este material? Essa ação
+                      não pode ser desfeita e o arquivo deixará de aparecer para
+                      os alunos.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="text-xs sm:text-sm">
+                      Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs sm:text-sm"
+                      disabled={isDeleting}
+                      onClick={handleDelete}
+                    >
+                      {isDeleting ? "Excluindo..." : "Sim, excluir"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
               <Button
                 type="button"
                 variant="outline"

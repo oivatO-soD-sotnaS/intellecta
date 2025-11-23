@@ -1,9 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import SubjectMaterialsTab from "./SubjectMaterialsTab"
 import SubjectAssignmentsTab from "./SubjectAssignmentsTab"
 import SubjectOverviewTab from "./SubjectOverviewTab"
-import SubjectAssignmentsTabMock from "./mocks/SubjectAssignmentsTab"
-import SubjectMaterialsTabMock from "./mocks/SubjectMaterialsTab"
+import { SubjectMaterialsTab } from "./SubjectMaterialsTab"
+
 
 
 interface SubjectTabsProps {
@@ -43,7 +42,6 @@ export default function SubjectTabs({
           institutionId={institutionId}
           subjectId={subjectId}
           isTeacher={isTeacher}
-          isLoading={isLoading}
         />
       </TabsContent>
 
