@@ -9,6 +9,7 @@ use App\Dto\AssignmentDto;
 use App\Enums\FileType;
 use App\Models\Assignment;
 use App\Models\File;
+use App\Models\User;
 use App\Services\LogService;
 use App\Services\UploadService;
 use App\Services\ValidatorService;
@@ -28,7 +29,7 @@ readonly class AssignmentsController extends BaseController {
         private AssignmentsDao $assignmentsDao,
         private FilesDao $filesDao,
         private ValidatorService $validatorService,
-        private UploadService $uploadService
+        private UploadService $uploadService,
     ) {}
 
     public function getSubjectAssignments(Request $request, Response $response, string $institution_id, string $subject_id): Response {
@@ -198,6 +199,29 @@ readonly class AssignmentsController extends BaseController {
                 "/institutions/{$institution_id}/subjects/{$subject_id}/assignments/{$assignment_id}",
                 "{$user->getUserId()} deleted the {$assignment->getTitle()} assignment"
             );
+            return $response;
+        });
+    }
+
+    public function getUpcomingAssignments(Request $request, Response $response, string $institution_id) {
+        return $this->handleErrors($request, function() use ($request, $response, $institution_id) {
+            /** @var User $user */
+            $user = $request->getAttribute("user");
+
+            $subjectAssignments = $this->assignmentsDao->getUpcomingAssignmentsForUserInInstitution($institution_id, $user->getUserId());
+
+            if(count($subjectAssignments) === 0) {
+                throw new HttpNotFoundException($request, LogService::HTTP_404);
+            }
+
+            $subjectAssignmentsDtos = array_map(function(Assignment $assignment) {
+                $attachment = $assignment->getAttachmentId()
+                    ? $this->filesDao->getFileById($assignment->getAttachmentId())
+                    : null;
+                return new AssignmentDto($assignment, $attachment);
+            }, $subjectAssignments);
+
+            $response->getBody()->write(json_encode($subjectAssignmentsDtos));
             return $response;
         });
     }

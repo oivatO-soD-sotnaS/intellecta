@@ -19,6 +19,7 @@ import type { InstitutionSummary } from "@/types/institution"
 import { SkeletonGrid } from "./SkeletonGrid"
 import { useInstitutionsSummaries } from "@/hooks/institution/useInstitutionSummaries"
 
+
 function getErrorMessage(
   err: unknown,
   fallback = "Não foi possível carregar suas instituições."
@@ -31,8 +32,6 @@ function getErrorMessage(
   } catch {}
   return fallback
 }
-
-/* --------------------------- componente --------------------------- */
 
 export default function InstitutionsSection() {
   const [tab, setTab] = React.useState<"all" | "owned">("all")
@@ -56,28 +55,42 @@ export default function InstitutionsSection() {
     </div>
   )
 
-  // toasts de erro (HeroUI)
+  // toast para ALL — mas ignora 404
   React.useEffect(() => {
     if (allQuery.isError) {
+      const status = (allQuery.error as Error).message;
+
+      // 404 significa apenas "nenhuma instituição"
+      if (status === "HTTP 404") return;
+
       addToast({
         title: "Erro ao carregar instituições",
         description: getErrorMessage(allQuery.error),
         color: "danger",
         variant: "flat",
-      })
+      });
     }
-  }, [allQuery.isError])
+  }, [allQuery.isError]);
 
+  // toast para OWNED — mas ignora 404
   React.useEffect(() => {
     if (ownedQuery.isError) {
+      const status = (ownedQuery.error as Error).message;
+
+      // 404 significa apenas "nenhuma instituição"
+      if (status === "HTTP 404") return;
+
+
+
       addToast({
         title: "Erro ao carregar instituições (proprietário)",
         description: getErrorMessage(ownedQuery.error),
         color: "danger",
         variant: "flat",
-      })
+      });
     }
-  }, [ownedQuery.isError])
+  }, [ownedQuery.isError]);
+
 
   const isLoading = tab === "all" ? allQuery.isLoading : ownedQuery.isLoading
   const isError = tab === "all" ? allQuery.isError : ownedQuery.isError
@@ -107,6 +120,12 @@ export default function InstitutionsSection() {
     })
   }, [allQuery, ownedQuery])
 
+  function is404Error() {
+    const err = tab === "all" ? allQuery.error : ownedQuery.error;
+    if (!err) return false;
+    return (err as Error).message === "HTTP 404";
+  }
+  
   return (
     <Card className="border-border">
       <CardContent className="p-4 sm:p-5">
@@ -159,7 +178,7 @@ export default function InstitutionsSection() {
         <div className="mt-4">
           {isLoading ? (
             <SkeletonGrid />
-          ) : isError ? (
+          ) : isError && !is404Error() ? (
             <EmptyState
               description="Tente novamente em instantes."
               primaryText="Tentar novamente"

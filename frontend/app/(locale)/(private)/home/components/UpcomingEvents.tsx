@@ -54,53 +54,98 @@ interface Event {
 
 interface UpcomingEventsProps {}
 
-// Função para obter ícone e estilos baseado no tipo de evento
-const getEventConfig = (type: string) => {
-  switch (type) {
-    case "exam":
-      return { icon: FileText, variant: "destructive" as const, label: "Prova" }
-    case "quiz":
-      return {
-        icon: HelpCircle,
-        variant: "destructive" as const,
-        label: "Quiz",
-      }
-    case "assignment":
-      return { icon: BookOpen, variant: "default" as const, label: "Trabalho" }
-    case "lecture":
-      return {
-        icon: GraduationCap,
-        variant: "secondary" as const,
-        label: "Aula",
-      }
-    case "workshop":
-      return { icon: Users, variant: "default" as const, label: "Workshop" }
-    case "seminar":
-      return {
-        icon: Presentation,
-        variant: "default" as const,
-        label: "Seminário",
-      }
-    case "presentation":
-      return {
-        icon: Presentation,
-        variant: "default" as const,
-        label: "Apresentação",
-      }
-    case "deadline":
-      return { icon: Clock, variant: "destructive" as const, label: "Prazo" }
-    case "holiday":
-      return { icon: Calendar, variant: "default" as const, label: "Feriado" }
-    case "announcement":
-      return { icon: Megaphone, variant: "default" as const, label: "Anúncio" }
-    case "cultural":
-      return { icon: Palette, variant: "default" as const, label: "Cultural" }
-    case "sports":
-      return { icon: Dumbbell, variant: "default" as const, label: "Esportes" }
-    default:
-      return { icon: Calendar, variant: "outline" as const, label: "Outro" }
-  }
-}
+export const getEventTypeConfig = (type: string) => {
+  const map: Record<
+    string,
+    {
+      label: string;
+      className: string;
+      icon: React.ComponentType<{ className?: string }>;
+    }
+  > = {
+    exam: {
+      label: "Prova",
+      className: "bg-red-100 text-red-900 border-red-200 hover:bg-red-200",
+      icon: FileText,
+    },
+    quiz: {
+      label: "Quiz",
+      className:
+        "bg-orange-100 text-orange-900 border-orange-200 hover:bg-orange-200",
+      icon: HelpCircle,
+    },
+    assignment: {
+      label: "Trabalho",
+      className:
+        "bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-200",
+      icon: BookOpen,
+    },
+    lecture: {
+      label: "Aula",
+      className:
+        "bg-green-100 text-green-900 border-green-200 hover:bg-green-200",
+      icon: GraduationCap,
+    },
+    workshop: {
+      label: "Workshop",
+      className:
+        "bg-purple-100 text-purple-900 border-purple-200 hover:bg-purple-200",
+      icon: Users,
+    },
+    seminar: {
+      label: "Seminário",
+      className:
+        "bg-indigo-100 text-indigo-900 border-indigo-200 hover:bg-indigo-200",
+      icon: Presentation,
+    },
+    presentation: {
+      label: "Apresentação",
+      className:
+        "bg-pink-100 text-pink-900 border-pink-200 hover:bg-pink-200",
+      icon: Presentation,
+    },
+    deadline: {
+      label: "Prazo",
+      className:
+        "bg-yellow-100 text-yellow-900 border-yellow-200 hover:bg-yellow-200",
+      icon: Clock,
+    },
+    holiday: {
+      label: "Feriado",
+      className:
+        "bg-emerald-100 text-emerald-900 border-emerald-200 hover:bg-emerald-200",
+      icon: Calendar,
+    },
+    announcement: {
+      label: "Anúncio",
+      className:
+        "bg-cyan-100 text-cyan-900 border-cyan-200 hover:bg-cyan-200",
+      icon: Megaphone,
+    },
+    cultural: {
+      label: "Cultural",
+      className:
+        "bg-violet-100 text-violet-900 border-violet-200 hover:bg-violet-200",
+      icon: Palette,
+    },
+    sports: {
+      label: "Esportes",
+      className:
+        "bg-lime-100 text-lime-900 border-lime-200 hover:bg-lime-200",
+      icon: Dumbbell,
+    },
+
+    // fallback
+    other: {
+      label: "Outro",
+      className:
+        "bg-gray-100 text-gray-900 border-gray-200 hover:bg-gray-200",
+      icon: AlertCircle,
+    },
+  };
+
+  return map[type] || map.other;
+};
 
 // Origem do evento
 const getEventSourceConfig = (event: Event) => {
@@ -138,11 +183,10 @@ const EventItem = ({ event }: { event: Event }) => {
     .toUpperCase()
     .replace(".", "")
 
-  const eventConfig = getEventConfig(event.type)
-  const sourceConfig = getEventSourceConfig(event)
+  const { label, className, icon: Icon } = getEventTypeConfig(event.type);
+  const sourceConfig = getEventSourceConfig(event);
 
-  const EventIcon = eventConfig.icon
-  const SourceIcon = sourceConfig.icon
+  const SourceIcon = sourceConfig.icon;
 
   const isToday = new Date().toDateString() === start.toDateString()
   const isTomorrow =
@@ -171,13 +215,13 @@ const EventItem = ({ event }: { event: Event }) => {
               </p>
             )}
           </div>
-          <EventIcon className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Tipo do evento */}
-          <Badge className="text-xs" variant={eventConfig.variant}>
-            {eventConfig.label}
+          <Badge className={`flex items-center gap-1 ${className}`}>
+            <Icon className="h-3 w-3" />
+            {label}
           </Badge>
 
           {/* Origem */}
@@ -241,16 +285,19 @@ const EventSkeleton = () => (
 
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
   const {
-    data: eventsData,
+    data,
     isPending,
     error,
-  } = useQuery<Event[]>({
+  } = useQuery({
     queryKey: ["upcomingEvents"],
-    queryFn: () => fetch("/api/me/events/upcoming").then((r) => r.json()),
-  })
+    queryFn: async () => {
+      const r = await fetch("/api/me/events/upcoming");
+      return r.json();
+    },
+  });
 
-  // Garantir que events seja sempre um array
-  const events = Array.isArray(eventsData) ? eventsData : []
+  // Garante sempre um array e evita crashes
+  const events: Event[] = Array.isArray(data) ? data : [];
 
   // Loading
   if (isPending) {
@@ -325,6 +372,8 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({}) => {
       </Card>
     )
   }
+
+  console.log("EVENTS:", events);
 
   return (
     <Card className="rounded-xl border shadow-sm">

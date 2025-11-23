@@ -17,6 +17,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { useRouter } from "next/navigation"
+import { useInstitution } from "../../layout"
 
 type Props = {
   title?: string
@@ -26,10 +27,6 @@ type Props = {
   isError?: boolean
 
   onOpenClass: (class_id: string) => void
-  institutionId: string
-
-  /** controla o menu (três pontinhos) nos cards */
-  isInstitutionAdmin?: boolean
 }
 
 export default function ClassesCarousel({
@@ -38,11 +35,10 @@ export default function ClassesCarousel({
   isLoading: loadingFromProps,
   isError: errorFromProps,
   onOpenClass,
-  institutionId,
-  isInstitutionAdmin = true, // <- ajuste para sua flag real, se houver
 }: Props) {
-  // Se não vier por props, buscamos aqui:
-  const { data, isLoading, isError, refetch } = useClasses(institutionId)
+  const { institution, me } = useInstitution()
+  
+  const { data, isLoading, isError, refetch } = useClasses(institution.institution_id)
   const list = dataFromProps ?? data ?? []
   const loading = loadingFromProps ?? isLoading
   const error = errorFromProps ?? isError
@@ -64,16 +60,16 @@ export default function ClassesCarousel({
       return
     }
 
-    router.push(`/institutions/${institutionId}/classes/${classId}`)
+    router.push(`/institutions/${institution.institution_id}/classes/${classId}`)
   }
 
   return (
     <section className="w-full">
       <header className="mb-3 flex items-end justify-between">
         <h2 className="text-lg font-semibold">{title}</h2>
-        {isInstitutionAdmin && (
+        {me.role === "admin" && (
           <CreateClassButton
-            institutionId={institutionId}
+            institutionId={institution.institution_id}
             onCreated={() => refetch()}
           />
         )}
@@ -104,7 +100,7 @@ export default function ClassesCarousel({
         </div>
       ) : list.length === 0 ? (
         <div className="flex min-h-[140px] items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
-          Nenhuma turma encontrada.
+          Você não foi matriculado em nenhuma turma.
         </div>
       ) : (
         <>
@@ -122,8 +118,8 @@ export default function ClassesCarousel({
                   >
                     <CourseCard
                       klass={klass}
-                      institutionId={institutionId}
-                      canManage={isInstitutionAdmin}
+                      institutionId={institution.institution_id}
+                      canManage={me.role === "admin"}
                       onDeleted={() => refetch()}
                       onEditClass={handleEditRequest}
                       onOpen={() => handleOpenClass?.(klass.class_id)}
@@ -141,7 +137,7 @@ export default function ClassesCarousel({
           <ClassEditClassModal
             open={editOpen}
             onOpenChange={setEditOpen}
-            institutionId={institutionId}
+            institutionId={institution.institution_id}
             klass={editing}
             onSaved={() => refetch()}
           />

@@ -6,11 +6,10 @@ import { useDeleteUserEventById } from "./_query-options/use-delete-user-event-b
 import { useCreateUserEvent } from "./_query-options/use-create-user-event"
 import { useUpdateUserEvent } from "./_query-options/use-update-user-event"
 import { Calendar } from "lucide-react"
-import { toast, Toaster } from "sonner"
+import { toast } from "sonner"
 import { Spinner } from "@heroui/spinner"
 import { Card, CardBody, CardHeader } from "@heroui/card"
 import {Alert} from "@heroui/alert";
-import { Divider } from "@heroui/divider"
 
 type ApiEvent = {
   event_id: string
@@ -32,9 +31,9 @@ type UserEventItem = {
 type UserEventsApi = UserEventItem[]
 
 export default function CalendarPage() {
-  const deleteUserEvent = useDeleteUserEventById()
   const createUserEvent = useCreateUserEvent()
   const updateUserEvent = useUpdateUserEvent()
+  const deleteUserEvent = useDeleteUserEventById()
 
   const {
     data: events,
@@ -95,12 +94,6 @@ export default function CalendarPage() {
     })
   }
 
-  // Estados de loading para operações
-  const isProcessing = 
-    createUserEvent.isPending || 
-    updateUserEvent.isPending || 
-    deleteUserEvent.isPending
-
   return (
     <div className="min-h-screen bg-secondary p-6">
       {/* Calendário em tamanho completo */}
@@ -155,6 +148,7 @@ export default function CalendarPage() {
                   onEventAdd={handleEventAdd}
                   onEventUpdate={handleEventUpdate}
                   onEventDelete={handleEventDelete}
+                  canMutate
                 />
               </div>
             )}
@@ -167,7 +161,7 @@ export default function CalendarPage() {
                   Nenhum evento encontrado
                 </h3>
                 <p className="text-gray-600 max-w-md mx-auto">
-                  Comece adicionando seu primeiro evento clicando em qualquer data no calendário.
+                  Comece adicionando seu primeiro evento clicando em "novo evento".
                 </p>
               </div>
             )}

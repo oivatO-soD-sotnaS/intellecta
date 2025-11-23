@@ -3,19 +3,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Button } from "@heroui/button"
-import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover"
 import { Avatar } from "@heroui/avatar"
 import {
-  MoreVertical,
   MapPin,
   Users,
   BookOpen,
   CalendarDays,
   Clock,
-  Pencil,
-  Trash2,
-  Settings,
 } from "lucide-react"
 
 import { EditInstitutionModal } from "./EditInstitutionModal"
@@ -30,18 +24,10 @@ import { InstitutionSummary } from "@/types/institution"
 import { Badge } from "@/components/ui/badge"
 
 type Props = { institution: InstitutionSummary; className?: string }
-type Props = { institution: InstitutionSummary; className?: string }
 
 export function InstitutionCard({ institution, className }: Props) {
-  const [menuOpen, setMenuOpen] = React.useState(false)
-  const [editOpen, setEditOpen] = React.useState(false)
-  const [deleteOpen, setDeleteOpen] = React.useState(false)
-
   // Usa o summary atualizado ou os dados da institution
   const finalInstitution = institution
-
-  console.log(finalInstitution)
-  
 
   // URLs finais
   const bannerUrl = normalizeFileUrl(finalInstitution.banner?.url)
@@ -51,9 +37,6 @@ export function InstitutionCard({ institution, className }: Props) {
   const members = formatNumber(finalInstitution.active_user_count)
   const created = formatDatePtBR(new Date()) // Não temos created_at no summary
   const lastAct = timeAgo(new Date()) // Não temos last_activity no summary
-
-  // Verifica se o usuário é admin para mostrar opções de edição
-  const isAdmin = role === "admin"
 
   return (
     <>
@@ -91,65 +74,6 @@ export function InstitutionCard({ institution, className }: Props) {
               <Badge>{finalInstitution.upcoming_event_count} evento(s)</Badge>
             )}
           </div>
-
-          {/* menu - só mostra para admins */}
-          {isAdmin && (
-            <div className="absolute right-3 top-3">
-              <Popover
-                isOpen={menuOpen}
-                placement="left-start"
-                onOpenChange={setMenuOpen}
-              >
-                <PopoverTrigger>
-                  <Button
-                    isIconOnly
-                    className="bg-border opacity-55 backdrop-blur hover:opacity-100"
-                    size="sm"
-                    variant="flat"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48 p-1">
-                  <div className="grid">
-                    <Button
-                      className="justify-start gap-2"
-                      color="warning"
-                      variant="light"
-                      onPress={() => {
-                        setMenuOpen(false)
-                        setEditOpen(true)
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" /> Editar instituição
-                    </Button>
-
-                    {/* <Button className="justify-start gap-2" variant="light">
-                      <Settings className="h-4 w-4" />
-                      <Link
-                        className="ml-3 hidden text-xs text-muted-foreground underline-offset-2 hover:underline sm:inline"
-                        href={`/institutions/${finalInstitution.institution_id}/settings`}
-                      >
-                        Configurações
-                      </Link>
-                    </Button> */}
-
-                    <Button
-                      className="justify-start gap-2"
-                      color="danger"
-                      variant="light"
-                      onPress={() => {
-                        setMenuOpen(false)
-                        setDeleteOpen(true)
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" /> Deletar instituição
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          )}
         </div>
 
         <CardContent className="p-4">
@@ -220,25 +144,6 @@ export function InstitutionCard({ institution, className }: Props) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Modais - só renderiza para admins */}
-      {isAdmin && (
-        <>
-          <EditInstitutionModal
-            institution={institution}
-            isOpen={editOpen}
-            onOpenChange={setEditOpen}
-            onUpdated={() => {}}
-          />
-          <ConfirmDeleteModal
-            institutionId={finalInstitution.institution_id}
-            isOpen={deleteOpen}
-            name={finalInstitution.name}
-            onDeleted={() => {}}
-            onOpenChange={setDeleteOpen}
-          />
-        </>
-      )}
     </>
   )
 }

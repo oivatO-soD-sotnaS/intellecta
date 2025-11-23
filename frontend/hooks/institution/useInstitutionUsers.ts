@@ -1,13 +1,7 @@
 "use client"
 import { useQuery } from "@tanstack/react-query"
 import { apiGet } from "@/lib/apiClient"
-
-export type InstitutionUser = {
-  id: string
-  name: string
-  email: string
-  role: string
-}
+import { InstitutionUser } from "../institutions/useInstitutionUsers"
 
 type Resp = { items: InstitutionUser[] } | InstitutionUser[]
 

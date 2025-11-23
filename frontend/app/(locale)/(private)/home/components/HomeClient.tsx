@@ -5,10 +5,6 @@ import React from "react"
 
 import { UpcomingEvents } from "./UpcomingEvents"
 import InstitutionsSection from "./Institution/InstitutionsSection"
-import { useInstitutions } from "@/hooks/institution/useInstitutions"
-import { useSubjectsCountByInstitutions } from "@/hooks/subjects/useSubjectsCountByInstitutions"
-
-import { ProfileCard } from "./ProfileCard"
 
 export interface User {
   user_id: string

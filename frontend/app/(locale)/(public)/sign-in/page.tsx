@@ -56,13 +56,12 @@ export default function SignInPage() {
               <div className="space-y-4 sm:space-y-5">
                 <Header />
                 <SignInForm />
+                {/* links legais FORA do card para encurtar a altura visual do card */}
+                <div className="mt-4">
+                  <LegalLinks />
+                </div>
               </div>
             </section>
-          </div>
-
-          {/* links legais FORA do card para encurtar a altura visual do card */}
-          <div className="mt-4">
-            <LegalLinks />
           </div>
         </div>
       </div>

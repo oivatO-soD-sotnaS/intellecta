@@ -16,15 +16,14 @@ export type FileRef = {
 export type InstitutionUser = {
   institution_user_id: string
   institution_id: string
-  user_id: string
-  role: "admin" | "teacher" | "student" | string
-  created_at?: string
-  user?: {
+  role: "admin" | "teacher" | "student"
+  joined_at: string
+  user: {
     user_id: string
     full_name: string
     email: string
-    created_at?: string
-    changed_at?: string
+    created_at: string
+    changed_at: string
     profile_picture?: FileRef
   }
 }
