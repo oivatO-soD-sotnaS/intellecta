@@ -110,14 +110,37 @@ export function DateTimePicker({
       return
     }
 
-    const parsed = new Date(value)
-    if (isNaN(parsed.getTime())) {
+    let parsed: Date | null = null
+
+    // Tenta casar formatos: "YYYY-MM-DD HH:mm:ss" ou "YYYY-MM-DDTHH:mm:ss"
+    const match = value.match(
+      /(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/
+    )
+
+    if (match) {
+      const [, year, month, day, hour = "0", minute = "0", second = "0"] = match
+
+      parsed = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second)
+      )
+    } else {
+      const fallback = new Date(value)
+      parsed = isNaN(fallback.getTime()) ? null : fallback
+    }
+
+    if (!parsed) {
       setDate(today)
       setTime(undefined)
       return
     }
 
     setDate(parsed)
+
     const hours = String(parsed.getHours()).padStart(2, "0")
     const minutes = String(parsed.getMinutes()).padStart(2, "0")
     setTime(`${hours}:${minutes}`)
@@ -131,9 +154,9 @@ export function DateTimePicker({
       return
     }
 
-    const [hStr, mStr] = newTime.split(":")
-    const hours = Number(hStr)
-    const minutes = Number(mStr)
+    const [hoursStr, minutesStr] = newTime.split(":")
+    const hours = Number(hoursStr)
+    const minutes = Number(minutesStr)
 
     const combined = new Date(
       newDate.getFullYear(),
@@ -145,7 +168,17 @@ export function DateTimePicker({
       0
     )
 
-    onChange(combined.toISOString())
+    const yyyy = combined.getFullYear()
+    const mm = String(combined.getMonth() + 1).padStart(2, "0")
+    const dd = String(combined.getDate()).padStart(2, "0")
+    const hh = String(combined.getHours()).padStart(2, "0")
+    const mi = String(combined.getMinutes()).padStart(2, "0")
+
+    // 🔹 Formato igual ao <input type="datetime-local">
+    //    ex.: "2025-11-21T14:30"
+    const formatted = `${yyyy}-${mm}-${dd}T${hh}:${mi}`
+
+    onChange(formatted)
   }
 
   const labelText = date

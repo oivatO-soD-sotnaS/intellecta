@@ -1,14 +1,11 @@
 // app/(locale)/(private)/institutions/[id]/classes/[classId]/_components/ClassSubjectsTab.tsx
 "use client"
 
-import { useMemo, useState, FormEvent } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Plus, MessageCircle, Link2, Loader2 } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Plus } from "lucide-react"
 
 import {
   useClassSubjects,
-  useAddSubjectToClass,
-  useRemoveClassSubject,
   type ClassSubject,
 } from "@/hooks/classes/useClassSubjects"
 

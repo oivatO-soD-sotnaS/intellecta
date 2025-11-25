@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useAssignmentDeadlinesStore } from "@/hooks/subjects/assignments/useAssignmentDeadlinesStore"
 
 interface AssignmentDetailsSheetProps {
   open: boolean
@@ -59,6 +60,16 @@ export function AssignmentDetailsSheet({
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [deadline, setDeadline] = useState<string | null>(null)
+
+  const storedDeadlineEntry = useAssignmentDeadlinesStore((state) =>
+    assignmentId ? state.items[assignmentId] : undefined
+  )
+  const setDeadlineInStore = useAssignmentDeadlinesStore(
+    (state) => state.setDeadline
+  )
+  const removeDeadlineFromStore = useAssignmentDeadlinesStore(
+    (state) => state.removeDeadline
+  )
 
   const maxSize = 10 * 1024 * 1024
   const [
@@ -91,14 +102,18 @@ export function AssignmentDetailsSheet({
     if (assignment && open) {
       setTitle(assignment.title ?? "")
       setDescription(assignment.description ?? "")
-      setDeadline(assignment.deadline ?? null)
+
+      const backendDeadline: string | null = assignment.deadline ?? null
+
+      const effective = storedDeadlineEntry?.deadlineLocal ?? backendDeadline
+      setDeadline(effective)
 
       if (newFile) {
         removeFile(newFile.id)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignment, open])
+  }, [assignment, open, storedDeadlineEntry])
 
   const handleClose = () => {
     if (updateMutation.isPending || deleteMutation.isPending) return
@@ -107,19 +122,34 @@ export function AssignmentDetailsSheet({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!assignmentId || !title.trim()) return
+    if (!assignmentId) return
+
+    const newFile = files[0]
 
     updateMutation.mutate(
       {
         assignmentId,
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         deadline,
         // se o PATCH estiver só com JSON, o campo abaixo será ignorado
         attachment: newFile?.file ?? undefined,
       } as any,
       {
         onSuccess: () => {
+          if (deadline && assignmentId && subjectId && institutionId) {
+            setDeadlineInStore({
+              assignmentId,
+              subjectId,
+              institutionId,
+              deadlineLocal: deadline,
+              updatedAt: new Date().toISOString(),
+            })
+          } else if (assignmentId) {
+            // se o usuário limpar a data, removemos do store
+            removeDeadlineFromStore(assignmentId)
+          }
+
           handleClose()
         },
       }
@@ -358,37 +388,37 @@ export function AssignmentDetailsSheet({
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-2xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Deseja realmente excluir esta atividade?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Essa ação não pode ser desfeita. A atividade será
-                          removida permanentemente e as entregas associadas
-                          poderão deixar de ser acessíveis para os alunos.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteMutation.isPending}>
-                          Cancelar
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          disabled={deleteMutation.isPending}
-                          onClick={() => {
-                            if (!assignmentId) return
-                            deleteMutation.mutate(assignmentId, {
-                              onSuccess: () => {
-                                handleClose()
-                              },
-                            } as any)
-                          }}
-                        >
-                          {deleteMutation.isPending
-                            ? "Excluindo..."
-                            : "Sim, excluir"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Deseja realmente excluir esta atividade?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Essa ação não pode ser desfeita. A atividade será
+                        removida permanentemente e as entregas associadas
+                        poderão deixar de ser acessíveis para os alunos.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleteMutation.isPending}>
+                        Cancelar
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => {
+                          if (!assignmentId) return
+                          deleteMutation.mutate(assignmentId, {
+                            onSuccess: () => {
+                              handleClose()
+                            },
+                          } as any)
+                        }}
+                      >
+                        {deleteMutation.isPending
+                          ? "Excluindo..."
+                          : "Sim, excluir"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               )}

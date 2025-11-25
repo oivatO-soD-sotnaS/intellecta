@@ -8,6 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CalendarClock, ChevronRight, DownloadIcon } from "lucide-react"
+import { useAssignmentDeadlinesStore } from "@/hooks/subjects/assignments/useAssignmentDeadlinesStore"
 
 interface AssignmentCardProps {
   assignment: any
@@ -29,25 +30,68 @@ export default function AssignmentCard({
     assignment.description ??
     "Atividade avaliativa da disciplina. Detalhes serão exibidos ao abrir."
 
-  const dueDate = assignment.due_date ?? assignment.deadline
-  const formattedDueDate =
-    dueDate &&
-    new Date(dueDate).toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
+  const assignmentId: string | undefined = assignment.assignment_id
+  const subjectId: string | undefined = assignment.subject_id
+  const institutionId: string | undefined = assignment.institution_id
+
+  // Lê deadline local persistido (se existir)
+  const storedDeadlineEntry = useAssignmentDeadlinesStore((state) =>
+    assignmentId ? state.items[assignmentId] : undefined
+  )
+
+  const backendDeadlineRaw: string | null =
+    assignment.due_date ?? assignment.deadline ?? null
+
+  // Se existir um deadline salvo no store, priorizamos ele.
+  const effectiveDeadlineRaw: string | null =
+    storedDeadlineEntry?.deadlineLocal ?? backendDeadlineRaw
+
+
+  function parseDeadline(raw: string | null): Date | null {
+    if (!raw) return null
+
+    const match = raw.match(
+      /(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/
+    )
+
+    if (match) {
+      const [, year, month, day, hour = "0", minute = "0", second = "0"] = match
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second)
+      )
+    }
+
+    const fallback = new Date(raw)
+    return isNaN(fallback.getTime()) ? null : fallback
+  }
+
+  function formatDeadlineLabel(date: Date | null): string | null {
+    if (!date) return null
+
+    const dd = String(date.getDate()).padStart(2, "0")
+    const mm = String(date.getMonth() + 1).padStart(2, "0")
+    const yyyy = date.getFullYear()
+    const hh = String(date.getHours()).padStart(2, "0")
+    const mi = String(date.getMinutes()).padStart(2, "0")
+
+    return `${dd}/${mm}/${yyyy} às ${hh}:${mi}`
+  }
+
+  const deadlineDate = parseDeadline(effectiveDeadlineRaw)
+  const deadlineLabel = formatDeadlineLabel(deadlineDate)
 
   let deadlineClasses =
     "mt-2 flex items-center gap-2 rounded-md px-2 py-1 text-[11px] ring-1"
 
-  if (dueDate) {
+  if (deadlineDate) {
     const now = new Date()
-    const due = new Date(dueDate)
-    const diffDays = (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    const diffDays =
+      (deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
 
     if (diffDays >= 7) {
       deadlineClasses += " bg-emerald-50 text-emerald-900 ring-emerald-200"
@@ -81,14 +125,13 @@ export default function AssignmentCard({
             </Badge>
           )}
         </div>
-        
-        {formattedDueDate && (
+        {deadlineLabel && (
           <div className={deadlineClasses}>
             <CalendarClock className="h-3 w-3" />
             <span className="font-semibold uppercase tracking-wide">
               Entrega até:
             </span>
-            <span className="font-medium">{formattedDueDate}</span>
+            <span className="font-medium">{deadlineLabel}</span>
           </div>
         )}
       </CardHeader>
