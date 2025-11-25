@@ -92,3 +92,25 @@ if [ -e "$DB_ENV_PATH" ]; then
 elif ask_consent "Configure database variables?"; then
   set_envs DB_ENV_STRINGS "$DB_ENV_PATH"
 fi
+
+### ===========================
+### FRONTEND .ENV.LOCAL
+### ===========================
+
+FRONTEND_ENV_PATH="$MAIN_DIR/../frontend/.env.local"
+
+echo -e "${YELLOW}************************************************************${ENDCOLOR}"
+echo -e "${GREEN}CONFIGURING FRONTEND .ENV.LOCAL${ENDCOLOR}"
+echo -e "${YELLOW}************************************************************${ENDCOLOR}"
+
+if [ -e "$FRONTEND_ENV_PATH" ]; then
+    if ask_consent ".env.local already exists. Overwrite it?"; then
+        echo "API_BASE_URL=http://api.intellecta" > "$FRONTEND_ENV_PATH"
+        echo -e "${GREEN}.env.local updated successfully!${ENDCOLOR}"
+    else
+        echo -e "${YELLOW}Keeping existing .env.local file.${ENDCOLOR}"
+    fi
+else
+    echo "API_BASE_URL=http://api.intellecta" > "$FRONTEND_ENV_PATH"
+    echo -e "${GREEN}.env.local created successfully!${ENDCOLOR}"
+fi
