@@ -12,9 +12,13 @@ echo -e "${YELLOW}************************************************************${
 echo -e "${GREEN}${BACKEND_MSG^^}${ENDCOLOR}"
 echo -e "${YELLOW}************************************************************${ENDCOLOR}"
 
-# Backend
-BACKEND_ENV_STRINGS=("EMAIL_USERNAME" "EMAIL_PASSWORD" "EMAIL_SENDER" "JWT_SECRET_KEY" "JWT_ALGORITHM" "JWT_EXPIRATION_TIME")
+# Backend (AGORA SEM EMAILS)
+BACKEND_ENV_STRINGS=("JWT_SECRET_KEY" "JWT_ALGORITHM" "JWT_EXPIRATION_TIME")
 BACKEND_ENV_PATH="$MAIN_DIR/../backend/.env"
+
+# Conf (.env separado para EMAIL*)
+CONF_ENV_STRINGS=("EMAIL_USERNAME" "EMAIL_PASSWORD" "EMAIL_SENDER")
+CONF_ENV_PATH="$MAIN_DIR/../conf/.env"
 
 # MySql
 DB_ENV_STRINGS=("MYSQL_ROOT_PASSWORD" "MYSQL_DATABASE" "MYSQL_USER" "MYSQL_PASSWORD")
@@ -35,6 +39,10 @@ function set_envs {
     done
 }
 
+### ===========================
+### BACKEND .ENV
+### ===========================
+
 if [ -e "$BACKEND_ENV_PATH" ]; then    
     missing_backend_envs=()
     get_unconfigured_settings BACKEND_ENV_STRINGS "$BACKEND_ENV_PATH" "Backend" missing_backend_envs
@@ -48,6 +56,28 @@ if [ -e "$BACKEND_ENV_PATH" ]; then
 elif ask_consent "Configure backend variables?"; then
   set_envs BACKEND_ENV_STRINGS "$BACKEND_ENV_PATH"
 fi
+
+### ===========================
+### CONF .ENV (EMAILS)
+### ===========================
+
+if [ -e "$CONF_ENV_PATH" ]; then
+    missing_conf_envs=()
+    get_unconfigured_settings CONF_ENV_STRINGS "$CONF_ENV_PATH" "Conf" missing_conf_envs
+    if [[ "${#missing_conf_envs[@]}" -eq 0 ]]; then
+        if ask_consent "All email variables are set. Re-configure them?"; then
+            set_envs CONF_ENV_STRINGS "$CONF_ENV_PATH"
+        fi
+    elif ask_consent "You have ${#missing_conf_envs[@]} unconfigured email variables. Configure them?"; then
+        set_envs missing_conf_envs "$CONF_ENV_PATH"
+    fi
+elif ask_consent "Configure email variables?"; then
+  set_envs CONF_ENV_STRINGS "$CONF_ENV_PATH"
+fi
+
+### ===========================
+### DATABASE .ENV
+### ===========================
 
 if [ -e "$DB_ENV_PATH" ]; then
     missing_db_envs=()
