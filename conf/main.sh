@@ -13,13 +13,13 @@ chmod +x "$MAIN_DIR/set_hosts.sh"
 chmod +x "$MAIN_DIR/install_dependencies.sh"
 
 # Display banner
-$MAIN_DIR/modules/banner.sh
+"$MAIN_DIR/modules/banner.sh"
 # Set hosts
-$MAIN_DIR/set_hosts.sh
+"$MAIN_DIR/set_hosts.sh"
 # Set environment variables
-$MAIN_DIR/set_envs.sh
+"$MAIN_DIR/set_envs.sh"
 # Install project dependencies
-$MAIN_DIR/install_dependencies.sh
+"$MAIN_DIR/install_dependencies.sh"
 
 CONGRATULATION_MSG="Congrats on completing the Intellecta project configuration!"
 
