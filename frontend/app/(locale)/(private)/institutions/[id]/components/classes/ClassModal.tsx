@@ -23,6 +23,7 @@ import {
   UploadProfileAssetResponse,
   useUploadProfileAsset,
 } from "@/hooks/files/useUploadProfileAsset"
+import { AIAssistantButton } from "@/app/(locale)/(private)/components/AIAssistantButton"
 
 type Props = {
   isOpen: boolean
@@ -162,58 +163,87 @@ export function ClassModal({
                 placeholder="Breve descrição da turma…"
                 value={description}
                 onValueChange={setDescription}
-                isRequired
-                minRows={3}
                 variant="bordered"
                 size="sm"
                 classNames={{ inputWrapper: "bg-background border-border" }}
               />
 
-              <div>
-                <div className="mb-1 text-sm font-medium">
-                  Foto de perfil (opcional)
-                </div>
-                <FileUpload
-                  ref={profileRef}
-                  accept="image/*"
-                  multiple={false}
-                  maxFiles={1}
-                  maxSizeMB={5}
-                  description="PNG, JPG até 5MB"
-                  dropzoneLabel="Selecionar imagem"
-                />
-              </div>
+              {/* aqui podem ter outros campos (ex.: código da turma) */}
 
-              <div>
-                <div className="mb-1 text-sm font-medium">
-                  Banner (opcional)
+              {/* Uploads lado a lado */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <div className="mb-1 text-sm font-medium">
+                    Foto de perfil (opcional)
+                  </div>
+                  <FileUpload
+                    ref={profileRef}
+                    accept="image/*"
+                    multiple={false}
+                    maxFiles={1}
+                    maxSizeMB={5}
+                    description="PNG, JPG até 5MB"
+                    dropzoneLabel="Selecionar imagem"
+                  />
                 </div>
-                <FileUpload
-                  ref={bannerRef}
-                  accept="image/*"
-                  multiple={false}
-                  maxFiles={1}
-                  maxSizeMB={5}
-                  description="PNG, JPG até 5MB"
-                  dropzoneLabel="Selecionar imagem"
-                />
+
+                <div>
+                  <div className="mb-1 text-sm font-medium">
+                    Banner (opcional)
+                  </div>
+                  <FileUpload
+                    ref={bannerRef}
+                    accept="image/*"
+                    multiple={false}
+                    maxFiles={1}
+                    maxSizeMB={5}
+                    description="PNG, JPG até 5MB"
+                    dropzoneLabel="Selecionar imagem"
+                  />
+                </div>
               </div>
             </ModalBody>
 
-            <ModalFooter>
-              <Button
-                variant="light"
-                onPress={() => {
-                  resetForm()
-                  close()
+            <ModalFooter className="flex items-center justify-between gap-2">
+              <AIAssistantButton
+                endpoint="/api/ai/classes/suggest"
+                title="IA para turma"
+                textareaPlaceholder="Descreva que tipo de turma você quer criar (série, disciplina, perfil dos alunos, turno, etc.)..."
+                submitLabel="Gerar com IA"
+                successTitle="Sugestão criada!"
+                successDescription="Preenchemos o nome e a descrição da turma para você. Revise antes de salvar."
+                disable={isBusy}
+                onSuccess={(data) => {
+                  // aqui mapeamos a resposta da API pros estados do modal
+                  if (typeof data?.name === "string") {
+                    setName(data.name)
+                  }
+                  if (typeof data?.description === "string") {
+                    setDescription(data.description)
+                  }
                 }}
-                isDisabled={isBusy}
-              >
-                Cancelar
-              </Button>
-              <Button color="primary" isLoading={isBusy} onPress={handleSubmit}>
-                Salvar
-              </Button>
+              />
+
+              <div className="flex gap-2">
+                <Button
+                  variant="light"
+                  onPress={() => {
+                    resetForm()
+                    close()
+                  }}
+                  isDisabled={isBusy}
+                >
+                  Cancelar
+                </Button>
+
+                <Button
+                  color="primary"
+                  isLoading={isBusy}
+                  onPress={handleSubmit}
+                >
+                  Salvar
+                </Button>
+              </div>
             </ModalFooter>
           </>
         )}

@@ -50,6 +50,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { AIAssistantButton } from "@/app/(locale)/(private)/components/AIAssistantButton"
+import { Separator } from "@/components/ui/separator"
 
 interface SubjectAssignmentsTabProps {
   institutionId: string
@@ -468,31 +470,52 @@ export default function SubjectAssignmentsTab({
               />
             </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCloseDialog}
-                disabled={createAssignmentMutation.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={
-                  !deadline ||
-                  !title.trim() ||
-                  !title ||
-                  !description ||
-                  createAssignmentMutation.isPending
-                }
-              >
-                {createAssignmentMutation.isPending
-                  ? "Criando..."
-                  : "Criar atividade"}
-              </Button>
+            <Separator className="w-full" />
+
+            <DialogFooter className="flex items-center justify-between gap-2">
+              <AIAssistantButton
+                endpoint="/api/ai/assignments/suggest"
+                title="IA para atividade"
+                textareaPlaceholder="Descreva o tipo de atividade que você quer criar (tema, série, objetivos, formato, etc.)..."
+                submitLabel="Gerar com IA"
+                successTitle="Sugestão criada!"
+                successDescription="Preenchemos o título e a descrição da atividade para você. Revise antes de salvar."
+                disable={createAssignmentMutation.isPending}
+                onSuccess={(data) => {
+                  if (typeof data?.title === "string") {
+                    setTitle(data.title)
+                  }
+                  if (typeof data?.description === "string") {
+                    setDescription(data.description)
+                  }
+                }}
+              />
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCloseDialog}
+                  disabled={createAssignmentMutation.isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  size="sm"
+                  disabled={
+                    !title.trim() ||
+                    !deadline ||
+                    createAssignmentMutation.isPending
+                  }
+                >
+                  {createAssignmentMutation.isPending
+                    ? "Criando..."
+                    : "Criar atividade"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

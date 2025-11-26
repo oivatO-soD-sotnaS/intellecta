@@ -13,6 +13,7 @@ import { Button } from "@heroui/button"
 import { addToast } from "@heroui/toast"
 
 import FileUpload, { FileUploadHandle } from "@/components/comp-547"
+import { AIAssistantButton } from "../../../components/AIAssistantButton"
 
 type Props = {
   isOpen: boolean
@@ -191,22 +192,44 @@ export function InstitutionModal({ isOpen, onOpenChange, onCreate }: Props) {
           </div>
         </ModalBody>
 
-        <ModalFooter>
-          <Button
-            isDisabled={isPending}
-            variant="flat"
-            onPress={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button
-            color="primary"
-            isDisabled={!canSubmit}
-            isLoading={isPending}
-            onPress={handleSubmit}
-          >
-            Criar instituição
-          </Button>
+
+        <ModalFooter className="flex items-center justify-between gap-2">
+          <AIAssistantButton
+            endpoint="/api/ai/institutions/suggest"
+            title="IA para instituição"
+            textareaPlaceholder="Descreva que tipo de instituição você quer criar (nível de ensino, área, público-alvo, estilo, etc.)..."
+            submitLabel="Gerar com IA"
+            successTitle="Sugestão criada!"
+            successDescription="Preenchemos o nome e a descrição da instituição para você. Revise antes de salvar."
+            disable={isPending}
+            onSuccess={(data) => {
+              if (typeof data?.title === "string") {
+                setName(data.title)
+              }
+              if (typeof data?.description === "string") {
+                setDescription(data.description)
+              }
+            }}
+          />
+
+          <div className="flex gap-2">
+            <Button
+              isDisabled={isPending}
+              variant="flat"
+              onPress={() => onOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              color="primary"
+              isDisabled={!canSubmit}
+              isLoading={isPending}
+              onPress={handleSubmit}
+            >
+              Criar instituição
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>
