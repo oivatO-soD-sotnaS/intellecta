@@ -4,7 +4,9 @@
 import * as React from "react"
 import { useMemo, useState } from "react"
 import { Separator } from "@/components/ui/separator"
-
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { Send } from "lucide-react"
 
 import { ForumHeader } from "./components/ForumHeader"
 import { ForumFiltersBar } from "./components/ForumFiltersBar"
@@ -16,25 +18,28 @@ import { addToast } from "@heroui/toast"
 import { useForumMessages } from "@/hooks/forum/useForumMessages"
 import { useForumMessagesCount } from "@/hooks/forum/useForumMessagesCount"
 import { useCreateForumMessage } from "@/hooks/forum/useCreateForumMessage"
-import { useUpdateForumMessage } from "@/hooks/forum/useUpdateForumMessage"
 import { ForumMessageDTO } from "@/types/forum"
 import { ForumEmptyState } from "./components/ForumEmptyState"
+import { useUpdateForumMessage } from "@/hooks/forum/useUpdateForumMessage"
 
 type SubjectForumClientProps = {
   institutionId: string
   subjectId: string
-  /**
-   * Define se o usuário pode postar no fórum.
-   * (Somente professor deve ter canPost = true.)
-   */
   canPost?: boolean
 }
 
 export default function SubjectForumClient({
   institutionId,
   subjectId,
-  canPost = false,
+  canPost = true,
 }: SubjectForumClientProps) {
+  // Debug logs
+  console.log("SubjectForumClient props:", {
+    institutionId,
+    subjectId,
+    canPost,
+  })
+
   const [page, setPage] = useState(1)
   const [period, setPeriod] = useState<"7d" | "30d" | "all">("30d")
   const [searchContent, setSearchContent] = useState<string | undefined>()
@@ -79,7 +84,7 @@ export default function SubjectForumClient({
   )
 
   const createMessage = useCreateForumMessage(institutionId, subjectId)
-  const updateMessage = useUpdateForumMessage(institutionId, subjectId)
+  const updateMessage = useUpdateForumMessage()
 
   const messages = messagesPage?.records ?? []
   const paging = messagesPage?.paging
@@ -100,31 +105,17 @@ export default function SubjectForumClient({
           setPage(1)
           addToast({
             title: "Mensagem publicada",
+            variant: "bordered",
+            color: "success",
             description: "O aviso foi enviado para o fórum da disciplina.",
-          })
-        },
-        onError: (error) => {
-          addToast({
-            title: "Erro ao publicar",
-            description:
-              error.message ?? "Tente novamente em alguns instantes.",
-            color: "danger",
           })
         },
       }
     )
   }
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    if (canPost) {
-      // professor: input funciona como composer
-      return handleComposerSubmit(e)
-    }
-
-    const term = inputValue.trim()
-    setSearchContent(term || undefined)
+  const handleSearchSubmit = (searchTerm: string) => {
+    setSearchContent(searchTerm || undefined)
     setPage(1)
   }
 
@@ -144,6 +135,8 @@ export default function SubjectForumClient({
 
     updateMessage.mutate(
       {
+        institutionId,
+        subjectId,
         forumMessageId: message.forum_messages_id,
         content: newContent,
       },
@@ -153,16 +146,9 @@ export default function SubjectForumClient({
           setEditingContent("")
           addToast({
             title: "Mensagem atualizada",
+            variant: "bordered",
+            color: "success",
             description: "As alterações foram salvas com sucesso.",
-          })
-        },
-        onError: (error) => {
-          addToast({
-            title: "Não foi possível editar",
-            description:
-              error.message ??
-              "Talvez o tempo máximo de edição já tenha sido excedido.",
-            color: "danger",
           })
         },
       }
@@ -182,6 +168,28 @@ export default function SubjectForumClient({
               setPeriod={setPeriod}
               onSubmit={handleSearchSubmit}
             />
+
+            {canPost && (
+              <form onSubmit={handleComposerSubmit} className="space-y-3">
+                <Textarea
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Escreva uma mensagem para o fórum da disciplina..."
+                  className="min-h-[100px] resize-none"
+                  disabled={createMessage.isPending}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={!inputValue.trim() || createMessage.isPending}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    {createMessage.isPending ? "Publicando..." : "Publicar"}
+                  </Button>
+                </div>
+              </form>
+            )}
 
             <Separator />
 

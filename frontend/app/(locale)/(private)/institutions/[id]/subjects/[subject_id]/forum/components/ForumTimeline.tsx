@@ -72,6 +72,7 @@ export function ForumTimeline({
                 new Date(b.created_at).getTime() -
                 new Date(a.created_at).getTime()
             )
+            .slice(0, 5)
             .map((message) => (
               <ForumMessageCard
                 key={`${message.forum_messages_id}-recent`}

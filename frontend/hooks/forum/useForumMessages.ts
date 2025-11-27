@@ -1,54 +1,117 @@
-// hooks/forum/useForumMessages.ts
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import { apiGet } from "@/lib/apiClient"
-import { ForumMessagesPageDTO, ForumMessagesQueryParams } from "@/types/forum"
+import { useQuery } from "@tanstack/react-query"
 
+export type ForumMessage = {
+  forum_messages_id: string
+  content: string
+  created_at: string
+  changed_at: string | null
+  subject_id: string
+  sent_by: {
+    user_id: string
+    full_name: string
+    email: string
+    profile_picture?: {
+      file_id: string
+      url: string
+      filename: string
+      mime_type: string
+      size: number
+      uploaded_at: string
+      file_type: string
+    } | null
+  }
+}
 
-/**
- * Hook para listar mensagens do fórum de uma disciplina
- * proxy: /api/institutions/[institution_id]/subjects/[subject_id]/forum/messages
- */
+export type ForumMessagesResponse = {
+  paging: {
+    page: number
+    total_pages: number
+    total_records: number
+  }
+  records: ForumMessage[]
+}
+
+interface UseForumMessagesOptions {
+  page?: number 
+  limit?: number
+  offset?: number
+  created_at_from?: string
+  created_at_to?: string
+  content?: string
+}
 export function useForumMessages(
-  institutionId?: string,
-  subjectId?: string,
-  params?: ForumMessagesQueryParams
+  institutionId: string,
+  subjectId: string | undefined,
+  {
+    page,
+    limit = 20,
+    offset,
+    created_at_from,
+    created_at_to,
+    content,
+  }: UseForumMessagesOptions = {}
 ) {
+  const effectiveOffset =
+    typeof offset === "number"
+      ? offset
+      : page && page > 0
+        ? (page - 1) * limit
+        : 0
+
   return useQuery({
-    queryKey: ["forum-messages", institutionId, subjectId, params],
-    enabled: !!institutionId && !!subjectId,
-    staleTime: 60_000,
+    enabled: Boolean(institutionId && subjectId),
+    queryKey: [
+      "forum-messages",
+      institutionId,
+      subjectId,
+      {
+        page,
+        limit,
+        offset: effectiveOffset,
+        created_at_from,
+        created_at_to,
+        content,
+      },
+    ],
     queryFn: async () => {
-      if (!institutionId || !subjectId) {
-        throw new Error("institutionId e subjectId são obrigatórios")
+      if (!subjectId) {
+        throw new Error("Subject ID is required")
       }
 
-      try {
-        const data = await apiGet<ForumMessagesPageDTO>(
-          `/api/institutions/${institutionId}/subjects/${subjectId}/forum/messages`,
-          {
-            query: params,
-          }
-        )
+      const params = new URLSearchParams()
 
+      params.set("limit", String(limit))
+      params.set("offset", String(effectiveOffset))
+      // if (created_at_from) params.set("created_at_from", created_at_from)
+      // if (created_at_to) params.set("created_at_to", created_at_to)
+      if (content) params.set("content", content)
+
+      const url = `/api/institutions/${institutionId}/subjects/${subjectId}/forum/messages?${params.toString()}`
+
+      try {
+        const data = await apiGet<ForumMessagesResponse>(url)
         return data
       } catch (err: any) {
+        // tenta descobrir o status HTTP do erro
         const status =
           err?.status ?? err?.response?.status ?? err?.cause?.status
 
-        // backend lança 404 quando não há mensagens; aqui mapeamos para lista vazia
+        // 👇 se o backend respondeu 404, tratamos como "nenhuma mensagem"
         if (status === 404) {
           return {
             paging: {
-              page: params?.page ?? 1,
+              page: page ?? 1,
               total_pages: 0,
               total_records: 0,
             },
             records: [],
-          } satisfies ForumMessagesPageDTO
+          } satisfies ForumMessagesResponse
         }
 
+        // outros erros (500, 401, etc) sobem normalmente
         throw err
       }
     },

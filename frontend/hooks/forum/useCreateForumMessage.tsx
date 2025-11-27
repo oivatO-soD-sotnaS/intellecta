@@ -28,6 +28,9 @@ export function useCreateForumMessage(
         }
       )
 
+      console.log("Logo do data POST -> ",data);
+      
+
       return data
     },
     onSuccess: (_data) => {

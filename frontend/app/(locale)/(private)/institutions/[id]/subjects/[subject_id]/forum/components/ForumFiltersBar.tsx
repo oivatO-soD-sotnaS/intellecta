@@ -1,5 +1,6 @@
 // app/(locale)/(private)/institutions/[institution_id]/subjects/[subject_id]/forum/_components/ForumFiltersBar.tsx
 
+import { useState, FormEvent } from "react"
 import { Info, Search } from "lucide-react"
 import {
   Select,
@@ -15,7 +16,7 @@ type ForumFiltersBarProps = {
   canPost: boolean
   period: "7d" | "30d" | "all"
   setPeriod: (p: "7d" | "30d" | "all") => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  onSubmit: (searchTerm: string) => void 
 }
 
 export function ForumFiltersBar({
@@ -24,7 +25,19 @@ export function ForumFiltersBar({
   setPeriod,
   onSubmit,
 }: ForumFiltersBarProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+
   const placeholders = canPost ? POST_PLACEHOLDERS : SEARCH_PLACEHOLDERS
+
+  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const term = searchTerm.trim()
+    onSubmit(term)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }
 
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card/80 p-3 shadow-sm backdrop-blur-md sm:p-4">
@@ -62,10 +75,8 @@ export function ForumFiltersBar({
 
       <PlaceholdersAndVanishInput
         placeholders={placeholders}
-        onChange={(_e: any) => {
-
-        }}
-        onSubmit={onSubmit}
+        onChange={handleInputChange}
+        onSubmit={handleFormSubmit}
       />
 
       {!canPost && (
