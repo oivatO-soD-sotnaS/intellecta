@@ -15,7 +15,6 @@ export default async function SubjectForumPage(props: {
   const { id, subject_id } = params
 
 
-
   return (
     <SubjectForumClient
       institutionId={id}

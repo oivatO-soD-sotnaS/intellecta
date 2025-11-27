@@ -157,7 +157,7 @@ export function SubjectMaterialsTab({
           )}
         </div>
 
-        {/* Erros */}
+        {/* Erros
         {hasError && (
           <Alert variant="destructive" className="border-destructive/60">
             <AlertTitle className="text-xs font-semibold">
@@ -167,7 +167,7 @@ export function SubjectMaterialsTab({
               {errorMessage}
             </AlertDescription>
           </Alert>
-        )}
+        )} */}
 
         {/* Lista de materiais */}
         {loading && (

@@ -1,4 +1,4 @@
-// app/(locale)/(private)/institutions/[id]/classes/[classId]/ClassPageClient.tsx
+// app/(locale)/(private)/institutions/[id]/classes/[classId]/components/ClassPageClient.tsx
 "use client"
 
 import { useState } from "react"
@@ -11,6 +11,9 @@ import { ClassPeopleTab } from "./ClassPeopleTab"
 import { ClassTimelineTab } from "./ClassTimelineTab"
 import { ClassOverviewTab } from "./ClassOverviewTab"
 
+// 🔹 importa o contexto da instituição (que já te dá o "me")
+import { useInstitution } from "../../../layout"
+
 type Props = {
   institutionId: string
   classId: string
@@ -21,8 +24,14 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
     "overview" | "subjects" | "people" | "timeline"
   >("subjects")
 
-  // TODO: depois você troca isso pra algo baseado no usuário logado (admin/professor)
-  const canManageSubjects = true
+  // pega institution + me (com role: "admin" | "teacher" | "student")
+  const { me } = useInstitution()
+
+  // role atual do usuário na instituição
+  const userRole = me.role // "admin" | "teacher" | "student"
+
+  // regra de permissão pra gerir disciplinas da turma
+  const canManageSubjects = userRole === "admin" || userRole === "teacher"
 
   const { data: classData, isLoading } = useClass(institutionId, classId)
 
@@ -38,11 +47,15 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
         classData={classData}
         isLoading={isLoading}
       />
+
       <ClassTabs value={activeTab} onValueChange={setActiveTab} />
 
       <div className="mt-4">
         {activeTab === "overview" && (
-          <ClassOverviewTab institutionId={institutionId} classId={classId} />
+          <ClassOverviewTab
+            institutionId={institutionId}
+            classId={classId}
+          />
         )}
 
         {activeTab === "subjects" && (
@@ -54,11 +67,17 @@ export default function ClassPageClient({ institutionId, classId }: Props) {
         )}
 
         {activeTab === "people" && (
-          <ClassPeopleTab institutionId={institutionId} classId={classId} />
+          <ClassPeopleTab
+            institutionId={institutionId}
+            classId={classId}
+          />
         )}
 
         {activeTab === "timeline" && (
-          <ClassTimelineTab institutionId={institutionId} classId={classId} />
+          <ClassTimelineTab
+            institutionId={institutionId}
+            classId={classId}
+          />
         )}
       </div>
     </motion.div>

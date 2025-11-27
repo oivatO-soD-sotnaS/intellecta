@@ -202,7 +202,7 @@ export function AssignmentDetailsSheet({
                   Informações básicas
                 </h3>
                 <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
-                  ID: {assignment.assignment_id.slice(0, 8)}…
+                  ID: {assignment.assignment_id}
                 </span>
               </div>
 

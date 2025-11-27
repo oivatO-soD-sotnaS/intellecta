@@ -17,7 +17,7 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
 
   if (!token) {
     // Ajuste a rota de login conforme o seu app
-    redirect(`/${locale}/signin`)
+    redirect(`/sign-in`)
   }
 
   return <SubjectPageClient institutionId={id} subjectId={subject_id} />

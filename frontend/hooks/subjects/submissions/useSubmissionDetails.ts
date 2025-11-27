@@ -1,6 +1,5 @@
-// hooks/subjects/useSubmissionDetails.ts
+// hooks/subjects/submissions/useSubmissionDetails.ts
 import { useQuery } from "@tanstack/react-query"
-import { apiGet } from "@/lib/apiClient"
 import type { SubmissionDTO } from "../types"
 
 interface UseSubmissionDetailsOptions {
@@ -20,7 +19,7 @@ export function useSubmissionDetails({
 }: UseSubmissionDetailsOptions) {
   return useQuery({
     queryKey: [
-      "submission",
+      "submission-details",
       institutionId,
       subjectId,
       assignmentId,
@@ -29,9 +28,23 @@ export function useSubmissionDetails({
     enabled: Boolean(
       institutionId && subjectId && assignmentId && submissionId && enabled
     ),
-    queryFn: async () =>
-      apiGet<SubmissionDTO>(
-        `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions/${submissionId}`
-      ),
+    queryFn: async (): Promise<SubmissionDTO> => {
+      const url = `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions/${submissionId}`
+
+      const response = await fetch(url, {
+        method: "GET",
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "")
+
+        throw new Error(
+          errorText ||
+            `Erro ao carregar detalhes da submissão (status ${response.status})`
+        )
+      }
+
+      return response.json()
+    },
   })
 }

@@ -52,11 +52,15 @@ import {
 } from "@/components/ui/pagination"
 import { AIAssistantButton } from "@/app/(locale)/(private)/components/AIAssistantButton"
 import { Separator } from "@/components/ui/separator"
+import type { SubmissionDTO } from "@/hooks/subjects/types"
+import { EvaluateSubmissionDialog } from "./EvaluateSubmissionDialog"
 
 interface SubjectAssignmentsTabProps {
   institutionId: string
   subjectId: string
   isTeacher: boolean
+  userRole?: string
+  currentUserId?: string
 }
 
 const ITEMS_PER_PAGE = 6
@@ -65,6 +69,8 @@ export default function SubjectAssignmentsTab({
   institutionId,
   subjectId,
   isTeacher,
+  userRole,
+  currentUserId,
 }: SubjectAssignmentsTabProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<
@@ -72,6 +78,8 @@ export default function SubjectAssignmentsTab({
   >(null)
 
   const [submissionsOpen, setSubmissionsOpen] = useState(false)
+  const [submissionToEvaluate, setSubmissionToEvaluate] =
+    useState<SubmissionDTO | null>(null)
 
   const [detailsAssignmentId, setDetailsAssignmentId] = useState<string | null>(
     null
@@ -276,7 +284,7 @@ export default function SubjectAssignmentsTab({
                 </PaginationContent>
               </Pagination>
             )}
-          {isTeacher && (
+          {(userRole === "teacher" || userRole === "admin") && (
             <Button size="sm" variant="outline" onClick={handleOpenDialog}>
               Nova atividade
             </Button>
@@ -370,6 +378,10 @@ export default function SubjectAssignmentsTab({
                   institutionId={institutionId}
                   subjectId={subjectId}
                   assignmentId={selectedAssignmentId}
+                  onEvaluateSubmission={(submission) => {
+                    setSubmissionToEvaluate(submission)
+                    setSubmissionsOpen(false)
+                  }}
                 />
               </div>
             )}
@@ -385,7 +397,23 @@ export default function SubjectAssignmentsTab({
         </TopSheet>
       )}
 
-      {!isTeacher && selectedAssignmentId && (
+      {/* Dialog de avaliação - agora controlado pelo componente pai */}
+      {submissionToEvaluate && selectedAssignmentId && (
+        <EvaluateSubmissionDialog
+          open={!!submissionToEvaluate}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSubmissionToEvaluate(null)
+            }
+          }}
+          submission={submissionToEvaluate}
+          institutionId={institutionId}
+          subjectId={subjectId}
+          assignmentId={selectedAssignmentId}
+        />
+      )}
+
+      {userRole === "student" && selectedAssignmentId && (
         <div className="space-y-3">
           <MySubmissionPanel
             institutionId={institutionId}

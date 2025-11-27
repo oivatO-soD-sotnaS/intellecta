@@ -15,6 +15,7 @@ type ForumMessageCardProps = {
   onEditClick: () => void
   onEditCancel: () => void
   onEditSave: () => void
+  userRole?: "admin" | "teacher" | "student"
 }
 
 /**
@@ -30,10 +31,12 @@ export function ForumMessageCard({
   onEditClick,
   onEditCancel,
   onEditSave,
+  userRole,
 }: ForumMessageCardProps) {
   const author = message.sent_by
   const createdLabel = formatForumDate(message.created_at)
   const edited = message.changed_at && message.changed_at !== message.created_at
+  const isTeacher = userRole === "teacher"
 
   return (
     <article
@@ -111,14 +114,10 @@ export function ForumMessageCard({
       <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
         <span>Mensagem do professor para esta disciplina.</span>
 
-        {canPost && !isEditing && (
-          <button
-            type="button"
-            onClick={onEditClick}
-            className="text-[11px] font-medium text-primary hover:underline"
-          >
+        {isTeacher && !isEditing && (
+          <Button variant="ghost" size="sm" onClick={onEditClick}>
             Editar
-          </button>
+          </Button>
         )}
       </div>
     </article>

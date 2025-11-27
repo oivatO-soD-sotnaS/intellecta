@@ -1,6 +1,7 @@
 // components/SessionExpiredModal.tsx
 "use client";
 
+import { useSubmissionCacheStore } from "@/hooks/subjects/submissions/useSubmissionCacheStore";
 import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ export default function SessionExpiredModal({
   nextUrl = "/sign-in",
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
+  
 
   // ao fechar, limpamos a flag do cookie
   useEffect(() => {
@@ -23,6 +25,8 @@ export default function SessionExpiredModal({
       document.cookie = "session_expired=; Max-Age=0; Path=/";
     }
   }, [open]);
+
+  useSubmissionCacheStore.getState().clearAll()
 
   return (
     <Modal

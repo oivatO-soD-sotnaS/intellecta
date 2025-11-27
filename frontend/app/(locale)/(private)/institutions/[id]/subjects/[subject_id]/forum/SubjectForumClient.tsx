@@ -21,10 +21,17 @@ import { useCreateForumMessage } from "@/hooks/forum/useCreateForumMessage"
 import { ForumMessageDTO } from "@/types/forum"
 import { ForumEmptyState } from "./components/ForumEmptyState"
 import { useUpdateForumMessage } from "@/hooks/forum/useUpdateForumMessage"
+import { useInstitution } from "../../../layout"
+
+// 🔹 hook de contexto da instituição, que expõe o `me.role`
 
 type SubjectForumClientProps = {
   institutionId: string
   subjectId: string
+  /**
+   * Flag opcional para desabilitar posts globalmente.
+   * Mesmo se for true, só "teacher" vai poder postar.
+   */
   canPost?: boolean
 }
 
@@ -33,19 +40,29 @@ export default function SubjectForumClient({
   subjectId,
   canPost = true,
 }: SubjectForumClientProps) {
-  // Debug logs
-  console.log("SubjectForumClient props:", {
-    institutionId,
-    subjectId,
-    canPost,
-  })
-
   const [page, setPage] = useState(1)
   const [period, setPeriod] = useState<"7d" | "30d" | "all">("30d")
   const [searchContent, setSearchContent] = useState<string | undefined>()
   const [inputValue, setInputValue] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingContent, setEditingContent] = useState<string>("")
+
+  // 🔹 pega o role do usuário na instituição
+  const { me } = useInstitution()
+  const userRole = me?.role // "admin" | "teacher" | "student"
+
+  // 🔹 apenas teacher pode postar no fórum da disciplina
+  const canPostByRole = userRole === "teacher"
+  const effectiveCanPost = canPost && canPostByRole
+
+  // Debug
+  console.log("SubjectForumClient props / role:", {
+    institutionId,
+    subjectId,
+    canPostProp: canPost,
+    userRole,
+    effectiveCanPost,
+  })
 
   const dateFilters = useMemo(() => {
     if (period === "all") return {}
@@ -92,7 +109,7 @@ export default function SubjectForumClient({
 
   const handleComposerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!canPost) return
+    if (!effectiveCanPost) return
 
     const content = inputValue.trim()
     if (!content) return
@@ -163,13 +180,14 @@ export default function SubjectForumClient({
         <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
           <div className="space-y-4">
             <ForumFiltersBar
-              canPost={canPost}
+              canPost={effectiveCanPost}
               period={period}
               setPeriod={setPeriod}
               onSubmit={handleSearchSubmit}
             />
 
-            {canPost && (
+            {/* 🔹 Apenas teacher vê o formulário de nova mensagem */}
+            {effectiveCanPost && (
               <form onSubmit={handleComposerSubmit} className="space-y-3">
                 <Textarea
                   value={inputValue}
@@ -198,12 +216,12 @@ export default function SubjectForumClient({
             ) : isError ? (
               <ForumErrorState onRetry={refetch} />
             ) : isEmpty ? (
-              <ForumEmptyState canPost={canPost} />
+              <ForumEmptyState canPost={effectiveCanPost} />
             ) : (
               <ForumTimeline
                 messages={messages}
                 paging={paging}
-                canPost={canPost}
+                canPost={effectiveCanPost}
                 page={page}
                 setPage={setPage}
                 isFetching={isFetching}
@@ -213,11 +231,12 @@ export default function SubjectForumClient({
                 onEditClick={handleEditClick}
                 onEditCancel={handleEditCancel}
                 onEditSave={handleEditSave}
+                userRole={userRole}
               />
             )}
           </div>
 
-          <ForumSidebar canPost={canPost} />
+          <ForumSidebar canPost={effectiveCanPost} />
         </div>
       </div>
     </div>

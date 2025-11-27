@@ -59,13 +59,7 @@ export default async function HomePage() {
   } catch (e) {
     console.error("Erro ao buscar usuário:", e);
 
-    return (
-      <div className="container mx-auto p-6">
-        <p className="text-center text-red-600">
-          Erro ao carregar perfil. Tente recarregar a página.
-        </p>
-      </div>
-    );
+    return <SessionGuard />
   }
 
   const firstName = user.full_name.split(" ")[0];

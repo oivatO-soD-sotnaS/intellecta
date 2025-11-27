@@ -4,8 +4,8 @@ import { useMemo } from "react"
 import SubjectHeader from "./SubjectHeader"
 import SubjectTabs from "./SubjectTabs"
 import { useSubject } from "@/hooks/subjects/useSubject"
-import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
-import { useInstitution } from "@/hooks/institution/useInstitution"
+import { useInstitution } from "../../../layout"
+
 
 interface SubjectPageClientProps {
   institutionId: string
@@ -22,16 +22,17 @@ export default function SubjectPageClient({
     error,
   } = useSubject(institutionId, subjectId)
 
-  const { data: currentUser } = useCurrentUser()
-  const { data: institution } = useInstitution(institutionId)
+  const { institution, me } = useInstitution()
 
-  console.log("log do institution_id -> ", institutionId)
+  const userRole = me?.role
+
 
   const isTeacher = useMemo(() => {
-    if (!currentUser) return false
-    // MODO DEV: todo mundo logado pode gerenciar a disciplina
-    return true
-  }, [currentUser])
+    if (!userRole) return false
+
+    // exemplo: teacher e admin podem gerenciar a disciplina
+    return userRole === "teacher" || userRole === "admin"
+  }, [userRole])
 
   if (error) {
     return (
@@ -50,6 +51,8 @@ export default function SubjectPageClient({
         institutionName={institution?.name}
         subject={subject}
         isLoading={isLoading}
+        userRole={userRole}
+        isTeacher={isTeacher}
       />
 
       <SubjectTabs
@@ -58,6 +61,8 @@ export default function SubjectPageClient({
         subject={subject}
         isTeacher={isTeacher}
         isLoading={isLoading}
+        userRole={userRole}
+        currentUserId={me?.user_id}
       />
     </div>
   )

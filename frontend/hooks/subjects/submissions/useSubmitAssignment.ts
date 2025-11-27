@@ -1,15 +1,11 @@
-// hooks/subjects/useSubmitAssignment.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiPost } from "@/lib/apiClient"
 import type { SubmissionDTO } from "../types"
 
 interface SubmitAssignmentInput {
   institutionId: string
   subjectId: string
   assignmentId: string
-  // payload vai depender de como você está modelando o envio:
-  // pode ser { attachment_id: string } ou FormData, etc.
-  payload: any
+  attachment: File
 }
 
 export function useSubmitAssignment() {
@@ -20,16 +16,30 @@ export function useSubmitAssignment() {
       institutionId,
       subjectId,
       assignmentId,
-      payload,
-    }: SubmitAssignmentInput) =>
-      apiPost<SubmissionDTO>(
-        `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions`,
-        payload
-      ),
+      attachment,
+    }: SubmitAssignmentInput): Promise<SubmissionDTO> => {
+      const url = `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions`
+
+      const formData = new FormData()
+      formData.append("attachment", attachment)
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "")
+        throw new Error(
+          errorText || `Erro ao enviar submissão (status ${response.status})`
+        )
+      }
+
+      return response.json()
+    },
     onSuccess(_data, variables) {
       const { institutionId, subjectId, assignmentId } = variables
 
-      // Atualiza lista de submissões daquele assignment (visão professor)
       queryClient.invalidateQueries({
         queryKey: [
           "assignment-submissions",
@@ -39,7 +49,6 @@ export function useSubmitAssignment() {
         ],
       })
 
-      // Se você criar um hook "my-submission", já deixa pronto:
       queryClient.invalidateQueries({
         queryKey: ["my-submission", institutionId, subjectId, assignmentId],
       })

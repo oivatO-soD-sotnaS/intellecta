@@ -3,14 +3,14 @@ import SubjectAssignmentsTab from "./SubjectAssignmentsTab"
 import SubjectOverviewTab from "./SubjectOverviewTab"
 import { SubjectMaterialsTab } from "./SubjectMaterialsTab"
 
-
-
 interface SubjectTabsProps {
   institutionId: string
   subjectId: string
   subject?: any
-  isTeacher: boolean
   isLoading?: boolean
+  isTeacher: boolean
+  userRole?: string
+  currentUserId?: string
 }
 
 export default function SubjectTabs({
@@ -19,6 +19,8 @@ export default function SubjectTabs({
   subject,
   isTeacher,
   isLoading,
+  userRole,
+  currentUserId,
 }: SubjectTabsProps) {
   return (
     <Tabs defaultValue="overview" className="space-y-4">
@@ -42,6 +44,8 @@ export default function SubjectTabs({
           institutionId={institutionId}
           subjectId={subjectId}
           isTeacher={isTeacher}
+          userRole={userRole}
+          currentUserId={currentUserId}
         />
       </TabsContent>
 
@@ -50,6 +54,8 @@ export default function SubjectTabs({
           institutionId={institutionId}
           subjectId={subjectId}
           isTeacher={isTeacher}
+          userRole={userRole}
+          currentUserId={currentUserId}
         />
       </TabsContent>
     </Tabs>

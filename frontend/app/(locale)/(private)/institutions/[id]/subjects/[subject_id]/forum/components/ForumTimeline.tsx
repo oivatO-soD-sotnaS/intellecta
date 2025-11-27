@@ -19,6 +19,7 @@ type ForumTimelineProps = {
   onEditClick: (message: ForumMessageDTO) => void
   onEditCancel: () => void
   onEditSave: (message: ForumMessageDTO) => void
+  userRole?: "admin" | "teacher" | "student"
 }
 
 export function ForumTimeline({
@@ -34,6 +35,7 @@ export function ForumTimeline({
   onEditClick,
   onEditCancel,
   onEditSave,
+  userRole
 }: ForumTimelineProps) {
   const hasMore =
     paging &&
@@ -60,6 +62,7 @@ export function ForumTimeline({
               onEditClick={() => onEditClick(message)}
               onEditCancel={onEditCancel}
               onEditSave={() => onEditSave(message)}
+              userRole={userRole}
             />
           ))}
         </TabsContent>

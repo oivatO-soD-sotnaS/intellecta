@@ -1,5 +1,3 @@
-import { useState } from "react"
-
 import {
   Table,
   TableBody,
@@ -10,72 +8,28 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { UserCircle2 } from "lucide-react"
 import type { SubmissionDTO } from "@/hooks/subjects/types"
-import { useEvaluateSubmission } from "@/hooks/subjects/submissions/useEvaluateSubmission"
 import { useAssignmentSubmissions } from "@/hooks/subjects/submissions/useAssignmentSubmissions"
 
 interface AssignmentSubmissionsPanelProps {
   institutionId: string
   subjectId: string
   assignmentId: string
+  onEvaluateSubmission?: (submission: SubmissionDTO) => void
 }
 
 export default function AssignmentSubmissionsPanel({
   institutionId,
   subjectId,
   assignmentId,
+  onEvaluateSubmission,
 }: AssignmentSubmissionsPanelProps) {
   const { data: submissions, isLoading } = useAssignmentSubmissions({
     institutionId,
     subjectId,
     assignmentId,
   })
-
-  const [openDialog, setOpenDialog] = useState(false)
-  const [currentSubmission, setCurrentSubmission] =
-    useState<SubmissionDTO | null>(null)
-  const [concept, setConcept] = useState("")
-  const [feedback, setFeedback] = useState("")
-
-  const evaluateMutation = useEvaluateSubmission()
-
-  function handleOpenEvaluation(submission: SubmissionDTO) {
-    setCurrentSubmission(submission)
-    setConcept(submission.concept ?? "")
-    setFeedback(submission.feedback ?? "")
-    setOpenDialog(true)
-  }
-
-  function handleSubmitEvaluation() {
-    if (!currentSubmission) return
-
-    evaluateMutation.mutate(
-      {
-        institutionId,
-        subjectId,
-        assignmentId,
-        submissionId: currentSubmission.submission_id,
-        concept,
-        feedback,
-      },
-      {
-        onSuccess() {
-          setOpenDialog(false)
-        },
-      }
-    )
-  }
 
   return (
     <>
@@ -167,10 +121,9 @@ export default function AssignmentSubmissionsPanel({
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
-                          size="sm"
                           variant="outline"
-                          className="text-xs"
-                          onClick={() => handleOpenEvaluation(submission)}
+                          size="sm"
+                          onClick={() => onEvaluateSubmission?.(submission)}
                         >
                           Avaliar
                         </Button>
@@ -182,62 +135,6 @@ export default function AssignmentSubmissionsPanel({
             </div>
           )}
         </div>
-
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Avaliar submissão</DialogTitle>
-              <DialogDescription>
-                Forneça o conceito e um feedback para o aluno. Essas informações
-                ficarão visíveis para ele.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-3 py-2">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">
-                  Conceito / Nota
-                </label>
-                <Input
-                  value={concept}
-                  onChange={(e) => setConcept(e.target.value)}
-                  placeholder="Ex.: 9.5, A, B+, etc."
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">
-                  Feedback
-                </label>
-                <Textarea
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder="Escreva um comentário construtivo para o aluno."
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOpenDialog(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSubmitEvaluation}
-                disabled={evaluateMutation.isPending}
-              >
-                {evaluateMutation.isPending
-                  ? "Salvando..."
-                  : "Salvar avaliação"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </>
   )

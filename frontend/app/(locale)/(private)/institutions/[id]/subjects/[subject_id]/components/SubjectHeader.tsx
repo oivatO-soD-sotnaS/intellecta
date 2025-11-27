@@ -5,9 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface SubjectHeaderProps {
   institutionId: string
+  institutionName?: string
   subject?: any
   isLoading?: boolean
-  institutionName: string
+  userRole?: string
+  isTeacher?: boolean
 }
 
 export default function SubjectHeader({

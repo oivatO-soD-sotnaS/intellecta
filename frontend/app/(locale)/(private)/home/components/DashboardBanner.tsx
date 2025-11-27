@@ -94,28 +94,7 @@ export default function DashboardBanner({
           </div>
 
           {/* Cards de métricas */}
-          <div className="lg:col-span-5">
-            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-              <StatCard
-                Icon={ClipboardList}
-                label="Atividades"
-                sublabel="Pendentes"
-                value={stats.activities}
-              />
-              <StatCard
-                Icon={CalendarDays}
-                label="Eventos"
-                sublabel="Próximos"
-                value={stats.events}
-              />
-              <StatCard
-                Icon={Mail}
-                label="Mensagens"
-                sublabel="Não lidas"
-                value={stats.messages}
-              />
-            </div>
-          </div>
+
         </motion.div>
       </div>
     </section>

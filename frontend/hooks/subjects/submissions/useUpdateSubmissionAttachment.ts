@@ -1,19 +1,12 @@
-// hooks/subjects/useUpdateSubmissionAttachment.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiPatch } from "@/lib/apiClient"
 import type { SubmissionDTO } from "../types"
 
-interface UpdateSubmissionAttachmentInput {
+export interface UpdateSubmissionAttachmentInput {
   institutionId: string
   subjectId: string
   assignmentId: string
   submissionId: string
-  attachmentId: string
-}
-
-interface UpdateSubmissionAttachmentResponse {
-  message: string
-  submission: SubmissionDTO
+  attachment: File
 }
 
 export function useUpdateSubmissionAttachment() {
@@ -25,16 +18,32 @@ export function useUpdateSubmissionAttachment() {
       subjectId,
       assignmentId,
       submissionId,
-      attachmentId,
-    }: UpdateSubmissionAttachmentInput) =>
-      apiPatch<UpdateSubmissionAttachmentResponse>(
-        `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions/${submissionId}/attachment`,
-        { attachment_id: attachmentId }
-      ),
-    onSuccess(data, variables) {
-      const { institutionId, subjectId, assignmentId, submissionId } = variables
+      attachment,
+    }: UpdateSubmissionAttachmentInput): Promise<SubmissionDTO> => {
+      const url = `/api/institutions/${institutionId}/subjects/${subjectId}/assignments/${assignmentId}/submissions/${submissionId}/attachment`
 
-      // Atualiza lista de submissões
+      const formData = new FormData()
+      formData.append("attachment", attachment)
+
+      const response = await fetch(url, {
+        method: "PATCH",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "")
+        throw new Error(
+          errorText ||
+            `Erro ao atualizar anexo da submissão (status ${response.status})`
+        )
+      }
+
+      return response.json()
+    },
+    onSuccess(_data, variables) {
+      const { institutionId, subjectId, assignmentId } = variables
+
+      // Lista de submissões (visão professor)
       queryClient.invalidateQueries({
         queryKey: [
           "assignment-submissions",
@@ -44,23 +53,10 @@ export function useUpdateSubmissionAttachment() {
         ],
       })
 
-      // Atualiza detalhes da submissão específica
-      queryClient.invalidateQueries({
-        queryKey: [
-          "submission",
-          institutionId,
-          subjectId,
-          assignmentId,
-          submissionId,
-        ],
-      })
-
-      // Atualiza "minha submissão" se você usar isso
+      // “Minha submissão” desse aluno para essa atividade
       queryClient.invalidateQueries({
         queryKey: ["my-submission", institutionId, subjectId, assignmentId],
       })
-
-      return data
     },
   })
 }

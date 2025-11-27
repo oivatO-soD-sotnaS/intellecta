@@ -1,10 +1,10 @@
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   ClassSubject,
   useRemoveClassSubject,
 } from "@/hooks/classes/useClassSubjects"
-import { Badge } from "@heroui/badge"
 import { Link } from "@heroui/link"
 import { addToast } from "@heroui/toast"
 import { AnimatePresence, motion } from "framer-motion"
@@ -111,7 +111,7 @@ export function SubjectsGrid({
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
                   <div className="absolute right-3 top-3">
                     <Badge
-                      size="sm"
+                      variant="default"
                       className="rounded-full border border-emerald-100 bg-emerald-50 text-[0.65rem] font-semibold text-emerald-700"
                     >
                       Disciplina

@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import { GraduationCap } from "lucide-react";
 
 import NotificationsBell from "./NotificationsBell";
-import SearchBar from "./SearchBar";
+// import SearchBar from "./SearchBar";
 import UserMenu, { type HeaderUser } from "./UserMenu";
 
 import { cn } from "@/lib/utils";
@@ -65,7 +65,7 @@ export default function Header({ leftSlot, className }: HeaderProps) {
 
         <div className="flex-1 hidden md:flex">
           <div className="w-full max-w-xl mx-auto">
-            <SearchBar placeholder="Buscar disciplinas, materiais, atividades…" />
+            {/* <SearchBar placeholder="Buscar disciplinas, materiais, atividades…" /> */}
           </div>
         </div>
 

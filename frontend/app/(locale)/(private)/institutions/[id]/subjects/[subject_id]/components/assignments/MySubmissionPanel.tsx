@@ -1,17 +1,19 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { useCurrentUser } from "@/hooks/auth/useCurrentUser"
 import type { SubmissionDTO } from "@/hooks/subjects/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FileText, Upload } from "lucide-react"
-import { useAssignmentSubmissions } from "@/hooks/subjects/submissions/useAssignmentSubmissions"
+import { useSubmissionDetails } from "@/hooks/subjects/submissions/useSubmissionDetails"
 import { useSubmitAssignment } from "@/hooks/subjects/submissions/useSubmitAssignment"
 import { useUpdateSubmissionAttachment } from "@/hooks/subjects/submissions/useUpdateSubmissionAttachment"
+import { useSubmissionCacheStore } from "@/hooks/subjects/submissions/useSubmissionCacheStore"
+import { useFileUpload } from "@/hooks/use-file-upload"
+import { FileUploadComponent } from "../../../../components/FileUploadComponent"
 
 interface MySubmissionPanelProps {
   institutionId: string
@@ -26,62 +28,123 @@ export default function MySubmissionPanel({
 }: MySubmissionPanelProps) {
   const { data: currentUserData } = useCurrentUser()
 
-  const { data: submissions, isLoading } = useAssignmentSubmissions({
-    institutionId,
-    subjectId,
-    assignmentId,
-  })
+  // 🔹 Integração com Zustand store
+  const { getSubmissionId, setSubmissionId: setCachedSubmissionId } =
+    useSubmissionCacheStore()
+
+  // 🔹 Estado local do submissionId
+  const [submissionId, setSubmissionId] = useState<string | null>(null)
+
+  // 🔹 Efeito para carregar submissionId do cache quando o usuário estiver disponível
+  useEffect(() => {
+    if (!currentUserData) return
+
+    const cachedId = getSubmissionId({
+      institutionId,
+      subjectId,
+      assignmentId,
+      userId: currentUserData.user_id,
+    })
+
+    if (cachedId) {
+      setSubmissionId(cachedId)
+    }
+  }, [currentUserData, getSubmissionId, institutionId, subjectId, assignmentId])
 
   const submitMutation = useSubmitAssignment()
   const updateAttachmentMutation = useUpdateSubmissionAttachment()
 
-  const [attachmentId, setAttachmentId] = useState("")
+  const maxSize = 10 * 1024 * 1024 // 10MB
 
-  const mySubmission: SubmissionDTO | null = useMemo(() => {
-    if (!submissions || !currentUserData) return null
-    return (
-      submissions.find((s) => s.user_id === currentUserData.user_id) ?? null
-    )
-  }, [submissions, currentUserData])
+  const [
+    { files, isDragging, errors },
+    {
+      handleDragEnter,
+      handleDragLeave,
+      handleDragOver,
+      handleDrop,
+      openFileDialog,
+      removeFile,
+      getInputProps,
+    },
+  ] = useFileUpload({
+    maxSize,
+    initialFiles: [],
+  })
+
+  const file = files[0] ?? null
+
+  // 🔹 Hook para buscar detalhes da submissão
+  const { data: mySubmission, isLoading: isLoadingDetails } =
+    useSubmissionDetails({
+      institutionId,
+      subjectId,
+      assignmentId,
+      submissionId: submissionId ?? undefined,
+      enabled: Boolean(submissionId),
+    })
 
   const isPending =
     submitMutation.isPending || updateAttachmentMutation.isPending
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!attachmentId.trim()) return
+    if (!file || !currentUserData) return
 
-    // Se ainda não tem submissão → cria
+    const currentFile = file
+
+    const attachmentFile =
+      currentFile instanceof File
+        ? currentFile
+        : "file" in currentFile && currentFile.file instanceof File
+          ? currentFile.file
+          : null
+
+    if (!attachmentFile) {
+      console.error("Arquivo inválido para envio de submissão")
+      return
+    }
+
+    // 🔹 Chave para o cache
+    const key = {
+      institutionId,
+      subjectId,
+      assignmentId,
+      userId: currentUserData.user_id,
+    }
+
+    // ➜ Ainda não tem submissão: cria e guarda o submission_id
     if (!mySubmission) {
       submitMutation.mutate(
         {
           institutionId,
           subjectId,
           assignmentId,
-          payload: {
-            // seguindo o mesmo padrão do PATCH de attachment
-            attachment_id: attachmentId,
-          },
+          attachment: attachmentFile,
         },
         {
-          onSuccess() {
-            setAttachmentId("")
+          onSuccess: (createdSubmission: SubmissionDTO) => {
+            setSubmissionId(createdSubmission.submission_id)
+            setCachedSubmissionId(key, createdSubmission.submission_id)
+            removeFile(currentFile.id)
           },
         }
       )
     } else {
-      // Se já tem → atualiza apenas o anexo
+      // ➜ Já tem submissão: atualiza o anexo
       updateAttachmentMutation.mutate(
         {
           institutionId,
           subjectId,
           assignmentId,
           submissionId: mySubmission.submission_id,
-          attachmentId,
+          attachment: attachmentFile,
         },
         {
-          onSuccess() {
-            setAttachmentId("")
+          onSuccess: (updatedSubmission: SubmissionDTO) => {
+            setSubmissionId(updatedSubmission.submission_id)
+            setCachedSubmissionId(key, updatedSubmission.submission_id)
+            removeFile(currentFile.id)
           },
         }
       )
@@ -89,18 +152,16 @@ export default function MySubmissionPanel({
   }
 
   return (
-    <Card className="border-border/70">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm">
-          Minha entrega{" "}
-          <span className="font-mono text-xs text-muted-foreground">
-            ({assignmentId})
-          </span>
-        </CardTitle>
+    <Card className="border-border/70 bg-card/90 shadow-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">Minha entrega</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Envie ou atualize o arquivo da sua resposta para esta atividade.
+        </p>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {isLoading && (
+        {isLoadingDetails && (
           <div className="space-y-2">
             <Skeleton className="h-4 w-64" />
             <Skeleton className="h-4 w-40" />
@@ -108,17 +169,17 @@ export default function MySubmissionPanel({
           </div>
         )}
 
-        {!isLoading && !mySubmission && (
+        {!isLoadingDetails && !mySubmission && (
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>Você ainda não enviou nenhuma entrega para esta atividade.</p>
             <p className="text-xs">
-              Use o campo abaixo para informar o <code>attachment_id</code> do
-              arquivo que você enviou pelo sistema de upload.
+              Selecione o arquivo da sua resposta no campo abaixo e clique em{" "}
+              <span className="font-semibold">Enviar entrega</span>.
             </p>
           </div>
         )}
 
-        {!isLoading && mySubmission && (
+        {!isLoadingDetails && mySubmission && (
           <div className="space-y-2 rounded-md border border-border/60 bg-muted/40 p-3 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -168,31 +229,42 @@ export default function MySubmissionPanel({
         )}
 
         {/* Formulário para enviar/atualizar anexo */}
-        {!isLoading && (
-          <form onSubmit={handleSubmit} className="space-y-2">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-foreground">
-                ID do anexo (attachment_id)
-              </label>
-              <Input
-                value={attachmentId}
-                onChange={(e) => setAttachmentId(e.target.value)}
-                placeholder="Cole aqui o attachment_id gerado pelo upload"
+        {!isLoadingDetails && (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="overflow-hidden">
+              <FileUploadComponent
+                label={
+                  mySubmission
+                    ? "Atualizar arquivo da entrega"
+                    : "Arquivo da entrega"
+                }
+                maxSize={maxSize}
+                file={file}
+                errors={errors}
+                isDragging={isDragging}
+                openFileDialog={openFileDialog}
+                handleDragEnter={handleDragEnter}
+                handleDragLeave={handleDragLeave}
+                handleDragOver={handleDragOver}
+                handleDrop={handleDrop}
+                getInputProps={getInputProps}
+                removeFile={removeFile}
               />
-              <p className="text-[11px] text-muted-foreground">
-                Em breve você pode integrar este campo com o componente de
-                upload para que o ID seja preenchido automaticamente.
-              </p>
             </div>
+
+            <p className="text-[11px] text-muted-foreground">
+              Envie um único arquivo com a sua resposta. Você poderá reenviar um
+              novo arquivo caso precise atualizar a entrega.
+            </p>
 
             <Button
               type="submit"
               size="sm"
-              disabled={isPending || !attachmentId.trim()}
+              disabled={isPending || !file}
               className="flex items-center gap-2"
             >
               <Upload className="h-3 w-3" />
-              {mySubmission ? "Atualizar anexo da entrega" : "Enviar entrega"}
+              {mySubmission ? "Atualizar entrega" : "Enviar entrega"}
             </Button>
           </form>
         )}

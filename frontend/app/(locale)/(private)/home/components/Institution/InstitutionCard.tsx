@@ -12,8 +12,7 @@ import {
   Clock,
 } from "lucide-react"
 
-import { EditInstitutionModal } from "./EditInstitutionModal"
-import { ConfirmDeleteModal } from "./ConfirmDeleteModal"
+
 
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
