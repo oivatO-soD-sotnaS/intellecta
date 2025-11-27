@@ -22,7 +22,7 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `email_ve
 ('d1c9a7f2-6000-40ae-840e-3c24da6d80db', 'Julia Roberts', 'julia@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('7c9e6679-7425-40de-944b-e07fc1f90ae7', 'Kevin Spacey', 'kevin@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
 ('7bae5f09-48fd-47d6-958d-26809f97a2e0', 'Blibs Blobs', 'bblobs@example.com', '$2y$10$9tzFNIkMGNBLXeBssS1Kje/v03Gdk7qKiwrIFqBwHkFSv.GW/GII2', TRUE, @today, @today, NULL),
-('65fe5128-3fbd-424c-86e9-6d8e42ef9286', 'Otávio dos Santos Lima', 'otavio@unix.com.br', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, @today, @today, NULL),
+('65fe5128-3fbd-424c-86e9-6d8e42ef9286', 'Otávio dos Santos Lima', 'otavio@example.com', '$2y$10$Ip9dAuCvrUcAKJh3mUFbLOZ.gTf3Q/bvXC4fFcuFP33IkzZQBLSte', TRUE, @today, @today, NULL),
 ('bccdcd1a-1263-4315-8cb5-1fa2fcb4d56e', 'Bob Johnson', 'bob@example.com', '$2y$10$pvkDbaG812rhWDboJBkgn.2N03PZJORmC83/3xLwLFEhNbG1aCXly', FALSE, @today, @today, NULL);
 
 INSERT INTO `institutions` (`institution_id`, `name`, `email`, `description`, `profile_picture_id`, `banner_id`, `user_id`) VALUES
